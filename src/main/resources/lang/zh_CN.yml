@@ -1,0 +1,29 @@
+Plugin-UnsupportedVersion: '&8[&3Vul&bpecula&8] &c错误 &8| &cPlugin does not support this outdated Minecraft version'
+Plugin-Loading: '&8[&3Vul&bpecula&8] &a良好 &8| &7Loading... &f{0}'
+Plugin-Enabled: '&8[&3Vul&bpecula&8] &a良好 &8| &3Plugin has been enabled. Currently running version &2{0}&7.'
+Plugin-Reloaded: '&8[&3Vul&bpecula&8] &a良好 &8| &3Plugin has been reloaded.'
+Plugin-Debug-Normal: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0}'
+Plugin-Debug-Detail: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0} {1}'
+
+Config-Reload-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 重载 Config.yml 完毕！ &8({0} ms)'
+Config-Reload-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 Config.yml 加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+
+Dispatcher-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个调度模块！ &8({2} ms)'
+Dispatcher-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {1}'
+Dispatcher-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个调度模块！ &8({1} ms)'
+Dispatcher-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 调度模块加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+
+Handler-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个处理模块！ &8({2} ms)'
+Handler-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {1}'
+Handler-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个处理模块！ &8({1} ms)'
+Handler-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 处理模块加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'

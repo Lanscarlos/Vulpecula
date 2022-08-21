@@ -1,0 +1,16 @@
+on-interact:
+  # 监听器三要素
+  listen: 'PlayerInteractEvent'
+  priority: 'normal'
+  ignore-cancelled: false
+  # 预处理 & 尾处理
+  pre-handle: 'print pre'
+  post-handle: 'print post'
+  # 阻断器
+  # 此功能可能仅玩家事件可用
+  baffle:
+    # 按次数/时间来阻断
+    type: 'count/time'
+    count: 3
+    # 单位 tick
+    time: 200

@@ -1,0 +1,10 @@
+example-handler-1:
+  # 绑定的监听器 支持单行&多行模式
+  binding: 'on-interact'
+  # 处理模块的优先级，越低越先被执行
+  # 默认为 8
+  priority: 8
+  # 需要执行的代码
+  handle:
+    - type: 'js'
+      content: 'player.sendMessage("hello!")'
