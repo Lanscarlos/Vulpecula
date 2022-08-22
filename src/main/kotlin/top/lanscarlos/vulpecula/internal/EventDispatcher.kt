@@ -118,7 +118,7 @@ class EventDispatcher(
             sb.append("set $key to $value\n")
         }
 
-        val sorted = handlers.sortedBy { it.priority }
+        val sorted = handlers.sortedByDescending { it.priority }
         sorted.forEach {
             sb.append("call handler_${it.hash}\n")
         }
