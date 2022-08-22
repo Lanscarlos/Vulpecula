@@ -1,5 +1,9 @@
 package top.lanscarlos.vulpecula.utils
 
+import taboolib.common.platform.function.info
+import top.lanscarlos.vulpecula.internal.ScriptFragment
+import java.util.*
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.utils
@@ -38,10 +42,10 @@ internal fun Any.formatToScript(): String? {
 
 private fun String.formatToScript(type: String = "ke"): String? {
     return when (type.lowercase()) {
-        "ke", "kether" -> "$this\n"
+        "ke", "kether" -> this + '\n'
         "js", "javascript" -> "js '$this'\n"
         "ks", "script" -> "vul script run *$this\n"
-//            "kf", "fragment" -> "vul fragment inline *$content"
+        "kf", "fragment" -> ScriptFragment.get(this)?.let { it + '\n' }
         else -> null
     }
 }

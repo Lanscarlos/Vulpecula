@@ -10,6 +10,15 @@ Config-Reload-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 Config.yml 加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
 
+Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
+Mapping-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {1}'
+Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个事件映射！ &8({1} ms)'
+Mapping-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+
 Dispatcher-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个调度模块！ &8({2} ms)'
 Dispatcher-Load-Automatic-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
@@ -27,3 +36,13 @@ Handler-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7
 Handler-Load-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 处理模块加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+
+Fragment-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个脚本片段！ &8({2} ms)'
+Fragment-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {1}'
+Fragment-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个脚本片段！ &8({1} ms)'
+Fragment-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本片段加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+Fragment-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本片段 &a{0}&7 未定义！'

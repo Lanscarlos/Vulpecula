@@ -12,10 +12,7 @@ import org.bukkit.event.player.PlayerEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.releaseResourceFile
-import taboolib.common.platform.function.warning
+import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.kether.KetherShell
@@ -25,6 +22,7 @@ import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import top.lanscarlos.vulpecula.utils.formatToScript
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.swing.text.html.parser.Entity
 
@@ -130,7 +128,9 @@ class EventDispatcher(
             sb.append(it.script)
         }
 
-        script = sb.toString()
+        script = ScriptBuilder(sb.toString().also {
+            info("构建前：$it")
+        }).build()
 
         debug("构建脚本：$script")
     }
@@ -176,9 +176,9 @@ class EventDispatcher(
             File(getDataFolder(), "dispatchers")
         }
 
-        private val mapping = mutableMapOf<String, File>() // id -> File
+        private val mapping = ConcurrentHashMap<String, File>() // id -> File
 
-        private val cache = mutableMapOf<String, EventDispatcher>()
+        private val cache = ConcurrentHashMap<String, EventDispatcher>()
 
         fun get(id: String): EventDispatcher? {
             return cache[id]
@@ -191,8 +191,12 @@ class EventDispatcher(
                 debug("onFileChanged: ${file.name}")
 
                 // 获取旧的调度模块
-                val dispatchers = mapping.filter { it.value == file }.mapNotNull { cache.remove(it.key) }.associateBy { it.id }
+                val dispatchers = mapping.filterValues { it == file }.mapNotNull { cache.remove(it.key) }.associateBy { it.id }
+
                 dispatchers.values.forEach {
+                    // 清除缓存映射
+                    mapping.remove(it.id)
+                    // 注销监听器
                     EventListener.unregisterDispatcher(it)
                 }
 
@@ -250,6 +254,12 @@ class EventDispatcher(
             return try {
                 // 耗时检测
                 val start = timing()
+
+                // 移除原有映射
+                mapping.values.forEach {
+                    it.removeWatcher()
+                }
+                mapping.clear()
 
                 // 清空缓存
                 cache.clear()

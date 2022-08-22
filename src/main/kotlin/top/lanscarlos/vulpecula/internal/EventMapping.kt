@@ -4,10 +4,8 @@ import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.module.lang.asLangText
-import top.lanscarlos.vulpecula.utils.forEachString
-import top.lanscarlos.vulpecula.utils.ifNotExists
-import top.lanscarlos.vulpecula.utils.timing
-import top.lanscarlos.vulpecula.utils.toConfig
+import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 
 /**
@@ -23,13 +21,32 @@ object EventMapping {
         File(getDataFolder(), "listen-mapping.yml")
     }
 
-    private val mapping = mutableMapOf<String, String>()
+    private val cache = mutableMapOf<String, String>()
 
     fun mapping(id: String): String? {
         return if (id.contains('.')) {
             id
         } else {
-            mapping[id]
+            cache[id]
+        }
+    }
+
+    fun onFileChanged(file: File) {
+        try {
+            val start = timing()
+
+            // 清除缓存
+            cache.clear()
+
+            // 加载文件
+            file.toConfig().forEachString { key, value ->
+                cache[key] = value
+            }
+
+            console().sendLang("Mapping-Load-Automatic-Succeeded", cache.size, timing(start))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            console().sendLang("Mapping-Load-Automatic-Failed", e.localizedMessage)
         }
     }
 
@@ -40,10 +57,13 @@ object EventMapping {
             folder.ifNotExists {
                 releaseResourceFile("listen-mapping.yml")
             }.toConfig().forEachString { key, value ->
-                mapping[key] = value
+                cache[key] = value
             }
 
-            console().asLangText("Mapping-Load-Succeeded", mapping.size, timing(start)).also {
+            // 添加监听器
+            folder.addWatcher { onFileChanged(this) }
+
+            console().asLangText("Mapping-Load-Succeeded", cache.size, timing(start)).also {
                 console().sendMessage(it)
             }
         } catch (e: Exception) {

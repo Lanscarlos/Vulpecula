@@ -9,6 +9,7 @@ import taboolib.common.platform.function.unregisterListener
 import taboolib.common.platform.function.warning
 import top.lanscarlos.vulpecula.utils.Debug
 import top.lanscarlos.vulpecula.utils.Debug.debug
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Vulpecula
@@ -69,7 +70,7 @@ private constructor(
 
     companion object {
 
-        private val cache = mutableMapOf<String, EventListener>()
+        private val cache = ConcurrentHashMap<String, EventListener>()
 
         /**
          * 注册所有监听模块

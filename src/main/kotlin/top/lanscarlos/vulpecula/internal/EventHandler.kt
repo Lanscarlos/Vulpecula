@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import top.lanscarlos.vulpecula.utils.formatToScript
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Vulpecula
@@ -64,9 +65,9 @@ class EventHandler(
             File(getDataFolder(), "handlers")
         }
 
-        private val mapping = mutableMapOf<String, File>() // id -> File
+        private val mapping = ConcurrentHashMap<String, File>() // id -> File
 
-        private val cache = mutableMapOf<String, EventHandler>()
+        private val cache = ConcurrentHashMap<String, EventHandler>()
 
         fun get(id: String): EventHandler? {
             return cache[id]
@@ -79,7 +80,10 @@ class EventHandler(
                 debug("onFileChanged: ${file.name}")
 
                 // 获取旧的处理模块
-                val handlers = mapping.filter { it.value == file }.mapNotNull { cache.remove(it.key) }
+                val handlers = mapping.filterValues { it == file }.mapNotNull { cache.remove(it.key) }
+
+                // 清除缓存映射
+                handlers.forEach { mapping.remove(it.id) }
 
                 // 从关联的 Dispatcher 中删除旧的 Handler
                 val dispatchers = mutableSetOf<EventDispatcher>()
@@ -132,10 +136,11 @@ class EventHandler(
             return try {
                 val start = timing()
 
-                // 移除原有监听器
+                // 移除原有映射
                 mapping.values.forEach {
                     it.removeWatcher()
                 }
+                mapping.clear()
 
                 // 清空缓存
                 cache.clear()
