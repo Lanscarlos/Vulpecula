@@ -79,15 +79,18 @@ class EventHandler(
 
                 debug("onFileChanged: ${file.name}")
 
+                // 缓存与本次加载相关联的 Handler
+                val dispatchers = mutableSetOf<EventDispatcher>()
+
                 // 获取旧的处理模块
                 val handlers = mapping.filterValues { it == file }.mapNotNull { cache.remove(it.key) }
 
-                // 清除缓存映射
-                handlers.forEach { mapping.remove(it.id) }
-
-                // 从关联的 Dispatcher 中删除旧的 Handler
-                val dispatchers = mutableSetOf<EventDispatcher>()
                 handlers.forEach { handler ->
+
+                    // 清除缓存映射
+                    mapping.remove(handler.id)
+
+                    // 从关联的 Dispatcher 中删除旧的 Handler
                     dispatchers.addAll(EventDispatcher.unregisterHandler(handler))
                 }
 

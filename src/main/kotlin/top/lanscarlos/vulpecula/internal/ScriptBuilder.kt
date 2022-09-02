@@ -1,8 +1,9 @@
 package top.lanscarlos.vulpecula.internal
 
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
 import taboolib.library.kether.LoadError
+import taboolib.module.kether.Script
+import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 
 /**
@@ -17,8 +18,8 @@ class ScriptBuilder(
 ) {
 
     private val content = source.toCharArray()
-    var startPos = 0
-    var index = 0
+    private var startPos = 0
+    private var index = 0
 
     fun build(): String {
         val script = StringBuilder()
@@ -30,9 +31,7 @@ class ScriptBuilder(
                 '\n', '\r', '{', '}', '[', ']', '(', ')' -> skip(1)
                 else -> {
 
-                    val before = before()
-                    info("before -> \"$before\"")
-                    script.append(before)
+                    script.append(before())
 
                     if (!hasNext()) break
                     when (val it = next()) {
@@ -51,58 +50,54 @@ class ScriptBuilder(
                             resetStartPos()
                         }
                         else -> {
-                            val before = before()
-                            info("before -> \"$before\"")
-                            script.append(before)
+                            script.append(before())
                         }
                     }
                 }
             }
         }
 
-        val before = before()
-        info("before -> \"$before\"")
-        script.append(before)
+        script.append(before())
 
         return script.toString()
     }
 
-    fun resetStartPos() {
+    private fun resetStartPos() {
         startPos = index
     }
 
-    fun before(): String {
+    private fun before(): String {
         return String(content, startPos, index - startPos).also {
             resetStartPos()
         }
     }
 
-    fun peek(): Char {
+    private fun peek(): Char {
         if (index < content.size) {
             return content[index]
         } else {
-            throw LoadError.EOF.create();
+            throw LoadError.EOF.create()
         }
     }
 
-    fun hasNext(): Boolean {
-        skipBlank();
-        return index < content.size;
+    private fun hasNext(): Boolean {
+        skipBlank()
+        return index < content.size
     }
 
-    fun next(): String {
+    private fun next(): String {
         if (!hasNext()) {
             throw LoadError.EOF.create()
         }
         skipBlank()
-        val begin = index;
+        val begin = index
         while (index < content.size && !Character.isWhitespace(content[index])) {
             index++
         }
         return String(content, begin, index - begin)
     }
 
-    fun skipToken() {
+    private fun skipToken() {
         when (peek()) {
             '"' -> {
                 var cnt = 0
@@ -158,5 +153,14 @@ class ScriptBuilder(
                 break
             }
         }
+    }
+
+    companion object {
+
+        fun String.parseToScript(namespace: List<String>): Script {
+            val source = if (this.startsWith("def ")) this else "def main = { $this }"
+            return ScriptBuilder(source).build().parseKetherScript(namespace)
+        }
+
     }
 }

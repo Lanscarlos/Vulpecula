@@ -15,16 +15,18 @@ import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.KetherShell
+import taboolib.module.kether.Script
+import taboolib.module.kether.ScriptContext
+import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.internal.ScriptBuilder.Companion.parseToScript
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import top.lanscarlos.vulpecula.utils.formatToScript
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.swing.text.html.parser.Entity
 
 /**
  * Vulpecula
@@ -46,9 +48,11 @@ class EventDispatcher(
     private val handlers = mutableSetOf<EventHandler>()
 
     private lateinit var namespace: List<String>
-    private lateinit var script: String
+    private lateinit var script: Script
 
     fun run(event: Event) {
+
+        if (!::script.isInitialized) return
 
         val player = when (event) {
             is PlayerEvent -> event.player
@@ -72,19 +76,16 @@ class EventDispatcher(
         }
 
         debug(Debug.HIGHEST, "调度器 $id 正在运行...")
-        debug(Debug.HIGHEST, script)
+//        debug(Debug.HIGHEST, script)
 
-        KetherShell.eval(
-            script,
-            true,
-            namespace = namespace,
-        ) {
+        // 执行脚本
+        ScriptContext.create(script).apply {
             set("@Event", event)
             player?.let {
                 set("@Sender", it)
                 set("player", it)
             }
-        }
+        }.runActions()
     }
 
     fun removeHandler(handler: EventHandler) {
@@ -108,31 +109,61 @@ class EventDispatcher(
     }
 
     fun buildScript() {
-        val sb = StringBuilder("def main = {\n")
+        val script = StringBuilder("def main = {\n")
 
-        preHandle?.let { sb.append("$it\n") }
+        preHandle?.let { script.append("$it\n") }
 
         variables?.forEach { (key, value) ->
-            sb.append("set $key to $value\n")
+            script.append("set $key to $value\n")
         }
 
         val sorted = handlers.sortedByDescending { it.priority }
         sorted.forEach {
-            sb.append("call handler_${it.hash}\n")
+            script.append("call handler_${it.hash}\n")
         }
 
-        postHandle?.let { sb.append("$it\n") }
+        postHandle?.let { script.append("$it\n") }
 
-        sb.append("}\n\n")
+        script.append("}\n\n")
         sorted.forEach {
-            sb.append(it.script)
+            script.append(it.script)
         }
 
-        script = ScriptBuilder(sb.toString().also {
-            info("构建前：$it")
-        }).build()
+        // 脚本安全性检测
+        try {
+            this.script = script.toString().parseToScript(namespace)
+        } catch (outer: Exception) {
+            // 排查问题
+            var index = -2
+            try {
+                preHandle?.parseToScript(namespace)
+                index = -1
+                postHandle?.parseToScript(namespace)
+                index = 0
+                for (i in sorted.indices) {
+                    index = i
+                    sorted[i].script.parseToScript(namespace)
+                }
 
-        debug("构建脚本：$script")
+                // 未能排查问题
+                outer.printStackTrace()
+                console().sendLang("Dispatcher-Load-Failed-Details", id, outer.localizedMessage)
+            } catch (inner: Exception) {
+                // 锁定报错
+                inner.printStackTrace()
+                when (index) {
+                    -2 -> {
+                        console().sendLang("Dispatcher-Load-Failed-Details", "$id.pre-handle", inner.localizedMessage)
+                    }
+                    -1 -> {
+                        console().sendLang("Dispatcher-Load-Failed-Details", "$id.post-handle", inner.localizedMessage)
+                    }
+                    else -> {
+                        console().sendLang("Handler-Load-Failed-Details", sorted[index].id, inner.localizedMessage)
+                    }
+                }
+            }
+        }
     }
 
     private fun initVariables(config: ConfigurationSection): Map<String, String> {
@@ -177,6 +208,8 @@ class EventDispatcher(
         }
 
         private val mapping = ConcurrentHashMap<String, File>() // id -> File
+
+        private val scriptCache = ConcurrentHashMap<String, Script>()
 
         private val cache = ConcurrentHashMap<String, EventDispatcher>()
 

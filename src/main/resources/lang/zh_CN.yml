@@ -27,6 +27,9 @@ Dispatcher-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0
 Dispatcher-Load-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 调度模块加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+Dispatcher-Load-Failed-Details:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块 &a{0}&7 时出现问题！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {1}'
 
 Handler-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个处理模块！ &8({2} ms)'
 Handler-Load-Automatic-Failed:
@@ -36,6 +39,9 @@ Handler-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7
 Handler-Load-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 处理模块加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+Handler-Load-Failed-Details:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载处理模块 &a{0}&7 时出现问题！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {1}'
 
 Fragment-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个脚本片段！ &8({2} ms)'
 Fragment-Load-Automatic-Failed:
@@ -46,3 +52,5 @@ Fragment-Load-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本片段加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
 Fragment-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本片段 &a{0}&7 未定义！'
+
+Action-TryCatch-Warning: '&8[&3Vul&bpecula&8] &e提示 &8|&7 执行 Kether 时出现报错: {0}'
