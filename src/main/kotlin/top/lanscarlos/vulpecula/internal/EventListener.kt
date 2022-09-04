@@ -4,10 +4,7 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.ProxyListener
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.registerBukkitListener
-import taboolib.common.platform.function.unregisterListener
-import taboolib.common.platform.function.warning
+import taboolib.common.platform.function.*
 import taboolib.module.lang.sendLang
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.CopyOnWriteArrayList
@@ -49,10 +46,11 @@ private constructor(
         }
     }
 
-    fun addDispatcher(dispatcher: EventDispatcher) {
+    fun addDispatcher(dispatcher: EventDispatcher, replace: Boolean = false) {
         if (dispatcher.id in dispatchers.map { it.id }) {
             // 已存在相同 id 的 Dispatcher
-            return
+            if (!replace) return
+            dispatchers.removeAll { it.id == dispatcher.id }
         }
 
         dispatchers += dispatcher
@@ -98,6 +96,18 @@ private constructor(
         fun get(eventName: String, priority: EventPriority): EventListener? {
             val key = eventName + priority.name
             return cache[key]
+        }
+
+        fun registerAll() {
+            cache.values.forEach { it.register() }
+        }
+
+        fun unregisterAll() {
+            cache.values.forEach { it.unregister() }
+        }
+
+        fun destroyAll() {
+            cache.values.forEach { it.destroy() }
         }
 
         /**

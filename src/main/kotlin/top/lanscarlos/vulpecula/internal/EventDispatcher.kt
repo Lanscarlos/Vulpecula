@@ -1,15 +1,26 @@
 package top.lanscarlos.vulpecula.internal
 
+import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
+import org.bukkit.event.Event
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerEvent
 import taboolib.common.platform.event.EventPriority
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common.platform.function.*
+import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
+import taboolib.module.kether.Script
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.internal.EventListener.Companion.getListener
 import top.lanscarlos.vulpecula.utils.*
+import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * Vulpecula
@@ -31,22 +42,224 @@ class EventDispatcher(
         EventPriority.valueOf(it.uppercase())
     } ?: EventPriority.NORMAL
 
-    val scriptSource = ""
+    val ignoreCancelled = config.getBoolean("ignore-cancelled", true)
+    private val preHandle = config["pre-handle"]?.formatToScript()
+    private val postHandle = config["post-handle"]?.formatToScript()
+    private val baffle = config.getConfigurationSection("baffle")?.let { initBaffle(it) }
+    private val variables = config.getConfigurationSection("variables")?.let { initVariables(it) }
 
-    val handlerCache = mutableSetOf<String>()
-    val handlers = mutableSetOf<String>()
+    private val handlerCache = mutableSetOf<String>()
+    private val handlers = mutableSetOf<String>()
+
+    private lateinit var namespace: List<String>
+    private lateinit var scriptSource: String
+    private lateinit var script: Script
+
+    fun run(event: Event) {
+
+        if (!::script.isInitialized) return
+
+        val player = when (event) {
+            is PlayerEvent -> event.player
+            is BlockBreakEvent -> event.player
+            is BlockPlaceEvent -> event.player
+            is EntityDamageEvent -> (event.entity as? Player)
+            is EntityDamageByEntityEvent -> {
+                when (event.damager) {
+                    is Player -> event.damager
+                    is Projectile -> ((event.damager as Projectile).shooter as? Player)
+                    else -> null
+                }
+            }
+            is InventoryClickEvent -> event.whoClicked as? Player
+            else -> null
+        }
+
+        if (baffle != null) {
+            val key = player?.name ?: event.eventName
+            if (!baffle.hasNext(key)) return
+        }
+
+        debug(Debug.HIGHEST, "调度器 $id 正在运行...")
+//        debug(Debug.HIGHEST, script)
+
+        // 执行脚本
+        script.runActions {
+            set("@Event", event)
+            player?.let {
+                set("@Sender", it)
+                set("player", it)
+            }
+        }
+    }
+
+    fun buildScriptSource() {
+
+        namespace = handlers.toMutableList().also {
+            if (handlerCache.isNotEmpty()) {
+                it.addAll(handlerCache)
+            }
+        }.mapNotNull {
+            EventHandler.get(it)
+        }.flatMap { it.namespace }.distinct()
+
+        val script = StringBuilder("def main = {\n")
+        preHandle?.let { script.append("$it\n") }
+        variables?.forEach { (key, value) ->
+            script.append("set $key to $value\n")
+        }
+
+        val sorted = handlers.toMutableList().also {
+            if (handlerCache.isNotEmpty()) {
+                it.addAll(handlerCache)
+            }
+        }.mapNotNull {
+            EventHandler.get(it)
+        }.sortedByDescending { it.priority }
+
+        sorted.forEach {
+            script.append("call handler_${it.hash}\n")
+        }
+        postHandle?.let { script.append("$it\n") }
+        script.append("}\n\n")
+        sorted.forEach {
+            script.append(it.script)
+        }
+
+        scriptSource = script.toString()
+    }
 
     /**
      * 通过脚本源码构建脚本对象
      * */
-    fun buildScript() {}
+    fun buildScript() {
 
-    fun addHandler(id: String) {
-        handlerCache += id
+        if (!::scriptSource.isInitialized) {
+            // 构建脚本源码
+            buildScriptSource()
+        }
+
+        // 脚本安全性检测
+        try {
+
+            this.script = scriptSource.parseToScript(namespace)
+
+            // 检测通过，将缓存导入
+            if (handlerCache.isNotEmpty()) {
+                handlers.addAll(handlerCache)
+                handlerCache.clear()
+            }
+
+        } catch (e: Exception) {
+
+            // 检测 Dispatcher
+            if (!compileChecking()) {
+                return
+            }
+
+            val sorted = handlers.toMutableList().also {
+                if (handlerCache.isNotEmpty()) {
+                    it.addAll(handlerCache)
+                }
+            }.mapNotNull {
+                EventHandler.get(it)
+            }.sortedByDescending { it.priority }
+
+            // 检测 Handler
+            for (handler in sorted) {
+                if (!handler.compileChecking()) break
+            }
+        }
+
+    }
+
+    fun compileChecking(): Boolean {
+        var pointer = "Uninitialized"
+        return try {
+
+            pointer = "pre-handle"
+            preHandle?.parseToScript(namespace)
+
+            variables?.forEach { (key, source) ->
+                pointer = "variables.$key"
+                source.parseToScript(namespace)
+            }
+
+            pointer = "post-handle"
+            postHandle?.parseToScript(namespace)
+
+            true
+        } catch (e: Exception) {
+            console().sendLang("Dispatcher-Load-Failed-Details", id, pointer, e.localizedMessage)
+            false
+        }
+    }
+
+    fun postLoad() {
+        buildScriptSource()
+        buildScript()
+    }
+
+    fun releaseBaffle(player: Player? = null) {
+        if (baffle != null) {
+            if (player != null) {
+                baffle.reset(player.name)
+            } else {
+                baffle.resetAll()
+            }
+        }
+    }
+
+    fun addHandler(handler: EventHandler, replace: Boolean = false) {
+        if (handler.id in handlers || handler.id in handlerCache) {
+            // 已存在相同 id 的 Handler
+            if (!replace) return
+            handlers.remove(handler.id)
+        }
+        handlerCache += handler.id
     }
 
     fun removeHandler(id: String) {
-        handlerCache -= id
+        handlerCache.remove(id)
+    }
+
+    private fun initVariables(config: ConfigurationSection): Map<String, String> {
+        return config.getKeys(false).mapNotNull { key ->
+            config.getString(key)?.let { key to it }
+        }.toMap()
+    }
+
+    private fun initBaffle(config: ConfigurationSection): Baffle? {
+        return when (val it = config.getString("type")) {
+            "time" -> {
+                val time = config.getInt("time", -1)
+                if (time > 0) {
+                    Baffle.of(time * 50L, TimeUnit.MILLISECONDS)
+                } else {
+                    warning("Illegal baffle time \"$time\" at EventDispatcher \"$id\"!")
+                    null
+                }
+            }
+            "count" -> {
+                val count = config.getInt("count", -1)
+                if (count > 0) {
+                    Baffle.of(count)
+                } else {
+                    warning("Illegal baffle count \"$count\" at EventDispatcher \"$id\"!")
+                    null
+                }
+            }
+            else -> {
+                if (it != null) {
+                    warning("Unknown baffle type \"$it\" at EventDispatcher \"$id\"!")
+                }
+                null
+            }
+        }
+    }
+
+    override fun toString(): String {
+        return "EventDispatcher(id='$id')"
     }
 
     companion object {
@@ -91,15 +304,19 @@ class EventDispatcher(
                     if (old != null) {
 
                         // 载入旧对象的所有 Handler
-                        dispatcher.handlers += old.handlers
+                        dispatcher.handlerCache += old.handlers
+                        dispatcher.handlerCache += old.handlerCache
 
                         // 比对新旧对象的监听器/事件要素
                         if (listener.id != old.getListener()?.id) {
                             // 新对象发生改变，更改监听器
-                            listener.addDispatcher(dispatcher)
                             old.getListener()?.removeDispatcher(old.id)
                         }
 
+                        // 构建脚本源码
+                        dispatcher.buildScriptSource()
+
+                        // 比对新旧对象的脚本源码
                         if (dispatcher.scriptSource != old.scriptSource) {
                             // 脚本源码不一致，重构脚本
                             dispatcher.buildScript()
@@ -109,10 +326,11 @@ class EventDispatcher(
 
                         // 获取与该 Dispatcher 绑定的 Handler
                         val handlers = EventHandler.getAll().filter { dispatcher.id in it.binding }.map { it.id }
-                        dispatcher.handlers += handlers
+                        dispatcher.handlerCache += handlers
                     }
 
                     // 尝试注册监听器
+                    listener.addDispatcher(dispatcher, true)
                     listener.register()
 
                     // 存入缓存
@@ -168,6 +386,9 @@ class EventDispatcher(
                             return@inner
                         }
 
+                        // 生成监听器
+                        dispatcher.getListener()?.addDispatcher(dispatcher)
+
                         // 记录临时映射信息
                         mapping[dispatcher.id] = file
 
@@ -188,6 +409,22 @@ class EventDispatcher(
                 console().asLangText("Dispatcher-Load-Failed", e.localizedMessage, timing(start)).also {
                     console().sendMessage(it)
                 }
+            }
+        }
+
+        fun postLoad() {
+
+            // 绑定 Dispatcher
+            EventHandler.getAll().forEach { handler ->
+                handler.binding.mapNotNull {
+                    get(it)
+                }.forEach { dispatcher ->
+                    dispatcher.addHandler(handler)
+                }
+            }
+
+            cache.values.forEach {
+                it.postLoad()
             }
         }
     }

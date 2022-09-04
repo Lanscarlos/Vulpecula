@@ -33,7 +33,7 @@ object VulpeculaContext {
         messages += ScriptFragment.load()
 
         // 初步加载调度模块
-        messages += EventDispatcher.preLoad()
+        messages += EventDispatcher.load()
 
         // 加载处理模块
         messages += EventHandler.load()

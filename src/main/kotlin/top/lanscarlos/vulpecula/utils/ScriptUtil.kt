@@ -1,8 +1,13 @@
 package top.lanscarlos.vulpecula.utils
 
 import taboolib.common.platform.function.info
+import taboolib.module.kether.Script
+import taboolib.module.kether.ScriptContext
+import taboolib.module.kether.parseKetherScript
+import top.lanscarlos.vulpecula.internal.ScriptBuilder
 import top.lanscarlos.vulpecula.internal.ScriptFragment
-import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Vulpecula
@@ -11,6 +16,18 @@ import java.util.*
  * @author Lanscarlos
  * @since 2022-08-19 16:38
  */
+
+
+//private val scriptCache = ConcurrentHashMap<String, Script>()
+
+fun Script.runActions(func: ScriptContext.() -> Unit): CompletableFuture<Any?> {
+    return ScriptContext.create(this).apply(func).runActions()
+}
+
+fun String.parseToScript(namespace: List<String>): Script {
+    val source = if (this.startsWith("def ")) this else "def main = { $this }"
+    return ScriptBuilder(source).build().parseKetherScript(namespace)
+}
 
 internal fun Any.formatToScript(): String? {
     return when (this) {

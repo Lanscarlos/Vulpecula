@@ -154,13 +154,4 @@ class ScriptBuilder(
             }
         }
     }
-
-    companion object {
-
-        fun String.parseToScript(namespace: List<String>): Script {
-            val source = if (this.startsWith("def ")) this else "def main = { $this }"
-            return ScriptBuilder(source).build().parseKetherScript(namespace)
-        }
-
-    }
 }

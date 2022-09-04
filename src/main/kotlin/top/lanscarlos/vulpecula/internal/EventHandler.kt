@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.internal
 
+import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
@@ -21,7 +22,60 @@ class EventHandler(
     config: ConfigurationSection
 ) {
 
+    val hash = id.digest("md5")
     val binding = config.getStringOrList("binding")
+    val priority = config.getInt("priority", 8)
+    val namespace = config.getStringOrList("namespace")
+    val variables = config.getConfigurationSection("variables")?.let { initVariables(it) }
+    val handle = config["handle"]?.formatToScript()
+
+    val script by lazy {
+        buildScript()
+    }
+
+    fun buildScript(): String {
+        val sb = StringBuilder("def handler_$hash = {\n")
+        namespace.forEach {
+            sb.append("import $it\n")
+        }
+        variables?.forEach { (key, value) ->
+            sb.append("set $key to $value\n")
+        }
+        sb.append(handle)
+        sb.append("\n")
+        namespace.forEach {
+            sb.append("release $it\n")
+        }
+        sb.append("}\n\n")
+        return sb.toString()
+    }
+
+    fun compileChecking(): Boolean {
+        var pointer = "Uninitialized"
+        return try {
+            variables?.forEach { (key, source) ->
+                pointer = "variables.$key"
+                source.parseToScript(namespace)
+            }
+
+            pointer = "handle"
+            handle?.parseToScript(namespace)
+            true
+        } catch (e: Exception) {
+            console().sendLang("Handler-Load-Failed-Details", id, pointer, e.localizedMessage)
+            false
+        }
+    }
+
+    private fun initVariables(config: ConfigurationSection): Map<String, String> {
+        return config.getKeys(false).mapNotNull { key ->
+            config.getString(key)?.let { key to it }
+        }.toMap()
+    }
+
+    override fun toString(): String {
+        return "EventHandler(id='$id')"
+    }
 
     companion object {
 
@@ -48,7 +102,7 @@ class EventHandler(
                 // 加载新的 Handler
                 val loaded = loadFromFile(file)
 
-                // 收到影响的 Dispatcher
+                // 受到影响的 Dispatcher
                 val affected = mutableSetOf<EventDispatcher>()
 
                 // 遍历新对象
@@ -64,36 +118,21 @@ class EventHandler(
                     // 尝试获取旧对象
                     val old = existing?.remove(handler.id)
 
-                    if (old != null) {
-                        // 比对新对象是否解除了部分 Dispatcher 绑定
-                        old.binding.forEach {
-                            if (it !in handler.binding) {
-                                // 新对象解除了 Dispatcher 绑定
-                                EventDispatcher.get(it)?.let { dispatcher ->
-                                    dispatcher.removeHandler(handler.id)
-                                    affected += dispatcher
-                                }
-                            }
-                        }
-
-                        // 比对新对象是否增加了部分 Dispatcher 绑定
-                        handler.binding.forEach {
-                            if (it !in old.binding) {
-                                // 新对象新增了 Dispatcher 绑定
-                                EventDispatcher.get(it)?.let { dispatcher ->
-                                    dispatcher.addHandler(handler.id)
-                                    affected += dispatcher
-                                }
-                            }
-                        }
-                    } else {
-                        // 旧对象不存在，直接作为新对象绑定 Dispatcher
-
-                        handler.binding.forEach {
+                    old?.binding?.forEach {
+                        if (it !in handler.binding) {
+                            // 新对象解除了 Dispatcher 绑定
                             EventDispatcher.get(it)?.let { dispatcher ->
-                                dispatcher.addHandler(handler.id)
+                                dispatcher.removeHandler(old.id)
                                 affected += dispatcher
                             }
+                        }
+                    }
+
+                    // 更新新对象所绑定的 Dispatcher
+                    handler.binding.forEach {
+                        EventDispatcher.get(it)?.let { dispatcher ->
+                            dispatcher.addHandler(handler, true)
+                            affected += dispatcher
                         }
                     }
 
@@ -115,7 +154,7 @@ class EventHandler(
                 }
 
                 // 重载所有受到影响的 Dispatcher
-                affected.forEach { it.reload() }
+                affected.forEach { it.postLoad() }
 
                 console().sendLang("Handler-Load-Automatic-Succeeded", file.name, loaded.size, timing(start))
             } catch (e: Exception) {
