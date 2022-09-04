@@ -167,8 +167,11 @@ class EventDispatcher(
 
             // 检测 Handler
             for (handler in sorted) {
-                if (!handler.compileChecking()) break
+                if (!handler.compileChecking()) return
             }
+
+//            warning(e.localizedMessage)
+            console().sendLang("Dispatcher-Load-Failed-Details", id, "UNCHECK_PART", e.localizedMessage)
         }
 
     }

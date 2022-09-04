@@ -14,7 +14,7 @@ Config-Reload-Failed:
 
 # 映射模块
 
-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
+Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
 Mapping-Load-Automatic-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
@@ -27,7 +27,7 @@ Mapping-Load-Failed:
 
 # 调度模块
 
-Dispatcher-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个调度模块！ &8({2} ms)'
+Dispatcher-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个调度模块！ &8({2} ms)'
 Dispatcher-Load-Automatic-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
@@ -48,7 +48,7 @@ Dispatcher-Load-Failed-Details:
 
 # 处理模块
 
-Handler-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个处理模块！ &8({2} ms)'
+Handler-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个处理模块！ &8({2} ms)'
 Handler-Load-Automatic-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
@@ -67,7 +67,7 @@ Handler-Load-Failed-Details:
 
 # 片段模块
 
-Fragment-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个脚本片段！ &8({2} ms)'
+Fragment-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个脚本片段！ &8({2} ms)'
 Fragment-Load-Automatic-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
@@ -81,4 +81,6 @@ Fragment-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本片段 &a{0}&7 未
 
 # 动作模块
 
-Action-TryCatch-Warning: '&8[&3Vul&bpecula&8] &e提示 &8|&7 执行 Kether 时出现报错: {0}'
+Action-TryCatch-Warning:
+  - '&8[&3Vul&bpecula&8] &e提示 &8|&7 捕捉到 Kether 执行时的异常 &a{0}'
+  - '&8[&3Vul&bpecula&8] &e提示 &8|&e {1}'

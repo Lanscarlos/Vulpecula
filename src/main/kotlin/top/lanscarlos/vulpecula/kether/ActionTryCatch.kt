@@ -32,25 +32,32 @@ object ActionTryCatch {
         var catchAction: ParsedAction<*>? = null
 
         try {
+            it.mark()
             it.expect("catch")
             try {
+                it.mark()
                 it.expect("with")
-                it.nextToken().split("|").forEach { type ->
+                it.nextToken().replace("\\s+".toRegex(), " ").split("|").forEach { type ->
                     catchType += type.uppercase()
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                it.reset()
+            }
             catchAction = it.next(ArgTypes.ACTION)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+            it.reset()
+        }
 
         actionNow {
             return@actionNow try {
                 tryAction.run(this)
             } catch (e: Exception) {
                 val exceptionName = e::class.java.simpleName
-                console().sendLang("Action-TryCatch-Warning", e.localizedMessage)
-                if (catchAction == null || (catchType.isEmpty() || exceptionName.uppercase() in catchType)) {
+                console().sendLang("Action-TryCatch-Warning", exceptionName, e.localizedMessage)
+                if (catchAction == null || (catchType.isNotEmpty() && exceptionName.uppercase() !in catchType)) {
                     null
                 } else {
+                    this.variable("error", exceptionName)
                     this.variable("exception", exceptionName)
                     this.variable("exceptionInfo", e.localizedMessage)
                     this.variable("@Exception", e)
