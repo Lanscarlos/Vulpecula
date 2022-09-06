@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.internal
 import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.lang.asLangText
@@ -28,7 +29,10 @@ class EventHandler(
     val namespace = config.getStringOrList("namespace")
     private val exception = config["exception"]?.let { initException(it) }
     private val variables = config.getConfigurationSection("variables")?.let { initVariables(it) }
-    private val handle = config["handle"]?.formatToScript()
+    private val condition = config["condition"]?.formatToScript()
+    private val deny = config["deny"]?.formatToScript()
+    private val handleRaw = config["handle"]
+    private val handle = handleRaw?.formatToScript()
 
     val script by lazy {
         buildScript()
@@ -36,23 +40,41 @@ class EventHandler(
 
     private fun buildScript(): String {
         val sb = StringBuilder("def handler_$hash = {\n")
+        // 添加前置条件
+        condition?.let {
+            sb.append("if {\n$it} then {\n")
+        }
+        // 导入命名空间
         namespace.forEach {
             sb.append("import $it\n")
         }
+        // 设置变量
         variables?.forEach { (key, value) ->
             sb.append("set $key to $value\n")
         }
+        // 异常前置处理
         if (exception != null) {
             sb.append("try {\n")
         }
         sb.append(handle)
-        sb.append("\n")
+//        sb.append("\n")
+        // 异常后置处理
         if (exception != null) {
-            sb.append("} $exception\n\n")
+            sb.append("} $exception\n")
         }
+        // 释放命名空间
         namespace.forEach {
             sb.append("release $it\n")
         }
+        // 前置条件结束
+        condition?.let { _ ->
+            sb.append("}")
+            deny?.let {
+                sb.append(" else {\n$it}")
+            }
+            sb.append("\n")
+        }
+        // 方法体结束
         sb.append("}\n\n")
         return sb.toString()
     }
@@ -65,8 +87,81 @@ class EventHandler(
                 source.parseToScript(namespace)
             }
 
-            pointer = "handle"
-            handle?.parseToScript(namespace)
+            condition?.let {
+                pointer = "condition"
+                it.parseToScript(namespace)
+            }
+
+            when (handleRaw) {
+                is Map<*, *> -> {
+                    handleRaw["condition"]?.toString()?.let {
+                        pointer = "handle.condition"
+                        it.parseToScript(namespace)
+                    }
+
+                    handleRaw["content"]?.toString()?.let {
+                        pointer = "handle.content"
+                        it.parseToScript(namespace)
+                    }
+
+                    handleRaw["deny"]?.toString()?.let {
+                        pointer = "handle.deny"
+                        it.parseToScript(namespace)
+                    }
+                }
+                is ConfigurationSection -> {
+                    handleRaw.getString("condition")?.let {
+                        pointer = "handle.condition"
+                        it.parseToScript(namespace)
+                    }
+
+                    handleRaw.getString("content")?.let {
+                        pointer = "handle.content"
+                        it.parseToScript(namespace)
+                    }
+
+                    handleRaw.getString("deny")?.let {
+                        pointer = "handle.deny"
+                        it.parseToScript(namespace)
+                    }
+                }
+                is List<*> -> {
+                    handleRaw.forEachIndexed { index, content ->
+                        pointer = "handle[$index].deny"
+
+                        if (content is String) {
+                            content.parseToScript(namespace)
+                            return@forEachIndexed
+                        }
+
+                        val meta = content as? Map<*, *> ?: return@forEachIndexed
+                        meta["condition"]?.toString()?.let {
+                            pointer = "handle[$index].condition"
+                            it.parseToScript(namespace)
+                        }
+
+                        meta["content"]?.toString()?.let {
+                            pointer = "handle[$index].content"
+                            it.parseToScript(namespace)
+                        }
+
+                        meta["deny"]?.toString()?.let {
+                            pointer = "handle[$index].deny"
+                            it.parseToScript(namespace)
+                        }
+                    }
+                }
+                else -> {
+                    pointer = "handle"
+                    handle?.parseToScript(namespace)
+                }
+            }
+
+            deny?.let {
+                pointer = "deny"
+                it.parseToScript(namespace)
+            }
+
             true
         } catch (e: Exception) {
             console().sendLang("Handler-Load-Failed-Details", id, pointer, e.localizedMessage)

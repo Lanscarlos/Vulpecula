@@ -120,7 +120,7 @@ class EventDispatcher(
         sorted.forEach {
             script.append("call handler_${it.hash}\n")
         }
-        postHandle?.let { script.append("$it\n") }
+        postHandle?.let { script.append("\n$it\n") }
         script.append("}\n\n")
         sorted.forEach {
             script.append(it.script)
@@ -138,6 +138,8 @@ class EventDispatcher(
             // 构建脚本源码
             buildScriptSource()
         }
+
+        debug(Debug.HIGHEST, "构建脚本：\n$scriptSource")
 
         // 脚本安全性检测
         try {
