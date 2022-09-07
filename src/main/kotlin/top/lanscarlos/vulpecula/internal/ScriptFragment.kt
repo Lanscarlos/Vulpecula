@@ -5,6 +5,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.internal.compiler.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -23,14 +24,32 @@ object ScriptFragment {
     }
 
     private val mapping = ConcurrentHashMap<String, File>() // id -> File
-
-    val cache = ConcurrentHashMap<String, String>()
+    private val linked = ConcurrentHashMap<String, ScriptCompiler>()
+    private val cache = ConcurrentHashMap<String, String>()
 
     fun get(id: String): String? {
         return cache[id]
     }
 
-    fun onFileChanged(file: File) {
+    /**
+     * 连接片段
+     * */
+    fun link(compiler: ScriptCompiler, id: String): String? {
+        if (!cache.contains(id)) return null
+        linked[id] = compiler
+        return cache[id]
+    }
+
+    /**
+     * 断开连接
+     * */
+    fun unlink(compiler: ScriptCompiler) {
+        linked.filterValues { it == compiler }.keys.forEach {
+            linked.remove(it)
+        }
+    }
+
+    private fun onFileChanged(file: File) {
         try {
             val start = timing()
 
