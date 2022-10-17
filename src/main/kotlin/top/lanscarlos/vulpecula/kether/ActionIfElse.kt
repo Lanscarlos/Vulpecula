@@ -165,7 +165,7 @@ object ActionIfElse {
      * if* {...} {symbol} {...} then {...}
      * if* {...} and/or {...} then {...}
      * */
-    @KetherParser(["if*"], namespace = "vulpecula", shared = true)
+    @KetherParser(["if*"], shared = true)
     fun parse() = scriptParser { reader ->
         val expression = reader.parseCondition()
         val trueBlock = reader.tryNextBlock("then") ?: reader.nextBlock()

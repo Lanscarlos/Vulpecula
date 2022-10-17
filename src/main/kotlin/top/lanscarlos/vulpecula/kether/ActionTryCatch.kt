@@ -25,7 +25,7 @@ object ActionTryCatch {
      * try { ... } catch with "NullPointerException|OtherException" { ... }
      *
      * */
-    @KetherParser(["try"], namespace = "vulpecula", shared = true)
+    @KetherParser(["try"], shared = true)
     fun parse() = scriptParser { reader ->
         val tryBlock = reader.nextBlock()
         val catchType = mutableListOf<String>()
