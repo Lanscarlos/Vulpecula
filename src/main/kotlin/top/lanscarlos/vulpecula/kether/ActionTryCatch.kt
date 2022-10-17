@@ -2,13 +2,12 @@ package top.lanscarlos.vulpecula.kether
 
 import taboolib.common.platform.function.console
 import taboolib.library.kether.ArgTypes
-import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.KetherParser
 import taboolib.module.kether.actionNow
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.utils.run
-import top.lanscarlos.vulpecula.utils.variable
+import top.lanscarlos.vulpecula.utils.setVariable
 
 /**
  * Vulpecula
@@ -29,9 +28,9 @@ object ActionTryCatch {
     fun parse() = scriptParser {
         val tryAction = it.next(ArgTypes.ACTION)
         val catchType = mutableListOf<String>()
-        var catchAction: ParsedAction<*>? = null
 
-        try {
+        // 解析 catch 语句块
+        val catchAction = try {
             it.mark()
             it.expect("catch")
             try {
@@ -43,9 +42,10 @@ object ActionTryCatch {
             } catch (e: Exception) {
                 it.reset()
             }
-            catchAction = it.next(ArgTypes.ACTION)
+            it.next(ArgTypes.ACTION)
         } catch (e: Exception) {
             it.reset()
+            null
         }
 
         actionNow {
@@ -57,10 +57,10 @@ object ActionTryCatch {
                 if (catchAction == null || (catchType.isNotEmpty() && exceptionName.uppercase() !in catchType)) {
                     null
                 } else {
-                    this.variable("error", exceptionName)
-                    this.variable("exception", exceptionName)
-                    this.variable("exceptionInfo", e.localizedMessage)
-                    this.variable("@Exception", e)
+                    this.setVariable("error", exceptionName)
+                    this.setVariable("exception", exceptionName)
+                    this.setVariable("exceptionInfo", e.localizedMessage)
+                    this.setVariable("@Exception", e)
                     catchAction.run(this)
                 }
             }

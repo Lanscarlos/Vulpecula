@@ -1,14 +1,10 @@
 package top.lanscarlos.vulpecula.utils
 
-import taboolib.common.platform.function.adaptCommandSender
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestContext
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.KetherShell
 import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.printKetherErrorMessage
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -18,28 +14,10 @@ import java.util.concurrent.CompletableFuture
  * @since 2022-02-27 10:48
  */
 
-fun eval(
-    script: String,
-    sender: Any? = null,
-    namespace: List<String> = listOf("vulpecula"),
-    args: Map<String, Any?>? = null,
-    throws: Boolean = false
-): CompletableFuture<Any?> {
-    val func = {
-        KetherShell.eval(script, sender = sender?.let { adaptCommandSender(it) }, namespace = namespace, context= {
-            args?.forEach { (k, v) -> set(k, v) }
-        })
-    }
-    return if (throws) func()
-    else try {
-        func()
-    } catch (e: Exception) {
-        e.printKetherErrorMessage()
-        CompletableFuture.completedFuture(false)
-    }
-}
-
-fun QuestReader.tryNextAction(prefix: String = "by"): ParsedAction<*>? {
+/**
+ * 尝试通过前缀解析 Action
+ * */
+fun QuestReader.tryNextAction(prefix: String): ParsedAction<*>? {
     return try {
         this.mark()
         this.expect(prefix)
@@ -50,7 +28,10 @@ fun QuestReader.tryNextAction(prefix: String = "by"): ParsedAction<*>? {
     }
 }
 
-fun QuestReader.tryNextArgs(prefix: String = "with"): List<ParsedAction<*>> {
+/**
+ * 尝试通过前缀解析 Action List
+ * */
+fun QuestReader.tryNextActionList(prefix: String): List<ParsedAction<*>> {
     return try {
         this.mark()
         this.expect(prefix)
@@ -68,6 +49,7 @@ fun ParsedAction<*>.run(frame: ScriptFrame): Any? {
 /**
  * 将 [ arg1=value1 arg2=value2 ... ] 转化为 Map<String, String> 集合
  * */
+@Deprecated("This method is not recommended")
 fun List<ParsedAction<*>>.run(frame: ScriptFrame): Map<String, String> {
     return this.associate {
         val arg = it.run(frame).toString()
@@ -77,17 +59,30 @@ fun List<ParsedAction<*>>.run(frame: ScriptFrame): Map<String, String> {
     }
 }
 
-fun Map<String, String>.variable(vararg keys: String): String? {
+/**
+ * 获取变量
+ * */
+fun <T> QuestContext.Frame.getVariable(key: String): T? {
+    val result = variables().get<T>(key)
+    return if (result.isPresent) result.get() else null
+}
+
+/**
+ * 获取变量
+ * */
+fun <T> QuestContext.Frame.getVariable(vararg keys: String): T? {
     keys.forEach { key ->
-        this[key]?.let { return it }
+        val result = variables().get<T>(key)
+        if (result.isPresent) {
+            return result.get()
+        }
     }
     return null
 }
 
-fun QuestContext.Frame.variable(key: String): Any? {
-    return variables().get<Any?>(key).let { if (it.isPresent) it.get() else null }
-}
-
-fun QuestContext.Frame.variable(key: String, value: Any?) {
+/**
+ * 设置变量
+ * */
+fun QuestContext.Frame.setVariable(key: String, value: Any?) {
     return variables().set(key, value)
 }

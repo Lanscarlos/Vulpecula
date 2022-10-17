@@ -44,17 +44,10 @@ class EventDispatcher(
     } ?: EventPriority.NORMAL
 
     val ignoreCancelled = config.getBoolean("ignore-cancelled", true)
-//    private val preHandle = config["pre-handle"]?.formatToScript()
-//    private val postHandle = config["post-handle"]?.formatToScript()
     private val baffle = config.getConfigurationSection("baffle")?.let { initBaffle(it) }
-//    private val variables = config.getConfigurationSection("variables")?.let { initVariables(it) }
 
     val handlerCache = mutableSetOf<String>()
     val handlers = mutableSetOf<String>()
-
-//    private lateinit var namespace: List<String>
-//    private lateinit var scriptSource: String
-//    private lateinit var script: Script
 
     private val compiler = DispatcherCompiler(this)
 
@@ -84,11 +77,9 @@ class EventDispatcher(
         }
 
         debug(Debug.HIGHEST, "调度器 $id 正在运行...")
-//        debug(Debug.HIGHEST, script)
 
         // 执行脚本
         compiler.compiled?.runActions {
-
             set("@Event", event)
             player?.let {
                 set("@Sender", it)
@@ -98,117 +89,7 @@ class EventDispatcher(
         }
     }
 
-//    fun buildScriptSource() {
-//
-//        namespace = handlers.toMutableList().also {
-//            if (handlerCache.isNotEmpty()) {
-//                it.addAll(handlerCache)
-//            }
-//        }.mapNotNull {
-//            EventHandler.get(it)
-//        }.flatMap { it.namespace }.distinct()
-//
-//        val script = StringBuilder("def main = {\n")
-//        preHandle?.let { script.append("$it\n") }
-//        variables?.forEach { (key, value) ->
-//            script.append("set $key to $value\n")
-//        }
-//
-//        val sorted = handlers.toMutableList().also {
-//            if (handlerCache.isNotEmpty()) {
-//                it.addAll(handlerCache)
-//            }
-//        }.mapNotNull {
-//            EventHandler.get(it)
-//        }.sortedByDescending { it.priority }
-//
-//        sorted.forEach {
-//            script.append("call handler_${it.hash}\n")
-//        }
-//        postHandle?.let { script.append("\n$it\n") }
-//        script.append("}\n\n")
-//        sorted.forEach {
-//            script.append(it.script)
-//        }
-//
-//        scriptSource = script.toString()
-//    }
-
-//    /**
-//     * 通过脚本源码构建脚本对象
-//     * */
-//    fun buildScript() {
-//
-//        if (!::scriptSource.isInitialized) {
-//            // 构建脚本源码
-//            buildScriptSource()
-//        }
-//
-//        debug(Debug.HIGHEST, "构建脚本：\n$scriptSource")
-//
-//        // 脚本安全性检测
-//        try {
-//
-//            this.script = scriptSource.parseToScript(namespace)
-//
-//            // 检测通过，将缓存导入
-//            if (handlerCache.isNotEmpty()) {
-//                handlers.addAll(handlerCache)
-//                handlerCache.clear()
-//            }
-//
-//        } catch (e: Exception) {
-//
-//            // 检测 Dispatcher
-//            if (!compileChecking()) {
-//                return
-//            }
-//
-//            val sorted = handlers.toMutableList().also {
-//                if (handlerCache.isNotEmpty()) {
-//                    it.addAll(handlerCache)
-//                }
-//            }.mapNotNull {
-//                EventHandler.get(it)
-//            }.sortedByDescending { it.priority }
-//
-//            // 检测 Handler
-//            for (handler in sorted) {
-//                if (!handler.compileChecking()) return
-//            }
-//
-////            warning(e.localizedMessage)
-//            console().sendLang("Dispatcher-Load-Failed-Details", id, "UNCHECK_PART", e.localizedMessage)
-//        }
-//
-//    }
-//
-//    fun compileChecking(): Boolean {
-//        var pointer = "Uninitialized"
-//        return try {
-//
-//            pointer = "pre-handle"
-//            preHandle?.parseToScript(namespace)
-//
-//            variables?.forEach { (key, source) ->
-//                pointer = "variables.$key"
-//                source.parseToScript(namespace)
-//            }
-//
-//            pointer = "post-handle"
-//            postHandle?.parseToScript(namespace)
-//
-//            true
-//        } catch (e: Exception) {
-//            console().sendLang("Dispatcher-Load-Failed-Details", id, pointer, e.localizedMessage)
-//            false
-//        }
-//    }
-
     fun postLoad() {
-//        buildScriptSource()
-//        buildScript()
-
         compiler.buildSource()
         compiler.compile()
     }
@@ -295,6 +176,8 @@ class EventDispatcher(
                     cache.remove(it)
                 }?.associateBy { it.id }?.toMutableMap()
 
+                info("查看旧对象 -> ${existing?.map { it.value.id }}")
+
                 // 加载新的 Handler
                 val loaded = loadFromFile(file)
 
@@ -331,7 +214,7 @@ class EventDispatcher(
 
                         // 比对新旧对象的脚本源码
                         if (dispatcher.compiler.source.toString() != old.compiler.source.toString()) {
-                            // 脚本源码不一致，重构脚本
+                            // 脚本源码不一致，重新编译脚本
                             dispatcher.compiler.compile()
                         }
                     } else {
@@ -340,6 +223,11 @@ class EventDispatcher(
                         // 获取与该 Dispatcher 绑定的 Handler
                         val handlers = EventHandler.getAll().filter { dispatcher.id in it.binding }.map { it.id }
                         dispatcher.handlerCache += handlers
+
+                        // 构建脚本源码
+                        dispatcher.compiler.buildSource()
+                        // 编译脚本
+                        dispatcher.compiler.compile()
                     }
 
                     // 尝试注册监听器
@@ -355,6 +243,7 @@ class EventDispatcher(
 
                 // 遍历剩余旧对象
                 existing?.values?.forEach { dispatcher ->
+                    info("遍历旧对象 -> ${dispatcher.id}")
                     dispatcher.getListener()?.removeDispatcher(dispatcher.id)
                 }
 
@@ -367,7 +256,11 @@ class EventDispatcher(
         private fun loadFromFile(file: File): Set<EventDispatcher> {
             val loaded = mutableSetOf<EventDispatcher>()
             file.toConfig().forEachSections { key, section ->
-                loaded += EventDispatcher(key, section)
+                if (section.getBoolean("enable", true)) {
+                    loaded += EventDispatcher(key, section)
+                } else {
+                    info("关闭 -> $key")
+                }
             }
             return loaded
         }

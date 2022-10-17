@@ -1,10 +1,8 @@
 package top.lanscarlos.vulpecula.utils
 
+import taboolib.common.platform.function.adaptCommandSender
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.Script
-import taboolib.module.kether.ScriptContext
-import taboolib.module.kether.parseKetherScript
-import top.lanscarlos.vulpecula.internal.ScriptBuilder
+import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.internal.ScriptFragment
 import java.util.concurrent.CompletableFuture
 
@@ -17,100 +15,33 @@ import java.util.concurrent.CompletableFuture
  */
 
 
-//private val scriptCache = ConcurrentHashMap<String, Script>()
-
-val defNameSpace = "vulpecula"
-
+/**
+ * 运行脚本
+ * */
 fun Script.runActions(func: ScriptContext.() -> Unit): CompletableFuture<Any?> {
     return ScriptContext.create(this).apply(func).runActions()
 }
 
-fun String.parseToScript(namespace: List<String>): Script {
-    val source = if (this.startsWith("def ")) this else "def main = { $this }"
-    return if (defNameSpace !in namespace) {
-        ScriptBuilder(source).build().parseKetherScript(namespace.plus(defNameSpace))
-    } else {
-        ScriptBuilder(source).build().parseKetherScript(namespace)
+/**
+ * 运行脚本
+ * */
+fun eval(
+    script: String,
+    sender: Any? = null,
+    namespace: List<String> = listOf("vulpecula"),
+    args: Map<String, Any?>? = null,
+    throws: Boolean = false
+): CompletableFuture<Any?> {
+    val func = {
+        KetherShell.eval(script, sender = sender?.let { adaptCommandSender(it) }, namespace = namespace, context= {
+            args?.forEach { (k, v) -> set(k, v) }
+        })
     }
-}
-
-internal fun Any.formatToScript(ignoreCondition: Boolean = false): String? {
-    return when (this) {
-        is String -> this.formatToScript()
-        is Map<*, *> -> {
-            val content = this["content"]?.toString() ?: return null
-            val type = this["type"]?.toString()
-            if (ignoreCondition) {
-                content.formatToScript(type ?: "ke")
-            } else {
-                val condition = this["condition"]?.formatToScript(true)
-                val deny = this["deny"]?.formatToScript(true)
-                content.formatToScript(type ?: "ke", condition, deny)
-            }
-        }
-        is ConfigurationSection -> {
-            val content = this.getString("content") ?: return null
-            val type = this.getString("type")
-            if (ignoreCondition) {
-                content.formatToScript(type ?: "ke")
-            } else {
-                val condition = this["condition"]?.formatToScript(true)
-                val deny = this["deny"]?.formatToScript(true)
-                content.formatToScript(type ?: "ke", condition, deny)
-            }
-        }
-        is List<*> -> {
-            val sb = StringBuilder()
-            this.forEach {
-
-                if (it is String) {
-                    sb.append(it.formatToScript())
-                    return@forEach
-                }
-
-                val meta = it as? Map<*, *> ?: return@forEach
-                val content = meta["content"]?.toString() ?: return@forEach
-                val type = meta["type"]?.toString()
-                if (ignoreCondition) {
-                    content.formatToScript(type ?: "ke")
-                } else {
-                    val condition = meta["condition"]?.formatToScript(true)
-                    val deny = meta["deny"]?.formatToScript(true)
-                    content.formatToScript(type ?: "ke", condition, deny)
-                }
-            }
-            if (sb.isNotEmpty()) sb.toString() else null
-        }
-        else -> null
+    return if (throws) func()
+    else try {
+        func()
+    } catch (e: Exception) {
+        e.printKetherErrorMessage()
+        CompletableFuture.completedFuture(false)
     }
-}
-
-private fun String.formatToScript(type: String = "ke", condition: String? = null, deny: String? = null): String? {
-    val sb = StringBuilder()
-
-    // 加载条件
-    condition?.let {
-        sb.append("if {\n$it} then {\n")
-    }
-
-    val content = when (type.lowercase()) {
-        "ke", "kether" -> this + '\n'
-        "js", "javascript" -> "js '$this'\n"
-        "ks", "script" -> "vul script run *$this\n"
-        "kf", "fragment" -> ScriptFragment.get(this)?.let { it + '\n' }
-        else -> null
-    }
-
-    sb.append(content)
-
-    // 加载条件后续
-    condition?.let { _ ->
-        sb.append("}")
-        deny?.let {
-            sb.append(" else {\n$it}")
-        }
-        sb.append("\n")
-    }
-
-    return if (sb.isNotEmpty()) sb.toString() else null
 }

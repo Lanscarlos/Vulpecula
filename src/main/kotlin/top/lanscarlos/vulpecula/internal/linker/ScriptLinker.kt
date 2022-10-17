@@ -10,6 +10,9 @@ import top.lanscarlos.vulpecula.internal.compiler.ScriptCompiler
  * Vulpecula
  * top.lanscarlos.vulpecula.internal.compiler
  *
+ * 脚本连接器
+ * 用于连接脚本与片段，嵌入片段，并保持关联
+ *
  * @author Lanscarlos
  * @since 2022-09-07 10:32
  */
@@ -37,7 +40,7 @@ class ScriptLinker(
                         "fragment" -> {
                             skipBlank()
                             val id = next()
-                            val fragment = ScriptFragment.get(id)
+                            val fragment = ScriptFragment.link(compiler, id)
 
                             if (fragment != null) {
                                 buffer.append("\n$fragment\n")

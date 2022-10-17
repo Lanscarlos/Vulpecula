@@ -1,12 +1,8 @@
 package top.lanscarlos.vulpecula.internal.compiler
 
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.kether.*
-import top.lanscarlos.vulpecula.internal.ScriptFragment
-import top.lanscarlos.vulpecula.internal.linker.ScriptLinker
-import top.lanscarlos.vulpecula.utils.parseToScript
 import java.util.concurrent.CompletableFuture
 
 /**

@@ -1,12 +1,6 @@
 package top.lanscarlos.vulpecula.internal.compiler
 
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
-import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.internal.EventHandler
-import top.lanscarlos.vulpecula.utils.getStringOrList
-import top.lanscarlos.vulpecula.utils.parseToScript
 
 /**
  * Vulpecula
