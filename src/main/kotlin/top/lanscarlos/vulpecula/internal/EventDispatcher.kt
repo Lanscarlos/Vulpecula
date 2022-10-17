@@ -176,7 +176,7 @@ class EventDispatcher(
                     cache.remove(it)
                 }?.associateBy { it.id }?.toMutableMap()
 
-                info("查看旧对象 -> ${existing?.map { it.value.id }}")
+                debug("查看旧对象 -> ${existing?.map { it.value.id }}")
 
                 // 加载新的 Handler
                 val loaded = loadFromFile(file)
@@ -243,7 +243,7 @@ class EventDispatcher(
 
                 // 遍历剩余旧对象
                 existing?.values?.forEach { dispatcher ->
-                    info("遍历旧对象 -> ${dispatcher.id}")
+                    debug("遍历旧对象 -> ${dispatcher.id}")
                     dispatcher.getListener()?.removeDispatcher(dispatcher.id)
                 }
 
@@ -259,7 +259,7 @@ class EventDispatcher(
                 if (section.getBoolean("enable", true)) {
                     loaded += EventDispatcher(key, section)
                 } else {
-                    info("关闭 -> $key")
+                    debug("关闭 -> $key")
                 }
             }
             return loaded

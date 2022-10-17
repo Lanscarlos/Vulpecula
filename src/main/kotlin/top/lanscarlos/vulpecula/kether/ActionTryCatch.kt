@@ -6,6 +6,7 @@ import taboolib.module.kether.KetherParser
 import taboolib.module.kether.actionNow
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.run
 import top.lanscarlos.vulpecula.utils.setVariable
 
@@ -25,43 +26,43 @@ object ActionTryCatch {
      *
      * */
     @KetherParser(["try"], namespace = "vulpecula", shared = true)
-    fun parse() = scriptParser {
-        val tryAction = it.next(ArgTypes.ACTION)
+    fun parse() = scriptParser { reader ->
+        val tryBlock = reader.nextBlock()
         val catchType = mutableListOf<String>()
 
         // 解析 catch 语句块
-        val catchAction = try {
-            it.mark()
-            it.expect("catch")
+        val catchBlock = try {
+            reader.mark()
+            reader.expect("catch")
             try {
-                it.mark()
-                it.expect("with")
-                it.nextToken().replace("\\s+".toRegex(), " ").split("|").forEach { type ->
+                reader.mark()
+                reader.expect("with")
+                reader.nextToken().replace("\\s+".toRegex(), " ").split("|").forEach { type ->
                     catchType += type.uppercase()
                 }
             } catch (e: Exception) {
-                it.reset()
+                reader.reset()
             }
-            it.next(ArgTypes.ACTION)
+            reader.nextBlock()
         } catch (e: Exception) {
-            it.reset()
+            reader.reset()
             null
         }
 
         actionNow {
             return@actionNow try {
-                tryAction.run(this)
+                tryBlock.run(this)
             } catch (e: Exception) {
                 val exceptionName = e::class.java.simpleName
                 console().sendLang("Action-TryCatch-Warning", exceptionName, e.localizedMessage)
-                if (catchAction == null || (catchType.isNotEmpty() && exceptionName.uppercase() !in catchType)) {
+                if (catchBlock == null || (catchType.isNotEmpty() && exceptionName.uppercase() !in catchType)) {
                     null
                 } else {
                     this.setVariable("error", exceptionName)
                     this.setVariable("exception", exceptionName)
                     this.setVariable("exceptionInfo", e.localizedMessage)
                     this.setVariable("@Exception", e)
-                    catchAction.run(this)
+                    catchBlock.run(this)
                 }
             }
         }
