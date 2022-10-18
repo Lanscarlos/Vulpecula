@@ -1,7 +1,6 @@
-package top.lanscarlos.vulpecula.kether
+package top.lanscarlos.vulpecula.kether.action
 
 import taboolib.common.platform.function.console
-import taboolib.library.kether.ArgTypes
 import taboolib.module.kether.KetherParser
 import taboolib.module.kether.actionNow
 import taboolib.module.kether.scriptParser
@@ -12,7 +11,7 @@ import top.lanscarlos.vulpecula.utils.setVariable
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether
+ * top.lanscarlos.vulpecula.kether.action
  *
  * @author Lanscarlos
  * @since 2022-09-02 19:28

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether
+package top.lanscarlos.vulpecula.kether.action
 
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
@@ -10,7 +10,7 @@ import kotlin.collections.ArrayList
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether
+ * top.lanscarlos.vulpecula.kether.action
  *
  * @author Lanscarlos
  * @since 2022-10-17 15:56
