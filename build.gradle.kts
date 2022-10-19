@@ -24,6 +24,7 @@ taboolib {
 
 repositories {
     maven { url = uri("https://repo.tabooproject.org/repository/releases/") }
+    mavenLocal()
     mavenCentral()
 }
 
