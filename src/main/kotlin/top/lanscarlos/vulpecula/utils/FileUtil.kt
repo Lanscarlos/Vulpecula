@@ -17,11 +17,14 @@ inline fun File.ifNotExists(func: ((file: File) -> Unit)): File {
 fun File.getFiles(file : File = this, filter : String = "#", suffix: Array<String> = arrayOf("yml", "yaml")) : List<File> {
     if (!file.exists()) return listOf()
     return mutableListOf<File>().apply {
+        // 过滤前缀
+        if (file.name.startsWith(filter)) return@apply
+
         if(file.isDirectory) {
             file.listFiles()?.forEach {
                 addAll(getFiles(it))
             }
-        } else if (!file.name.startsWith(filter) && file.extension in suffix) {
+        } else if (file.extension in suffix) {
             add(file)
         }
     }
