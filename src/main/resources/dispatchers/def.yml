@@ -1,5 +1,5 @@
 on-interact:
-  enable: false
+  disable: true
   # 监听器三要素
   listen: 'PlayerInteractEvent'
   priority: 'normal'

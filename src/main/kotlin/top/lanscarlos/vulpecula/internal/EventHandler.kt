@@ -125,9 +125,8 @@ class EventHandler(
         private fun loadFromFile(file: File): Set<EventHandler> {
             val loaded = mutableSetOf<EventHandler>()
             file.toConfig().forEachSections { key, section ->
-                if (section.getBoolean("enable", true)) {
-                    loaded += EventHandler(key, section)
-                }
+                if (section.getBoolean("disable", false)) return@forEachSections
+                loaded += EventHandler(key, section)
             }
             return loaded
         }
