@@ -4,6 +4,7 @@ import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import taboolib.module.kether.action.transform.CheckType
+import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -17,29 +18,53 @@ import kotlin.collections.ArrayList
  */
 object ActionIfElse {
 
-    interface Condition {
-        fun run(frame: ScriptFrame): Boolean
-    }
+    /**
+     * 拓展 If 语句
+     *
+     * if* {...} {...} else {...}
+     * if* {...} then {...} else {...}
+     * if* {...} {symbol} {...} then {...}
+     * if* {...} and/or {...} then {...}
+     * */
+    @VulKetherParser(
+        id = "if-else",
+        name = ["if*"],
+        override = ["if"]
+    )
+    fun parse() = scriptParser { reader ->
+        val expression = reader.parseCondition()
+        val trueBlock = reader.tryNextBlock("then") ?: reader.nextBlock()
+        val falseBlock = reader.tryNextBlock("else")
+        actionNow {
 
-    class SingleCondition(
-        val condition: ParsedAction<*>
-    ) : Condition {
-        override fun run(frame: ScriptFrame): Boolean {
-            return condition.run(frame).toBoolean(false)
+            // 计算逆波兰表达式
+            val stack = Stack<Boolean>()
+            val queue = expression.toMutableList()
+            while (queue.isNotEmpty()) {
+                when (val it = queue.removeFirst()) {
+                    is Condition -> {
+                        stack.push(it.run(this))
+                    }
+                    LogicSymbol.AND -> {
+                        val first = stack.pop()
+                        val second = stack.pop()
+                        stack.push(first && second)
+                    }
+                    LogicSymbol.OR -> {
+                        val first = stack.pop()
+                        val second = stack.pop()
+                        stack.push(first || second)
+                    }
+                }
+            }
+
+            return@actionNow if (stack.pop()) {
+                trueBlock.run(this)
+            } else falseBlock?.run(this)
         }
     }
 
-    class LogicCondition(
-        val left: ParsedAction<*>,
-        val checkType: CheckType,
-        val right: ParsedAction<*>,
-    ) : Condition {
-        override fun run(frame: ScriptFrame): Boolean {
-            return checkType.check(left.run(frame), right.run(frame))
-        }
-    }
-
-    fun QuestReader.nextCondition(): Condition {
+    private fun QuestReader.nextCondition(): Condition {
         val origin = this.nextParsedAction()
         this.mark()
         val token = this.nextToken()
@@ -60,7 +85,7 @@ object ActionIfElse {
      * 解析条件语句块
      * @return 逆波兰表达式
      * */
-    fun QuestReader.parseCondition(): List<Any> {
+    private fun QuestReader.parseCondition(): List<Any> {
         val reader = this
         val expression = ArrayList<Any>()
         val stack = Stack<LogicSymbol>()
@@ -130,7 +155,29 @@ object ActionIfElse {
         return expression
     }
 
-    enum class LogicSymbol(val priority: Int) {
+    private interface Condition {
+        fun run(frame: ScriptFrame): Boolean
+    }
+
+    private class SingleCondition(
+        val condition: ParsedAction<*>
+    ) : Condition {
+        override fun run(frame: ScriptFrame): Boolean {
+            return condition.run(frame).toBoolean(false)
+        }
+    }
+
+    private class LogicCondition(
+        val left: ParsedAction<*>,
+        val checkType: CheckType,
+        val right: ParsedAction<*>,
+    ) : Condition {
+        override fun run(frame: ScriptFrame): Boolean {
+            return checkType.check(left.run(frame), right.run(frame))
+        }
+    }
+
+    private enum class LogicSymbol(val priority: Int) {
 
         BRACKETS_LEFT(3),
         BRACKETS_RIGHT(3),
@@ -154,48 +201,6 @@ object ActionIfElse {
                     else -> null
                 }
             }
-        }
-    }
-
-    /**
-     * 拓展 If 语句
-     *
-     * if* {...} {...} else {...}
-     * if* {...} then {...} else {...}
-     * if* {...} {symbol} {...} then {...}
-     * if* {...} and/or {...} then {...}
-     * */
-    @KetherParser(["if*"], shared = true)
-    fun parse() = scriptParser { reader ->
-        val expression = reader.parseCondition()
-        val trueBlock = reader.tryNextBlock("then") ?: reader.nextBlock()
-        val falseBlock = reader.tryNextBlock("else")
-        actionNow {
-
-            // 计算逆波兰表达式
-            val stack = Stack<Boolean>()
-            val queue = expression.toMutableList()
-            while (queue.isNotEmpty()) {
-                when (val it = queue.removeFirst()) {
-                    is Condition -> {
-                        stack.push(it.run(this))
-                    }
-                    LogicSymbol.AND -> {
-                        val first = stack.pop()
-                        val second = stack.pop()
-                        stack.push(first && second)
-                    }
-                    LogicSymbol.OR -> {
-                        val first = stack.pop()
-                        val second = stack.pop()
-                        stack.push(first || second)
-                    }
-                }
-            }
-
-            return@actionNow if (stack.pop()) {
-                trueBlock.run(this)
-            } else falseBlock?.run(this)
         }
     }
 }

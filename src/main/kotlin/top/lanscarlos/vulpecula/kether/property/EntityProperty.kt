@@ -5,20 +5,25 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import taboolib.common.OpenResult
 import taboolib.module.kether.ScriptProperty
+import top.lanscarlos.vulpecula.kether.VulKetherProperty
+import top.lanscarlos.vulpecula.kether.VulScriptProperty
 import top.lanscarlos.vulpecula.utils.toBoolean
 import top.lanscarlos.vulpecula.utils.toFloat
 import top.lanscarlos.vulpecula.utils.toInt
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property
+ * top.lanscarlos.vulpecula.kether.property.entity
  *
  * @author Lanscarlos
  * @since 2022-10-18 14:32
  */
-class EntityProperty(
-    id: String
-) : ScriptProperty<Entity>(id) {
+
+@VulKetherProperty(
+    id = "entity",
+    bind = Entity::class,
+)
+class EntityProperty : VulScriptProperty<Entity>("entity") {
 
     override fun read(instance: Entity, key: String): OpenResult {
         val property: Any? = when (key) {

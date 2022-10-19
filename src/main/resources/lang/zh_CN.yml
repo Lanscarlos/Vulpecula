@@ -1,3 +1,8 @@
+
+
+
+# 插件相关
+
 Plugin-UnsupportedVersion: '&8[&3Vul&bpecula&8] &c错误 &8| &cPlugin does not support this outdated Minecraft version'
 Plugin-Loading: '&8[&3Vul&bpecula&8] &a良好 &8| &7Loading... &f{0}'
 Plugin-Enabled: '&8[&3Vul&bpecula&8] &a良好 &8| &3Plugin has been enabled. Currently running version &2{0}&7.'
@@ -5,9 +10,23 @@ Plugin-Reloaded: '&8[&3Vul&bpecula&8] &a良好 &8| &3Plugin has been reloaded.'
 Plugin-Debug-Normal: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0}'
 Plugin-Debug-Detail: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0} {1}'
 
+
+
+# 主配置
+
 Config-Reload-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 重载 Config.yml 完毕！ &8({0} ms)'
 Config-Reload-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 Config.yml 加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+
+
+
+# Kether 相关
+
+Kether-Override-Action-Local-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 本地覆盖语句 &a{0}&7 完毕！ &8({1} ms)'
+Kether-Override-Action-Remote-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 同步覆盖语句 &a{0}&7 完毕！ &8({1} ms)'
+Kether-Action-Register-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 注册语句时遇到了问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
 
 

@@ -1,10 +1,10 @@
 package top.lanscarlos.vulpecula.kether.action
 
 import taboolib.common.platform.function.console
-import taboolib.module.kether.KetherParser
 import taboolib.module.kether.actionNow
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.run
 import top.lanscarlos.vulpecula.utils.setVariable
@@ -24,7 +24,7 @@ object ActionTryCatch {
      * try { ... } catch with "NullPointerException|OtherException" { ... }
      *
      * */
-    @KetherParser(["try"], shared = true)
+    @VulKetherParser(id = "try-catch", name = ["try"])
     fun parse() = scriptParser { reader ->
         val tryBlock = reader.nextBlock()
         val catchType = mutableListOf<String>()
