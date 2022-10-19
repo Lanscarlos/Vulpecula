@@ -1,4 +1,5 @@
 
 # 监听对象映射文件
+# 别名 -> 事件全类名
 
-PlayerInteractEvent: 'org.bukkit.event.player.PlayerInteractEvent'
+on-player-interact: 'org.bukkit.event.player.PlayerInteractEvent'
