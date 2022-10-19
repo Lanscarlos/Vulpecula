@@ -14,14 +14,14 @@ inline fun File.ifNotExists(func: ((file: File) -> Unit)): File {
 /**
  * 过滤有效文件
  * */
-fun File.getFiles(file : File = this, filter : String = "#", suffix: String = "yml") : List<File> {
+fun File.getFiles(file : File = this, filter : String = "#", suffix: Array<String> = arrayOf("yml", "yaml")) : List<File> {
     if (!file.exists()) return listOf()
     return mutableListOf<File>().apply {
         if(file.isDirectory) {
             file.listFiles()?.forEach {
                 addAll(getFiles(it))
             }
-        } else if (!file.name.startsWith(filter) && file.extension == suffix) {
+        } else if (!file.name.startsWith(filter) && file.extension in suffix) {
             add(file)
         }
     }
