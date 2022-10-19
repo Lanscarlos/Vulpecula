@@ -2,8 +2,6 @@ package top.lanscarlos.vulpecula
 
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.info
-import taboolib.module.configuration.Config
-import taboolib.module.configuration.Configuration
 import taboolib.platform.BukkitPlugin
 
 object Vulpecula : Plugin() {
@@ -12,12 +10,8 @@ object Vulpecula : Plugin() {
         BukkitPlugin.getInstance()
     }
 
-    @Config("config.yml")
-    lateinit var config: Configuration
-        private set
-
     override fun onEnable() {
-        VulpeculaContext.load(config)
+        VulpeculaContext.load(false)
         info("Successfully running ExamplePlugin!")
     }
 }

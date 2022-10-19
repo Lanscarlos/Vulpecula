@@ -1,9 +1,16 @@
 package top.lanscarlos.vulpecula
 
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
+import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.releaseResourceFile
+import taboolib.module.configuration.ConfigFile
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.utils.Debug
+import top.lanscarlos.vulpecula.utils.toConfig
+import java.io.File
 
 /**
  * Vulpecula
@@ -14,10 +21,29 @@ import top.lanscarlos.vulpecula.utils.Debug
  */
 object VulpeculaContext {
 
+    private val file by lazy {
+        File(getDataFolder(), "config.yml")
+    }
+
+    private lateinit var _config: ConfigFile
+    val config: Configuration get() = _config
+
+    @Awake(LifeCycle.LOAD)
+    private fun loadConfig() {
+        if (!file.exists()) {
+            releaseResourceFile("config.yml", true)
+        }
+        _config = file.toConfig()
+    }
+
     /**
      * @return 返回相关加载信息
      * */
-    fun load(config: Configuration): List<String> {
+    fun load(loadConfig: Boolean = true): List<String> {
+
+        // 加载
+        if (loadConfig) loadConfig()
+
         val messages = mutableListOf<String>()
 
         // 清理脚本缓存
