@@ -55,7 +55,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
             "world" -> instance.world
 
             "gravity" -> instance.hasGravity()
-            "isCustomNameVisible", "is-custom-name-visible", "custom-name-visible" -> instance.isCustomNameVisible
+            "isCustomNameVisible", "custom-name-visible" -> instance.isCustomNameVisible
             "isDead", "dead" -> instance.isDead
             "isEmpty", "empty" -> instance.isEmpty
             "isFrozen", "frozen" -> instance.isFrozen
@@ -84,7 +84,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
 
     override fun write(instance: Entity, key: String, value: Any?): OpenResult {
         when (key) {
-            "isCustomNameVisible", "is-custom-name-visible", "custom-name-visible" -> {
+            "isCustomNameVisible", "custom-name-visible" -> {
                 instance.isCustomNameVisible = value?.toBoolean() ?: return OpenResult.failed()
             }
             "fallDistance", "fall-distance" -> {
