@@ -5,13 +5,16 @@ on-interact:
   priority: 'normal'
   ignore-cancelled: false
   # 预处理 & 尾处理
-  pre-handle: 'print pre'
-  post-handle: 'print post'
+  pre-handle: |-
+    print pre
+  post-handle:
+    - type: 'ke'
+      content: |-
+        print post
   # 阻断器
   # 此功能可能仅玩家事件可用
   baffle:
-    # 按次数/时间来阻断
-    type: 'count/time'
-    count: 3
+    # 按时间来阻断
+    type: 'time'
     # 单位 tick
     time: 200
