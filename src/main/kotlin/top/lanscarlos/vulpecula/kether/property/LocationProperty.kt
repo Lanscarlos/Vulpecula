@@ -1,0 +1,87 @@
+package top.lanscarlos.vulpecula.kether.property
+
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.util.Vector
+import taboolib.common.OpenResult
+import top.lanscarlos.vulpecula.kether.VulKetherProperty
+import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.utils.toDouble
+import top.lanscarlos.vulpecula.utils.toFloat
+
+/**
+ * Vulpecula
+ * top.lanscarlos.vulpecula.kether.property
+ *
+ * @author Lanscarlos
+ * @since 2022-10-20 11:44
+ */
+@VulKetherProperty(
+    id = "location",
+    bind = Location::class,
+)
+class LocationProperty : VulScriptProperty<Location>("location") {
+
+    override fun read(instance: Location, key: String): OpenResult {
+        val property: Any? = when (key) {
+            "clone" -> instance.clone()
+            "block" -> instance.block
+            "blockX", "block-x" -> instance.blockX
+            "blockY", "block-y" -> instance.blockY
+            "blockZ", "block-z" -> instance.blockZ
+            "chunk" -> instance.chunk
+            "direction" -> instance.direction
+            "pitch" -> instance.pitch
+            "world" -> instance.world
+            "x" -> instance.x
+            "y" -> instance.y
+            "yaw" -> instance.yaw
+            "z" -> instance.z
+            "isWorldLoaded", "world-loaded", "loaded" -> instance.isWorldLoaded
+            "length" -> instance.length()
+            "lengthSquared", "length-squared", "squared", "sq" -> instance.lengthSquared()
+            "serialize" -> instance.serialize()
+            "toVector", "vector" -> instance.toVector()
+            "toString", "string" -> instance.toString()
+            "zero" -> instance.zero()
+            else -> OpenResult.failed()
+        }
+        return OpenResult.successful(property)
+    }
+
+    override fun write(instance: Location, key: String, value: Any?): OpenResult {
+        when (key) {
+            "direction" -> {
+                instance.direction = value as? Vector ?: return OpenResult.failed()
+            }
+            "pitch" -> {
+                instance.pitch = value?.toFloat(0f) ?: return OpenResult.failed()
+            }
+            "world" -> {
+                val world = when (value) {
+                    is World -> value
+                    is String -> Bukkit.getWorld(value)
+                    is Location -> value.world
+                    else -> return OpenResult.failed()
+                }
+                instance.world = world ?: return OpenResult.failed()
+            }
+            "x" -> {
+                instance.x = value?.toDouble() ?: return OpenResult.failed()
+            }
+            "y" -> {
+                instance.y = value?.toDouble() ?: return OpenResult.failed()
+            }
+            "yaw" -> {
+                instance.yaw = value?.toFloat() ?: return OpenResult.failed()
+            }
+            "z" -> {
+                instance.z = value?.toDouble() ?: return OpenResult.failed()
+            }
+            else -> return OpenResult.failed()
+        }
+        return OpenResult.successful()
+    }
+
+}
