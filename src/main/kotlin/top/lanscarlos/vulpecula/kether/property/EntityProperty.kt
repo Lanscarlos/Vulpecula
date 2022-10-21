@@ -85,67 +85,67 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
     override fun write(instance: Entity, key: String, value: Any?): OpenResult {
         when (key) {
             "isCustomNameVisible", "custom-name-visible" -> {
-                instance.isCustomNameVisible = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isCustomNameVisible = value?.toBoolean() ?: return OpenResult.successful()
             }
             "fallDistance", "fall-distance" -> {
-                instance.fallDistance = value?.toFloat() ?: return OpenResult.failed()
+                instance.fallDistance = value?.toFloat() ?: return OpenResult.successful()
             }
             "fireTicks", "fire-ticks" -> {
-                instance.fireTicks = value?.toInt() ?: return OpenResult.failed()
+                instance.fireTicks = value?.toInt() ?: return OpenResult.successful()
             }
             "freezeTicks", "freeze-ticks" -> {
-                instance.freezeTicks = value?.toInt() ?: return OpenResult.failed()
+                instance.freezeTicks = value?.toInt() ?: return OpenResult.successful()
             }
             "isGlowing", "glowing" -> {
-                instance.isGlowing = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isGlowing = value?.toBoolean() ?: return OpenResult.successful()
             }
             "gravity" -> {
-                instance.setGravity(value?.toBoolean() ?: return OpenResult.failed())
+                instance.setGravity(value?.toBoolean() ?: return OpenResult.successful())
             }
             "isInsideVehicle", "inside-vehicle" -> instance.isInsideVehicle
             "isInvulnerable", "invulnerable" -> {
-                instance.isInvulnerable = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isInvulnerable = value?.toBoolean() ?: return OpenResult.successful()
             }
             "lastDamageCause", "last-damage-cause" -> {
                 instance.lastDamageCause = value as? EntityDamageEvent
             }
             "passenger" -> {
-                instance.setPassenger(value as? Entity ?: return OpenResult.failed())
+                instance.setPassenger(value as? Entity ?: return OpenResult.successful())
             }
             "isPersistent", "persistent" -> {
-                instance.isPersistent = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isPersistent = value?.toBoolean() ?: return OpenResult.successful()
             }
             "portalCooldown", "portal-cooldown" -> {
-                instance.portalCooldown = value?.toInt() ?: return OpenResult.failed()
+                instance.portalCooldown = value?.toInt() ?: return OpenResult.successful()
             }
             "rotation" -> {
-                val pair = value as? Pair<*, *> ?: return OpenResult.failed()
+                val pair = value as? Pair<*, *> ?: return OpenResult.successful()
                 instance.setRotation(
                     pair.first.toFloat(0f),
                     pair.second.toFloat(0f)
                 )
             }
             "isSilent", "silent" -> {
-                instance.isSilent = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isSilent = value?.toBoolean() ?: return OpenResult.successful()
             }
             "ticks-lived" -> {
-                instance.ticksLived = value?.toInt() ?: return OpenResult.failed()
+                instance.ticksLived = value?.toInt() ?: return OpenResult.successful()
             }
             "velocity" -> {
                 instance.velocity = value as? Vector ?: Vector(0, 0, 0)
             }
             "isVisualFire", "visual-fire" -> {
-                instance.isVisualFire = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isVisualFire = value?.toBoolean() ?: return OpenResult.successful()
             }
 
             // Nameable
             "customName", "custom-name" -> {
-                instance.customName = value?.toString() ?: return OpenResult.failed()
+                instance.customName = value?.toString() ?: return OpenResult.successful()
             }
 
             // ServerOperator
             "isOp", "op" -> {
-                instance.isOp = value?.toBoolean() ?: return OpenResult.failed()
+                instance.isOp = value?.toBoolean() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

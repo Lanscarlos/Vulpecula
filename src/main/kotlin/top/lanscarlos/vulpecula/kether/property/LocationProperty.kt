@@ -53,31 +53,31 @@ class LocationProperty : VulScriptProperty<Location>("location") {
     override fun write(instance: Location, key: String, value: Any?): OpenResult {
         when (key) {
             "direction" -> {
-                instance.direction = value as? Vector ?: return OpenResult.failed()
+                instance.direction = value as? Vector ?: return OpenResult.successful()
             }
             "pitch" -> {
-                instance.pitch = value?.toFloat(0f) ?: return OpenResult.failed()
+                instance.pitch = value?.toFloat(0f) ?: return OpenResult.successful()
             }
             "world" -> {
                 val world = when (value) {
                     is World -> value
                     is String -> Bukkit.getWorld(value)
                     is Location -> value.world
-                    else -> return OpenResult.failed()
+                    else -> null
                 }
-                instance.world = world ?: return OpenResult.failed()
+                instance.world = world ?: return OpenResult.successful()
             }
             "x" -> {
-                instance.x = value?.toDouble() ?: return OpenResult.failed()
+                instance.x = value?.toDouble() ?: return OpenResult.successful()
             }
             "y" -> {
-                instance.y = value?.toDouble() ?: return OpenResult.failed()
+                instance.y = value?.toDouble() ?: return OpenResult.successful()
             }
             "yaw" -> {
-                instance.yaw = value?.toFloat() ?: return OpenResult.failed()
+                instance.yaw = value?.toFloat() ?: return OpenResult.successful()
             }
             "z" -> {
-                instance.z = value?.toDouble() ?: return OpenResult.failed()
+                instance.z = value?.toDouble() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }
