@@ -26,7 +26,7 @@ class EventProperty : VulScriptProperty<Event>("event") {
             "isCancelled", "cancelled", "cancel" -> (instance as? Cancellable)?.isCancelled ?: false
             "eventName", "event-name", "name" -> instance.eventName
             "isAsynchronous", "asynchronous", "async" -> instance.isAsynchronous
-            else -> OpenResult.failed()
+            else -> return OpenResult.failed()
         }
         return OpenResult.successful(property)
     }
