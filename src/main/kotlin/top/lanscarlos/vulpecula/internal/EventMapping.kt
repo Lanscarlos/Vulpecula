@@ -43,10 +43,10 @@ object EventMapping {
                 cache[key] = value
             }
 
-            console().sendLang("Mapping-Load-Automatic-Succeeded", cache.size, timing(start))
+            console().sendLang("Mapping-Load-Automatic-Succeeded", file.name, cache.size, timing(start))
         } catch (e: Exception) {
             e.printStackTrace()
-            console().sendLang("Mapping-Load-Automatic-Failed", e.localizedMessage)
+            console().sendLang("Mapping-Load-Automatic-Failed", file.name, e.localizedMessage)
         }
     }
 

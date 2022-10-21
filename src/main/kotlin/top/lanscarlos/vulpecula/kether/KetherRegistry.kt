@@ -132,12 +132,15 @@ class KetherRegistry : ClassVisitor(0) {
         private val propertyRegistry = HashMap<Class<*>, ScriptProperty<*>>()
         private var propertyCache: Collection<Pair<Class<*>, ScriptProperty<*>>> = emptyList()
 
+        @Suppress("UNCHECKED_CAST")
         fun <T> getScriptProperties(instance: T): Collection<ScriptProperty<in T>> {
             return propertyCache.filter {
                 it.first.isInstance(instance)
             }.sortedWith { c1, c2 ->
                 if (c1.first.isAssignableFrom(c2.first)) 1 else -1
-            }.mapNotNull { it.second as? ScriptProperty<in T> }
+            }.mapNotNull {
+                it.second as? ScriptProperty<in T>
+            }
         }
 
         fun registerScriptProperty(key: Class<*>, property: ScriptProperty<*>) {
