@@ -20,6 +20,7 @@ import top.lanscarlos.vulpecula.utils.toBoolean
     bind = Event::class,
 )
 class EventProperty : VulScriptProperty<Event>("event") {
+
     override fun read(instance: Event, key: String): OpenResult {
         val property: Any = when (key) {
             "isCancelled", "cancelled", "cancel" -> (instance as? Cancellable)?.isCancelled ?: false
