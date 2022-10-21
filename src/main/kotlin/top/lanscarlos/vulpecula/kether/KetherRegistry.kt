@@ -88,6 +88,7 @@ class KetherRegistry : ClassVisitor(0) {
 
             // 注册语句
             name.forEach {
+                Kether.scriptRegistry.registerAction("vul", it, parser)
                 if (namespace != "kether") {
                     // 防止注入原生命名空间
                     Kether.scriptRegistry.registerAction(namespace, it, parser)
@@ -180,6 +181,7 @@ class KetherRegistry : ClassVisitor(0) {
 
                         if (it.name == pluginId) return@inner
 
+                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "vul"))
                         if (meta.namespace != "kether") {
                             // 防止注入原生命名空间
                             it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, meta.namespace))
