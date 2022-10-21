@@ -1,11 +1,13 @@
 package top.lanscarlos.vulpecula.command
 
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.info
 import taboolib.module.kether.Kether
+import top.lanscarlos.vulpecula.Context
 import top.lanscarlos.vulpecula.utils.eval
 
 /**
@@ -24,6 +26,18 @@ object CommandVulpecula {
             execute<Player> { player, _, argument ->
                 val result = eval(argument, player, args = mapOf("player" to player)).get()
                 player.sendMessage("运行结果：$result")
+            }
+        }
+    }
+
+    @CommandBody
+    val reload = subCommand {
+        execute<CommandSender> { sender, _, _ ->
+            val info = Context.load()
+            if (sender is Player) {
+                info.forEach {
+                    sender.sendMessage(it)
+                }
             }
         }
     }
