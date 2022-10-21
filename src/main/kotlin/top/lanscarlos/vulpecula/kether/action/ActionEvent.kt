@@ -11,7 +11,6 @@ import top.lanscarlos.vulpecula.utils.getVariable
 import top.lanscarlos.vulpecula.utils.run
 import top.lanscarlos.vulpecula.utils.toBoolean
 import top.lanscarlos.vulpecula.utils.tryNextAction
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
