@@ -7,7 +7,9 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.EntityEvent
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.*
@@ -59,7 +61,6 @@ class EventDispatcher(
             is PlayerEvent -> event.player
             is BlockBreakEvent -> event.player
             is BlockPlaceEvent -> event.player
-            is EntityDamageEvent -> (event.entity as? Player)
             is EntityDamageByEntityEvent -> {
                 when (event.damager) {
                     is Player -> event.damager
@@ -67,7 +68,9 @@ class EventDispatcher(
                     else -> null
                 }
             }
+            is EntityEvent -> (event.entity as? Player)
             is InventoryClickEvent -> event.whoClicked as? Player
+            is InventoryEvent -> event.view.player as? Player
             else -> null
         }
 
@@ -80,12 +83,14 @@ class EventDispatcher(
 
         // 执行脚本
         compiler.compiled?.runActions {
-            set("@Event", event)
-            player?.let {
-                set("@Sender", it)
-                set("@Player", it)
-                set("player", it)
-            }
+            setVariable(
+                "@Event", "event",
+                value = event
+            )
+            setVariable(
+                "@Sender", "@Player", "player",
+                value = player
+            )
         }
     }
 

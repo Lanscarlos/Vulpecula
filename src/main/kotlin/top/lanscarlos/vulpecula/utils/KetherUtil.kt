@@ -4,6 +4,7 @@ import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestContext
 import taboolib.library.kether.QuestReader
+import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptFrame
 
 /**
@@ -135,4 +136,13 @@ fun <T> QuestContext.Frame.getVariable(vararg keys: String): T? {
  * */
 fun QuestContext.Frame.setVariable(key: String, value: Any?) {
     return variables().set(key, value)
+}
+
+/**
+ * 设置变量
+ * */
+fun ScriptContext.setVariable(vararg keys: String, value: Any?) {
+    keys.forEach { key ->
+        set(key, value)
+    }
 }
