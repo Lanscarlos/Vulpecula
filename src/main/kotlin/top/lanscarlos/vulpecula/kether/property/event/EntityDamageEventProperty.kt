@@ -1,14 +1,12 @@
 package top.lanscarlos.vulpecula.kether.property.event
 
 import org.bukkit.entity.Projectile
-import org.bukkit.event.Cancellable
 import org.bukkit.event.entity.EntityDamageByBlockEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toBoolean
 import top.lanscarlos.vulpecula.utils.toDouble
 
 /**
