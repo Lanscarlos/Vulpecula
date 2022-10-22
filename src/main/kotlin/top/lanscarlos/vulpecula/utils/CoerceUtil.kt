@@ -104,7 +104,7 @@ fun Any?.asList(def: List<Any?>): List<Any?> {
     return Coerce.asList(this).let { if (it.isPresent) it.get() else def }
 }
 
-fun Any?.toList(def: List<Any?>? = null): List<Any?> {
-    if (this == null && def != null) return def
-    return Coerce.toList(this)
-}
+//fun Any?.toList(def: List<Any?>? = null): List<Any?> {
+//    if (this == null && def != null) return def
+//    return Coerce.toList(this)
+//}

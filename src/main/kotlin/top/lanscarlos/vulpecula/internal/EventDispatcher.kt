@@ -6,7 +6,6 @@ import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryEvent
@@ -15,7 +14,6 @@ import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.Script
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.internal.EventListener.Companion.getListener
