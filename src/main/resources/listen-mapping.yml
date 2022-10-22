@@ -2,4 +2,18 @@
 # 监听对象映射文件
 # 别名 -> 事件全类名
 
+
+# 实体受伤事件
+on-entity-damage: 'org.bukkit.event.entity.EntityDamageEvent'
+
+# 实体受其他实体攻击事件
+on-entity-damage-by-entity: 'org.bukkit.event.entity.EntityDamageByEventEvent'
+
+# 实体死亡事件
+on-entity-death: 'org.bukkit.event.entity.EntityDeathEvent'
+
+# 玩家执行命令事件
+on-player-command: 'org.bukkit.event.player.PlayerCommandPreprocessEvent'
+
+# 玩家交互事件
 on-player-interact: 'org.bukkit.event.player.PlayerInteractEvent'
