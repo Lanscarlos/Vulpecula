@@ -13,11 +13,19 @@ action:
     # 是否覆盖原生 If & Else
     # 覆盖之后，原生 If 功能将由此语句替代
     override-default-action: false
+  sound:
+    shared: true
+    inject-default-namespace: true
+    override-default-action: false
   try-catch:
     shared: true
     inject-default-namespace: true
 
 # 属性设定
 property:
-  entity:
+  entity-generic:
+    shared: true
+  event-generic:
+    shared: true
+  location-generic:
     shared: true

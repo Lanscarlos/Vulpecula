@@ -29,6 +29,19 @@ fun QuestReader.nextPeek(): String {
 /**
  * 尝试通过前缀解析 Action
  * */
+fun QuestReader.hasNextToken(vararg expected: String): Boolean {
+    this.mark()
+    return if (this.nextToken() in expected) {
+        true
+    } else {
+        this.reset()
+        false
+    }
+}
+
+/**
+ * 尝试通过前缀解析 Action
+ * */
 fun QuestReader.tryNextAction(vararg prefix: String): ParsedAction<*>? {
     this.mark()
     return if (this.nextToken() in prefix) {

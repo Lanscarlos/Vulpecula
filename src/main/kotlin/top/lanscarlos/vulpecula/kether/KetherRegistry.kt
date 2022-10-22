@@ -94,27 +94,6 @@ class KetherRegistry : ClassVisitor(0) {
                     Kether.scriptRegistry.registerAction(namespace, it, parser)
                 }
             }
-        } else if (method.isAnnotationPresent(VulKetherProperty::class.java) && ScriptProperty::class.java.isAssignableFrom(method.returnType)) {
-            val annotation = method.getAnnotation(VulKetherProperty::class.java)
-            val id = annotation.property<String>("id") ?: return
-            if (config.getBoolean("property.$id.disable", false)) return
-
-            val property = (if (instance == null) method.invokeStatic() else method.invoke(instance.get())) as ScriptProperty<*>
-            val bind = annotation.property<Class<*>>("bind") ?: error("KetherProperty bind is null")
-            val shared = if (annotation.property("shared", true)) {
-                config.getBoolean("action.$id.shared", true)
-            } else {
-                false
-            }
-
-            if (shared) {
-                var name = bind.name
-                name = if (name.startsWith(taboolibPath)) "@${name.substring(taboolibPath.length)}" else name
-                getOpenContainers().forEach {
-                    it.call(StandardChannel.REMOTE_ADD_PROPERTY, arrayOf(pluginId, name, property))
-                }
-            }
-            Kether.registeredScriptProperty.computeIfAbsent(bind) { HashMap() }[property.id] = property
         }
     }
 
