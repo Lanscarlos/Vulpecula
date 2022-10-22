@@ -4,7 +4,6 @@ import org.bukkit.event.entity.EntityDeathEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toDouble
 import top.lanscarlos.vulpecula.utils.toInt
 
 /**

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.property
+package top.lanscarlos.vulpecula.kether.property.entity
 
 import org.bukkit.entity.Player
 import taboolib.common.OpenResult

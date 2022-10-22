@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.property
+package top.lanscarlos.vulpecula.kether.property.entity
 
 import org.bukkit.entity.Entity
 import org.bukkit.event.entity.EntityDamageEvent
