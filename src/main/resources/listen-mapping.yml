@@ -17,3 +17,9 @@ on-player-command: 'org.bukkit.event.player.PlayerCommandPreprocessEvent'
 
 # 玩家交互事件
 on-player-interact: 'org.bukkit.event.player.PlayerInteractEvent'
+
+# 玩家破坏方块事件
+on-player-break: 'org.bukkit.event.block.BlockBreakEvent'
+
+# 实体射箭事件
+on-entity-shoot: 'org.bukkit.event.entity.EntityShootBowEvent'

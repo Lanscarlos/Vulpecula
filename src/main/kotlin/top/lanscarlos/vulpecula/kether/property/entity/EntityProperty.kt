@@ -4,6 +4,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import taboolib.common.OpenResult
+import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
 import top.lanscarlos.vulpecula.utils.toBoolean
@@ -82,6 +83,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
     }
 
     override fun write(instance: Entity, key: String, value: Any?): OpenResult {
+        info("检测 -> $key -> $value")
         when (key) {
             "isCustomNameVisible", "custom-name-visible" -> {
                 instance.isCustomNameVisible = value?.toBoolean() ?: return OpenResult.successful()
@@ -96,6 +98,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
                 instance.freezeTicks = value?.toInt() ?: return OpenResult.successful()
             }
             "isGlowing", "glowing" -> {
+                info("检测 x1 -> $key -> $value")
                 instance.isGlowing = value?.toBoolean() ?: return OpenResult.successful()
             }
             "gravity" -> {

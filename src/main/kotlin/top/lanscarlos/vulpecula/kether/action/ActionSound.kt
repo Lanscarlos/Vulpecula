@@ -4,6 +4,7 @@ import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import taboolib.module.kether.actionNow
+import taboolib.module.kether.player
 import taboolib.module.kether.script
 import taboolib.module.kether.scriptParser
 import taboolib.platform.type.BukkitPlayer
@@ -56,7 +57,7 @@ object ActionSound {
                     loc.world?.playSound(loc, Sound.valueOf(resource.replace('.', '_').uppercase()), meta.first, meta.second)
                 }
             } else {
-                val player = (this.script().sender as? BukkitPlayer)?.player ?: error("No player selected.")
+                val player = (this.player() as? BukkitPlayer)?.player ?: error("No player selected.")
                 val loc = locAction?.run(this) as? Location ?: player.location
                 if (resource.startsWith("resource:")) {
                     player.playSound(loc, resource.substring("resource:".length), meta.first, meta.second)

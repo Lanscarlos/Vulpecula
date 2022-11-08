@@ -1,8 +1,6 @@
 package top.lanscarlos.vulpecula.internal.compiler
 
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.warning
 import taboolib.module.kether.Script
 import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.sendLang
@@ -25,12 +23,12 @@ class DispatcherCompiler(
 ) : ScriptCompiler("dispatcher_${dispatcher.id}", dispatcher.config) {
 
     protected val linker = ScriptLinker(this)
-    protected lateinit var _compiled: Script
+    lateinit var _compiled: Script
     val compiled: Script? get() = if (::_compiled.isInitialized) _compiled else null
 
-    fun compile() {
-        if (source.isEmpty()) return
-        try {
+    fun compile(): Boolean {
+        if (source.isEmpty()) return false
+        return try {
             // 取消所有连接
             ScriptFragment.unlink(this)
 
@@ -46,20 +44,25 @@ class DispatcherCompiler(
                 dispatcher.handlers.addAll(dispatcher.handlerCache)
                 dispatcher.handlerCache.clear()
             }
+            true
         } catch (e: Exception) {
-
-            peekAll().forEach { (key, pointer) ->
-                val id = key.split("_").let { it[0] to it[1] }
-                when (id.first) {
-                    "dispatcher" -> {
-                        console().sendLang("Dispatcher-Load-Failed-Details", id.second, pointer, e.localizedMessage)
+            if (peekAll().isEmpty()) {
+                console().sendLang("Dispatcher-Load-Failed-Details", "Unknown", "Unknown", e.localizedMessage)
+            } else {
+                peekAll().forEach { (key, pointer) ->
+                    val id = key.split("_").let { it[0] to it[1] }
+                    when (id.first) {
+                        "dispatcher" -> {
+                            console().sendLang("Dispatcher-Load-Failed-Details", id.second, pointer, e.localizedMessage)
+                        }
+                        "handler" -> {
+                            console().sendLang("Handler-Load-Failed-Details", id.second, pointer, e.localizedMessage)
+                        }
+                        else -> e.printStackTrace()
                     }
-                    "handler" -> {
-                        console().sendLang("Handler-Load-Failed-Details", id.second, pointer, e.localizedMessage)
-                    }
-                    else -> e.printStackTrace()
                 }
             }
+            false
         }
     }
 

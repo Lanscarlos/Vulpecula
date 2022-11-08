@@ -20,12 +20,13 @@ class PlayerProperty : VulScriptProperty<Player>("player") {
     override fun read(instance: Player, key: String): OpenResult {
         val property: Any? = when (key) {
             "exp" -> instance.exp
+            "eye-loc" -> instance.eyeLocation
             else -> return OpenResult.failed()
         }
         return OpenResult.successful(property)
     }
 
     override fun write(instance: Player, key: String, value: Any?): OpenResult {
-        TODO("Not yet implemented")
+        return OpenResult.failed()
     }
 }

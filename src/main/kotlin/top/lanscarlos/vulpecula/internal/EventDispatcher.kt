@@ -120,12 +120,6 @@ class EventDispatcher(
         handlerCache.remove(id)
     }
 
-//    private fun initVariables(config: ConfigurationSection): Map<String, String> {
-//        return config.getKeys(false).mapNotNull { key ->
-//            config.getString(key)?.let { key to it }
-//        }.toMap()
-//    }
-
     private fun initBaffle(config: ConfigurationSection): Baffle? {
         return when (val it = config.getString("type")) {
             "time" -> {
@@ -218,7 +212,12 @@ class EventDispatcher(
                         // 比对新旧对象的脚本源码
                         if (dispatcher.compiler.source.toString() != old.compiler.source.toString()) {
                             // 脚本源码不一致，重新编译脚本
-                            dispatcher.compiler.compile()
+                            if (!dispatcher.compiler.compile()) {
+                                // 编译失败
+                                old.compiler.compiled?.let {
+                                    dispatcher.compiler._compiled = it
+                                }
+                            }
                         }
                     } else {
                         // 不存在旧对象
