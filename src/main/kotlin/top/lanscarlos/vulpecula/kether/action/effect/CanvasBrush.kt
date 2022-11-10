@@ -4,6 +4,7 @@ import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
+import top.lanscarlos.vulpecula.utils.VolatileHandler
 import java.awt.Color
 
 /**
@@ -17,7 +18,7 @@ import java.awt.Color
  */
 class CanvasBrush {
 
-    var particle = ProxyParticle.FLAME
+    var particle = ProxyParticle.SPELL_MOB
     var count = 1
     var speed = 0.0
     var offset = Vector(0, 0, 0)
@@ -37,11 +38,18 @@ class CanvasBrush {
 
         val meta = when (particle) {
             ProxyParticle.BLOCK_DUST -> ProxyParticle.BlockData(material, data)
-            ProxyParticle.REDSTONE,
-            ProxyParticle.SPELL_MOB,
-            ProxyParticle.SPELL_MOB_AMBIENT -> ProxyParticle.DustData(color, size)
+            ProxyParticle.REDSTONE -> ProxyParticle.DustData(color, size)
             ProxyParticle.DUST_COLOR_TRANSITION -> ProxyParticle.DustTransitionData(color, transition, size)
             ProxyParticle.ITEM_CRACK -> ProxyParticle.ItemData(material, data, name, lore, customModelData)
+            ProxyParticle.SPELL_MOB,
+            ProxyParticle.SPELL_MOB_AMBIENT -> {
+                count = 0
+                speed = 1.0
+                vector.x = color.red.div(255.0)
+                vector.y = color.green.div(255.0)
+                vector.z = color.blue.div(255.0)
+                null
+            }
             else -> null
         }
 

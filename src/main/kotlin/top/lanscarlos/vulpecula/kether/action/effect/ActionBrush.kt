@@ -120,7 +120,7 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
         fun modify(brush: CanvasBrush, frame: ScriptFrame, option: String, value: LiveData<*>) {
             when (option) {
                 "type" -> {
-                    brush.particle = ProxyParticle.valueOf(value.getValue(frame, brush.particle.name))
+                    brush.particle = ProxyParticle.valueOf(value.getValue(frame, brush.particle.name).uppercase())
                 }
                 "count" -> brush.count = value.getValue(frame, brush.count)
                 "speed" -> brush.speed = value.getValue(frame, brush.speed)
