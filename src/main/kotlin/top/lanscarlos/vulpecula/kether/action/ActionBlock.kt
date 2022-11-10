@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action
 
+import taboolib.common.platform.function.info
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -22,7 +23,7 @@ class ActionBlock(
         if (block.isEmpty()) {
             return CompletableFuture.completedFuture(null)
         } else if (block.size == 1) {
-            frame.run(block[0])
+            return frame.run(block[0])
         } else {
             for (i in 0 until block.lastIndex) {
                 block[i].run(frame)

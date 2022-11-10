@@ -37,7 +37,7 @@ class DispatcherCompiler(
             linker.link(source, content)
 
             // 尝试编译
-            _compiled = source.toString().parseKetherScript(listOf("vulpecula"))
+            _compiled = source.toString().parseKetherScript(listOf("vulpecula", "vul"))
 
             // 检测通过，将缓存导入
             if (dispatcher.handlerCache.isNotEmpty()) {
@@ -46,6 +46,7 @@ class DispatcherCompiler(
             }
             true
         } catch (e: Exception) {
+            e.printStackTrace()
             if (peekAll().isEmpty()) {
                 console().sendLang("Dispatcher-Load-Failed-Details", "Unknown", "Unknown", e.localizedMessage)
             } else {
