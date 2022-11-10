@@ -37,7 +37,7 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
     }
 
     override fun runActions(): CompletableFuture<Any> {
-        set("@StartTime", System.currentTimeMillis())
+        set(ActionCanvas.VARIABLE_DURATION_START, System.currentTimeMillis())
         return super.runActions()
     }
 

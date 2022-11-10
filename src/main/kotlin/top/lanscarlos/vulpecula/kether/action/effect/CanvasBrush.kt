@@ -45,8 +45,14 @@ class CanvasBrush {
             else -> null
         }
 
-        viewers.forEach {
-            it.sendParticle(particle, location, offset, count, speed, meta)
+        if ((offset.x == 0.0) && (offset.y == 0.0) && (offset.z == 0.0)) {
+            viewers.forEach {
+                it.sendParticle(particle, location, vector, count, speed, meta)
+            }
+        } else {
+            viewers.forEach {
+                it.sendParticle(particle, location.clone().add(offset), vector, count, speed, meta)
+            }
         }
     }
 }

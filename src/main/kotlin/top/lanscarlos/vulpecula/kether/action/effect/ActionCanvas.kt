@@ -2,8 +2,6 @@ package top.lanscarlos.vulpecula.kether.action.effect
 
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.warning
 import taboolib.library.kether.ParsedAction
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.*
@@ -52,23 +50,38 @@ class ActionCanvas : ScriptAction<Any?>() {
             else -> null
         } ?: frame.player().uniqueId.toString()
 
-        frame.setVariable("@Brush", CanvasBrush())
+        frame.setVariable(VARIABLE_BRUSH, CanvasBrush())
+
+        val body = ParsedAction(ActionBlock(actions))
+        val preHandle = ParsedAction(ActionBlock(this.preHandle))
+        val postHandle = ParsedAction(ActionBlock(this.postHandle))
 
         condition?.let {
-            val body = ParsedAction(ActionBlock(actions))
-            val preHandle = ParsedAction(ActionBlock(this.preHandle))
-            val postHandle = ParsedAction(ActionBlock(this.postHandle))
             val quest = CanvasQuest(uniqueId, period, it, body, preHandle, postHandle)
             // 提交绘画任务
             CanvasScriptContext.submit(quest, frame.deepVars(), force)
-        } ?: warning("Canvas Condition not defined.")
+        } ?: let {
+            // 循环条件未定义 任务只执行一次
+            frame.run(preHandle).thenRun {
+                frame.run(body).thenRun {
+                    frame.run(postHandle)
+                }
+            }
+//            warning("Canvas Condition not defined.")
+        }
 
         return CompletableFuture.completedFuture(null)
     }
 
     companion object {
 
-        private const val extendNamespace = "vulpecula-canvas"
+        private const val NAMESPACE_EXTEND = "vulpecula-canvas"
+        const val VARIABLE_DURATION_START = "@CanvasStartTime"
+        const val VARIABLE_DURATION_END = "@CanvasEndTime"
+        const val VARIABLE_BRUSH = "@CanvasBrush"
+        const val VARIABLE_ORIGIN = "@CanvasOrigin"
+        const val VARIABLE_VIEWERS = "@CanvasViewers"
+        const val VARIABLE_PATTERN = "@CanvasPattern"
 
         @VulKetherParser(
             id = "canvas",
@@ -78,7 +91,7 @@ class ActionCanvas : ScriptAction<Any?>() {
 
             // 添加内部命名空间
             val namespace = reader.getProperty<MutableList<String>>("namespace")!!
-            namespace += extendNamespace
+            namespace += NAMESPACE_EXTEND
 
             val canvas = ActionCanvas()
 
@@ -120,9 +133,9 @@ class ActionCanvas : ScriptAction<Any?>() {
             }
 
             // 移除内部命名空间
-            namespace -= extendNamespace
+            namespace -= NAMESPACE_EXTEND
 
-            canvas
+            return@scriptParser canvas
         }
     }
 }

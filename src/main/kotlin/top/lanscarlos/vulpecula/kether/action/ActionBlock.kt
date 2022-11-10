@@ -2,9 +2,14 @@ package top.lanscarlos.vulpecula.kether.action
 
 import taboolib.common.platform.function.info
 import taboolib.library.kether.ParsedAction
+import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
+import taboolib.module.kether.scriptParser
+import top.lanscarlos.vulpecula.kether.VulKetherParser
+import top.lanscarlos.vulpecula.utils.hasNextToken
+import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.run
 import java.util.concurrent.CompletableFuture
 
@@ -32,4 +37,22 @@ class ActionBlock(
         return frame.run(block[block.lastIndex])
     }
 
+    companion object {
+        @VulKetherParser(
+            id = "block",
+            name = ["block"]
+        )
+        fun parser() = scriptParser { reader ->
+            reader.expect("{")
+            ActionBlock(readBlock(reader))
+        }
+
+        fun readBlock(reader: QuestReader): List<ParsedAction<*>> {
+            val block = mutableListOf<ParsedAction<*>>()
+            while (!reader.hasNextToken("}")) {
+                block += reader.nextParsedAction()
+            }
+            return block
+        }
+    }
 }

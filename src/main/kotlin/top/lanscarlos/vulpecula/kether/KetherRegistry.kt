@@ -25,7 +25,7 @@ import java.util.function.Supplier
  * @since 2022-10-18 16:33
  */
 @Awake(LifeCycle.LOAD)
-class KetherRegistry : ClassVisitor(0) {
+class KetherRegistry : ClassVisitor(1) {
 
     override fun getLifeCycle() = LifeCycle.LOAD
 
@@ -34,13 +34,15 @@ class KetherRegistry : ClassVisitor(0) {
         if (!clazz.isAnnotationPresent(VulKetherProperty::class.java)) return
         if (!VulScriptProperty::class.java.isAssignableFrom(clazz)) return
 
-        val property = (if (supplier?.get() != null) {
-            supplier.get()
-        } else try {
-            clazz.getDeclaredConstructor().newInstance()
-        } catch (e: Exception) {
-            null
-        }) as? VulScriptProperty<*> ?: return
+        val property = let {
+            if (supplier?.get() != null) {
+                supplier.get()
+            } else try {
+                clazz.getDeclaredConstructor().newInstance()
+            } catch (e: Exception) {
+                null
+            }
+        } as? VulScriptProperty<*> ?: return
 
         val annotation = clazz.getAnnotation(VulKetherProperty::class.java)
 

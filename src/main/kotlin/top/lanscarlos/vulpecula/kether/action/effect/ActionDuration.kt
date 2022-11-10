@@ -1,11 +1,10 @@
 package top.lanscarlos.vulpecula.kether.action.effect
 
-import taboolib.module.kether.ScriptAction
-import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.scriptParser
+import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.action.ActionDuration
 import top.lanscarlos.vulpecula.utils.getVariable
+import top.lanscarlos.vulpecula.utils.nextBlock
+import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -15,22 +14,37 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-11-09 22:22
  */
-class ActionDuration : ScriptAction<Int>() {
+class ActionDuration(val duration: Int, val between: Boolean) : ScriptAction<Boolean>() {
 
-    override fun run(frame: ScriptFrame): CompletableFuture<Int> {
-        val startTime = frame.getVariable<Long>("@StartTime") ?: error("No start time record.")
-        val duration = (System.currentTimeMillis() - startTime) / 50L
-        return CompletableFuture.completedFuture(duration.toInt())
+    override fun run(frame: ScriptFrame): CompletableFuture<Boolean> {
+        val startTime = frame.getVariable<Long>(ActionCanvas.VARIABLE_DURATION_START) ?: error("No canvas start time record.")
+        val endTime = frame.getVariable<Long>(ActionCanvas.VARIABLE_DURATION_END) ?: (startTime + duration * 50L).also {
+            frame.setVariable(ActionCanvas.VARIABLE_DURATION_END, it)
+        }
+        return CompletableFuture.completedFuture(if (between) System.currentTimeMillis() <= endTime else System.currentTimeMillis() > endTime)
     }
 
     companion object {
+
+        /**
+         * 判断画布工作时间是否处于指定 ticks 内
+         * duration in {ticks}
+         * duration in 200
+         * */
         @VulKetherParser(
             id = "duration",
             name = ["duration"],
             namespace = "vulpecula-canvas"
         )
-        fun parser() = scriptParser {
-            ActionDuration()
+        fun parser() = scriptParser { reader ->
+            reader.switch {
+                case("in") {
+                    ActionDuration(reader.nextInt(), true)
+                }
+                case("out") {
+                    ActionDuration(reader.nextInt(), false)
+                }
+            }
         }
     }
 }

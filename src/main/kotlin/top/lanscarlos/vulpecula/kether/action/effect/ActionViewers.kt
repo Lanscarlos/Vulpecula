@@ -52,7 +52,7 @@ class ActionViewers(val raw: Set<Any>) : ScriptAction<Collection<ProxyPlayer>>()
         }
 
         val viewers = cache.distinctBy { it.uniqueId.toString() }
-        frame.setVariable("@Viewers", viewers)
+        frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
         return CompletableFuture.completedFuture(viewers)
     }
 
