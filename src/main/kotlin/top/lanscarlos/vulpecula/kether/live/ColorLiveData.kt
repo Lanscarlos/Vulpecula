@@ -20,10 +20,18 @@ class ColorLiveData(
         return when (value) {
             is Color -> value
             is Triple<*, *, *> -> {
-                val r = (value.first as? IntLiveData)?.get(frame, def.red) ?: def.red
-                val g = (value.second as? IntLiveData)?.get(frame, def.green) ?: def.green
-                val b = (value.third as? IntLiveData)?.get(frame, def.blue) ?: def.blue
-                Color(r, g, b)
+                val red = (value.first as? IntLiveData)?.get(frame, def.red) ?: def.red
+                val green = (value.second as? IntLiveData)?.get(frame, def.green) ?: def.green
+                val blue = (value.third as? IntLiveData)?.get(frame, def.blue) ?: def.blue
+                Color(red, green, blue)
+            }
+            is Pair<*, *> -> {
+                val base = value.first as? Triple<*, *, *> ?: return def
+                val red = (base.first as? IntLiveData)?.get(frame, def.red) ?: def.red
+                val green = (base.second as? IntLiveData)?.get(frame, def.green) ?: def.green
+                val blue = (base.third as? IntLiveData)?.get(frame, def.blue) ?: def.blue
+                val alpha = (value.second as? IntLiveData)?.get(frame, def.alpha) ?: def.alpha
+                Color(red, green, blue, alpha)
             }
             is StringLiveData -> {
                 val hex = value.get(frame, "FFFFFF")
@@ -40,17 +48,27 @@ class ColorLiveData(
          * rgb r g b
          * rgb &r &g &b
          *
+         * rgba r g b a
+         * rgba &r &g &b &a
+         *
          * hex #aaffcc
          * hex &hex
          *
          * */
         fun read(reader: QuestReader): LiveData<Color> {
-            val value: Any = when (reader.expects("rgb", "hex")) {
+            val value: Any = when (reader.expects("rgb", "rgba", "hex")) {
                 "rgb" -> {
-                    val r = reader.readInt()
-                    val g = reader.readInt()
-                    val b = reader.readInt()
-                    Triple(r, g, b)
+                    val red = reader.readInt()
+                    val green = reader.readInt()
+                    val blue = reader.readInt()
+                    Triple(red, green, blue)
+                }
+                "rgba" -> {
+                    val red = reader.readInt()
+                    val green = reader.readInt()
+                    val blue = reader.readInt()
+                    val alpha = reader.readInt()
+                    Triple(red, green, blue) to alpha
                 }
                 "hex" -> {
                     if (reader.nextPeek().startsWith('#')) {

@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.action.effect
 
 import taboolib.common.platform.ProxyParticle
+import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -128,7 +129,23 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 "vector" -> brush.vector = value.getValue(frame, brush.vector)
 
                 "size" -> brush.size = value.getValue(frame, brush.size.toDouble()).toFloat()
-                "color" -> brush.color = value.getValue(frame, brush.color)
+                "color" -> {
+                    val color = value.getValue(frame, brush.color)
+                    when (brush.particle) {
+                        ProxyParticle.SPELL_MOB,
+                        ProxyParticle.SPELL_MOB_AMBIENT -> {
+                            brush.color = color
+                            brush.count = 0
+                            brush.speed = color.alpha.div(255.0)
+                            brush.vector.x = color.red.div(255.0)
+                            brush.vector.y = color.green.div(255.0)
+                            brush.vector.z = color.blue.div(255.0)
+                        }
+                        else -> {
+                            brush.color = color
+                        }
+                    }
+                }
                 "transition" -> brush.transition = value.getValue(frame, brush.transition)
                 "material" -> brush.material = value.getValue(frame, brush.material)
                 "data" -> brush.data = value.getValue(frame, brush.data)
