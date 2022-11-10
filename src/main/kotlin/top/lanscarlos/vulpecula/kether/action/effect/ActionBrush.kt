@@ -26,9 +26,7 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
         val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
             frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
         }
-        val iterator = options.iterator()
-        while (iterator.hasNext()) {
-            val it = iterator.next()
+        for (it in options) {
             modify(brush, frame, it.key, it.value)
         }
         return CompletableFuture.completedFuture(brush)

@@ -6,10 +6,8 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.library.kether.ParsedAction
-import taboolib.module.kether.ScriptAction
-import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.run
-import taboolib.module.kether.scriptParser
+import taboolib.library.kether.QuestReader
+import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
@@ -23,7 +21,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-11-09 00:23
  */
-class ActionViewers(val raw: Set<Any>) : ScriptAction<Collection<ProxyPlayer>>() {
+class ActionViewers(val raw: Collection<Any>) : ScriptAction<Collection<ProxyPlayer>>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Collection<ProxyPlayer>> {
 
@@ -51,7 +49,11 @@ class ActionViewers(val raw: Set<Any>) : ScriptAction<Collection<ProxyPlayer>>()
             }
         }
 
-        val viewers = cache.distinctBy { it.uniqueId.toString() }
+        val viewers = if (cache.isNotEmpty()) {
+            cache.distinctBy { it.uniqueId.toString() }
+        } else {
+            listOf(frame.player())
+        }
         frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
         return CompletableFuture.completedFuture(viewers)
     }
@@ -81,26 +83,29 @@ class ActionViewers(val raw: Set<Any>) : ScriptAction<Collection<ProxyPlayer>>()
             namespace = "vulpecula-canvas"
         )
         fun parser() = scriptParser { reader ->
-            val raw = mutableSetOf<Any>()
+            ActionViewers(read(reader))
+        }
+
+        fun read(reader: QuestReader): Collection<Any> {
+            val viewers = mutableSetOf<Any>()
             if (reader.hasNextToken("to")) {
                 if (reader.hasNextToken("[")) {
                     while (!reader.hasNextToken("]")) {
-                        raw += reader.nextBlock()
+                        viewers += reader.nextBlock()
                     }
                 } else {
-                    raw += reader.nextBlock()
+                    viewers += reader.nextBlock()
                 }
             } else {
                 if (reader.hasNextToken("[")) {
                     while (!reader.hasNextToken("]")) {
-                        raw += reader.nextToken()
+                        viewers += reader.nextToken()
                     }
                 } else {
-                    raw += reader.nextToken()
+                    viewers += reader.nextToken()
                 }
             }
-
-            ActionViewers(raw)
+            return viewers
         }
     }
 }
