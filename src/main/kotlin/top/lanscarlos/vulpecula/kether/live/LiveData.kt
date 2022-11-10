@@ -4,7 +4,7 @@ import taboolib.module.kether.ScriptFrame
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether
+ * top.lanscarlos.vulpecula.kether.live
  *
  * @author Lanscarlos
  * @since 2022-11-10 15:03
