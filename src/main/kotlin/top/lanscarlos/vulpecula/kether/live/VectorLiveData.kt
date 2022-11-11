@@ -29,8 +29,8 @@ class VectorLiveData(
         return when (it) {
             is Vector -> it
             is org.bukkit.util.Vector -> Vector(it.x, it.y, it.z)
-            is Location -> it.toVectorFix()
-            is org.bukkit.Location -> it.toProxyLocation().toVectorFix()
+            is Location -> it.direction
+            is org.bukkit.Location -> it.toProxyLocation().direction
             is Triple<*, *, *> -> {
                 val x = (it.first as? DoubleLiveData)?.get(frame, def.x) ?: def.x
                 val y = (it.second as? DoubleLiveData)?.get(frame, def.x) ?: def.x
@@ -53,7 +53,6 @@ class VectorLiveData(
             val value: Any = if (reader.hasNextToken("to")) {
                 reader.nextBlock()
             } else {
-                reader.mark()
                 val x = reader.readDouble()
                 val y = reader.readDouble()
                 val z = reader.readDouble()

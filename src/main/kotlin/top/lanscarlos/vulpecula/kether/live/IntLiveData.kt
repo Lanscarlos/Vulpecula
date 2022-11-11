@@ -25,6 +25,7 @@ class IntLiveData(
         } else value
 
         return when (it) {
+            "~" -> def
             is Short -> it.toInt()
             is Int -> it
             is Long -> it.toInt()

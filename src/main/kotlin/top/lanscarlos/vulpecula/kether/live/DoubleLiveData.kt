@@ -25,6 +25,7 @@ class DoubleLiveData(
         } else value
 
         return when (it) {
+            "~" -> def
             is Short -> it.toDouble()
             is Int -> it.toDouble()
             is Long -> it.toDouble()
