@@ -18,10 +18,10 @@ import top.lanscarlos.vulpecula.utils.toFloat
  * @since 2022-10-20 11:44
  */
 @VulKetherProperty(
-    id = "location",
+    id = "location-bukkit",
     bind = Location::class,
 )
-class LocationProperty : VulScriptProperty<Location>("location") {
+class LocationBukkitProperty : VulScriptProperty<Location>("location-bukkit") {
 
     override fun read(instance: Location, key: String): OpenResult {
         val property: Any? = when (key) {
