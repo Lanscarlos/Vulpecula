@@ -1,20 +1,14 @@
 package top.lanscarlos.vulpecula.utils
 
-import org.bukkit.entity.Entity
-import taboolib.common.platform.ProxyParticle
-import taboolib.common.platform.function.info
-import taboolib.common.util.Location
-import taboolib.common.util.Vector
+import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestContext
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.run
-import taboolib.platform.util.toProxyLocation
+import taboolib.module.kether.script
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
-import java.awt.Color
 
 /**
  * Vulpecula
@@ -103,24 +97,6 @@ fun ParsedAction<*>.run(frame: ScriptFrame): Any? {
 }
 
 /**
- * 运行一组动作
- * @return 返回最后一个动作的结果
- * */
-@Deprecated("Deprecated")
-fun List<ParsedAction<*>>.run(frame: ScriptFrame): Any? {
-    return if (this.isEmpty()) {
-        null
-    } else if (this.size == 1) {
-        this[0].run(frame)
-    } else {
-        for (i in 0 until lastIndex) {
-            this[i].run(frame)
-        }
-        this[lastIndex].run(frame)
-    }
-}
-
-/**
  * 获取变量
  * */
 fun <T> ScriptFrame.getVariable(key: String): T? {
@@ -159,4 +135,8 @@ fun ScriptContext.setVariable(vararg keys: String, value: Any?) {
     keys.forEach { key ->
         set(key, value)
     }
+}
+
+fun QuestContext.Frame.unsafePlayer(): ProxyPlayer? {
+    return script().sender as? ProxyPlayer
 }

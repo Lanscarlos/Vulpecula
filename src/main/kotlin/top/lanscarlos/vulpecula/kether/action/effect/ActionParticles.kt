@@ -7,6 +7,7 @@ import taboolib.common.util.Location
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
+import top.lanscarlos.vulpecula.kether.action.ActionLocation
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
@@ -31,7 +32,7 @@ class ActionParticles(
             ActionBrush.modify(brush, frame, it.key, it.value)
         }
 
-        val loc = location.getValue(frame, frame.player().location)
+        val loc = location.getValue(frame, frame.unsafePlayer()?.location ?: ActionLocation.def)
 
         val viewers = when (val value = frame.run(this.viewers).join()) {
             is ProxyPlayer -> listOf(value)

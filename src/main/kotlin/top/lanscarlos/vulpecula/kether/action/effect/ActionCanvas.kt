@@ -35,7 +35,7 @@ class ActionCanvas : ScriptAction<Any?>() {
         * */
         val uniqueId = when (val it = unique) {
             "false" -> "temp_" + UUID.randomUUID().toString()
-            is String -> it + '_' + frame.player().uniqueId.toString()
+            is String -> it + '_' + frame.unsafePlayer()?.uniqueId?.toString()
             is Pair<*, *> -> {
                 val id = it.first?.toString() ?: "temp"
                 val extend = (it.second as? ParsedAction<*>)?.let { action ->

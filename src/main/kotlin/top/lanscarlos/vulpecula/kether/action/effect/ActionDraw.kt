@@ -7,6 +7,7 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
+import top.lanscarlos.vulpecula.kether.action.ActionLocation
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.LocationLiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
@@ -24,7 +25,7 @@ class ActionDraw(val raw: LiveData<*>) : ScriptAction<Any?>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
 
-        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.player().location
+        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.unsafePlayer()?.location ?: ActionLocation.def
 
         val loc = when (raw) {
             is LocationLiveData -> {
@@ -92,7 +93,7 @@ class ActionDraw(val raw: LiveData<*>) : ScriptAction<Any?>() {
                 "origin", "base" -> {
                     val raw = reader.readLocation()
                     actionNow {
-                        this.setVariable(ActionCanvas.VARIABLE_ORIGIN, raw.get(this, this.player().location))
+                        this.setVariable(ActionCanvas.VARIABLE_ORIGIN, raw.get(this, this.unsafePlayer()?.location ?: ActionLocation.def))
                     }
                 }
                 "by", "with" -> {
