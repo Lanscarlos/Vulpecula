@@ -37,7 +37,7 @@ class LocationTabooProperty : VulScriptProperty<Location>("location-taboolib") {
             "yaw" -> instance.yaw
             "z" -> instance.z
             "length" -> instance.length()
-            "lengthSquared", "length-squared", "squared", "sq" -> instance.lengthSquared()
+            "lengthSquared", "length-squared", "length-sq", "squared", "sq" -> instance.lengthSquared()
             "toVector", "vector" -> instance.toVector()
             "toString", "string" -> instance.toString()
             "zero" -> instance.zero()

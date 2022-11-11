@@ -5,6 +5,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.util.Vector
 import taboolib.common.OpenResult
+import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
 import top.lanscarlos.vulpecula.utils.toDouble
@@ -26,6 +27,7 @@ class LocationBukkitProperty : VulScriptProperty<Location>("location-bukkit") {
     override fun read(instance: Location, key: String): OpenResult {
         val property: Any? = when (key) {
             "clone" -> instance.clone()
+            "taboo" -> instance.toProxyLocation()
             "block" -> instance.block
             "blockX", "block-x" -> instance.blockX
             "blockY", "block-y" -> instance.blockY
