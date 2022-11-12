@@ -7,6 +7,8 @@ import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
+import top.lanscarlos.vulpecula.kether.live.IntLiveData
+import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -22,7 +24,7 @@ class ActionCanvas : ScriptAction<Any?>() {
 
     var unique: Any? = null
     var force: Boolean = false
-    var period: Int = 20
+    var period: LiveData<Int> = IntLiveData(20)
     var condition: ParsedAction<*>? = null
     val actions = mutableListOf<ParsedAction<*>>()
     var preHandle = mutableListOf<ParsedAction<*>>()
@@ -57,7 +59,7 @@ class ActionCanvas : ScriptAction<Any?>() {
         val postHandle = ParsedAction(ActionBlock(this.postHandle))
 
         condition?.let {
-            val quest = CanvasQuest(uniqueId, period, it, body, preHandle, postHandle)
+            val quest = CanvasQuest(uniqueId, period.get(frame, 20), it, body, preHandle, postHandle)
             // 提交绘画任务
             CanvasScriptContext.submit(quest, frame.deepVars(), force)
         } ?: let {
@@ -111,7 +113,7 @@ class ActionCanvas : ScriptAction<Any?>() {
                         }
                     }
                     "period" -> {
-                        canvas.period = reader.nextInt()
+                        canvas.period = reader.readInt()
                     }
                     "force" -> {
                         canvas.force = reader.nextToken().toBoolean(false)
