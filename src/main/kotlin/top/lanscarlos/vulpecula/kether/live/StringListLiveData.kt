@@ -24,7 +24,10 @@ class StringListLiveData(
 
         return when (it) {
             is String -> listOf(it)
-            is List<*> -> {
+            is Array<*> -> {
+                it.mapNotNull { it?.toString() }
+            }
+            is Collection<*> -> {
                 it.mapNotNull { it?.toString() }
             }
             else -> def
