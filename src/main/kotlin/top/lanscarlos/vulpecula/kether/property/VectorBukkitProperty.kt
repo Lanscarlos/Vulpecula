@@ -13,9 +13,20 @@ import top.lanscarlos.vulpecula.utils.toDouble
  * @author Lanscarlos
  * @since 2022-11-11 23:57
  */
+
+/**
+ * Location 泛型属性
+ * */
+@VulKetherProperty(
+    id = "vector-bukkit-generic",
+    bind = Vector::class,
+    generic = true
+)
+class VectorBukkitGenericProperty : GenericProperty<Vector>("vector-bukkit-generic")
+
 @VulKetherProperty(
     id = "vector-bukkit",
-    bind = Vector::class,
+    bind = Vector::class
 )
 class VectorBukkitProperty : VulScriptProperty<Vector>("vector-bukkit") {
 

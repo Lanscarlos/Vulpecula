@@ -16,11 +16,22 @@ import top.lanscarlos.vulpecula.utils.toFloat
  * @author Lanscarlos
  * @since 2022-11-11 19:58
  */
+
+/**
+ * Location 泛型属性
+ * */
 @VulKetherProperty(
-    id = "location-taboolib",
+    id = "location-taboo-generic",
     bind = Location::class,
+    generic = true
 )
-class LocationTabooProperty : VulScriptProperty<Location>("location-taboolib") {
+class LocationTabooGenericProperty : GenericProperty<Location>("location-taboo-generic")
+
+@VulKetherProperty(
+    id = "location-taboo",
+    bind = Location::class
+)
+class LocationTabooProperty : VulScriptProperty<Location>("location-taboo") {
 
     override fun read(instance: Location, key: String): OpenResult {
         val property: Any? = when (key) {

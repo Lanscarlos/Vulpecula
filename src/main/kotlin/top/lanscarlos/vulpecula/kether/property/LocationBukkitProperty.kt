@@ -18,9 +18,21 @@ import top.lanscarlos.vulpecula.utils.toFloat
  * @author Lanscarlos
  * @since 2022-10-20 11:44
  */
+
+
+/**
+ * Location 泛型属性
+ * */
+@VulKetherProperty(
+    id = "location-bukkit-generic",
+    bind = Location::class,
+    generic = true
+)
+class LocationBukkitGenericProperty : GenericProperty<Location>("location-bukkit-generic")
+
 @VulKetherProperty(
     id = "location-bukkit",
-    bind = Location::class,
+    bind = Location::class
 )
 class LocationBukkitProperty : VulScriptProperty<Location>("location-bukkit") {
 

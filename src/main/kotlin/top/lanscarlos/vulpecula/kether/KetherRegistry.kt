@@ -31,9 +31,9 @@ class KetherRegistry : ClassVisitor(1) {
 
     // 加载 Vulpecula 脚本属性
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
-        if (!clazz.isAnnotationPresent(VulKetherProperty::class.java)) return
-        if (!VulScriptProperty::class.java.isAssignableFrom(clazz)) return
+        if (!clazz.isAnnotationPresent(VulKetherProperty::class.java) || !VulScriptProperty::class.java.isAssignableFrom(clazz)) return
 
+        // 加载属性对象
         val property = let {
             if (supplier?.get() != null) {
                 supplier.get()
@@ -44,10 +44,13 @@ class KetherRegistry : ClassVisitor(1) {
             }
         } as? VulScriptProperty<*> ?: return
 
+        // 加载注解
         val annotation = clazz.getAnnotation(VulKetherProperty::class.java)
 
+        // 是否禁用属性
         if (config.getBoolean("property.${annotation.id}.disable", false)) return
 
+        // 是否分享泛型属性
         if (annotation.generic && annotation.shared) {
             if (config.getBoolean("action.${annotation.id}.shared", true)) {
                 var name = annotation.bind.java.name
@@ -59,6 +62,7 @@ class KetherRegistry : ClassVisitor(1) {
         }
 
         if (annotation.generic) {
+            // 仅分享泛型属性
             Kether.registeredScriptProperty.computeIfAbsent(annotation.bind.java) { HashMap() }[property.id] = property
         } else {
             registerScriptProperty(annotation.bind.java, property)
@@ -67,34 +71,40 @@ class KetherRegistry : ClassVisitor(1) {
 
     // 加载 Vulpecula 语句
     override fun visit(method: ClassMethod, clazz: Class<*>, instance: Supplier<*>?) {
-        if (method.isAnnotationPresent(VulKetherParser::class.java) && method.returnType == ScriptActionParser::class.java) {
-            val annotation = method.getAnnotation(VulKetherParser::class.java)
-            val id = annotation.property<String>("id") ?: return
+        if (!method.isAnnotationPresent(VulKetherParser::class.java) || method.returnType != ScriptActionParser::class.java) return
 
-            if (config.getBoolean("action.$id.disable", false)) return
+        // 加载注解
+        val annotation = method.getAnnotation(VulKetherParser::class.java)
 
-            val name = annotation.property<Any>("name")?.asList()?.toTypedArray() ?: arrayOf()
-            val namespace = annotation.property("namespace", "vulpecula")
-            val override = annotation.property<Any>("override")?.asList()?.toTypedArray() ?: arrayOf()
-            val injectDefaultNamespace = config.getBoolean("action.$id.inject-default-namespace", true)
-            val overrideDefaultAction = config.getBoolean("action.$id.override-default-action", false)
+        val id = annotation.property<String>("id") ?: return
 
-            val shared = if (annotation.property("shared", true)) {
-                config.getBoolean("action.$id.shared", true)
-            } else {
-                false
-            }
+        // 是否禁用语句
+        if (config.getBoolean("action.$id.disable", false)) return
 
-            val parser = (if (instance == null) method.invokeStatic() else method.invoke(instance.get())) as ScriptActionParser<*>
-            parserRegistry[id] = ParserMetadata(id, parser, name, namespace, shared, override, injectDefaultNamespace, overrideDefaultAction)
+        // 加载注解属性
+        val name = annotation.property<Any>("name")?.asList()?.toTypedArray() ?: arrayOf()
+        val namespace = annotation.property("namespace", "vulpecula")
+        val override = annotation.property<Any>("override")?.asList()?.toTypedArray() ?: arrayOf()
+        val injectDefaultNamespace = config.getBoolean("action.$id.inject-default-namespace", true)
+        val overrideDefaultAction = config.getBoolean("action.$id.override-default-action", false)
 
-            // 注册语句
-            name.forEach {
-                Kether.scriptRegistry.registerAction("vul", it, parser)
-                if (namespace != "kether") {
-                    // 防止注入原生命名空间
-                    Kether.scriptRegistry.registerAction(namespace, it, parser)
-                }
+        // 是否分享语句
+        val shared = if (annotation.property("shared", true)) {
+            config.getBoolean("action.$id.shared", true)
+        } else {
+            false
+        }
+
+        // 获取解析器
+        val parser = (if (instance == null) method.invokeStatic() else method.invoke(instance.get())) as ScriptActionParser<*>
+        parserRegistry[id] = ParserMetadata(id, parser, name, namespace, shared, override, injectDefaultNamespace, overrideDefaultAction)
+
+        // 注册语句
+        name.forEach {
+            Kether.scriptRegistry.registerAction("vul", it, parser)
+            if (namespace != "kether") {
+                // 防止注入原生命名空间
+                Kether.scriptRegistry.registerAction(namespace, it, parser)
             }
         }
     }
@@ -126,11 +136,13 @@ class KetherRegistry : ClassVisitor(1) {
 
         fun registerScriptProperty(key: Class<*>, property: ScriptProperty<*>) {
             propertyRegistry[key] = property
+            // 提前解析为列表方便后续过滤
             propertyCache = propertyRegistry.map { it.key to it.value }
         }
 
         fun unregisterScriptProperty(key: Class<*>) {
             propertyRegistry.remove(key)
+            // 提前解析为列表方便后续过滤
             propertyCache = propertyRegistry.map { it.key to it.value }
         }
 

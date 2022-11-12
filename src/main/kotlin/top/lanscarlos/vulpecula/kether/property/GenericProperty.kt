@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.kether.property
 
-import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.event.Event
 import taboolib.common.OpenResult
@@ -23,20 +22,9 @@ import top.lanscarlos.vulpecula.kether.VulScriptProperty
 @VulKetherProperty(
     id = "entity-generic",
     bind = Entity::class,
-    generic = true,
+    generic = true
 )
 class EntityGenericProperty : GenericProperty<Entity>("entity-generic")
-
-
-/**
- * Location 泛型属性
- * */
-@VulKetherProperty(
-    id = "location-generic",
-    bind = Location::class,
-    generic = true,
-)
-class LocationGenericProperty : GenericProperty<Entity>("location-generic")
 
 /**
  * Event 泛型属性
@@ -44,7 +32,7 @@ class LocationGenericProperty : GenericProperty<Entity>("location-generic")
 @VulKetherProperty(
     id = "event-generic",
     bind = Event::class,
-    generic = true,
+    generic = true
 )
 class EventGenericProperty : GenericProperty<Event>("event-generic")
 

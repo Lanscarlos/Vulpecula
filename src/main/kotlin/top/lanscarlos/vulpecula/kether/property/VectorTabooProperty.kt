@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.property
 
 import taboolib.common.OpenResult
+import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
@@ -13,11 +14,22 @@ import top.lanscarlos.vulpecula.utils.toDouble
  * @author Lanscarlos
  * @since 2022-11-11 23:49
  */
+
+/**
+ * Vector 泛型属性
+ * */
 @VulKetherProperty(
-    id = "vector-taboolib",
+    id = "vector-taboo-generic",
     bind = Vector::class,
+    generic = true
 )
-class VectorTabooProperty : VulScriptProperty<Vector>("vector-taboolib") {
+class VectorTabooGenericProperty : GenericProperty<Vector>("vector-taboo-generic")
+
+@VulKetherProperty(
+    id = "vector-taboo",
+    bind = Vector::class
+)
+class VectorTabooProperty : VulScriptProperty<Vector>("vector-taboo") {
 
     override fun read(instance: Vector, key: String): OpenResult {
         val property: Any = when (key) {

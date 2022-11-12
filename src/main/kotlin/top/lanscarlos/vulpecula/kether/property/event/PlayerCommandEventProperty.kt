@@ -18,8 +18,7 @@ import top.lanscarlos.vulpecula.kether.VulScriptProperty
     id = "player-command-event",
     bind = PlayerCommandPreprocessEvent::class,
 )
-class PlayerCommandEventProperty
-    : VulScriptProperty<PlayerCommandPreprocessEvent>("player-command-event") {
+class PlayerCommandEventProperty : VulScriptProperty<PlayerCommandPreprocessEvent>("player-command-event") {
 
     override fun read(instance: PlayerCommandPreprocessEvent, key: String): OpenResult {
         val property: Any = when (key) {
