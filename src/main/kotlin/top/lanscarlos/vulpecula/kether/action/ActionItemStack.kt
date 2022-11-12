@@ -11,11 +11,10 @@ import taboolib.library.kether.QuestReader
 import taboolib.library.reflex.Reflex.Companion.invokeMethod
 import taboolib.library.xseries.XMaterial
 import taboolib.module.chat.colored
-import taboolib.module.kether.ScriptAction
-import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.expects
-import taboolib.module.kether.scriptParser
+import taboolib.module.kether.*
 import taboolib.module.nms.getI18nName
+import taboolib.module.nms.getItemTag
+import taboolib.module.nms.setItemTag
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.modifyLore
 import top.lanscarlos.vulpecula.kether.VulKetherParser
@@ -34,7 +33,7 @@ import java.util.concurrent.CompletableFuture
 class ActionItemStack : ScriptAction<Any?>() {
 
     interface Handler {
-        fun handle(frame: ScriptFrame, previous: ItemStack?): Any
+        fun handle(frame: ScriptFrame, previous: ItemStack?): Any?
     }
 
     interface TransferHandler : Handler {
@@ -80,6 +79,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                     "lore" -> lore(isRoot, reader)
                     "enchant" -> enchant(isRoot, reader)
                     "flag" -> flag(isRoot, reader)
+                    "nbt" -> nbt(isRoot, reader)
                     else -> error("Unknown argument \"$it\" at item action.")
                 }
                 if (action.handlers.lastOrNull() !is TransferHandler) {
@@ -362,9 +362,32 @@ class ActionItemStack : ScriptAction<Any?>() {
             }
         }
 
-        private fun handle(itemStack: LiveData<ItemStack>? = null, func: ScriptFrame.(previous: ItemStack) -> Any): Handler {
+        fun nbt(isRoot: Boolean, reader: QuestReader): Handler {
+            val itemStack = if (isRoot) reader.readItemStack() else null
+            val path = StringLiveData(reader.nextBlock())
+            return if (reader.hasNextToken("to")) {
+                // 设置
+                val value = reader.nextBlock()
+                transfer(itemStack) { item ->
+                    val tag = item.getItemTag()
+                    tag.putDeep(path.getOrNull(this) ?: error("No path selected."), this.run(value).join())
+                    val newItem = item.setItemTag(tag)
+
+                    item.also { it.itemMeta = newItem.itemMeta }
+                }
+            } else {
+                handle(itemStack) { item ->
+                    val tag = item.getItemTag()
+                    path.getOrNull(this)?.let {
+                        tag.getDeep(it)
+                    }
+                }
+            }
+        }
+
+        private fun handle(itemStack: LiveData<ItemStack>? = null, func: ScriptFrame.(previous: ItemStack) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any {
+                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any? {
                     val item = previous ?: itemStack?.getOrNull(frame) ?: error("No item select.")
                     return func(frame, item)
                 }
