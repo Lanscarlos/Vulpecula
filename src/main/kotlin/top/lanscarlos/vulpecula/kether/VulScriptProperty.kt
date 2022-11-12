@@ -46,11 +46,16 @@ abstract class VulScriptProperty<T : Any>(
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> readProperty(instance, path.first())
             path.size == 2 -> {
-                val cache = readProperty(instance, path.first())
+                val cache = readProperty(instance, path.first()).let {
+                    if (it.isSuccessful) it.value else null
+                } ?: return OpenResult.failed()
                 readGenericProperty(cache, path.last())
             }
             else -> {
-                var cache: Any = readProperty(instance, path.first())
+                var cache: Any = readProperty(instance, path.first()).let {
+                    if (it.isSuccessful) it.value else null
+                } ?: return OpenResult.failed()
+
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
                     cache = readGenericProperty(cache, path[i]).let {
@@ -74,7 +79,10 @@ abstract class VulScriptProperty<T : Any>(
                 writeGenericProperty(cache, path.last(), value)
             }
             else -> {
-                var cache: Any = readProperty(instance, path.first())
+                var cache: Any = readProperty(instance, path.first()).let {
+                    if (it.isSuccessful) it.value else null
+                } ?: return OpenResult.failed()
+
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
                     cache = readGenericProperty(cache, path[i]).let {
