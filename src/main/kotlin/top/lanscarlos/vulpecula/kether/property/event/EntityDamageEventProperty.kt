@@ -27,7 +27,7 @@ class EntityDamageEventProperty : VulScriptProperty<EntityDamageEvent>("entity-d
         val property: Any? = when (key) {
             "cause*" -> instance.cause
             "cause" -> instance.cause.name
-            "damage" -> instance.damage
+            "damage", "dmg" -> instance.damage
             "damager*" -> {
                 when (instance) {
                     is EntityDamageByBlockEvent -> instance.damager
