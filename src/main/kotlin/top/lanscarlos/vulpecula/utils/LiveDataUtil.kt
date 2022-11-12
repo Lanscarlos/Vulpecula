@@ -26,6 +26,14 @@ fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): T {
 }
 
 /**
+ * 根据传入的默认值的类型自动匹配 LiveData
+ * */
+fun <T> LiveData<*>?.getValueOrNull(frame: ScriptFrame): T? {
+    if (this == null) return null
+    return (this as? LiveData<T>)?.getOrNull(frame)
+}
+
+/**
  * 以兼容模式读取 Boolean
  * */
 fun QuestReader.readBoolean(): LiveData<Boolean> = BooleanLiveData.read(reader = this)
