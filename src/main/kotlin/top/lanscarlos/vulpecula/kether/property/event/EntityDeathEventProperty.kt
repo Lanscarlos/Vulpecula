@@ -16,11 +16,11 @@ import top.lanscarlos.vulpecula.utils.toInt
 
 @VulKetherProperty(
     id = "entity-death-event",
-    bind = EntityDeathEvent::class,
+    bind = EntityDeathEvent::class
 )
 class EntityDeathEventProperty : VulScriptProperty<EntityDeathEvent>("entity-death-event") {
 
-    override fun read(instance: EntityDeathEvent, key: String): OpenResult {
+    override fun readProperty(instance: EntityDeathEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "droppedExp", "dropped-exp", "exp" -> instance.droppedExp
             "drops" -> instance.drops
@@ -30,7 +30,7 @@ class EntityDeathEventProperty : VulScriptProperty<EntityDeathEvent>("entity-dea
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: EntityDeathEvent, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: EntityDeathEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "droppedExp", "dropped-exp", "exp" -> {
                 instance.droppedExp = value?.toInt() ?: return OpenResult.successful()

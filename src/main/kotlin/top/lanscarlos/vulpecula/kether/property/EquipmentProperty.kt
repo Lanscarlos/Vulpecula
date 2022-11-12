@@ -1,15 +1,15 @@
-package top.lanscarlos.vulpecula.kether.property.entity
+package top.lanscarlos.vulpecula.kether.property
 
 import org.bukkit.inventory.EntityEquipment
 import org.bukkit.inventory.ItemStack
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.property.GenericProperty
+import top.lanscarlos.vulpecula.kether.VulScriptProperty
 import top.lanscarlos.vulpecula.utils.toFloat
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.entity
+ * top.lanscarlos.vulpecula.kether.property
  *
  * @author Lanscarlos
  * @since 2022-11-12 15:15
@@ -17,12 +17,11 @@ import top.lanscarlos.vulpecula.utils.toFloat
 
 @VulKetherProperty(
     id = "equipment",
-    bind = EntityEquipment::class,
-    generic = true
+    bind = EntityEquipment::class
 )
-class EquipmentProperty : GenericProperty<EntityEquipment>("equipment") {
+class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
 
-    override fun read(instance: EntityEquipment, key: String): OpenResult {
+    override fun readProperty(instance: EntityEquipment, key: String): OpenResult {
         val property: Any? = when (key) {
             "armorContents", "armors" -> instance.armorContents
 
@@ -62,7 +61,7 @@ class EquipmentProperty : GenericProperty<EntityEquipment>("equipment") {
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: EntityEquipment, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: EntityEquipment, key: String, value: Any?): OpenResult {
         when (key) {
             "armorContents", "armors" -> {
                 instance.armorContents = value as? Array<out ItemStack> ?: return OpenResult.failed()

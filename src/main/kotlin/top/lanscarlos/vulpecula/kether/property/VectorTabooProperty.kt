@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether.property
 
 import taboolib.common.OpenResult
-import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
@@ -15,23 +14,13 @@ import top.lanscarlos.vulpecula.utils.toDouble
  * @since 2022-11-11 23:49
  */
 
-/**
- * Vector 泛型属性
- * */
-@VulKetherProperty(
-    id = "vector-taboo-generic",
-    bind = Vector::class,
-    generic = true
-)
-class VectorTabooGenericProperty : GenericProperty<Vector>("vector-taboo-generic")
-
 @VulKetherProperty(
     id = "vector-taboo",
     bind = Vector::class
 )
 class VectorTabooProperty : VulScriptProperty<Vector>("vector-taboo") {
 
-    override fun read(instance: Vector, key: String): OpenResult {
+    override fun readProperty(instance: Vector, key: String): OpenResult {
         val property: Any = when (key) {
             "clone" -> instance.clone()
             "bukkit" -> org.bukkit.util.Vector(instance.x, instance.y, instance.z)
@@ -51,7 +40,7 @@ class VectorTabooProperty : VulScriptProperty<Vector>("vector-taboo") {
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: Vector, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: Vector, key: String, value: Any?): OpenResult {
         when (key) {
             "x" -> {
                 instance.x = value?.toDouble() ?: return OpenResult.successful()

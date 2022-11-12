@@ -19,11 +19,11 @@ import top.lanscarlos.vulpecula.utils.toDouble
 
 @VulKetherProperty(
     id = "entity-damage-event",
-    bind = EntityDamageEvent::class,
+    bind = EntityDamageEvent::class
 )
 class EntityDamageEventProperty : VulScriptProperty<EntityDamageEvent>("entity-damage-event") {
 
-    override fun read(instance: EntityDamageEvent, key: String): OpenResult {
+    override fun readProperty(instance: EntityDamageEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "cause*" -> instance.cause
             "cause" -> instance.cause.name
@@ -53,7 +53,7 @@ class EntityDamageEventProperty : VulScriptProperty<EntityDamageEvent>("entity-d
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: EntityDamageEvent, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: EntityDamageEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "damage" -> {
                 instance.damage = value?.toDouble() ?: return OpenResult.successful()

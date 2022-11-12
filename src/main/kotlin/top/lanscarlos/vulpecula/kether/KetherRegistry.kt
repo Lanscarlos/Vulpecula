@@ -120,21 +120,21 @@ class KetherRegistry : ClassVisitor(1) {
         }
 
         private val parserRegistry = HashMap<String, ParserMetadata>()
-        private val propertyRegistry = HashMap<Class<*>, ScriptProperty<*>>()
-        private var propertyCache: Collection<Pair<Class<*>, ScriptProperty<*>>> = emptyList()
+        private val propertyRegistry = HashMap<Class<*>, VulScriptProperty<*>>()
+        private var propertyCache: Collection<Pair<Class<*>, VulScriptProperty<*>>> = emptyList()
 
         @Suppress("UNCHECKED_CAST")
-        fun <T> getScriptProperties(instance: T): Collection<ScriptProperty<in T>> {
+        fun <T : Any> getScriptProperties(instance: T): Collection<VulScriptProperty<in T>> {
             return propertyCache.filter {
                 it.first.isInstance(instance)
             }.sortedWith { c1, c2 ->
                 if (c1.first.isAssignableFrom(c2.first)) 1 else -1
             }.mapNotNull {
-                it.second as? ScriptProperty<in T>
+                it.second as? VulScriptProperty<in T>
             }
         }
 
-        fun registerScriptProperty(key: Class<*>, property: ScriptProperty<*>) {
+        fun registerScriptProperty(key: Class<*>, property: VulScriptProperty<*>) {
             propertyRegistry[key] = property
             // 提前解析为列表方便后续过滤
             propertyCache = propertyRegistry.map { it.key to it.value }

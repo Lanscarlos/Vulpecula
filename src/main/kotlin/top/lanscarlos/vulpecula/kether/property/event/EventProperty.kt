@@ -19,11 +19,11 @@ import top.lanscarlos.vulpecula.utils.toBoolean
 
 @VulKetherProperty(
     id = "event",
-    bind = Event::class,
+    bind = Event::class
 )
 class EventProperty : VulScriptProperty<Event>("event") {
 
-    override fun read(instance: Event, key: String): OpenResult {
+    override fun readProperty(instance: Event, key: String): OpenResult {
         val property: Any = when (key) {
             "entity" -> (instance as? EntityEvent)?.entity ?: OpenResult.failed()
             "player" -> (instance as? PlayerEvent)?.player ?: OpenResult.failed()
@@ -35,7 +35,7 @@ class EventProperty : VulScriptProperty<Event>("event") {
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: Event, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: Event, key: String, value: Any?): OpenResult {
         when (key) {
             "isCancelled", "cancelled", "cancel" -> {
                 val cancellable = instance as? Cancellable ?: return OpenResult.failed()

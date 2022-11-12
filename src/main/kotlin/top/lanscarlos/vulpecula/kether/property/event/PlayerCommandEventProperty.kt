@@ -16,11 +16,11 @@ import top.lanscarlos.vulpecula.kether.VulScriptProperty
 
 @VulKetherProperty(
     id = "player-command-event",
-    bind = PlayerCommandPreprocessEvent::class,
+    bind = PlayerCommandPreprocessEvent::class
 )
 class PlayerCommandEventProperty : VulScriptProperty<PlayerCommandPreprocessEvent>("player-command-event") {
 
-    override fun read(instance: PlayerCommandPreprocessEvent, key: String): OpenResult {
+    override fun readProperty(instance: PlayerCommandPreprocessEvent, key: String): OpenResult {
         val property: Any = when (key) {
             "message", "msg" -> instance.message
             "player" -> instance.player
@@ -29,7 +29,7 @@ class PlayerCommandEventProperty : VulScriptProperty<PlayerCommandPreprocessEven
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: PlayerCommandPreprocessEvent, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: PlayerCommandPreprocessEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "message", "msg" -> {
                 instance.message = value?.toString() ?: return OpenResult.successful()

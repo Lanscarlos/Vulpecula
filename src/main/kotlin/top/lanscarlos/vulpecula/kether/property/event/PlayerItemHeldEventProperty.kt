@@ -16,11 +16,11 @@ import top.lanscarlos.vulpecula.kether.VulScriptProperty
 
 @VulKetherProperty(
     id = "player-item-held-event",
-    bind = PlayerItemHeldEvent::class,
+    bind = PlayerItemHeldEvent::class
 )
 class PlayerItemHeldEventProperty : VulScriptProperty<PlayerItemHeldEvent>("player-item-held-event") {
 
-    override fun read(instance: PlayerItemHeldEvent, key: String): OpenResult {
+    override fun readProperty(instance: PlayerItemHeldEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "newSlot", "new-slot" -> instance.newSlot
             "previousSlot", "previous-slot", "old-slot" -> instance.previousSlot
@@ -32,7 +32,7 @@ class PlayerItemHeldEventProperty : VulScriptProperty<PlayerItemHeldEvent>("play
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: PlayerItemHeldEvent, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: PlayerItemHeldEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "new-item" -> {
                 instance.player.inventory.setItem(instance.newSlot, value as? ItemStack)

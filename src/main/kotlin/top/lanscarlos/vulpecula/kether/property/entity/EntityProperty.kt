@@ -4,7 +4,6 @@ import org.bukkit.entity.Entity
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import taboolib.common.OpenResult
-import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
 import top.lanscarlos.vulpecula.utils.toBoolean
@@ -21,11 +20,11 @@ import top.lanscarlos.vulpecula.utils.toInt
 
 @VulKetherProperty(
     id = "entity",
-    bind = Entity::class,
+    bind = Entity::class
 )
 class EntityProperty : VulScriptProperty<Entity>("entity") {
 
-    override fun read(instance: Entity, key: String): OpenResult {
+    override fun readProperty(instance: Entity, key: String): OpenResult {
         val property: Any? = when (key) {
             "boundingBox", "bounding-box" -> instance.boundingBox
             "entityId", "entity-id", "id" -> instance.entityId
@@ -82,8 +81,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: Entity, key: String, value: Any?): OpenResult {
-        info("检测 -> $key -> $value")
+    override fun writeProperty(instance: Entity, key: String, value: Any?): OpenResult {
         when (key) {
             "isCustomNameVisible", "custom-name-visible" -> {
                 instance.isCustomNameVisible = value?.toBoolean() ?: return OpenResult.successful()
@@ -98,7 +96,6 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
                 instance.freezeTicks = value?.toInt() ?: return OpenResult.successful()
             }
             "isGlowing", "glowing" -> {
-                info("检测 x1 -> $key -> $value")
                 instance.isGlowing = value?.toBoolean() ?: return OpenResult.successful()
             }
             "gravity" -> {

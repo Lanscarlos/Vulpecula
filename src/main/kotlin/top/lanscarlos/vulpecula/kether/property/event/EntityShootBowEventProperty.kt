@@ -17,11 +17,11 @@ import top.lanscarlos.vulpecula.utils.toBoolean
 
 @VulKetherProperty(
     id = "entity-shoot-event",
-    bind = EntityShootBowEvent::class,
+    bind = EntityShootBowEvent::class
 )
 class EntityShootBowEventProperty : VulScriptProperty<EntityShootBowEvent>("entity-shoot-event") {
 
-    override fun read(instance: EntityShootBowEvent, key: String): OpenResult {
+    override fun readProperty(instance: EntityShootBowEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "bow" -> instance.bow
             "consumable" -> instance.consumable
@@ -35,7 +35,7 @@ class EntityShootBowEventProperty : VulScriptProperty<EntityShootBowEvent>("enti
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: EntityShootBowEvent, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: EntityShootBowEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "consumable" -> {
                 instance.setConsumeItem(value?.toBoolean() ?: return OpenResult.successful())

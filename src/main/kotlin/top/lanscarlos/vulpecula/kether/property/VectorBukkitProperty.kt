@@ -14,23 +14,13 @@ import top.lanscarlos.vulpecula.utils.toDouble
  * @since 2022-11-11 23:57
  */
 
-/**
- * Location 泛型属性
- * */
-@VulKetherProperty(
-    id = "vector-bukkit-generic",
-    bind = Vector::class,
-    generic = true
-)
-class VectorBukkitGenericProperty : GenericProperty<Vector>("vector-bukkit-generic")
-
 @VulKetherProperty(
     id = "vector-bukkit",
     bind = Vector::class
 )
 class VectorBukkitProperty : VulScriptProperty<Vector>("vector-bukkit") {
 
-    override fun read(instance: Vector, key: String): OpenResult {
+    override fun readProperty(instance: Vector, key: String): OpenResult {
         val property: Any = when (key) {
             "clone" -> instance.clone()
             "taboo" -> taboolib.common.util.Vector(instance.x, instance.y, instance.z)
@@ -50,7 +40,7 @@ class VectorBukkitProperty : VulScriptProperty<Vector>("vector-bukkit") {
         return OpenResult.successful(property)
     }
 
-    override fun write(instance: Vector, key: String, value: Any?): OpenResult {
+    override fun writeProperty(instance: Vector, key: String, value: Any?): OpenResult {
         when (key) {
             "x" -> {
                 instance.x = value?.toDouble() ?: return OpenResult.successful()
