@@ -190,9 +190,12 @@ class ActionItemStack : ScriptAction<Any?>() {
                         val lore = itemMeta?.lore ?: mutableListOf()
 
                         val newLore = raw.get(this, listOf())
-                        val cursor = index?.get(this, lore.size)
-                        for (i in newLore.lastIndex downTo 0) {
-                            lore.addSafely(cursor ?: lore.size, newLore[i], newLore[i])
+                        val cursor = index.getValue(this, lore.size)
+                        if (cursor >= lore.size) {
+                            // 下标位于末尾
+                            lore.addAll(newLore)
+                        } else {
+                            lore.addAll(cursor, newLore)
                         }
 
                         itemMeta?.lore = lore
@@ -212,7 +215,12 @@ class ActionItemStack : ScriptAction<Any?>() {
 
                         val cursor = index.get(this, lore.size)
                         val line = raw.get(this, "").ifEmpty { null } ?: return@transfer item
-                        lore.setSafely(cursor, line, line)
+                        if (cursor >= lore.size) {
+                            // 下标位于末尾
+                            lore.add(line)
+                        } else {
+                            lore[cursor] = line
+                        }
 
                         itemMeta?.lore = lore
                         item.itemMeta = itemMeta
@@ -231,6 +239,18 @@ class ActionItemStack : ScriptAction<Any?>() {
                         lore.removeAt(cursor)
 
                         itemMeta?.lore = lore
+                        item.itemMeta = itemMeta
+                        item
+                    }
+                }
+                "clear" -> {
+                    transfer { previous ->
+                        val item = previous ?: itemStack?.get(this, def) ?: error("No item selected.")
+                        val itemMeta = item.itemMeta
+
+                        if (itemMeta?.lore == null) return@transfer item
+                        itemMeta.lore = null
+
                         item.itemMeta = itemMeta
                         item
                     }
