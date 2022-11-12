@@ -19,20 +19,23 @@ class IntLiveData(
 ) : LiveData<Int> {
 
     override fun get(frame: ScriptFrame, def: Int): Int {
+        return getOrNull(frame) ?: def
+    }
 
+    override fun getOrNull(frame: ScriptFrame): Int? {
         val it = if (value is ParsedAction<*>) {
             frame.run(value).join()
         } else value
 
         return when (it) {
-            "~" -> def
+            "~" -> null
             is Short -> it.toInt()
             is Int -> it
             is Long -> it.toInt()
             is Float -> it.toInt()
             is Double -> it.toInt()
-//            is String -> it.toDouble(def)
-            else -> it.toInt(def)
+            is String -> it.toIntOrNull()
+            else -> it?.toInt()
         }
     }
 

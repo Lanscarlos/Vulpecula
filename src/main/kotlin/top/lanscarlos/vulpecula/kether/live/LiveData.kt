@@ -12,5 +12,8 @@ import taboolib.module.kether.ScriptFrame
  * @since 2022-11-10 15:03
  */
 interface LiveData<T> {
+
     fun get(frame: ScriptFrame, def: T): T
+
+    fun getOrNull(frame: ScriptFrame): T?
 }

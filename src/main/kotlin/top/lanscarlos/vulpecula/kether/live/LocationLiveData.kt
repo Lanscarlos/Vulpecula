@@ -53,6 +53,38 @@ class LocationLiveData(
         }
     }
 
+    override fun getOrNull(frame: ScriptFrame): Location? {
+
+        val it = if (value is ParsedAction<*>) {
+            frame.run(value).join()
+        } else value
+
+        return when (it) {
+            is Location -> it
+            is org.bukkit.Location -> it.toProxyLocation()
+            is Entity -> it.location.toProxyLocation()
+            is Vector -> Location(null, it.x, it.y, it.z)
+            is org.bukkit.util.Vector -> Location(null, it.x, it.y, it.z)
+            is Triple<*, *, *> -> {
+                val x = (it.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val y = (it.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val z = (it.third as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                Location(null, x, y, z)
+            }
+            is Pair<*, *> -> {
+                val base = it.first as? Triple<*, *, *> ?: return null
+                val meta = it.second as? Pair<*, *> ?: return null
+                val x = (base.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val y = (base.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val z = (base.third as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val yaw = (meta.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val pitch = (meta.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                Location(null, x, y, z, yaw.toFloat(), pitch.toFloat())
+            }
+            else -> null
+        }
+    }
+
     companion object {
 
         /**

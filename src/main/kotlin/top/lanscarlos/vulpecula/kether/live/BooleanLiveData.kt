@@ -19,18 +19,21 @@ class BooleanLiveData(
 ) : LiveData<Boolean> {
 
     override fun get(frame: ScriptFrame, def: Boolean): Boolean {
+        return getOrNull(frame) ?: def
+    }
+
+    override fun getOrNull(frame: ScriptFrame): Boolean? {
         val it = if (value is ParsedAction<*>) {
             frame.run(value).join()
         } else value
 
         return when (it) {
-            "~" -> def
+            "~" -> null
             is Boolean -> it
             "true", "yes" -> true
             "false", "no" -> false
             is Number -> it != 0
-//            is String -> it.toDouble(def)
-            else -> it.toBoolean(def)
+            else -> it?.toBoolean()
         }
     }
 

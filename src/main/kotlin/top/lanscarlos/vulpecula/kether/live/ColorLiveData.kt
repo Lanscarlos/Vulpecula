@@ -16,6 +16,7 @@ import java.awt.Color
 class ColorLiveData(
     val value: Any
 ) : LiveData<Color> {
+
     override fun get(frame: ScriptFrame, def: Color): Color {
         return when (value) {
             is Color -> value
@@ -34,10 +35,35 @@ class ColorLiveData(
                 Color(red, green, blue, alpha)
             }
             is StringLiveData -> {
-                val hex = value.get(frame, "FFFFFF")
+                val hex = value.getOrNull(frame) ?: return def
                 Color.decode(if (hex.startsWith("#")) hex.substring(1) else hex)
             }
             else -> def
+        }
+    }
+
+    override fun getOrNull(frame: ScriptFrame): Color? {
+        return when (value) {
+            is Color -> value
+            is Triple<*, *, *> -> {
+                val red = (value.first as? IntLiveData)?.getOrNull(frame) ?: return null
+                val green = (value.second as? IntLiveData)?.getOrNull(frame) ?: return null
+                val blue = (value.third as? IntLiveData)?.getOrNull(frame) ?: return null
+                Color(red, green, blue)
+            }
+            is Pair<*, *> -> {
+                val base = value.first as? Triple<*, *, *> ?: return null
+                val red = (base.first as? IntLiveData)?.getOrNull(frame) ?: return null
+                val green = (base.second as? IntLiveData)?.getOrNull(frame) ?: return null
+                val blue = (base.third as? IntLiveData)?.getOrNull(frame) ?: return null
+                val alpha = (value.second as? IntLiveData)?.getOrNull(frame) ?: return null
+                Color(red, green, blue, alpha)
+            }
+            is StringLiveData -> {
+                val hex = value.getOrNull(frame) ?: return null
+                Color.decode(if (hex.startsWith("#")) hex.substring(1) else hex)
+            }
+            else -> null
         }
     }
 

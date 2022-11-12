@@ -41,6 +41,26 @@ class VectorLiveData(
         }
     }
 
+    override fun getOrNull(frame: ScriptFrame): Vector? {
+        val it = if (value is ParsedAction<*>) {
+            frame.run(value).join()
+        } else value
+
+        return when (it) {
+            is Vector -> it
+            is org.bukkit.util.Vector -> Vector(it.x, it.y, it.z)
+            is Location -> it.direction
+            is org.bukkit.Location -> it.toProxyLocation().direction
+            is Triple<*, *, *> -> {
+                val x = (it.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val y = (it.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                val z = (it.third as? DoubleLiveData)?.getOrNull(frame) ?: return null
+                Vector(x, y, z)
+            }
+            else -> null
+        }
+    }
+
     companion object {
 
         /**

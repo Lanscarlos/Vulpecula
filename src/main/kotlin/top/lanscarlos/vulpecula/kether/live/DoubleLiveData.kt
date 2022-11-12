@@ -19,20 +19,24 @@ class DoubleLiveData(
 ) : LiveData<Double> {
 
     override fun get(frame: ScriptFrame, def: Double): Double {
+        return getOrNull(frame) ?: def
+    }
+
+    override fun getOrNull(frame: ScriptFrame): Double? {
 
         val it = if (value is ParsedAction<*>) {
             frame.run(value).join()
         } else value
 
         return when (it) {
-            "~" -> def
+            "~" -> null
             is Short -> it.toDouble()
             is Int -> it.toDouble()
             is Long -> it.toDouble()
             is Float -> it.toDouble()
             is Double -> it
-//            is String -> it.toDouble(def)
-            else -> it.toDouble(def)
+            is String -> it.toDoubleOrNull()
+            else -> it?.toDouble()
         }
     }
 

@@ -19,13 +19,17 @@ class StringLiveData(
 ) : LiveData<String> {
 
     override fun get(frame: ScriptFrame, def: String): String {
+        return getOrNull(frame) ?: def
+    }
+
+    override fun getOrNull(frame: ScriptFrame): String? {
         val it = if (value is ParsedAction<*>) {
             frame.run(value).join()
         } else value
 
         return when (it) {
             is String -> it
-            else -> it?.toString() ?: def
+            else -> it?.toString()
         }
     }
 
