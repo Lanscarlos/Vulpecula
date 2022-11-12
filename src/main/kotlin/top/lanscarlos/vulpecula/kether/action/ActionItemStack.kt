@@ -15,6 +15,7 @@ import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.expects
 import taboolib.module.kether.scriptParser
+import taboolib.module.nms.getI18nName
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.modifyLore
 import top.lanscarlos.vulpecula.kether.VulKetherParser
@@ -263,11 +264,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                     val ignoreLevelRestriction = !reader.hasNextToken("-restriction", "-r")
 
                     transferMeta(itemStack) { itemMeta ->
-                        val name = type.getOrNull(this) ?: return@transferMeta itemMeta
-                        val enchant = Enchantment.values().firstOrNull {
-                            name.equals(it.name, true)
-                        } ?: return@transferMeta itemMeta
-
+                        val enchant = type.runAsEnchantment(this) ?: return@transferMeta itemMeta
                         itemMeta.also {
                             it.addEnchant(enchant, level.get(this, 1), ignoreLevelRestriction)
                         }
@@ -276,12 +273,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                 "remove", "rm" -> {
                     val type = StringLiveData(reader.nextBlock())
                     transferMeta(itemStack) { itemMeta ->
-
-                        val name = type.getOrNull(this) ?: return@transferMeta itemMeta
-                        val enchant = Enchantment.values().firstOrNull {
-                            name.equals(it.name, true)
-                        } ?: return@transferMeta itemMeta
-
+                        val enchant = type.runAsEnchantment(this) ?: return@transferMeta itemMeta
                         itemMeta.also { it.removeEnchant(enchant) }
                     }
                 }
@@ -298,12 +290,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                         val itemMeta = previous.itemMeta
 
                         if (type == null) return@handle itemMeta?.hasEnchants() ?: false
-
-                        val name = type.getOrNull(this) ?: return@handle false
-                        val enchant = Enchantment.values().firstOrNull {
-                            name.equals(it.name, true)
-                        } ?: return@handle false
-
+                        val enchant = type.runAsEnchantment(this) ?: return@handle false
                         return@handle itemMeta?.hasEnchant(enchant) ?: false
                     }
                 }
@@ -313,11 +300,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                     handle(itemStack) { previous ->
                         val itemMeta = previous.itemMeta
 
-                        val name = type.getOrNull(this) ?: return@handle 0
-                        val enchant = Enchantment.values().firstOrNull {
-                            name.equals(it.name, true)
-                        } ?: return@handle 0
-
+                        val enchant = type.runAsEnchantment(this) ?: return@handle 0
                         return@handle itemMeta?.getEnchantLevel(enchant) ?: 0
                     }
                 }
@@ -406,6 +389,14 @@ class ActionItemStack : ScriptAction<Any?>() {
                     return item
                 }
             }
+        }
+
+        /**
+         * 获取 Enchantment 对象
+         * */
+        private fun LiveData<String>.runAsEnchantment(frame: ScriptFrame): Enchantment? {
+            val name = this.getOrNull(frame) ?: return null
+            return Enchantment.values().firstOrNull { name.equals(it.name, true) }
         }
     }
 }
