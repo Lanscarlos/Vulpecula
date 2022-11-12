@@ -1,7 +1,10 @@
 package top.lanscarlos.vulpecula.kether.action
 
 import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import taboolib.common.util.addSafely
 import taboolib.common.util.setSafely
 import taboolib.library.kether.QuestReader
@@ -55,8 +58,6 @@ class ActionItemStack : ScriptAction<Any?>() {
 
     companion object {
 
-        val def: ItemStack get() = ItemStack(Material.STONE)
-
         /**
          *
          * item build &type -name(n) &name -lore &lore -amount...
@@ -76,6 +77,8 @@ class ActionItemStack : ScriptAction<Any?>() {
                     "build" -> build(reader)
                     "modify", "set" -> modify(isRoot, reader)
                     "lore" -> lore(isRoot, reader)
+                    "enchant" -> enchant(isRoot, reader)
+                    "flag" -> flag(isRoot, reader)
                     else -> error("Unknown argument \"$it\" at item action.")
                 }
                 if (action.handlers.lastOrNull() !is TransferHandler) {
@@ -113,7 +116,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                         when (option.key) {
                             "amount" -> amount = option.value.getValue(this@transfer, amount)
                             "durability" -> damage = option.value.getValue(this@transfer, damage)
-                            "name" -> name = option.value.getValue(this@transfer, "").ifEmpty { name }
+                            "name" -> name = option.value.getValueOrNull<String>(this@transfer) ?: name
                             "shiny" -> {
                                 if (option.value.getValue(this@transfer, false)) shiny()
                             }
@@ -141,8 +144,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                 }
             }
 
-            return transfer { previous ->
-                val item = previous ?: itemStack?.get(this, def) ?: error("No item selected.")
+            return transfer(itemStack) { item ->
                 val itemMeta = item.itemMeta
                 for (option in options) {
                     when (option.key) {
@@ -155,7 +157,7 @@ class ActionItemStack : ScriptAction<Any?>() {
                         "amount" -> item.amount = option.value.getValue(this@transfer, item.amount)
                         "durability" -> item.durability = option.value.getValue(this@transfer, item.durability)
                         "name" -> {
-                            val name = option.value.getValue(this@transfer, "").ifEmpty { null }
+                            val name = option.value.getValueOrNull<String>(this@transfer)
                             itemMeta?.setDisplayName(name?.colored())
                         }
                         "model" -> {
@@ -169,28 +171,30 @@ class ActionItemStack : ScriptAction<Any?>() {
                         }
                     }
                 }
-                item.itemMeta = itemMeta
-                item
+                item.also { it.itemMeta = itemMeta }
             }
         }
 
         fun lore(isRoot: Boolean, reader: QuestReader): Handler {
             val itemStack = if (isRoot) reader.readItemStack() else null
 
-            return when (val it = reader.expects("insert", "add", "modify", "set", "remove", "rm", "clear")) {
+            return when (val it = reader.expects(
+                "insert", "add",
+                "modify", "set",
+                "remove", "rm",
+                "clear"
+            )) {
                 "insert", "add" -> {
                     val raw = reader.readStringList()
                     val index = if (reader.hasNextToken("to")) {
                         reader.readInt()
                     } else null
 
-                    transfer { previous ->
-                        val item = previous ?: itemStack?.get(this, def) ?: error("No item selected.")
-                        val itemMeta = item.itemMeta
-                        val lore = itemMeta?.lore ?: mutableListOf()
+                    transferMeta(itemStack) { itemMeta ->
+                        val lore = itemMeta.lore ?: mutableListOf()
 
                         val newLore = raw.get(this, listOf())
-                        val cursor = index.getValue(this, lore.size)
+                        val cursor = index?.getOrNull(this) ?: lore.size
                         if (cursor >= lore.size) {
                             // 下标位于末尾
                             lore.addAll(newLore)
@@ -198,23 +202,19 @@ class ActionItemStack : ScriptAction<Any?>() {
                             lore.addAll(cursor, newLore)
                         }
 
-                        itemMeta?.lore = lore
-                        item.itemMeta = itemMeta
-                        item
+                        itemMeta.also { it.lore = lore }
                     }
                 }
                 "modify", "set" -> {
                     val index = reader.readInt()
-                    reader.expect("to")
+                    reader.hasNextToken("to")
                     val raw = StringLiveData(reader.nextBlock())
 
-                    transfer { previous ->
-                        val item = previous ?: itemStack?.get(this, def) ?: error("No item selected.")
-                        val itemMeta = item.itemMeta
-                        val lore = itemMeta?.lore ?: mutableListOf()
+                    transferMeta(itemStack) { itemMeta ->
+                        val lore = itemMeta.lore ?: mutableListOf()
 
                         val cursor = index.get(this, lore.size)
-                        val line = raw.get(this, "").ifEmpty { null } ?: return@transfer item
+                        val line = raw.getOrNull(this) ?: return@transferMeta itemMeta
                         if (cursor >= lore.size) {
                             // 下标位于末尾
                             lore.add(line)
@@ -222,55 +222,188 @@ class ActionItemStack : ScriptAction<Any?>() {
                             lore[cursor] = line
                         }
 
-                        itemMeta?.lore = lore
-                        item.itemMeta = itemMeta
-                        item
+                        itemMeta.also { it.lore = lore }
                     }
                 }
                 "remove", "rm" -> {
                     val index = reader.readInt()
-                    transfer { previous ->
-                        val item = previous ?: itemStack?.get(this, def) ?: error("No item selected.")
-                        val itemMeta = item.itemMeta
-                        val lore = itemMeta?.lore ?: mutableListOf()
+                    transferMeta(itemStack) { itemMeta ->
+                        val lore = itemMeta.lore ?: mutableListOf()
 
                         val cursor = index.get(this, lore.size)
-                        if (cursor >= lore.size) return@transfer item
+                        if (cursor >= lore.size) return@transferMeta itemMeta
                         lore.removeAt(cursor)
 
-                        itemMeta?.lore = lore
-                        item.itemMeta = itemMeta
-                        item
+                        itemMeta.also { it.lore = lore }
                     }
                 }
                 "clear" -> {
-                    transfer { previous ->
-                        val item = previous ?: itemStack?.get(this, def) ?: error("No item selected.")
-                        val itemMeta = item.itemMeta
-
-                        if (itemMeta?.lore == null) return@transfer item
-                        itemMeta.lore = null
-
-                        item.itemMeta = itemMeta
-                        item
+                    transferMeta(itemStack) { itemMeta ->
+                        itemMeta.also { it.lore = null }
                     }
                 }
                 else -> error("Unknown argument \"$it\" at item lore action.")
             }
         }
 
-        private fun handle(func: ScriptFrame.(previous: ItemStack?) -> Any): Handler {
-            return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any {
-                    return func(frame, previous)
+        fun enchant(isRoot: Boolean, reader: QuestReader): Handler {
+            val itemStack = if (isRoot) reader.readItemStack() else null
+            return when (val it = reader.expects(
+                "insert", "add",
+                "modify", "set",
+                "remove", "rm",
+                "clear",
+                "has", "contains", "contain",
+                "level"
+            )) {
+                "insert", "add",
+                "modify", "set" -> {
+                    val type = StringLiveData(reader.nextBlock())
+                    val level = reader.readInt()
+                    val ignoreLevelRestriction = !reader.hasNextToken("-restriction", "-r")
+
+                    transferMeta(itemStack) { itemMeta ->
+                        val name = type.getOrNull(this) ?: return@transferMeta itemMeta
+                        val enchant = Enchantment.values().firstOrNull {
+                            name.equals(it.name, true)
+                        } ?: return@transferMeta itemMeta
+
+                        itemMeta.also {
+                            it.addEnchant(enchant, level.get(this, 1), ignoreLevelRestriction)
+                        }
+                    }
+                }
+                "remove", "rm" -> {
+                    val type = StringLiveData(reader.nextBlock())
+                    transferMeta(itemStack) { itemMeta ->
+
+                        val name = type.getOrNull(this) ?: return@transferMeta itemMeta
+                        val enchant = Enchantment.values().firstOrNull {
+                            name.equals(it.name, true)
+                        } ?: return@transferMeta itemMeta
+
+                        itemMeta.also { it.removeEnchant(enchant) }
+                    }
+                }
+                "clear" -> {
+                    transferMeta(itemStack) { itemMeta ->
+                        itemMeta.also {
+                            it.enchants.keys.forEach { enchant -> it.removeEnchant(enchant) }
+                        }
+                    }
+                }
+                "has", "contains", "contain" -> {
+                    val type = if (!reader.hasNextToken("any")) StringLiveData(reader.nextBlock()) else null
+                    handle(itemStack) { previous ->
+                        val itemMeta = previous.itemMeta
+
+                        if (type == null) return@handle itemMeta?.hasEnchants() ?: false
+
+                        val name = type.getOrNull(this) ?: return@handle false
+                        val enchant = Enchantment.values().firstOrNull {
+                            name.equals(it.name, true)
+                        } ?: return@handle false
+
+                        return@handle itemMeta?.hasEnchant(enchant) ?: false
+                    }
+                }
+                "level" -> {
+                    reader.hasNextToken("by")
+                    val type = StringLiveData(reader.nextBlock())
+                    handle(itemStack) { previous ->
+                        val itemMeta = previous.itemMeta
+
+                        val name = type.getOrNull(this) ?: return@handle 0
+                        val enchant = Enchantment.values().firstOrNull {
+                            name.equals(it.name, true)
+                        } ?: return@handle 0
+
+                        return@handle itemMeta?.getEnchantLevel(enchant) ?: 0
+                    }
+                }
+                else -> error("Unknown argument \"$it\" at item enchant action.")
+            }
+        }
+
+        fun flag(isRoot: Boolean, reader: QuestReader): Handler {
+            val itemStack = if (isRoot) reader.readItemStack() else null
+
+            if (reader.hasNextToken("clear")) {
+                return transferMeta(itemStack) { itemMeta ->
+                    itemMeta.also {
+                        it.itemFlags.forEach { flag -> it.removeItemFlags(flag) }
+                    }
+                }
+            } else {
+                val operation = reader.expects(
+                    "insert", "add",
+                    "modify", "set",
+                    "remove", "rm",
+                )
+
+                // 解析 Flags
+                val raw = mutableSetOf<LiveData<String>>()
+                if (reader.hasNextToken("[")) {
+                    while (!reader.hasNextToken("]")) {
+                        raw += reader.readString()
+                    }
+                } else {
+                    raw += reader.readString()
+                }
+
+                return transferMeta(itemStack) { itemMeta ->
+                    val flags = raw.mapNotNull {
+                        it.getOrNull(this)
+                    }.map {
+                        ItemFlag.valueOf(it)
+                    }
+
+                    when (operation) {
+                        "insert", "add" -> {
+                            itemMeta.addItemFlags(*flags.toTypedArray())
+                        }
+                        "modify", "set" -> {
+                            itemMeta.itemFlags.forEach {
+                                if (it !in flags) itemMeta.removeItemFlags(it)
+                            }
+                            itemMeta.addItemFlags(*flags.toTypedArray())
+                        }
+                        "remove", "rm" -> {
+                            itemMeta.itemFlags.forEach {
+                                if (it !in flags) itemMeta.removeItemFlags(it)
+                            }
+                        }
+                    }
+                    return@transferMeta itemMeta
                 }
             }
         }
 
-        private fun transfer(func: ScriptFrame.(previous: ItemStack?) -> ItemStack): Handler {
+        private fun handle(itemStack: LiveData<ItemStack>? = null, func: ScriptFrame.(previous: ItemStack) -> Any): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any {
+                    val item = previous ?: itemStack?.getOrNull(frame) ?: error("No item select.")
+                    return func(frame, item)
+                }
+            }
+        }
+
+        private fun transfer(itemStack: LiveData<ItemStack>? = null, func: ScriptFrame.(previous: ItemStack) -> ItemStack): Handler {
             return object : TransferHandler {
                 override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
-                    return func(frame, previous)
+                    val item = previous ?: itemStack?.getOrNull(frame) ?: error("No item select.")
+                    return func(frame, item)
+                }
+            }
+        }
+
+        private fun transferMeta(itemStack: LiveData<ItemStack>? = null, func: ScriptFrame.(itemMeta: ItemMeta) -> ItemMeta): Handler {
+            return object : TransferHandler {
+                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
+                    val item = previous ?: itemStack?.getOrNull(frame) ?: error("No item select.")
+                    val meta = item.itemMeta ?: error("No item meta select.")
+                    item.itemMeta = func(frame, meta)
+                    return item
                 }
             }
         }
