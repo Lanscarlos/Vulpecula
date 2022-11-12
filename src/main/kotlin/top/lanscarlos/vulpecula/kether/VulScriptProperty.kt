@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether
 
 import taboolib.common.OpenResult
+import taboolib.common.platform.function.info
 import taboolib.module.kether.ScriptProperty
 
 /**
@@ -46,21 +47,15 @@ abstract class VulScriptProperty<T : Any>(
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> readProperty(instance, path.first())
             path.size == 2 -> {
-                val cache = readProperty(instance, path.first()).let {
-                    if (it.isSuccessful) it.value else null
-                } ?: return OpenResult.failed()
+                val cache = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
                 readGenericProperty(cache, path.last())
             }
             else -> {
-                var cache: Any = readProperty(instance, path.first()).let {
-                    if (it.isSuccessful) it.value else null
-                } ?: return OpenResult.failed()
+                var cache: Any = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
 
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
-                    cache = readGenericProperty(cache, path[i]).let {
-                        if (it.isSuccessful) it.value else null
-                    } ?: return OpenResult.failed()
+                    cache = readGenericProperty(cache, path[i]).get() ?: return OpenResult.failed()
                 }
                 readGenericProperty(cache, path.last())
             }
@@ -75,19 +70,15 @@ abstract class VulScriptProperty<T : Any>(
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> writeProperty(instance, path.first(), value)
             path.size == 2 -> {
-                val cache = readProperty(instance, path.first())
+                val cache = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
                 writeGenericProperty(cache, path.last(), value)
             }
             else -> {
-                var cache: Any = readProperty(instance, path.first()).let {
-                    if (it.isSuccessful) it.value else null
-                } ?: return OpenResult.failed()
+                var cache: Any = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
 
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
-                    cache = readGenericProperty(cache, path[i]).let {
-                        if (it.isSuccessful) it.value else null
-                    } ?: return OpenResult.failed()
+                    cache = readGenericProperty(cache, path[i]).get() ?: return OpenResult.failed()
                 }
                 writeGenericProperty(cache, path.last(), value)
             }
@@ -116,5 +107,9 @@ abstract class VulScriptProperty<T : Any>(
             if (result.isSuccessful) return result
         }
         return OpenResult.failed()
+    }
+
+    fun OpenResult.get(): Any? {
+        return if (this.isSuccessful) this.value else null
     }
 }
