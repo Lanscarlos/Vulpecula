@@ -105,7 +105,8 @@ class ActionLocation : ScriptAction<Any>() {
             do {
                 val isRoot = action.handlers.isEmpty()
                 reader.mark()
-                action.handlers += when (reader.nextToken()) {
+                val it = reader.nextToken()
+                action.handlers += when (it) {
                     "build" -> build(reader)
                     "modify", "set" -> modify(isRoot, reader)
                     "add" -> add(isRoot, reader)
@@ -142,7 +143,7 @@ class ActionLocation : ScriptAction<Any>() {
                 }
                 if (action.handlers.lastOrNull() !is TransferHandler) {
                     if (reader.hasNextToken(">>")) {
-                        error("Cannot use \">> ${reader.nextPeek()}\", previous action has closed the pipeline.")
+                        error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$it\" has closed the pipeline.")
                     }
                     break
                 }
@@ -175,7 +176,7 @@ class ActionLocation : ScriptAction<Any>() {
                 val y = reader.readDouble()
                 val z = reader.readDouble()
                 val options = mutableMapOf<String, LiveData<*>>()
-                while (reader.nextPeek().startsWith("-")) {
+                while (reader.nextPeek().startsWith('-')) {
                     when (val it = reader.nextToken().substring(1)) {
                         "world" -> options["world"] = StringLiveData(reader.nextBlock())
                         "yaw" -> options["yaw"] = reader.readDouble()
@@ -199,12 +200,12 @@ class ActionLocation : ScriptAction<Any>() {
         fun modify(isRoot: Boolean, reader: QuestReader): Handler {
             val location = if (isRoot) LocationLiveData(reader.nextBlock()) else null
             val options = mutableMapOf<String, LiveData<*>>()
-            if (!reader.nextPeek().startsWith("-")) {
+            if (!reader.nextPeek().startsWith('-')) {
                 options["x"] = reader.readDouble()
                 options["y"] = reader.readDouble()
                 options["z"] = reader.readDouble()
             }
-            while (reader.nextPeek().startsWith("-")) {
+            while (reader.nextPeek().startsWith('-')) {
                 when (val it = reader.nextToken().substring(1)) {
                     "x" -> options["x"] = reader.readDouble()
                     "y" -> options["y"] = reader.readDouble()
@@ -222,13 +223,13 @@ class ActionLocation : ScriptAction<Any>() {
                 loc.let {
                     if (reproduced) it.clone() else it
                 }.also {
-                    for (entry in options) {
-                        when (entry.key) {
-                            "x" -> it.x = entry.value.getValue(this, it.x)
-                            "y" -> it.y = entry.value.getValue(this, it.y)
-                            "z" -> it.z = entry.value.getValue(this, it.z)
-                            "yaw" -> it.yaw = entry.value.getValue(this, it.yaw.toDouble()).toFloat()
-                            "pitch" -> it.pitch = entry.value.getValue(this, it.pitch.toDouble()).toFloat()
+                    for (option in options) {
+                        when (option.key) {
+                            "x" -> it.x = option.value.getValue(this, it.x)
+                            "y" -> it.y = option.value.getValue(this, it.y)
+                            "z" -> it.z = option.value.getValue(this, it.z)
+                            "yaw" -> it.yaw = option.value.getValue(this, it.yaw.toDouble()).toFloat()
+                            "pitch" -> it.pitch = option.value.getValue(this, it.pitch.toDouble()).toFloat()
                         }
                     }
                 }.let {
@@ -255,12 +256,12 @@ class ActionLocation : ScriptAction<Any>() {
                 }
             } else {
                 val options = mutableMapOf<String, LiveData<*>>()
-                if (!reader.nextPeek().startsWith("-")) {
+                if (!reader.nextPeek().startsWith('-')) {
                     options["x"] = reader.readDouble()
                     options["y"] = reader.readDouble()
                     options["z"] = reader.readDouble()
                 }
-                while (reader.nextPeek().startsWith("-")) {
+                while (reader.nextPeek().startsWith('-')) {
                     when (val it = reader.nextToken().substring(1)) {
                         "x" -> options["x"] = reader.readDouble()
                         "y" -> options["y"] = reader.readDouble()
@@ -277,13 +278,13 @@ class ActionLocation : ScriptAction<Any>() {
                     loc.let {
                         if (reproduced) it.clone() else it
                     }.also {
-                        for (entry in options) {
-                            when (entry.key) {
-                                "x" -> it.x += entry.value.getValue(this, 0.0)
-                                "y" -> it.y += entry.value.getValue(this, 0.0)
-                                "z" -> it.z += entry.value.getValue(this, 0.0)
-                                "yaw" -> it.yaw += entry.value.getValue(this, 0.0).toFloat()
-                                "pitch" -> it.pitch += entry.value.getValue(this, 0.0).toFloat()
+                        for (option in options) {
+                            when (option.key) {
+                                "x" -> it.x += option.value.getValue(this, 0.0)
+                                "y" -> it.y += option.value.getValue(this, 0.0)
+                                "z" -> it.z += option.value.getValue(this, 0.0)
+                                "yaw" -> it.yaw += option.value.getValue(this, 0.0).toFloat()
+                                "pitch" -> it.pitch += option.value.getValue(this, 0.0).toFloat()
                             }
                         }
                     }
@@ -305,12 +306,12 @@ class ActionLocation : ScriptAction<Any>() {
                 }
             } else {
                 val options = mutableMapOf<String, LiveData<*>>()
-                if (!reader.nextPeek().startsWith("-")) {
+                if (!reader.nextPeek().startsWith('-')) {
                     options["x"] = reader.readDouble()
                     options["y"] = reader.readDouble()
                     options["z"] = reader.readDouble()
                 }
-                while (reader.nextPeek().startsWith("-")) {
+                while (reader.nextPeek().startsWith('-')) {
                     when (val it = reader.nextToken().substring(1)) {
                         "x" -> options["x"] = reader.readDouble()
                         "y" -> options["y"] = reader.readDouble()
@@ -327,13 +328,13 @@ class ActionLocation : ScriptAction<Any>() {
                     loc.let {
                         if (reproduced) it.clone() else it
                     }.also {
-                        for (entry in options) {
-                            when (entry.key) {
-                                "x" -> it.x -= entry.value.getValue(this, 0.0)
-                                "y" -> it.y -= entry.value.getValue(this, 0.0)
-                                "z" -> it.z -= entry.value.getValue(this, 0.0)
-                                "yaw" -> it.yaw -= entry.value.getValue(this, 0.0).toFloat()
-                                "pitch" -> it.pitch -= entry.value.getValue(this, 0.0).toFloat()
+                        for (option in options) {
+                            when (option.key) {
+                                "x" -> it.x -= option.value.getValue(this, 0.0)
+                                "y" -> it.y -= option.value.getValue(this, 0.0)
+                                "z" -> it.z -= option.value.getValue(this, 0.0)
+                                "yaw" -> it.yaw -= option.value.getValue(this, 0.0).toFloat()
+                                "pitch" -> it.pitch -= option.value.getValue(this, 0.0).toFloat()
                             }
                         }
                     }
@@ -355,12 +356,12 @@ class ActionLocation : ScriptAction<Any>() {
                 }
             } else {
                 val options = mutableMapOf<String, LiveData<*>>()
-                if (!reader.nextPeek().startsWith("-")) {
+                if (!reader.nextPeek().startsWith('-')) {
                     options["x"] = reader.readDouble()
                     options["y"] = reader.readDouble()
                     options["z"] = reader.readDouble()
                 }
-                while (reader.nextPeek().startsWith("-")) {
+                while (reader.nextPeek().startsWith('-')) {
                     when (val it = reader.nextToken().substring(1)) {
                         "x" -> options["x"] = reader.readDouble()
                         "y" -> options["y"] = reader.readDouble()
@@ -377,13 +378,13 @@ class ActionLocation : ScriptAction<Any>() {
                     loc.let {
                         if (reproduced) it.clone() else it
                     }.also {
-                        for (entry in options) {
-                            when (entry.key) {
-                                "x" -> it.x *= entry.value.getValue(this, 1.0)
-                                "y" -> it.y *= entry.value.getValue(this, 1.0)
-                                "z" -> it.z *= entry.value.getValue(this, 1.0)
-                                "yaw" -> it.yaw *= entry.value.getValue(this, 1.0).toFloat()
-                                "pitch" -> it.pitch *= entry.value.getValue(this, 1.0).toFloat()
+                        for (option in options) {
+                            when (option.key) {
+                                "x" -> it.x *= option.value.getValue(this, 1.0)
+                                "y" -> it.y *= option.value.getValue(this, 1.0)
+                                "z" -> it.z *= option.value.getValue(this, 1.0)
+                                "yaw" -> it.yaw *= option.value.getValue(this, 1.0).toFloat()
+                                "pitch" -> it.pitch *= option.value.getValue(this, 1.0).toFloat()
                             }
                         }
                     }

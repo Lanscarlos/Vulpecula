@@ -134,7 +134,9 @@ class ActionVector : ScriptAction<Any?>() {
             val action = ActionVector()
             do {
                 val isRoot = action.handlers.isEmpty()
-                action.handlers += when (val it = reader.nextToken()) {
+                val it = reader.nextToken()
+                // 将语句写入待处理列表
+                action.handlers += when (it) {
                     "build" -> build(reader)
                     "modify", "set" -> modify(isRoot, reader)
                     "add" -> add(isRoot, reader)
@@ -157,11 +159,13 @@ class ActionVector : ScriptAction<Any?>() {
                     else -> error("Unknown argument \"$it\" at vector action.")
                 }
                 if (action.handlers.lastOrNull() !is TransferHandler) {
+                    // 上一个处理器的返回非 Vector 对象，管道关闭
                     if (reader.hasNextToken(">>")) {
-                        error("Cannot use \">> ${reader.nextPeek()}\", previous action has closed the pipeline.")
+                        error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$it\" has closed the pipeline.")
                     }
                     break
                 }
+                // 判断后续是否含有管道符
             } while (reader.hasNextToken(">>"))
 
             return@scriptParser action
