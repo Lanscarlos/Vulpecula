@@ -63,7 +63,7 @@ object ScriptFragment {
             val size = cache.size
 
             // 加载文件
-            file.toConfig().forEachString { key, value ->
+            file.toConfig().forEachLine { key, value ->
                 cache[key] = value
                 mapping[key] = file
             }
@@ -99,7 +99,7 @@ object ScriptFragment {
                 it.addWatcher { onFileChanged(this) }
 
                 // 加载文件
-                it.toConfig().forEachString { key, value ->
+                it.toConfig().forEachLine { key, value ->
                     cache[key] = value
                     mapping[key] = it
                 }

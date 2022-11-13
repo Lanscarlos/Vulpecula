@@ -39,7 +39,7 @@ object EventMapping {
             cache.clear()
 
             // 加载文件
-            file.toConfig().forEachString { key, value ->
+            file.toConfig().forEachLine { key, value ->
                 cache[key] = value
             }
 
@@ -56,7 +56,7 @@ object EventMapping {
 
             folder.ifNotExists {
                 releaseResourceFile("listen-mapping.yml")
-            }.toConfig().forEachString { key, value ->
+            }.toConfig().forEachLine { key, value ->
                 cache[key] = value
             }
 

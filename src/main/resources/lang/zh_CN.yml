@@ -31,14 +31,27 @@ Kether-Action-Register-Failed:
 
 
 
-# 映射模块
+# Unicode 映射模块
 
-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
-Mapping-Load-Automatic-Failed:
+Unicode-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个 Unicode 映射！ &8({2} ms)'
+Unicode-Mapping-Load-Automatic-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个事件映射！ &8({1} ms)'
-Mapping-Load-Failed:
+Unicode-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个 Unicode 映射！ &8({1} ms)'
+Unicode-Mapping-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 Unicode 映射加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+
+
+
+# 映射模块
+
+Event-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
+Event-Mapping-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Event-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个事件映射！ &8({1} ms)'
+Event-Mapping-Load-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
 
