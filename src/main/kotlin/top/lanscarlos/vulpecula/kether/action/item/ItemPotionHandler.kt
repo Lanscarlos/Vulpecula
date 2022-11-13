@@ -47,8 +47,8 @@ object ItemPotionHandler : ActionItemStack.Reader {
         val type = StringLiveData(reader.nextBlock())
         val options = mutableMapOf<String, LiveData<*>>()
         if (!reader.nextPeek().startsWith('-')) {
-            options["duration"] = reader.readDouble()
-            options["amplifier"] = reader.readDouble()
+            options["duration"] = reader.readInt()
+            options["amplifier"] = reader.readInt()
         }
         while (reader.nextPeek().startsWith('-')) {
             when (val it = reader.nextToken().substring(1)) {

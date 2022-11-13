@@ -7,6 +7,7 @@ import taboolib.library.reflex.ClassField
 import taboolib.library.reflex.ClassMethod
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.effect.pattern.CanvasPattern
+import top.lanscarlos.vulpecula.kether.action.item.ActionItemStack
 import java.util.function.Supplier
 
 /**
@@ -34,6 +35,7 @@ abstract class ClassInjector(
 
         private val injectors: List<ClassInjector> = listOf(
             CanvasPattern.Companion,
+            ActionItemStack.Companion,
             KetherRegistry
         )
 
