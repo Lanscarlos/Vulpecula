@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether
 
 import taboolib.common.LifeCycle
-import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.taboolibPath
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.*
@@ -9,9 +8,9 @@ import taboolib.common.util.asList
 import taboolib.library.reflex.ClassMethod
 import taboolib.module.kether.Kether
 import taboolib.module.kether.ScriptActionParser
-import taboolib.module.kether.ScriptProperty
 import taboolib.module.kether.StandardChannel
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.injector.ClassInjector
 import top.lanscarlos.vulpecula.utils.timing
 import top.lanscarlos.vulpecula.utils.toConfig
 import java.io.File
@@ -24,10 +23,19 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2022-10-18 16:33
  */
-@Awake(LifeCycle.LOAD)
-class KetherRegistry : ClassVisitor(1) {
+object KetherRegistry : ClassInjector(packageName = KetherRegistry::class.java.packageName) {
 
-    override fun getLifeCycle() = LifeCycle.LOAD
+    private val config by lazy {
+        val file = File(getDataFolder(), "kether-registry.yml")
+        if (!file.exists()) {
+            releaseResourceFile("kether-registry.yml", true)
+        }
+        file.toConfig()
+    }
+
+    private val parserRegistry = HashMap<String, ParserMetadata>()
+    private val propertyRegistry = HashMap<Class<*>, VulScriptProperty<*>>()
+    private var propertyCache: Collection<Pair<Class<*>, VulScriptProperty<*>>> = emptyList()
 
     // 加载 Vulpecula 脚本属性
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
@@ -70,7 +78,7 @@ class KetherRegistry : ClassVisitor(1) {
     }
 
     // 加载 Vulpecula 语句
-    override fun visit(method: ClassMethod, clazz: Class<*>, instance: Supplier<*>?) {
+    override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
         if (!method.isAnnotationPresent(VulKetherParser::class.java) || method.returnType != ScriptActionParser::class.java) return
 
         // 加载注解
@@ -96,7 +104,7 @@ class KetherRegistry : ClassVisitor(1) {
         }
 
         // 获取解析器
-        val parser = (if (instance == null) method.invokeStatic() else method.invoke(instance.get())) as ScriptActionParser<*>
+        val parser = (if (supplier == null) method.invokeStatic() else method.invoke(supplier.get())) as ScriptActionParser<*>
         parserRegistry[id] = ParserMetadata(id, parser, name, namespace, shared, override, injectDefaultNamespace, overrideDefaultAction)
 
         // 注册语句
@@ -109,99 +117,83 @@ class KetherRegistry : ClassVisitor(1) {
         }
     }
 
-    companion object {
-
-        private val config by lazy {
-            val file = File(getDataFolder(), "kether-registry.yml")
-            if (!file.exists()) {
-                releaseResourceFile("kether-registry.yml", true)
-            }
-            file.toConfig()
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> getScriptProperties(instance: T): Collection<VulScriptProperty<in T>> {
+        return propertyCache.filter {
+            it.first.isInstance(instance)
+        }.sortedWith { c1, c2 ->
+            if (c1.first.isAssignableFrom(c2.first)) 1 else -1
+        }.mapNotNull {
+            it.second as? VulScriptProperty<in T>
         }
+    }
 
-        private val parserRegistry = HashMap<String, ParserMetadata>()
-        private val propertyRegistry = HashMap<Class<*>, VulScriptProperty<*>>()
-        private var propertyCache: Collection<Pair<Class<*>, VulScriptProperty<*>>> = emptyList()
+    fun registerScriptProperty(key: Class<*>, property: VulScriptProperty<*>) {
+        propertyRegistry[key] = property
+        // 提前解析为列表方便后续过滤
+        propertyCache = propertyRegistry.map { it.key to it.value }
+    }
 
-        @Suppress("UNCHECKED_CAST")
-        fun <T : Any> getScriptProperties(instance: T): Collection<VulScriptProperty<in T>> {
-            return propertyCache.filter {
-                it.first.isInstance(instance)
-            }.sortedWith { c1, c2 ->
-                if (c1.first.isAssignableFrom(c2.first)) 1 else -1
-            }.mapNotNull {
-                it.second as? VulScriptProperty<in T>
-            }
-        }
+    fun unregisterScriptProperty(key: Class<*>) {
+        propertyRegistry.remove(key)
+        // 提前解析为列表方便后续过滤
+        propertyCache = propertyRegistry.map { it.key to it.value }
+    }
 
-        fun registerScriptProperty(key: Class<*>, property: VulScriptProperty<*>) {
-            propertyRegistry[key] = property
-            // 提前解析为列表方便后续过滤
-            propertyCache = propertyRegistry.map { it.key to it.value }
-        }
+    /**
+     * 使用 ENABLE 防止被原生加载器覆盖语句解析器
+     * */
+    @Awake(LifeCycle.ENABLE)
+    fun autoRegisterAction() {
+        val start = timing()
+        try {
+            parserRegistry.forEach { (id, meta) ->
 
-        fun unregisterScriptProperty(key: Class<*>) {
-            propertyRegistry.remove(key)
-            // 提前解析为列表方便后续过滤
-            propertyCache = propertyRegistry.map { it.key to it.value }
-        }
+                // 注入原生命名空间
+                if (meta.injectDefaultNamespace) {
+                    meta.name.forEach {
+                        Kether.scriptRegistry.registerAction("kether", it, meta.parser)
+                    }
+                }
 
-        /**
-         * 使用 ENABLE 防止被原生加载器覆盖语句解析器
-         * */
-        @Awake(LifeCycle.ENABLE)
-        fun registerAction() {
-            val start = timing()
-            try {
-                parserRegistry.forEach { (id, meta) ->
+                // 覆盖原生语句
+                if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
+                    meta.override.forEach {
+                        Kether.scriptRegistry.registerAction("kether", it, meta.parser)
+                    }
+                    console().sendLang("Kether-Override-Action-Local-Succeeded", id, timing(start))
+                }
+
+                // 是否分享语句
+                if (!meta.shared) return@forEach
+
+                getOpenContainers().forEach inner@{
+
+                    if (it.name == pluginId) return@inner
+
+                    it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "vul"))
+                    if (meta.namespace != "kether") {
+                        // 防止注入原生命名空间
+                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, meta.namespace))
+                    }
 
                     // 注入原生命名空间
                     if (meta.injectDefaultNamespace) {
-                        meta.name.forEach {
-                            Kether.scriptRegistry.registerAction("kether", it, meta.parser)
-                        }
+                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "kether"))
                     }
 
                     // 覆盖原生语句
                     if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
-                        meta.override.forEach {
-                            Kether.scriptRegistry.registerAction("kether", it, meta.parser)
-                        }
-                        console().sendLang("Kether-Override-Action-Local-Succeeded", id, timing(start))
-                    }
-
-                    // 是否分享语句
-                    if (!meta.shared) return@forEach
-
-                    getOpenContainers().forEach inner@{
-
-                        if (it.name == pluginId) return@inner
-
-                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "vul"))
-                        if (meta.namespace != "kether") {
-                            // 防止注入原生命名空间
-                            it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, meta.namespace))
-                        }
-
-                        // 注入原生命名空间
-                        if (meta.injectDefaultNamespace) {
-                            it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "kether"))
-                        }
-
-                        // 覆盖原生语句
-                        if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
-                            it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.override, "kether"))
-                        }
-                    }
-
-                    if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
-                        console().sendLang("Kether-Override-Action-Remote-Succeeded", id, timing(start))
+                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.override, "kether"))
                     }
                 }
-            } catch (e: Exception) {
-                console().sendLang("Kether-Action-Register-Failed", e.localizedMessage, timing(start))
-            }
 
+                if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
+                    console().sendLang("Kether-Override-Action-Remote-Succeeded", id, timing(start))
+                }
+            }
+        } catch (e: Exception) {
+            console().sendLang("Kether-Action-Register-Failed", e.localizedMessage, timing(start))
         }
 
     }

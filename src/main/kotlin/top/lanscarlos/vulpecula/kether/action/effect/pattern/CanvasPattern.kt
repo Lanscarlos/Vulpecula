@@ -1,12 +1,9 @@
 package top.lanscarlos.vulpecula.kether.action.effect.pattern
 
-import taboolib.common.LifeCycle
-import taboolib.common.inject.ClassVisitor
-import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
+import top.lanscarlos.vulpecula.injector.ClassInjector
 import java.util.function.Supplier
 
 /**
@@ -63,10 +60,7 @@ interface CanvasPattern {
         fun build(frame: ScriptFrame): CanvasPattern
     }
 
-    @Awake(LifeCycle.LOAD)
-    companion object : ClassVisitor(0) {
-
-        override fun getLifeCycle() = LifeCycle.LOAD
+    companion object : ClassInjector(packageName = CanvasPattern::class.java.packageName) {
 
         private val registry = HashMap<String, Reader>()
 

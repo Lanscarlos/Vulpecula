@@ -37,7 +37,7 @@ fun File.toConfig(): ConfigFile {
 /**
  * 加载 Config 下所有 String 内容
  * */
-inline fun ConfigurationSection.forEachString(func: ((key: String, value: String) -> Unit)) {
+inline fun ConfigurationSection.forEachLine(func: ((key: String, value: String) -> Unit)) {
     getKeys(false).forEach { key ->
         getString(key)?.let { func(key, it) }
     }

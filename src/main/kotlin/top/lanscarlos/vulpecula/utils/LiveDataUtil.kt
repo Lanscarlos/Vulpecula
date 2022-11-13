@@ -52,47 +52,107 @@ fun <T> LiveData<*>?.getValueOrNull(frame: ScriptFrame): T? {
  * */
 fun QuestReader.readBoolean(): LiveData<Boolean> = BooleanLiveData.read(reader = this)
 
+fun QuestReader.tryReadBoolean(vararg expect: String): LiveData<Boolean>? {
+    return if (this.hasNextToken(*expect)) {
+        BooleanLiveData.read(reader = this)
+    } else null
+}
+
 /**
  * 以兼容模式读取 Int
  * */
 fun QuestReader.readInt(): LiveData<Int> = IntLiveData.read(reader = this)
+
+fun QuestReader.tryReadInt(vararg expect: String): LiveData<Int>? {
+    return if (this.hasNextToken(*expect)) {
+        IntLiveData.read(reader = this)
+    } else null
+}
 
 /**
  * 以兼容模式读取 Double
  * */
 fun QuestReader.readDouble(): LiveData<Double> = DoubleLiveData.read(reader = this)
 
+fun QuestReader.tryReadDouble(vararg expect: String): LiveData<Double>? {
+    return if (this.hasNextToken(*expect)) {
+        DoubleLiveData.read(reader = this)
+    } else null
+}
+
 /**
  * 以兼容模式读取 String
  * */
 fun QuestReader.readString(): LiveData<String> = StringLiveData.read(reader = this)
+
+fun QuestReader.tryReadString(vararg expect: String): LiveData<String>? {
+    return if (this.hasNextToken(*expect)) {
+        StringLiveData.read(reader = this)
+    } else null
+}
 
 /**
  * 以兼容模式读取 List<String>
  * */
 fun QuestReader.readStringList(): LiveData<List<String>> = StringListLiveData.read(reader = this)
 
+fun QuestReader.tryReadStringList(vararg expect: String): LiveData<List<String>>? {
+    return if (this.hasNextToken(*expect)) {
+        StringListLiveData.read(reader = this)
+    } else null
+}
+
 /**
  * 以兼容模式读取 Color
  * */
 fun QuestReader.readColor(): LiveData<Color> = ColorLiveData.read(reader = this)
+
+fun QuestReader.tryReadColor(vararg expect: String): LiveData<Color>? {
+    return if (this.hasNextToken(*expect)) {
+        ColorLiveData.read(reader = this)
+    } else null
+}
 
 /**
  * 以兼容模式读取 Vector
  * */
 fun QuestReader.readVector(): LiveData<Vector> = VectorLiveData.read(reader = this)
 
+fun QuestReader.tryReadVector(vararg expect: String): LiveData<Vector>? {
+    return if (this.hasNextToken(*expect)) {
+        VectorLiveData.read(reader = this)
+    } else null
+}
+
 /**
  * 以兼容模式读取 Location
  * */
 fun QuestReader.readLocation(): LiveData<Location> = LocationLiveData.read(reader = this)
+
+fun QuestReader.tryReadLocation(vararg expect: String): LiveData<Location>? {
+    return if (this.hasNextToken(*expect)) {
+        LocationLiveData.read(reader = this)
+    } else null
+}
 
 /**
  * 以兼容模式读取 ItemStack
  * */
 fun QuestReader.readItemStack(): LiveData<ItemStack> = ItemLiveData.read(reader = this)
 
+fun QuestReader.tryReadItemStack(vararg expect: String): LiveData<ItemStack>? {
+    return if (this.hasNextToken(*expect)) {
+        ItemLiveData.read(reader = this)
+    } else null
+}
+
 /**
  * 以兼容模式读取 Entity
  * */
 fun QuestReader.readEntity(): LiveData<Entity> = EntityLiveData.read(reader = this)
+
+fun QuestReader.tryReadEntity(vararg expect: String): LiveData<Entity>? {
+    return if (this.hasNextToken(*expect)) {
+        EntityLiveData.read(reader = this)
+    } else null
+}
