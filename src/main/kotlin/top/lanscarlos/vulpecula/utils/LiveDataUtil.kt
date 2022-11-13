@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.utils
 
+import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
@@ -22,7 +23,20 @@ import java.awt.Color
  * */
 fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): T {
     if (this == null) return def
-    return (this as? LiveData<T>)?.get(frame, def) ?: def
+    val it: Any? = when (def) {
+        is Boolean -> (this as BooleanLiveData).get(frame, def)
+        is Int -> (this as IntLiveData).get(frame, def)
+        is Double -> (this as DoubleLiveData).get(frame, def)
+        is String -> (this as StringLiveData).get(frame, def)
+        is List<*> -> (this as StringListLiveData).get(frame, def.map { it.toString() })
+        is Color -> (this as ColorLiveData).get(frame, def)
+        is Vector -> (this as VectorLiveData).get(frame, def)
+        is Location -> (this as LocationLiveData).get(frame, def)
+        is ItemStack -> (this as ItemLiveData).get(frame, def)
+        is Entity -> (this as EntityLiveData).get(frame, def)
+        else -> (this as? LiveData<T>)?.get(frame, def)
+    }
+    return it as? T ?: def
 }
 
 /**
@@ -30,7 +44,7 @@ fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): T {
  * */
 fun <T> LiveData<*>?.getValueOrNull(frame: ScriptFrame): T? {
     if (this == null) return null
-    return (this as? LiveData<T>)?.getOrNull(frame)
+    return this.getOrNull(frame) as? T
 }
 
 /**
@@ -77,3 +91,8 @@ fun QuestReader.readLocation(): LiveData<Location> = LocationLiveData.read(reade
  * 以兼容模式读取 ItemStack
  * */
 fun QuestReader.readItemStack(): LiveData<ItemStack> = ItemLiveData.read(reader = this)
+
+/**
+ * 以兼容模式读取 Entity
+ * */
+fun QuestReader.readEntity(): LiveData<Entity> = EntityLiveData.read(reader = this)
