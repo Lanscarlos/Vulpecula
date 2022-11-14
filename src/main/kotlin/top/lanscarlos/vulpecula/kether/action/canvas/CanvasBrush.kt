@@ -1,15 +1,14 @@
-package top.lanscarlos.vulpecula.kether.action.effect
+package top.lanscarlos.vulpecula.kether.action.canvas
 
 import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
-import top.lanscarlos.vulpecula.utils.VolatileHandler
 import java.awt.Color
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect
+ * top.lanscarlos.vulpecula.kether.action.canvas
  *
  * 笔刷
  *

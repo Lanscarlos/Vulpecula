@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.effect
+package top.lanscarlos.vulpecula.kether.action.canvas
 
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect
+ * top.lanscarlos.vulpecula.kether.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-08 10:05

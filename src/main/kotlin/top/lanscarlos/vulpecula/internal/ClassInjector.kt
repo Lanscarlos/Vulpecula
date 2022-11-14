@@ -6,7 +6,7 @@ import taboolib.common.platform.Awake
 import taboolib.library.reflex.ClassField
 import taboolib.library.reflex.ClassMethod
 import top.lanscarlos.vulpecula.kether.KetherRegistry
-import top.lanscarlos.vulpecula.kether.action.effect.pattern.CanvasPattern
+import top.lanscarlos.vulpecula.kether.action.canvas.pattern.CanvasPattern
 import top.lanscarlos.vulpecula.kether.action.item.ActionItemStack
 import top.lanscarlos.vulpecula.kether.action.vector.ActionVector
 import java.util.function.Supplier

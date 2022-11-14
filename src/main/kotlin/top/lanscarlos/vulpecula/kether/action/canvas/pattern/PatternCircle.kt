@@ -1,11 +1,10 @@
-package top.lanscarlos.vulpecula.kether.action.effect.pattern
+package top.lanscarlos.vulpecula.kether.action.canvas.pattern
 
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.getValue
-import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextPeek
 import top.lanscarlos.vulpecula.utils.readDouble
 import kotlin.math.cos
@@ -13,7 +12,7 @@ import kotlin.math.sin
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect.pattern
+ * top.lanscarlos.vulpecula.kether.action.canvas.pattern
  *
  * @author Lanscarlos
  * @since 2022-11-10 10:33

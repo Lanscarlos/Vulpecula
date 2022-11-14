@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.effect
+package top.lanscarlos.vulpecula.kether.action.canvas
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect
+ * top.lanscarlos.vulpecula.kether.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-09 00:20

@@ -1,15 +1,15 @@
-package top.lanscarlos.vulpecula.kether.action.effect
+package top.lanscarlos.vulpecula.kether.action.canvas
 
 import taboolib.common.util.Location
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.action.effect.pattern.CanvasPattern
+import top.lanscarlos.vulpecula.kether.action.canvas.pattern.CanvasPattern
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect
+ * top.lanscarlos.vulpecula.kether.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-10 11:14

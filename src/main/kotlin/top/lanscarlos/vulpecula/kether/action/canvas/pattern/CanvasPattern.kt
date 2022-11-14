@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.effect.pattern
+package top.lanscarlos.vulpecula.kether.action.canvas.pattern
 
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
@@ -8,7 +8,7 @@ import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect.pattern
+ * top.lanscarlos.vulpecula.kether.action.canvas.pattern
  *
  * @author Lanscarlos
  * @since 2022-11-10 10:32

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.effect
+package top.lanscarlos.vulpecula.kether.action.canvas
 
 import taboolib.common.platform.ProxyParticle
 import taboolib.library.kether.QuestReader
@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.effect
+ * top.lanscarlos.vulpecula.kether.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-08 23:25
