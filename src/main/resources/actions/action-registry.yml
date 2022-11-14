@@ -1,0 +1,25 @@
+
+# 请注意
+# 改动此文件后需要重启才能加载
+
+# If & Else 语句设置
+if-else:
+  # 是否为公有语句
+  shared: true
+  # 是否写入 Kether 命名空间
+  # 不写入则第三方插件使用前需要导入命名空间
+  inject-default-namespace: true
+  # 是否覆盖原生 If & Else
+  # 覆盖之后，原生 If 功能将由此语句替代
+  override-default-action: false
+
+sound:
+  shared: true
+  inject-default-namespace: true
+  override-default-action: false
+
+try-catch:
+  shared: true
+  inject-default-namespace: true
+
+

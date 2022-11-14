@@ -1,0 +1,13 @@
+
+# 请注意
+# 改动此文件后需要重启才能加载
+
+entity-generic:
+  # 是否为公有属性
+  shared: true
+
+event-generic:
+  shared: true
+
+location-generic:
+  shared: true

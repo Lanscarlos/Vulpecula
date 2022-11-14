@@ -7,12 +7,10 @@ import taboolib.module.kether.actionNow
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.text.StringBuilder
 
 /**
@@ -58,7 +56,7 @@ object ActionUnicode {
             fileCache.clear()
 
             folder.ifNotExists {
-                releaseResourceFile("actions/unicode/unicode-mapping.yml", true)
+                releaseResourceFile("actions/unicode/def-mapping.yml", true)
             }.getFiles().forEach { file ->
 
                 file.toConfig().forEachLine { key, value ->
@@ -81,7 +79,7 @@ object ActionUnicode {
         }
     }
 
-    fun String.replaceUnicode(keyword: Char = '@', prefix: Char = '{', suffix: Char = '}'): String {
+    private fun String.replaceUnicode(keyword: Char = '@', prefix: Char = '{', suffix: Char = '}'): String {
         val content = this.toCharArray()
         var index = 0
         val builder = StringBuilder()

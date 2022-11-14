@@ -25,10 +25,19 @@ import java.util.function.Supplier
  */
 object KetherRegistry : ClassInjector(packageName = KetherRegistry::class.java.packageName) {
 
-    private val config by lazy {
-        val file = File(getDataFolder(), "kether-registry.yml")
+    // 仅加载一次
+    private val actionConfig by lazy {
+        val file = File(getDataFolder(), "actions/action-registry.yml")
         if (!file.exists()) {
-            releaseResourceFile("kether-registry.yml", true)
+            releaseResourceFile("actions/action-registry.yml", true)
+        }
+        file.toConfig()
+    }
+
+    private val propertyConfig by lazy {
+        val file = File(getDataFolder(), "actions/property-registry.yml")
+        if (!file.exists()) {
+            releaseResourceFile("actions/property-registry.yml", true)
         }
         file.toConfig()
     }
@@ -69,11 +78,11 @@ object KetherRegistry : ClassInjector(packageName = KetherRegistry::class.java.p
         val annotation = clazz.getAnnotation(VulKetherProperty::class.java)
 
         // 是否禁用属性
-        if (config.getBoolean("property.${annotation.id}.disable", false)) return
+        if (propertyConfig.getBoolean("${annotation.id}.disable", false)) return
 
         // 是否分享泛型属性
         if (annotation.generic && annotation.shared) {
-            if (config.getBoolean("action.${annotation.id}.shared", true)) {
+            if (propertyConfig.getBoolean("${annotation.id}.shared", true)) {
                 var name = annotation.bind.java.name
                 name = if (name.startsWith(taboolibPath)) "@${name.substring(taboolibPath.length)}" else name
                 getOpenContainers().forEach {
@@ -100,18 +109,18 @@ object KetherRegistry : ClassInjector(packageName = KetherRegistry::class.java.p
         val id = annotation.property<String>("id") ?: return
 
         // 是否禁用语句
-        if (config.getBoolean("action.$id.disable", false)) return
+        if (actionConfig.getBoolean("$id.disable", false)) return
 
         // 加载注解属性
         val name = annotation.property<Any>("name")?.asList()?.toTypedArray() ?: arrayOf()
         val namespace = annotation.property("namespace", "vulpecula")
         val override = annotation.property<Any>("override")?.asList()?.toTypedArray() ?: arrayOf()
-        val injectDefaultNamespace = config.getBoolean("action.$id.inject-default-namespace", true)
-        val overrideDefaultAction = config.getBoolean("action.$id.override-default-action", false)
+        val injectDefaultNamespace = actionConfig.getBoolean("$id.inject-default-namespace", true)
+        val overrideDefaultAction = actionConfig.getBoolean("$id.override-default-action", false)
 
         // 是否分享语句
         val shared = if (annotation.property("shared", true)) {
-            config.getBoolean("action.$id.shared", true)
+            actionConfig.getBoolean("$id.shared", true)
         } else {
             false
         }
