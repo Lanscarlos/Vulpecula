@@ -37,6 +37,19 @@ object KetherRegistry : ClassInjector(packageName = KetherRegistry::class.java.p
     private val propertyRegistry = HashMap<Class<*>, VulScriptProperty<*>>()
     private var propertyCache: Collection<Pair<Class<*>, VulScriptProperty<*>>> = emptyList()
 
+    /**
+     * 判断语句是否被注册
+     * */
+    fun hasAction(vararg name: String): Boolean {
+        if (name.isEmpty()) return false
+        else if (name.size == 1) return name[0] in parserRegistry
+
+        for (it in name) {
+            if (it in parserRegistry) return true
+        }
+        return false
+    }
+
     // 加载 Vulpecula 脚本属性
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
         if (!clazz.isAnnotationPresent(VulKetherProperty::class.java) || !VulScriptProperty::class.java.isAssignableFrom(clazz)) return

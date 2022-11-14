@@ -7,6 +7,7 @@ import taboolib.module.kether.actionNow
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -23,9 +24,10 @@ import kotlin.text.StringBuilder
  */
 object ActionUnicode {
 
-    private val file by lazy { File(getDataFolder(), "actions/unicode-mapping.yml") }
+    private val folder by lazy { File(getDataFolder(), "actions/unicode") }
 
-    private val mapping by lazy { ConcurrentHashMap<String, String>() }
+    private val fileCache by lazy { mutableSetOf<File>() }
+    private val mapping by lazy { mutableMapOf<String, String>() }
 
     private fun onFileChange(file: File) {
         try {
@@ -37,10 +39,10 @@ object ActionUnicode {
                 mapping[key] = value
             }
 
-            console().sendLang("Unicode-Mapping-Load-Succeeded", mapping.size, timing(start))
+            console().sendLang("Action-Unicode-Mapping-Load-Succeeded", mapping.size, timing(start))
         } catch (e: Exception) {
             e.printStackTrace()
-            console().sendLang("Unicode-Mapping-Load-Failed", e.localizedMessage)
+            console().sendLang("Action-Unicode-Mapping-Load-Failed", e.localizedMessage)
         }
     }
 
@@ -48,28 +50,38 @@ object ActionUnicode {
         return try {
             val start = timing()
 
-            mapping.clear()
+            // 移除文件监听器
+            fileCache.forEach { it.removeWatcher() }
 
-            file.ifNotExists {
-                releaseResourceFile("actions/unicode-mapping.yml", true)
-            }.addWatcher {
-                onFileChange(this)
-            }.toConfig().forEachLine { key, value ->
-                mapping[key] = value
+            // 清除缓存
+            mapping.clear()
+            fileCache.clear()
+
+            folder.ifNotExists {
+                releaseResourceFile("actions/unicode/unicode-mapping.yml", true)
+            }.getFiles().forEach { file ->
+
+                file.toConfig().forEachLine { key, value ->
+                    // 载入映射列表
+                    mapping[key] = value
+                }
+
+                fileCache += file
+                file.addWatcher { onFileChange(this) }
             }
 
-            console().asLangText("Unicode-Mapping-Load-Succeeded", mapping.size, timing(start)).also {
+            console().asLangText("Action-Unicode-Mapping-Load-Succeeded", mapping.size, timing(start)).also {
                 console().sendMessage(it)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            console().asLangText("Unicode-Mapping-Load-Failed", e.localizedMessage).also {
+            console().asLangText("Action-Unicode-Mapping-Load-Failed", e.localizedMessage).also {
                 console().sendMessage(it)
             }
         }
     }
 
-    fun String.replaceUnicode(keyword: Char = '$', prefix: Char = '{', suffix: Char = '}'): String {
+    fun String.replaceUnicode(keyword: Char = '@', prefix: Char = '{', suffix: Char = '}'): String {
         val content = this.toCharArray()
         var index = 0
         val builder = StringBuilder()
@@ -110,7 +122,7 @@ object ActionUnicode {
                     builder.append(unicode)
                 } else {
                     // 查询失败
-                    builder.append('$')
+                    builder.append('@')
                     builder.append('{')
                     builder.append(key.toString())
                     builder.append('}')
@@ -123,7 +135,8 @@ object ActionUnicode {
         return builder.toString()
     }
 
-    fun isLetterOrDigit(char: Char): Boolean {
+    private fun isLetterOrDigit(char: Char): Boolean {
+        if (char == '_' || char == '-') return true
         val uppercase = 1 shl Character.UPPERCASE_LETTER.toInt()
         val lowercase = 1 shl Character.LOWERCASE_LETTER.toInt()
         val digit = 1 shl Character.DECIMAL_DIGIT_NUMBER.toInt()

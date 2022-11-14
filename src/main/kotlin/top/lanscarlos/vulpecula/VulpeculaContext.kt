@@ -8,6 +8,7 @@ import taboolib.module.configuration.ConfigFile
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
 import top.lanscarlos.vulpecula.internal.*
+import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.ActionUnicode
 import top.lanscarlos.vulpecula.utils.Debug
 import top.lanscarlos.vulpecula.utils.toConfig
@@ -60,7 +61,9 @@ object VulpeculaContext {
         messages += ScriptFragment.load()
 
         // 加载 Unicode 映射文件
-        messages += ActionUnicode.load()
+        if (KetherRegistry.hasAction("unicode")) {
+            messages += ActionUnicode.load()
+        }
 
         // 初步加载调度模块
         messages += EventDispatcher.load()

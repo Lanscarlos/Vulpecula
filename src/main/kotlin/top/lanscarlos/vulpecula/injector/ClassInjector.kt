@@ -31,12 +31,11 @@ abstract class ClassInjector(
     open fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {}
 
     @Awake(LifeCycle.LOAD)
-    companion object : ClassVisitor(0) {
+    companion object : ClassVisitor(1) {
 
         private val injectors: List<ClassInjector> = listOf(
             CanvasPattern.Companion,
-            ActionItemStack.Companion,
-            KetherRegistry
+            ActionItemStack.Companion
         )
 
         override fun getLifeCycle() = LifeCycle.LOAD
@@ -67,6 +66,24 @@ abstract class ClassInjector(
                 if (it.packageName != null && !clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visitEnd(clazz, supplier)
             }
+        }
+    }
+
+    @Awake(LifeCycle.LOAD)
+    object KetherClassInjector : ClassVisitor(0) {
+
+        private val injector = KetherRegistry
+
+        override fun getLifeCycle() = LifeCycle.LOAD
+
+        override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
+            if (injector.packageName != null && !clazz.packageName.startsWith(injector.packageName)) return
+            injector.visit(method, clazz, supplier)
+        }
+
+        override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
+            if (injector.packageName != null && !clazz.packageName.startsWith(injector.packageName)) return
+            injector.visitStart(clazz, supplier)
         }
     }
 }
