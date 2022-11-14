@@ -27,7 +27,7 @@ object VectorModifyHandler : ActionVector.Reader {
         val source = if (isRoot) reader.readVector(false) else null
         when (input) {
             "modify", "set" -> {
-                val other = reader.expectVector("with", "copy", "by")
+                val other = reader.expectVectorBy("with", "copy", "by")
                 val reproduced = reader.isReproduced()
 
                 return acceptTransfer(source, reproduced) { vector ->
@@ -35,7 +35,7 @@ object VectorModifyHandler : ActionVector.Reader {
                 }
             }
             "add", "multiply", "mul" -> {
-                val other = reader.expectVector("with", "and")
+                val other = reader.expectVectorBy("with", "and")
                 val reproduced = reader.isReproduced()
 
                 return acceptTransfer(source, reproduced) { vector ->
@@ -47,7 +47,7 @@ object VectorModifyHandler : ActionVector.Reader {
                 }
             }
             "subtract", "sub", "divide", "div" -> {
-                val other = reader.expectVector("by")
+                val other = reader.expectVectorBy("by")
                 val reproduced = reader.isReproduced()
 
                 return acceptTransfer(source, reproduced) { vector ->
@@ -68,7 +68,7 @@ object VectorModifyHandler : ActionVector.Reader {
      * 读取期望 Vector 数据
      * 主要用于运算
      * */
-    private fun QuestReader.expectVector(vararg expect: String): LiveData<Vector> {
+    private fun QuestReader.expectVectorBy(vararg expect: String): LiveData<Vector> {
         return if (this.hasNextToken("to")) {
             val amount = this.readDouble()
             VectorLiveData(Triple(amount, amount, amount))
