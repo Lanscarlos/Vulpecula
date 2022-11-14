@@ -72,10 +72,14 @@ class ActionVector : ScriptAction<Any?>() {
         fun parser() = scriptParser { reader ->
             val action = ActionVector()
             do {
+                reader.mark()
                 val it = reader.nextToken()
                 val isRoot = action.handlers.isEmpty()
 
-                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at vector action.")
+                action.handlers += registry[it]?.read(reader, it, isRoot) ?: let { _ ->
+                    reader.reset()
+                    VectorBuildHandler.read(reader, it, isRoot)
+                }
 
                 // 判断管道是否已关闭
                 if (action.handlers.lastOrNull() !is Transfer) {
