@@ -23,7 +23,7 @@ object ItemTagHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("nbt", "tag")
 
-    override fun read(isRoot: Boolean, reader: QuestReader): ActionItemStack.Handler {
+    override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
         reader.mark()
         return when (reader.nextToken()) {

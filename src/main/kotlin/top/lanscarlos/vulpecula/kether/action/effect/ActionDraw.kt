@@ -104,7 +104,7 @@ class ActionDraw(val raw: LiveData<*>) : ScriptAction<Any?>() {
                 }
                 else -> {
                     reader.reset()
-                    ActionDraw(reader.readVector())
+                    ActionDraw(reader.readVector(true))
                 }
             }
         }

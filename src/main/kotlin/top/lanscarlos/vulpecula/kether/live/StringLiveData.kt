@@ -38,11 +38,11 @@ class StringLiveData(
         /**
          *
          * ~ {token}
-         * ~ to &string
+         * ~ parse &string
          *
          * */
         fun read(reader: QuestReader): LiveData<String> {
-            val value: Any = if (reader.hasNextToken("to")) {
+            val value: Any = if (reader.hasNextToken("parse")) {
                 reader.nextBlock()
             } else {
                 reader.nextToken()

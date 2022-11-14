@@ -18,7 +18,7 @@ object ItemBuildHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("build")
 
-    override fun read(isRoot: Boolean, reader: QuestReader): ActionItemStack.Handler {
+    override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
 
         val type = StringLiveData(reader.nextBlock())
         val options = mutableMapOf<String, LiveData<*>>()

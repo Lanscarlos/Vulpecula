@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.kether.action.effect.pattern
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.injector.ClassInjector
+import top.lanscarlos.vulpecula.internal.ClassInjector
 import java.util.function.Supplier
 
 /**

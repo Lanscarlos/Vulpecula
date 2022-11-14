@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action.effect
 
 import taboolib.common.platform.ProxyParticle
-import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -66,13 +65,13 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                     options["speed"] = reader.readDouble()
                 }
                 "offset", "o" -> {
-                    options["offset"] = reader.readVector()
+                    options["offset"] = reader.readVector(!reader.hasNextToken("to"))
                 }
                 "spread", "s" -> {
-                    options["vector"] = reader.readVector()
+                    options["vector"] = reader.readVector(!reader.hasNextToken("to"))
                 }
                 "velocity", "vel", "v" -> {
-                    options["vector"] = reader.readVector()
+                    options["vector"] = reader.readVector(!reader.hasNextToken("to"))
                     options["count"] = IntLiveData(0)
 //                    options["speed"] = options["speed"].toDouble(0.0).coerceAtLeast(0.15)
                     val speed = (options["speed"] as? DoubleLiveData)?.value as? Double

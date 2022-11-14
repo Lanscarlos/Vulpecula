@@ -1,7 +1,6 @@
-package top.lanscarlos.vulpecula.kether.action.item
+package top.lanscarlos.vulpecula.kether.action.vector
 
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
+import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -9,24 +8,27 @@ import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.VectorLiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
+import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.nextPeek
+import top.lanscarlos.vulpecula.utils.readDouble
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.item
+ * top.lanscarlos.vulpecula.kether.action.vector
  *
  * @author Lanscarlos
- * @since 2022-11-12 13:01
+ * @since 2022-11-11 13:33
  */
-class ActionItemStack : ScriptAction<Any?>() {
+class ActionVector : ScriptAction<Any?>() {
 
     private val handlers = mutableListOf<Handler>()
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        var previous: ItemStack? = null
+        var previous: Vector? = null
         for (handler in handlers) {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
@@ -39,7 +41,7 @@ class ActionItemStack : ScriptAction<Any?>() {
         return CompletableFuture.completedFuture(previous)
     }
 
-    companion object : ClassInjector(packageName = ActionItemStack::class.java.packageName) {
+    companion object : ClassInjector(packageName = ActionVector::class.java.packageName) {
 
         private val registry = mutableMapOf<String, Reader>()
 
@@ -64,17 +66,16 @@ class ActionItemStack : ScriptAction<Any?>() {
         }
 
         @VulKetherParser(
-            id = "item",
-            name = ["item", "itemstack"],
-            override = ["item", "itemstack"]
+            id = "vector",
+            name = ["vec", "vector"]
         )
         fun parser() = scriptParser { reader ->
-            val action = ActionItemStack()
+            val action = ActionVector()
             do {
                 val it = reader.nextToken()
                 val isRoot = action.handlers.isEmpty()
 
-                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at item action.")
+                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at vector action.")
 
                 // 判断管道是否已关闭
                 if (action.handlers.lastOrNull() !is Transfer) {
@@ -93,14 +94,14 @@ class ActionItemStack : ScriptAction<Any?>() {
      * 处理后返回任意对象
      * */
     interface Handler {
-        fun handle(frame: ScriptFrame, previous: ItemStack?): Any?
+        fun handle(frame: ScriptFrame, previous: Vector?): Any?
     }
 
     /**
-     * 处理后返回 ItemStack 对象，供下一处理器使用
+     * 处理后返回 Vector 对象，供下一处理器使用
      * */
     interface Transfer : Handler {
-        override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack
+        override fun handle(frame: ScriptFrame, previous: Vector?): Vector
     }
 
     /**
@@ -118,60 +119,73 @@ class ActionItemStack : ScriptAction<Any?>() {
         fun read(reader: QuestReader, input: String, isRoot: Boolean): Handler
 
         /**
+         * 是否复制 Vector
+         * */
+        fun QuestReader.isReproduced(): Boolean {
+            return !this.hasNextToken("not-reproduced", "not-rep", "not-clone", "-n")
+        }
+
+        /**
+         * 读取期望 Vector 数据
+         * 主要用于运算
+         *
+         * @param expect 期望前缀，若找不到则使用 other 来构建 Vector
+         * @param other 用来标识构建 Vector 的前缀
+         * */
+        fun QuestReader.expectVector(expect: String, other: String): LiveData<Vector> {
+            return if (this.hasNextToken(expect)) {
+                VectorLiveData(this.nextBlock())
+            } else {
+                this.expect(other)
+                val x = this.readDouble()
+                val y = this.readDouble()
+                val z = this.readDouble()
+                VectorLiveData(Triple(x, y, z))
+            }
+        }
+
+        /**
          * 返回任意对象
          * */
-        fun handle(func: ScriptFrame.(item: ItemStack?) -> Any?): Handler {
+        fun handle(func: ScriptFrame.(vector: Vector?) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any? {
+                override fun handle(frame: ScriptFrame, previous: Vector?): Any? {
                     return func(frame, previous)
                 }
             }
         }
 
         /**
-         * 接收 ItemStack 返回任意对象
+         * 接收 Vector 返回任意对象
          * */
-        fun acceptHandler(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> Any?): Handler {
+        fun acceptHandler(source: LiveData<Vector>?, func: ScriptFrame.(vector: Vector) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any? {
-                    val item = previous ?: source?.getOrNull(frame) ?: error("No item select.")
-                    return func(frame, item)
+                override fun handle(frame: ScriptFrame, previous: Vector?): Any? {
+                    val vec = previous ?: source?.getOrNull(frame) ?: error("No vector select.")
+                    return func(frame, vec)
                 }
             }
         }
 
         /**
-         * 返回 ItemStack 对象
+         * 返回 Vector 对象
          * */
-        fun transfer(func: ScriptFrame.(item: ItemStack?) -> ItemStack): Handler {
+        fun transfer(func: ScriptFrame.(vector: Vector?) -> Vector): Handler {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
+                override fun handle(frame: ScriptFrame, previous: Vector?): Vector {
                     return func(frame, previous)
                 }
             }
         }
 
         /**
-         * 接收 ItemStack 并返回 ItemStack 对象
+         * 接收 Vector 并返回 Vector 对象
          * */
-        fun acceptTransfer(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> ItemStack): Transfer {
+        fun acceptTransfer(source: LiveData<Vector>?, reproduced: Boolean, func: ScriptFrame.(vector: Vector) -> Vector): Transfer {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
-                    val item = previous ?: source?.getOrNull(frame) ?: error("No item select.")
-                    return func(frame, item)
-                }
-            }
-        }
-
-        /**
-         * 接收 ItemStack 和 ItemMeta 并返回 ItemMeta 对象
-         * */
-        fun applyTransfer(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack, meta: ItemMeta) -> ItemMeta?): Transfer {
-            return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
-                    val item = previous ?: source?.getOrNull(frame) ?: error("No item select.")
-                    val meta = func(frame, item, item.itemMeta ?: return item)
-                    return item.also { it.itemMeta = meta }
+                override fun handle(frame: ScriptFrame, previous: Vector?): Vector {
+                    val vec = previous ?: source?.getOrNull(frame) ?: error("No vector select.")
+                    return func(frame, vec.let { if (reproduced) vec.clone() else vec })
                 }
             }
         }

@@ -15,7 +15,7 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("durability", "dura")
 
-    override fun read(isRoot: Boolean, reader: QuestReader): ActionItemStack.Handler {
+    override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
         reader.mark()
         return when (val it = reader.nextToken()) {

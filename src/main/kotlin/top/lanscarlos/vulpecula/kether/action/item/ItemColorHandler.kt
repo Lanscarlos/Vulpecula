@@ -19,7 +19,7 @@ object ItemColorHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("color")
 
-    override fun read(isRoot: Boolean, reader: QuestReader): ActionItemStack.Handler {
+    override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
         reader.hasNextToken("to")
         val raw = reader.readColor()

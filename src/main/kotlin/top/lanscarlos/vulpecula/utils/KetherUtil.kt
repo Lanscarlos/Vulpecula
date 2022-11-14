@@ -33,6 +33,7 @@ fun QuestReader.nextPeek(): String {
  * 判断是否有指定 token
  * */
 fun QuestReader.hasNextToken(vararg expected: String): Boolean {
+    if (expected.isEmpty()) return false
     this.mark()
     return if (this.nextToken() in expected) {
         true
@@ -45,9 +46,10 @@ fun QuestReader.hasNextToken(vararg expected: String): Boolean {
 /**
  * 尝试通过前缀解析 Action
  * */
-fun QuestReader.tryNextAction(vararg prefix: String): ParsedAction<*>? {
+fun QuestReader.tryNextAction(vararg expected: String): ParsedAction<*>? {
+    if (expected.isEmpty()) return null
     this.mark()
-    return if (this.nextToken() in prefix) {
+    return if (this.nextToken() in expected) {
         this.next(ArgTypes.ACTION)
     } else {
         this.reset()
@@ -58,9 +60,9 @@ fun QuestReader.tryNextAction(vararg prefix: String): ParsedAction<*>? {
 /**
  * 尝试通过前缀解析 Action List
  * */
-fun QuestReader.tryNextActionList(prefix: String): List<ParsedAction<*>>? {
+fun QuestReader.tryNextActionList(expected: String): List<ParsedAction<*>>? {
     this.mark()
-    return if (this.nextToken() in prefix) {
+    return if (this.nextToken() in expected) {
         this.next(ArgTypes.listOf(ArgTypes.ACTION))
     } else {
         this.reset()

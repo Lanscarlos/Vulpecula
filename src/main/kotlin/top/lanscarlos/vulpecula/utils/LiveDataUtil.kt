@@ -116,11 +116,11 @@ fun QuestReader.tryReadColor(vararg expect: String): LiveData<Color>? {
 /**
  * 以兼容模式读取 Vector
  * */
-fun QuestReader.readVector(): LiveData<Vector> = VectorLiveData.read(reader = this)
+fun QuestReader.readVector(produce: Boolean): LiveData<Vector> = VectorLiveData.read(reader = this, produce)
 
-fun QuestReader.tryReadVector(vararg expect: String): LiveData<Vector>? {
+fun QuestReader.tryReadVector(vararg expect: String, produce: Boolean): LiveData<Vector>? {
     return if (this.hasNextToken(*expect)) {
-        VectorLiveData.read(reader = this)
+        VectorLiveData.read(reader = this, produce)
     } else null
 }
 

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.injector
+package top.lanscarlos.vulpecula.internal
 
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
@@ -8,6 +8,7 @@ import taboolib.library.reflex.ClassMethod
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.effect.pattern.CanvasPattern
 import top.lanscarlos.vulpecula.kether.action.item.ActionItemStack
+import top.lanscarlos.vulpecula.kether.action.vector.ActionVector
 import java.util.function.Supplier
 
 /**
@@ -35,7 +36,8 @@ abstract class ClassInjector(
 
         private val injectors: List<ClassInjector> = listOf(
             CanvasPattern.Companion,
-            ActionItemStack.Companion
+            ActionItemStack.Companion,
+            ActionVector.Companion
         )
 
         override fun getLifeCycle() = LifeCycle.LOAD

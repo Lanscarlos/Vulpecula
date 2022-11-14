@@ -64,19 +64,17 @@ class VectorLiveData(
     companion object {
 
         /**
-         * ~ x y z
-         * ~ &x &y &z
-         * ~ to &vec
-         *
+         * 读取 Vector 对象
+         * @param produce 是否通过参数构建对象
          * */
-        fun read(reader: QuestReader): LiveData<Vector> {
-            val value: Any = if (reader.hasNextToken("to")) {
-                reader.nextBlock()
-            } else {
+        fun read(reader: QuestReader, produce: Boolean): LiveData<Vector> {
+            val value: Any = if (produce) {
                 val x = reader.readDouble()
                 val y = reader.readDouble()
                 val z = reader.readDouble()
                 Triple(x, y, z)
+            } else {
+                reader.nextBlock()
             }
             return VectorLiveData(value)
         }
