@@ -27,7 +27,7 @@ object VulpeculaContext {
         File(getDataFolder(), "config.yml")
     }
 
-    private lateinit var _config: ConfigFile
+    private lateinit var _config: Configuration
     val config: Configuration get() = _config
 
     @Awake(LifeCycle.LOAD)

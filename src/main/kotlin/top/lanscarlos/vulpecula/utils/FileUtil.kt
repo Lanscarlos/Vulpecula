@@ -30,7 +30,7 @@ fun File.getFiles(file : File = this, filter : String = "#", suffix: Array<Strin
     }
 }
 
-fun File.toConfig(): ConfigFile {
+fun File.toConfig(): Configuration {
     return Configuration.loadFromFile(this)
 }
 
