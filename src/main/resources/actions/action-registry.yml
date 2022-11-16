@@ -2,23 +2,103 @@
 # 请注意
 # 改动此文件后需要重启才能加载
 
-# If & Else 语句设置
-if-else:
+
+block:
   # 是否为公有语句
   shared: true
   # 是否写入 Kether 命名空间
   # 不写入则第三方插件使用前需要导入命名空间
   inject-default-namespace: true
+
+canvas:
+  shared: true
+  inject-default-namespace: true
+
+ceil:
+  shared: true
+  inject-default-namespace: true
+
+coerce:
+  shared: true
+  inject-default-namespace: true
+
+cos:
+  shared: true
+  inject-default-namespace: true
+
+event:
+  shared: true
+  inject-default-namespace: true
+
+floor:
+  shared: true
+  inject-default-namespace: true
+
+if-else:
+  shared: true
+  inject-default-namespace: true
   # 是否覆盖原生 If & Else
   # 覆盖之后，原生 If 功能将由此语句替代
   override-default-action: false
+
+item:
+  shared: true
+  inject-default-namespace: true
+
+lg:
+  shared: true
+  inject-default-namespace: true
+
+ln:
+  shared: true
+  inject-default-namespace: true
+
+location:
+  shared: true
+  inject-default-namespace: true
+
+log:
+  shared: true
+  inject-default-namespace: true
+
+particles:
+  shared: true
+  inject-default-namespace: true
+
+pow:
+  shared: true
+  inject-default-namespace: true
+
+radian:
+  shared: true
+  inject-default-namespace: true
+
+sin:
+  shared: true
+  inject-default-namespace: true
 
 sound:
   shared: true
   inject-default-namespace: true
   override-default-action: false
 
+sqrt:
+  shared: true
+  inject-default-namespace: true
+
+tan:
+  shared: true
+  inject-default-namespace: true
+
 try-catch:
+  shared: true
+  inject-default-namespace: true
+
+unicode:
+  shared: true
+  inject-default-namespace: true
+
+vector:
   shared: true
   inject-default-namespace: true
 
