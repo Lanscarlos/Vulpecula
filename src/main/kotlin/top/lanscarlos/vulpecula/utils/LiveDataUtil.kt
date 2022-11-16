@@ -138,21 +138,32 @@ fun QuestReader.tryReadLocation(vararg expect: String): LiveData<Location>? {
 /**
  * 以兼容模式读取 ItemStack
  * */
-fun QuestReader.readItemStack(): LiveData<ItemStack> = ItemLiveData.read(reader = this)
+fun QuestReader.readItemStack(): LiveData<ItemStack> = ItemLiveData(this.nextBlock())
 
 fun QuestReader.tryReadItemStack(vararg expect: String): LiveData<ItemStack>? {
     return if (this.hasNextToken(*expect)) {
-        ItemLiveData.read(reader = this)
+        ItemLiveData(this.nextBlock())
     } else null
 }
 
 /**
  * 以兼容模式读取 Entity
  * */
-fun QuestReader.readEntity(): LiveData<Entity> = EntityLiveData.read(reader = this)
+fun QuestReader.readEntity(): LiveData<Entity> = EntityLiveData(this.nextBlock())
 
 fun QuestReader.tryReadEntity(vararg expect: String): LiveData<Entity>? {
     return if (this.hasNextToken(*expect)) {
-        EntityLiveData.read(reader = this)
+        EntityLiveData(this.nextBlock())
+    } else null
+}
+
+/**
+ * 以兼容模式读取 Collection
+ * */
+fun QuestReader.readCollection(): LiveData<Collection<*>> = CollectionLiveData(this.nextBlock())
+
+fun QuestReader.tryReadCollection(vararg expect: String): LiveData<Collection<*>>? {
+    return if (this.hasNextToken(*expect)) {
+        CollectionLiveData(this.nextBlock())
     } else null
 }

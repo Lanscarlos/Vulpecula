@@ -37,10 +37,4 @@ class EntityLiveData(
             else -> null
         }
     }
-
-    companion object {
-        fun read(reader: QuestReader): LiveData<Entity> {
-            return EntityLiveData(reader.nextBlock())
-        }
-    }
 }

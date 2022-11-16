@@ -56,10 +56,4 @@ class ItemLiveData(
             else -> null
         }
     }
-
-    companion object {
-        fun read(reader: QuestReader): LiveData<ItemStack> {
-            return ItemLiveData(reader.nextBlock())
-        }
-    }
 }
