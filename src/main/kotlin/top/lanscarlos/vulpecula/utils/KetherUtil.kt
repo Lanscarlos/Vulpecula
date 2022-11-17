@@ -47,27 +47,14 @@ fun QuestReader.hasNextToken(vararg expected: String): Boolean {
  * 尝试通过前缀解析 Action
  * */
 fun QuestReader.tryNextAction(vararg expected: String): ParsedAction<*>? {
-    if (expected.isEmpty()) return null
-    this.mark()
-    return if (this.nextToken() in expected) {
-        this.next(ArgTypes.ACTION)
-    } else {
-        this.reset()
-        null
-    }
+    return if (this.hasNextToken(*expected)) this.nextParsedAction() else null
 }
 
 /**
  * 尝试通过前缀解析 Action List
  * */
-fun QuestReader.tryNextActionList(expected: String): List<ParsedAction<*>>? {
-    this.mark()
-    return if (this.nextToken() in expected) {
-        this.next(ArgTypes.listOf(ArgTypes.ACTION))
-    } else {
-        this.reset()
-        null
-    }
+fun QuestReader.tryNextActionList(vararg expected: String): List<ParsedAction<*>>? {
+    return if (this.hasNextToken(*expected)) this.next(ArgTypes.listOf(ArgTypes.ACTION)) else null
 }
 
 /**
@@ -84,14 +71,8 @@ fun QuestReader.nextBlock(): ParsedAction<*> {
 /**
  * 尝试通过前缀解析语句块
  * */
-fun QuestReader.tryNextBlock(prefix: String): ParsedAction<*>? {
-    this.mark()
-    return if (this.nextToken() in prefix) {
-        this.nextBlock()
-    } else {
-        this.reset()
-        null
-    }
+fun QuestReader.tryNextBlock(vararg expected: String): ParsedAction<*>? {
+    return if (this.hasNextToken(*expected)) this.nextBlock() else null
 }
 
 fun ParsedAction<*>.run(frame: ScriptFrame): Any? {
