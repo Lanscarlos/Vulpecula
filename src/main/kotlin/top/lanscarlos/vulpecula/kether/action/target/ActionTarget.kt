@@ -98,6 +98,13 @@ class ActionTarget : ScriptAction<Any>() {
         }
     }
 
+    /**
+     * 处理后返回 Collection 对象
+     * */
+    interface Handler {
+        fun handle(frame: ScriptFrame, collection: MutableCollection<Any>): MutableCollection<Any>
+    }
+
     interface Reader {
 
         val name: Array<String>
@@ -126,12 +133,5 @@ class ActionTarget : ScriptAction<Any>() {
                 }
             }
         }
-    }
-
-    /**
-     * 处理后返回 Collection 对象
-     * */
-    interface Handler {
-        fun handle(frame: ScriptFrame, collection: MutableCollection<Any>): MutableCollection<Any>
     }
 }
