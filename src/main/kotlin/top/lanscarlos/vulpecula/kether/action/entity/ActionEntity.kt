@@ -1,6 +1,8 @@
 package top.lanscarlos.vulpecula.kether.action.entity
 
 import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -129,11 +131,35 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 接收 Entity 返回任意对象
          * */
-        fun acceptHandler(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Any?): Handler {
+        fun acceptEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Any?): Handler {
             return object : Handler {
                 override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
                     val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
                     return func(frame, entity)
+                }
+            }
+        }
+
+        /**
+         * 接收 LivingEntity 返回任意对象
+         * */
+        fun acceptLivingEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: LivingEntity) -> Any?): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
+                    val entity = (previous ?: source?.getOrNull(frame)) as? LivingEntity ?: error("No living entity select.")
+                    return func(frame, entity)
+                }
+            }
+        }
+
+        /**
+         * 接收 Player 返回任意对象
+         * */
+        fun acceptPlayer(source: LiveData<Entity>?, func: ScriptFrame.(player: Player) -> Any?): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
+                    val player = (previous ?: source?.getOrNull(frame)) as? Player ?: error("No player select.")
+                    return func(frame, player)
                 }
             }
         }
@@ -152,11 +178,35 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 接收 Entity 并返回 Entity 对象
          * */
-        fun acceptTransfer(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Entity): Transfer {
+        fun applyEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Entity): Transfer {
             return object : Transfer {
                 override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
                     val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
                     return func(frame, entity)
+                }
+            }
+        }
+
+        /**
+         * 接收 LivingEntity 并返回 LivingEntity 对象
+         * */
+        fun applyLivingEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: LivingEntity) -> LivingEntity): Transfer {
+            return object : Transfer {
+                override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
+                    val entity = (previous ?: source?.getOrNull(frame)) as? LivingEntity ?: error("No living entity select.")
+                    return func(frame, entity)
+                }
+            }
+        }
+
+        /**
+         * 接收 Entity 并返回 Entity 对象
+         * */
+        fun applyPlayer(source: LiveData<Entity>?, func: ScriptFrame.(player: Player) -> Player): Transfer {
+            return object : Transfer {
+                override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
+                    val player = (previous ?: source?.getOrNull(frame)) as? Player ?: error("No player select.")
+                    return func(frame, player)
                 }
             }
         }

@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.live
 
 import org.bukkit.entity.Entity
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
@@ -30,6 +31,7 @@ class LocationLiveData(
         return when (it) {
             is Location -> it
             is org.bukkit.Location -> it.toProxyLocation()
+            is ProxyPlayer -> it.location
             is Entity -> it.location.toProxyLocation()
             is Vector -> Location(def.world, it.x, it.y, it.z)
             is org.bukkit.util.Vector -> Location(def.world, it.x, it.y, it.z)
@@ -62,6 +64,7 @@ class LocationLiveData(
         return when (it) {
             is Location -> it
             is org.bukkit.Location -> it.toProxyLocation()
+            is ProxyPlayer -> it.location
             is Entity -> it.location.toProxyLocation()
             is Vector -> Location(null, it.x, it.y, it.z)
             is org.bukkit.util.Vector -> Location(null, it.x, it.y, it.z)
