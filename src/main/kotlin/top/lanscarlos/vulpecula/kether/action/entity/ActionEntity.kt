@@ -12,6 +12,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextPeek
+import top.lanscarlos.vulpecula.utils.readEntity
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -117,6 +118,10 @@ class ActionEntity : ScriptAction<Any?>() {
          * */
         fun read(reader: QuestReader, input: String, isRoot: Boolean): Handler
 
+        fun QuestReader.source(isRoot: Boolean): LiveData<Entity>? {
+            return if (isRoot) this.readEntity() else null
+        }
+
         /**
          * 返回任意对象
          * */
@@ -146,8 +151,8 @@ class ActionEntity : ScriptAction<Any?>() {
         fun acceptLivingEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: LivingEntity) -> Any?): Handler {
             return object : Handler {
                 override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
-                    val entity = (previous ?: source?.getOrNull(frame)) as? LivingEntity ?: error("No living entity select.")
-                    return func(frame, entity)
+                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
+                    return func(frame, entity as? LivingEntity ?: return entity)
                 }
             }
         }
@@ -158,8 +163,8 @@ class ActionEntity : ScriptAction<Any?>() {
         fun acceptPlayer(source: LiveData<Entity>?, func: ScriptFrame.(player: Player) -> Any?): Handler {
             return object : Handler {
                 override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
-                    val player = (previous ?: source?.getOrNull(frame)) as? Player ?: error("No player select.")
-                    return func(frame, player)
+                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
+                    return func(frame, entity as? Player ?: return entity)
                 }
             }
         }
@@ -193,8 +198,8 @@ class ActionEntity : ScriptAction<Any?>() {
         fun applyLivingEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: LivingEntity) -> LivingEntity): Transfer {
             return object : Transfer {
                 override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
-                    val entity = (previous ?: source?.getOrNull(frame)) as? LivingEntity ?: error("No living entity select.")
-                    return func(frame, entity)
+                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
+                    return func(frame, entity as? LivingEntity ?: return entity)
                 }
             }
         }
@@ -205,8 +210,8 @@ class ActionEntity : ScriptAction<Any?>() {
         fun applyPlayer(source: LiveData<Entity>?, func: ScriptFrame.(player: Player) -> Player): Transfer {
             return object : Transfer {
                 override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
-                    val player = (previous ?: source?.getOrNull(frame)) as? Player ?: error("No player select.")
-                    return func(frame, player)
+                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
+                    return func(frame, entity as? Player ?: return entity)
                 }
             }
         }

@@ -7,6 +7,7 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.run
 import taboolib.platform.util.toBukkitLocation
+import top.lanscarlos.vulpecula.kether.action.entity.EntityPotionHandler.source
 import top.lanscarlos.vulpecula.utils.*
 
 /**
@@ -21,7 +22,7 @@ object EntityTeleportHandler : ActionEntity.Reader {
     override val name: Array<String> = arrayOf("teleport", "tp")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionEntity.Handler {
-        val source = if (isRoot) reader.readEntity() else null
+        val source = reader.source(isRoot)
         reader.hasNextToken("to")
         val destination = reader.readLocation()
         val reason = reader.tryReadString("by", "cause", "reason")

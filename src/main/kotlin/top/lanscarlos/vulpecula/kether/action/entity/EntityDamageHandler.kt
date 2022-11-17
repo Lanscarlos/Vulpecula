@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.action.entity
 
 import taboolib.library.kether.QuestReader
+import top.lanscarlos.vulpecula.kether.action.entity.EntityPotionHandler.source
 import top.lanscarlos.vulpecula.utils.readDouble
 import top.lanscarlos.vulpecula.utils.readEntity
 import top.lanscarlos.vulpecula.utils.tryReadEntity
@@ -17,7 +18,7 @@ object EntityDamageHandler : ActionEntity.Reader {
     override val name: Array<String> = arrayOf("damage", "dmg")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionEntity.Handler {
-        val source = if (isRoot) reader.readEntity() else null
+        val source = reader.source(isRoot)
         val damage = reader.readDouble()
         val damager = reader.tryReadEntity("by")
 
