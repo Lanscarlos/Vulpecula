@@ -3,9 +3,11 @@ package top.lanscarlos.vulpecula.kether.action.target.selector
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
+import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -31,12 +33,13 @@ object InRadiusSelector : ActionTarget.Reader {
     override val name: Array<String> = Type.values().flatMap { it.namespace.toList() }.toTypedArray()
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
-        val type = Type.values().firstOrNull { input in it.namespace }
+        val type = Type.values().firstOrNull { input.lowercase() in it.namespace }
 
         var center = reader.tryReadLocation("at")
         var radiusX: LiveData<Double> = DoubleLiveData(1)
         var radiusY: LiveData<Double> = DoubleLiveData(1)
         var radiusZ: LiveData<Double> = DoubleLiveData(1)
+        var includeSelf: LiveData<Boolean> = BooleanLiveData(false)
 
         while (reader.nextPeek().startsWith('-')) {
             when (reader.nextToken().substring(1)) {
@@ -50,6 +53,7 @@ object InRadiusSelector : ActionTarget.Reader {
                 "radius-x", "r-x", "x" -> radiusX = reader.readDouble()
                 "radius-y", "r-y", "y" -> radiusY = reader.readDouble()
                 "radius-z", "r-z", "z" -> radiusZ = reader.readDouble()
+                "include-self", "self" -> includeSelf = reader.readBoolean()
             }
         }
 
@@ -70,6 +74,13 @@ object InRadiusSelector : ActionTarget.Reader {
                     else -> false
                 }
                 if (filtered) collection += entity
+            }
+
+            // 排除自己
+            if (!includeSelf.get(this, false)) {
+                this.unsafePlayer()?.bukkit()?.let {
+                    collection.remove(it)
+                }
             }
 
             collection

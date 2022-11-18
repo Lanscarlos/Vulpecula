@@ -11,7 +11,11 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.run
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
+import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
+import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.utils.bukkit
 import top.lanscarlos.vulpecula.utils.tryNextBlock
+import top.lanscarlos.vulpecula.utils.tryReadBoolean
 import top.lanscarlos.vulpecula.utils.unsafePlayer
 
 /**
@@ -35,8 +39,9 @@ object InWorldSelector : ActionTarget.Reader {
     override val name: Array<String> = Type.values().flatMap { it.namespace.toList() }.toTypedArray()
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
-        val type = Type.values().firstOrNull { input in it.namespace }
+        val type = Type.values().firstOrNull { input.lowercase() in it.namespace }
         val raw = reader.tryNextBlock("at")
+        val includeSelf = reader.tryReadBoolean("-self", "-include-self")
 
         return handle { collection ->
             val world = when (val it = raw?.let { this.run(it).join() }) {
@@ -57,6 +62,13 @@ object InWorldSelector : ActionTarget.Reader {
                 else -> null
             }?.let {
                 collection.addAll(it)
+            }
+
+            // 排除自己
+            if (includeSelf?.get(this, false) == false) {
+                this.unsafePlayer()?.bukkit()?.let {
+                    collection.remove(it)
+                }
             }
 
             collection

@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.utils
 
+import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
@@ -8,6 +9,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.script
+import taboolib.platform.type.BukkitPlayer
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 
 /**
@@ -122,4 +124,8 @@ fun ScriptContext.setVariable(vararg keys: String, value: Any?) {
 
 fun QuestContext.Frame.unsafePlayer(): ProxyPlayer? {
     return script().sender as? ProxyPlayer
+}
+
+fun ProxyPlayer.bukkit(): Player? {
+    return (this as? BukkitPlayer)?.player
 }

@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
+import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -20,7 +21,7 @@ import top.lanscarlos.vulpecula.utils.*
 object NearestSelector : ActionTarget.Reader {
 
     enum class Type(vararg namespace: String) {
-        NearestEntity("nearest-entity", "NearestEntity", "@Nearest"),
+        NearestEntity("nearest-entity", "NearestEntity", "Nearest"),
         NearestLivingEntity("nearest-living-entity", "NearestLivingEntity"),
         NearestPlayer("nearest-player", "NearestPlayer"),
         NearestAnimal("nearest-animal", "NearestAnimal");
@@ -31,7 +32,7 @@ object NearestSelector : ActionTarget.Reader {
     override val name: Array<String> = Type.values().flatMap { it.namespace.toList() }.toTypedArray()
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
-        val type = Type.values().firstOrNull { input in it.namespace }
+        val type = Type.values().firstOrNull { input.lowercase() in it.namespace }
 
         var center = reader.tryReadLocation("at")
         var radiusX: LiveData<Double> = DoubleLiveData(1)
@@ -56,12 +57,15 @@ object NearestSelector : ActionTarget.Reader {
         return handle { collection ->
             val loc = (center?.getOrNull(this) ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No loc selected.")
 
+            val self = this.unsafePlayer()?.bukkit()
+
             loc.world?.getNearbyEntities(
                 loc,
                 radiusX.get(this, 1.0),
                 radiusY.get(this, 1.0),
                 radiusZ.get(this, 1.0)
             )?.filter { entity ->
+                if (self != null && entity == self) return@filter false
                 when (type) {
                     Type.NearestEntity -> true
                     Type.NearestLivingEntity -> entity is LivingEntity

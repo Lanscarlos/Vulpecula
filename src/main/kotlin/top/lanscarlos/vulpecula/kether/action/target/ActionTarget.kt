@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.kether.action.target
 
+import org.bukkit.entity.Entity
+import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -8,6 +10,9 @@ import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
+import top.lanscarlos.vulpecula.utils.nextPeek
+import top.lanscarlos.vulpecula.utils.readCollection
+import top.lanscarlos.vulpecula.utils.readEntity
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -77,21 +82,29 @@ class ActionTarget : ScriptAction<Any>() {
             val action = ActionTarget()
 
             do {
-                val it = reader.nextToken()
+                val next = reader.nextToken()
                 val isRoot = action.handlers.isEmpty()
 
-                val handler = if (it.startsWith('@')) {
-                    selectors[it.lowercase()]?.read(reader, it.substring(1), isRoot)
-                } else when (it) {
-                    "selector", "select", "sel" -> selectors[reader.nextToken().lowercase()]?.read(reader, it, isRoot)
-                    "filter" -> filters[reader.nextToken().lowercase()]?.read(reader, it, isRoot)
-                    "foreach" -> TargetForEachHandler.read(reader, it, isRoot)
-                    else -> {
-                        selectors[it.lowercase()]?.read(reader, it, isRoot)
-                    }
+                val handler = if (next.startsWith('@')) {
+                    val input = next.substring(1)
+                    selectors[input.lowercase()]?.read(reader, input, isRoot)
+                } else {
+                    reader.mark()
+                    val input = reader.nextToken()
+                    when (next) {
+                        "selector", "select", "sel" -> selectors[input.lowercase()]?.read(reader, input, isRoot)
+                        "filter" -> filters[input.lowercase()]?.read(reader, input, isRoot)
+                        "foreach" -> {
+                            reader.reset()
+                            TargetForEachHandler.read(reader, input, isRoot)
+                        }
+                        else -> {
+                            selectors[input.lowercase()]?.read(reader, input, isRoot)
+                        }
+                    } ?: error("Unknown argument \"$next $input\" at target action.")
                 }
 
-                action.handlers += handler ?: error("Unknown argument \"$it\" at target action.")
+                action.handlers += handler ?: error("Unknown argument \"$next\" at target action.")
             } while (reader.hasNextToken(">>"))
 
             return@scriptParser action
@@ -110,6 +123,10 @@ class ActionTarget : ScriptAction<Any>() {
         val name: Array<String>
 
         fun read(reader: QuestReader, input: String, isRoot: Boolean): Handler
+
+        fun QuestReader.source(isRoot: Boolean): LiveData<Collection<*>>? {
+            return if (isRoot) this.readCollection() else null
+        }
 
         /**
          * 处理后返回 Collection 对象

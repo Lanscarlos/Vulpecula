@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
+import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -31,7 +32,7 @@ object InRingSelector : ActionTarget.Reader {
     override val name: Array<String> = Type.values().flatMap { it.namespace.toList() }.toTypedArray()
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
-        val type = Type.values().firstOrNull { input in it.namespace }
+        val type = Type.values().firstOrNull { input.lowercase() in it.namespace }
 
         var center = reader.tryReadLocation("at")
         var minX: LiveData<Double> = DoubleLiveData(1)
@@ -41,6 +42,8 @@ object InRingSelector : ActionTarget.Reader {
         var maxX: LiveData<Double> = DoubleLiveData(1)
         var maxY: LiveData<Double> = DoubleLiveData(1)
         var maxZ: LiveData<Double> = DoubleLiveData(1)
+
+        var includeSelf: LiveData<Boolean> = BooleanLiveData(false)
 
         while (reader.nextPeek().startsWith('-')) {
             when (reader.nextToken().substring(1)) {
@@ -63,6 +66,7 @@ object InRingSelector : ActionTarget.Reader {
                 "max-x" -> maxX = reader.readDouble()
                 "max-y" -> maxY = reader.readDouble()
                 "max-z" -> maxZ = reader.readDouble()
+                "include-self", "self" -> includeSelf = reader.readBoolean()
             }
         }
 
@@ -93,6 +97,13 @@ object InRingSelector : ActionTarget.Reader {
                     else -> false
                 }
                 if (filtered) collection += entity
+            }
+
+            // 排除自己
+            if (!includeSelf.get(this, false)) {
+                this.unsafePlayer()?.bukkit()?.let {
+                    collection.remove(it)
+                }
             }
 
             collection
