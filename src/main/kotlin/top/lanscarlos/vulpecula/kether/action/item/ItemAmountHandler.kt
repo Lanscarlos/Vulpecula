@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.action.item
 
 import taboolib.library.kether.QuestReader
+import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.readInt
 import top.lanscarlos.vulpecula.utils.readItemStack
 
@@ -19,7 +20,10 @@ object ItemAmountHandler : ActionItemStack.Reader {
         val source = if (isRoot) reader.readItemStack() else null
         reader.mark()
         return when (val it = reader.nextToken()) {
-            "add", "set", "take" -> {
+            "add", "give",
+            "sub", "take",
+            "set" -> {
+                reader.hasNextToken("to")
                 val amount = reader.readInt()
                 acceptTransfer(source) { item ->
                     item.amount = when (it) {

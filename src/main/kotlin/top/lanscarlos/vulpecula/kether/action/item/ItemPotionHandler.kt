@@ -67,7 +67,7 @@ object ItemPotionHandler : ActionItemStack.Reader {
             val potion = PotionEffect(
                 type.asPotionEffectType(this) ?: PotionEffectType.SLOW,
                 options["duration"].getValue(this, 200),
-                options["amplifier"].getValue(this, 0) - 1,
+                options["amplifier"].getValue(this, 1) - 1,
                 options["ambient"].getValue(this, false),
                 options["particles"].getValue(this, true),
                 options["icon"].getValue(this, true)

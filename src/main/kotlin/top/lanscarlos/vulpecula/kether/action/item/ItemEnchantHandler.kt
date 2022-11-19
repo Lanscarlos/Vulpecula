@@ -31,7 +31,7 @@ object ItemEnchantHandler : ActionItemStack.Reader {
             "remove", "rm" -> remove(reader, source)
             "clear" -> clear(source)
             "has", "contains", "contain" -> contains(reader, source)
-            "level" -> level(reader, source)
+            "level", "lvl" -> level(reader, source)
             else -> {
                 reader.reset()
                 acceptHandler(source) { item -> item.itemMeta?.enchants }
@@ -41,6 +41,7 @@ object ItemEnchantHandler : ActionItemStack.Reader {
 
     private fun modify(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val type = StringLiveData(reader.nextBlock())
+        reader.hasNextToken("to")
         val level = reader.readInt()
         val ignoreLevelRestriction = !reader.hasNextToken("-restriction", "-r")
 
