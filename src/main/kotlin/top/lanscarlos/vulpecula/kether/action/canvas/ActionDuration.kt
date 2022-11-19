@@ -29,6 +29,8 @@ class ActionDuration(val duration: Int, val between: Boolean) : ScriptAction<Boo
          * 判断画布工作时间是否处于指定 ticks 内
          * duration in {ticks}
          * duration in 200
+         *
+         * duration out 200
          * */
         @VulKetherParser(
             id = "duration",

@@ -72,10 +72,6 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 }
                 "velocity", "vel", "v" -> {
                     options["vector"] = reader.readVector(!reader.hasNextToken("to"))
-                    options["count"] = IntLiveData(0)
-//                    options["speed"] = options["speed"].toDouble(0.0).coerceAtLeast(0.15)
-                    val speed = (options["speed"] as? DoubleLiveData)?.value as? Double
-                    options["speed"] = DoubleLiveData(speed?.coerceAtLeast(0.15) ?: 0.15)
                 }
 
                 "size" -> {
@@ -105,8 +101,8 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 "lore" -> {
                     options["lore"] = reader.readStringList()
                 }
-                "customModelData" -> {
-                    options["data"] = reader.readInt()
+                "customModelData", "model" -> {
+                    options["model"] = reader.readInt()
                 }
             }
         }
@@ -125,7 +121,11 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 "count" -> brush.count = value.getValue(frame, brush.count)
                 "speed" -> brush.speed = value.getValue(frame, brush.speed)
                 "offset" -> brush.offset = value.getValue(frame, brush.offset)
-                "vector" -> brush.vector = value.getValue(frame, brush.vector)
+                "vector" -> {
+                    brush.count = 0
+                    brush.speed = if (brush.speed != 0.0) brush.speed else 0.15
+                    brush.vector = value.getValue(frame, brush.vector)
+                }
 
                 "size" -> brush.size = value.getValue(frame, brush.size.toDouble()).toFloat()
                 "color" -> {
@@ -150,7 +150,7 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 "data" -> brush.data = value.getValue(frame, brush.data)
                 "name" -> brush.name = value.getValue(frame, brush.name)
                 "lore" -> brush.lore = value.getValue(frame, brush.lore)
-                "customModelData" -> brush.customModelData = value.getValue(frame, brush.customModelData)
+                "model" -> brush.customModelData = value.getValue(frame, brush.customModelData)
             }
         }
     }

@@ -37,11 +37,29 @@ class ActionViewers(val raw: Collection<Any>) : ScriptAction<Collection<ProxyPla
                     cache += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
                 }
                 is ParsedAction<*> -> {
-                    frame.run(value).join()?.let {
-                        cache += when (it) {
-                            is ProxyPlayer -> it
-                            is Player -> adaptPlayer(it)
-                            is String -> adaptPlayer(Bukkit.getPlayerExact(it) ?: return@let)
+                    frame.run(value).join()?.let { result ->
+                        when (result) {
+                            is ProxyPlayer -> cache += result
+                            is Player -> cache += adaptPlayer(result)
+                            is String -> cache += adaptPlayer(Bukkit.getPlayerExact(result) ?: return@let)
+                            is Collection<*> -> {
+                                result.forEach {
+                                    when (it) {
+                                        is ProxyPlayer -> cache += it
+                                        is Player -> cache += adaptPlayer(it)
+                                        is String -> cache += adaptPlayer(Bukkit.getPlayerExact(it) ?: return@let)
+                                    }
+                                }
+                            }
+                            is Array<*> -> {
+                                result.forEach {
+                                    when (it) {
+                                        is ProxyPlayer -> cache += it
+                                        is Player -> cache += adaptPlayer(it)
+                                        is String -> cache += adaptPlayer(Bukkit.getPlayerExact(it) ?: return@let)
+                                    }
+                                }
+                            }
                             else -> return@let
                         }
                     }

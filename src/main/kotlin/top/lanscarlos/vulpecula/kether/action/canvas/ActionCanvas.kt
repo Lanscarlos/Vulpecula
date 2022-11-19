@@ -9,6 +9,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.live.IntLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -39,7 +40,7 @@ class ActionCanvas : ScriptAction<Any?>() {
             "false" -> "temp_" + UUID.randomUUID().toString()
             is String -> it + '_' + frame.unsafePlayer()?.uniqueId?.toString()
             is Pair<*, *> -> {
-                val id = it.first?.toString() ?: "temp"
+                val id = (it.first as? StringLiveData)?.get(frame, "temp") ?: "temp"
                 val extend = (it.second as? ParsedAction<*>)?.let { action ->
                     when (val result = frame.run(action).join()) {
                         is Block -> result.location.toString()
@@ -54,15 +55,13 @@ class ActionCanvas : ScriptAction<Any?>() {
 
         frame.setVariable(VARIABLE_BRUSH, CanvasBrush())
 
+        val period = period.get(frame, 20)
+        val condition = this.condition
         val body = ParsedAction(ActionBlock(actions))
         val preHandle = ParsedAction(ActionBlock(this.preHandle))
         val postHandle = ParsedAction(ActionBlock(this.postHandle))
 
-        condition?.let {
-            val quest = CanvasQuest(uniqueId, period.get(frame, 20), it, body, preHandle, postHandle)
-            // 提交绘画任务
-            CanvasScriptContext.submit(quest, frame.deepVars(), force)
-        } ?: let {
+        if (period <= 0 || condition == null) {
             // 循环条件未定义 任务只执行一次
             frame.run(preHandle).thenRun {
                 frame.run(body).thenRun {
@@ -70,6 +69,10 @@ class ActionCanvas : ScriptAction<Any?>() {
                 }
             }
 //            warning("Canvas Condition not defined.")
+        } else {
+            val quest = CanvasQuest(uniqueId, period, condition, body, preHandle, postHandle)
+            // 提交绘画任务
+            CanvasScriptContext.submit(quest, frame.deepVars(), force)
         }
 
         return CompletableFuture.completedFuture(null)
@@ -105,7 +108,7 @@ class ActionCanvas : ScriptAction<Any?>() {
                 reader.mark()
                 when (reader.nextToken().lowercase()) {
                     "unique" -> {
-                        val id = reader.nextToken()
+                        val id = reader.readString()
                         canvas.unique = if (reader.hasNextToken("with")) {
                             Pair(id, reader.nextBlock())
                         } else {

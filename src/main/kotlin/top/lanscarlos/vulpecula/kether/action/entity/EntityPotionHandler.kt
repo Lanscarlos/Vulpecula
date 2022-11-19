@@ -25,6 +25,7 @@ object EntityPotionHandler : ActionEntity.Reader {
         return when (reader.nextToken()) {
             "add", "set" -> addPotion(reader, source)
             "remove", "rm" -> removePotion(reader, source)
+            "clear" -> clearPotion(reader, source)
             "contains", "contain", "has" -> containsPotion(reader, source)
             else -> {
                 reader.reset()
@@ -70,6 +71,13 @@ object EntityPotionHandler : ActionEntity.Reader {
 
         return applyLivingEntity(source) { entity ->
             type.asPotionEffectType(this)?.let { entity.removePotionEffect(it) }
+            entity
+        }
+    }
+
+    private fun clearPotion(reader: QuestReader, source: LiveData<Entity>?): ActionEntity.Handler {
+        return applyLivingEntity(source) { entity ->
+            entity.activePotionEffects.forEach { entity.removePotionEffect(it.type) }
             entity
         }
     }

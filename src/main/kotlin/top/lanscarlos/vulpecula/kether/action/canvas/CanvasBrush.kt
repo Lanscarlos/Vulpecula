@@ -32,6 +32,10 @@ class CanvasBrush {
     var lore: List<String> = emptyList()
     var customModelData: Int = -1
 
+    fun draw(locations: Collection<Location>, viewers: Collection<ProxyPlayer>) {
+        locations.forEach { draw(it, viewers) }
+    }
+
     fun draw(location: Location, viewers: Collection<ProxyPlayer>) {
         if (viewers.isEmpty()) return
 
