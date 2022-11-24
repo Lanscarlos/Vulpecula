@@ -1,10 +1,11 @@
 package top.lanscarlos.vulpecula.kether.action
 
-import taboolib.module.kether.actionNow
+import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import taboolib.module.kether.switch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.readDouble
+import top.lanscarlos.vulpecula.utils.toDouble
 
 /**
  * Vulpecula
@@ -26,34 +27,33 @@ object ActionCoerce {
      * coerce &n most &max
      *
      * */
-    @VulKetherParser(id = "coerce", name = ["pow"])
+    @VulKetherParser(id = "coerce", name = ["coerce"])
     fun parser() = scriptParser { reader ->
         val next = reader.readDouble()
         reader.switch {
             case("in") {
                 val min = reader.readDouble()
                 val max = reader.readDouble()
-                actionNow {
-                    next.get(this, 0.0).coerceIn(
-                        min.get(this, 0.0),
-                        max.get(this, 0.0)
-                    )
+                actionTake {
+                    next.thenApplyOrNull(this, min.getOrNull(this), max.getOrNull(this)) {
+                        this?.coerceIn(it.first().toDouble(0.0), it.last().toDouble(0.0)) ?: 0.0
+                    }
                 }
             }
             case("min", "least") {
                 val min = reader.readDouble()
-                actionNow {
-                    next.get(this, 0.0).coerceAtLeast(
-                        min.get(this, 0.0)
-                    )
+                actionTake {
+                    next.thenApplyOrNull(this, min.getOrNull(this)) {
+                        this?.coerceAtLeast(it.first().toDouble(0.0)) ?: 0.0
+                    }
                 }
             }
             case("max", "most") {
                 val max = reader.readDouble()
-                actionNow {
-                    next.get(this, 0.0).coerceAtMost(
-                        max.get(this, 0.0)
-                    )
+                actionTake {
+                    next.thenApplyOrNull(this, max.getOrNull(this)) {
+                        this?.coerceAtMost(it.first().toDouble(0.0)) ?: 0.0
+                    }
                 }
             }
         }
