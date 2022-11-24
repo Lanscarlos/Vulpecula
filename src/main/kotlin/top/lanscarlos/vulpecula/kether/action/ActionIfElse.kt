@@ -26,7 +26,7 @@ class ActionIfElse(
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
 
         // 计算逆波兰表达式
-        val stack = Stack<Boolean>()
+        val stack = Stack<CompletableFuture<Boolean>>()
         val queue = expression.toMutableList()
         while (queue.isNotEmpty()) {
             when (val it = queue.removeFirst()) {
@@ -36,21 +36,33 @@ class ActionIfElse(
                 LogicSymbol.AND -> {
                     val first = stack.pop()
                     val second = stack.pop()
-                    stack.push(first && second)
+                    val future = listOf(first, second).thenTake().thenApply {
+                        it[0].toBoolean(false) && it[1].toBoolean(false)
+                    }
+                    stack.push(future)
                 }
                 LogicSymbol.OR -> {
                     val first = stack.pop()
                     val second = stack.pop()
-                    stack.push(first || second)
+                    val future = listOf(first, second).thenTake().thenApply {
+                        it[0].toBoolean(false) || it[1].toBoolean(false)
+                    }
+                    stack.push(future)
                 }
             }
         }
 
-        return if (stack.pop()) {
-            frame.run(trueBlock)
-        } else {
-            falseBlock?.let { frame.run(it) } ?: CompletableFuture.completedFuture(null)
+        val future = CompletableFuture<Any?>()
+        stack.pop().thenApply { result ->
+            if (result) {
+                frame.run(trueBlock).thenApply { future.complete(it) }
+            } else if (falseBlock != null) {
+                frame.run(falseBlock).thenApply { future.complete(it) }
+            } else {
+                future.complete(false)
+            }
         }
+        return future
     }
 
     companion object {
@@ -168,14 +180,14 @@ class ActionIfElse(
     }
 
     private interface Condition {
-        fun run(frame: ScriptFrame): Boolean
+        fun run(frame: ScriptFrame): CompletableFuture<Boolean>
     }
 
     private class SingleCondition(
         val condition: ParsedAction<*>
     ) : Condition {
-        override fun run(frame: ScriptFrame): Boolean {
-            return frame.run(condition).join().toBoolean(false)
+        override fun run(frame: ScriptFrame): CompletableFuture<Boolean> {
+            return frame.run(condition).thenApply { it.toBoolean(false) }
         }
     }
 
@@ -184,8 +196,13 @@ class ActionIfElse(
         val checkType: CheckType,
         val right: ParsedAction<*>,
     ) : Condition {
-        override fun run(frame: ScriptFrame): Boolean {
-            return checkType.check(frame.run(left).join(), frame.run(right).join())
+        override fun run(frame: ScriptFrame): CompletableFuture<Boolean> {
+            return listOf(
+                frame.run(left),
+                frame.run(right)
+            ).thenTake().thenApply {
+                checkType.check(it[0], it[1])
+            }
         }
     }
 
