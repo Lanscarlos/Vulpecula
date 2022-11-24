@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.kether.action
 
-import taboolib.common.platform.function.info
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
@@ -9,9 +8,9 @@ import taboolib.module.kether.run
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.run
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula
@@ -30,11 +29,30 @@ class ActionBlock(
         } else if (block.size == 1) {
             return frame.run(block[0])
         } else {
-            for (i in 0 until block.lastIndex) {
-                block[i].run(frame)
+            val future = CompletableFuture<Any?>()
+            val futures = block.map { frame.run(it) }
+            val counter = AtomicInteger(0)
+            for (it in futures) {
+                if (it.isDone) {
+                    val count = counter.incrementAndGet()
+
+                    // 判断 futures 是否全部执行完毕
+                    if (count >= futures.size) {
+                        future.complete(futures.last().getNow(null))
+                    }
+                } else {
+                    it.thenRun {
+                        val count = counter.incrementAndGet()
+
+                        // 判断 futures 是否全部执行完毕
+                        if (count >= futures.size) {
+                            future.complete(futures.last().getNow(null))
+                        }
+                    }
+                }
             }
+            return future
         }
-        return frame.run(block[block.lastIndex])
     }
 
     companion object {
