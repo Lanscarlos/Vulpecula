@@ -7,7 +7,6 @@ import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.run
 import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.concurrent.CompletableFuture
 

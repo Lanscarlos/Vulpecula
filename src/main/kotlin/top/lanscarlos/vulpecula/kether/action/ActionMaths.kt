@@ -1,9 +1,10 @@
 package top.lanscarlos.vulpecula.kether.action
 
-import taboolib.module.kether.actionNow
+import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.readDouble
+import top.lanscarlos.vulpecula.utils.toDouble
 import kotlin.math.*
 
 /**
@@ -16,72 +17,78 @@ import kotlin.math.*
 object ActionMaths {
 
     @VulKetherParser(id = "pow", name = ["pow"])
-    fun powParser() = scriptParser {
-        val base = it.readDouble()
-        val power = it.readDouble()
-        actionNow {
-            base.get(this, 0.0).pow(power.get(this, 0.0))
+    fun powParser() = scriptParser { reader ->
+        val base = reader.readDouble()
+        val power = reader.readDouble()
+        actionTake {
+            base.thenApplyOrNull(this, power.getOrNull(this)) {
+                this?.pow(it.first().toDouble(0.0)) ?: 0.0
+            }
         }
     }
 
     @VulKetherParser(id = "sqrt", name = ["sqrt"])
-    fun sqrtParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { sqrt(next.get(this, 0.0)) }
+    fun sqrtParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { sqrt(it) } }
     }
 
     @VulKetherParser(id = "ceil", name = ["ceil"])
-    fun ceilParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { ceil(next.get(this, 0.0)) }
+    fun ceilParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { ceil(it) } }
     }
 
     @VulKetherParser(id = "floor", name = ["floor"])
-    fun floorParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { floor(next.get(this, 0.0)) }
+    fun floorParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { floor(it) } }
     }
 
     @VulKetherParser(id = "log", name = ["log"])
-    fun logParser() = scriptParser {
-        val base = it.readDouble() // 底数
-        val natural = it.readDouble() // 真数
-        actionNow { log(natural.get(this, 0.0), base.get(this, 0.0)) }
+    fun logParser() = scriptParser { reader ->
+        val base = reader.readDouble() // 底数
+        val natural = reader.readDouble() // 真数
+        actionTake {
+            base.thenApplyOrNull(this, natural.getOrNull(this)) {
+                log(it.first().toDouble(0.0), this ?: 0.0)
+            }
+        }
     }
 
     @VulKetherParser(id = "ln", name = ["ln"])
-    fun lnParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { ln(next.get(this, 0.0)) }
+    fun lnParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { ln(it) } }
     }
 
     @VulKetherParser(id = "lg", name = ["lg"])
-    fun lgParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { log10(next.get(this, 0.0)) }
+    fun lgParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { log10(it) } }
     }
 
     @VulKetherParser(id = "radian", name = ["radian", "rad"])
-    fun radianParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { Math.toRadians(next.get(this, 0.0)) }
+    fun radianParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { Math.toRadians(it) } }
     }
 
     @VulKetherParser(id = "sin", name = ["sin"])
-    fun sinParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { sin(next.get(this, 0.0)) }
+    fun sinParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { sin(it) } }
     }
 
     @VulKetherParser(id = "cos", name = ["cos"])
-    fun cosParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { cos(next.get(this, 0.0)) }
+    fun cosParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { cos(it) } }
     }
 
     @VulKetherParser(id = "tan", name = ["tan"])
-    fun tanParser() = scriptParser {
-        val next = it.readDouble()
-        actionNow { tan(next.get(this, 0.0)) }
+    fun tanParser() = scriptParser { reader ->
+        val next = reader.readDouble()
+        actionTake { next.get(this, 0.0).thenApply { tan(it) } }
     }
 }
