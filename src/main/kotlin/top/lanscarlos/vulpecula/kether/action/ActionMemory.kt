@@ -6,14 +6,12 @@ import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import taboolib.module.kether.scriptParser
-import taboolib.platform.type.BukkitPlayer
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.readEntity
-import top.lanscarlos.vulpecula.utils.unsafePlayer
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 
