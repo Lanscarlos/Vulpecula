@@ -1,13 +1,10 @@
 package top.lanscarlos.vulpecula.kether.action
 
-import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.util.Location
-import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.VulKetherParser
@@ -32,32 +29,43 @@ class ActionSound(
 ) : ScriptAction<Any?>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-
-        val res = resource.getOrNull(frame) ?: error("No sound resource selected.")
-        val volume = meta.first.get(frame, 1.0).toFloat()
-        val pitch = meta.second.get(frame, 1.0).toFloat()
-
         if (global) {
-            val loc = location?.getOrNull(frame)?.toBukkitLocation() ?: error("No location selected.")
-            if (res.startsWith("resource:")) {
-                loc.world?.playSound(loc, res.substring("resource:".length), volume, pitch)
-            } else {
-                loc.world?.playSound(loc, Sound.valueOf(res.replace('.', '_').uppercase()), volume, pitch)
+            return resource.thenApplyOrNull(frame,
+                location?.getOrNull(frame) ?: error("No location selected."),
+                meta.first.getOrNull(frame), // volume
+                meta.second.getOrNull(frame) // pitch
+            ) {
+                val resource = this ?: error("No sound resource selected.")
+                val loc = (it[0] as? Location)?.toBukkitLocation() ?: error("No location selected.")
+                val volume = it[1].toFloat(1f)
+                val pitch = it[2].toFloat(1f)
+
+                if (resource.startsWith("resource:")) {
+                    loc.world?.playSound(loc, resource.substring("resource:".length), volume, pitch)
+                } else {
+                    loc.world?.playSound(loc, Sound.valueOf(resource.replace('.', '_').uppercase()), volume, pitch)
+                }
             }
         } else {
-            val player = target?.getOrNull(frame)?.let {
-                if (it is Player) adaptPlayer(it) else null
-            } ?: frame.unsafePlayer() ?: error("No player selected.")
+            return resource.thenApplyOrNull(frame,
+                target?.getOrNull(frame) ?: CompletableFuture.completedFuture(null),
+                location?.getOrNull(frame) ?: CompletableFuture.completedFuture(null),
+                meta.first.getOrNull(frame), // volume
+                meta.second.getOrNull(frame) // pitch
+            ) {
+                val resource = this ?: error("No sound resource selected.")
+                val player = (it[0] as? Player)?.let { bukkit -> adaptPlayer(bukkit) } ?: frame.unsafePlayer() ?: error("No player selected.")
+                val loc = (it[1] as? Location) ?: player.location
+                val volume = it[2].toFloat(1f)
+                val pitch = it[3].toFloat(1f)
 
-            val loc = location.getValue(frame, player.location)
-            if (res.startsWith("resource:")) {
-                player.playSoundResource(loc, res.substring("resource:".length), volume, pitch)
-            } else {
-                player.playSound(loc, res.replace('.', '_').uppercase(), volume, pitch)
+                if (resource.startsWith("resource:")) {
+                    player.playSoundResource(loc, resource.substring("resource:".length), volume, pitch)
+                } else {
+                    player.playSound(loc, resource.replace('.', '_').uppercase(), volume, pitch)
+                }
             }
         }
-
-        return CompletableFuture.completedFuture(false)
     }
 
     companion object {
