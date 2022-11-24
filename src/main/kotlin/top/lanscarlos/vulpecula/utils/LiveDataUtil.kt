@@ -22,9 +22,9 @@ import java.util.concurrent.CompletableFuture
 /**
  * 根据传入的默认值的类型自动匹配 LiveData
  * */
-fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): CompletableFuture<T> {
+fun <T : Any> LiveData<*>?.getValue(frame: ScriptFrame, def: T): CompletableFuture<T> {
     if (this == null) return CompletableFuture.completedFuture(def)
-    val it: CompletableFuture<*> = when (def) {
+    val it: CompletableFuture<*>? = when (def) {
         is Boolean -> (this as BooleanLiveData).get(frame, def)
         is Int -> (this as IntLiveData).get(frame, def)
         is Double -> (this as DoubleLiveData).get(frame, def)
