@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.kether.action
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
-import taboolib.module.kether.actionNow
+import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
@@ -147,7 +147,7 @@ object ActionUnicode {
     )
     fun parser() = scriptParser { reader ->
         val source = StringLiveData(reader.nextBlock())
-        actionNow { source.getOrNull(this)?.replaceUnicode() }
+        actionTake { source.getOrNull(this).thenApply { it?.replaceUnicode() } }
     }
 
 }
