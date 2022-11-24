@@ -9,6 +9,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import taboolib.platform.type.BukkitPlayer
 import top.lanscarlos.vulpecula.utils.nextBlock
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -21,20 +22,22 @@ class EntityLiveData(
     val value: Any
 ) : LiveData<Entity> {
 
-    override fun get(frame: ScriptFrame, def: Entity): Entity {
-        return getOrNull(frame) ?: def
+    override fun get(frame: ScriptFrame, def: Entity): CompletableFuture<Entity> {
+        return getOrNull(frame).thenApply { if (it != null) def else def }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Entity? {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Entity?> {
+        val future = if (value is ParsedAction<*>) {
+            frame.run(value)
+        } else CompletableFuture.completedFuture(value)
 
-        return when (it) {
-            is Entity -> it
-            is ProxyPlayer -> (it as? BukkitPlayer)?.player
-            is String -> Bukkit.getPlayerExact(it)
-            else -> null
+        return future.thenApply {
+            when (it) {
+                is Entity -> it
+                is ProxyPlayer -> (it as? BukkitPlayer)?.player
+                is String -> Bukkit.getPlayerExact(it)
+                else -> null
+            }
         }
     }
 }

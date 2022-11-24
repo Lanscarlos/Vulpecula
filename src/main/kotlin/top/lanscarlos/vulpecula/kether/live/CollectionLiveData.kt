@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.kether.live
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -15,19 +16,21 @@ class CollectionLiveData(
     val value: Any
 ) : LiveData<Collection<*>> {
 
-    override fun get(frame: ScriptFrame, def: Collection<*>): Collection<*> {
-        return getOrNull(frame) ?: def
+    override fun get(frame: ScriptFrame, def: Collection<*>): CompletableFuture<Collection<*>> {
+        return getOrNull(frame).thenApply { if (it != null) def else def }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Collection<*>? {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Collection<*>?> {
+        val future = if (value is ParsedAction<*>) {
+            frame.run(value)
+        } else CompletableFuture.completedFuture(value)
 
-        return when (it) {
-            is Collection<*> -> it
-            is Array<*> -> it.map { it }
-            else -> if (it != null) setOf(it) else null
+        return future.thenApply {
+            when (it) {
+                is Collection<*> -> it
+                is Array<*> -> it.map { el -> el }
+                else -> if (it != null) setOf(it) else null
+            }
         }
     }
 }

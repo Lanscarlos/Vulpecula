@@ -9,6 +9,7 @@ import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.*
 import java.awt.Color
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -21,9 +22,9 @@ import java.awt.Color
 /**
  * 根据传入的默认值的类型自动匹配 LiveData
  * */
-fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): T {
-    if (this == null) return def
-    val it: Any? = when (def) {
+fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): CompletableFuture<T> {
+    if (this == null) return CompletableFuture.completedFuture(def)
+    val it: CompletableFuture<*> = when (def) {
         is Boolean -> (this as BooleanLiveData).get(frame, def)
         is Int -> (this as IntLiveData).get(frame, def)
         is Double -> (this as DoubleLiveData).get(frame, def)
@@ -36,15 +37,15 @@ fun <T> LiveData<*>?.getValue(frame: ScriptFrame, def: T): T {
         is Entity -> (this as EntityLiveData).get(frame, def)
         else -> (this as? LiveData<T>)?.get(frame, def)
     }
-    return it as? T ?: def
+    return it as? CompletableFuture<T> ?: CompletableFuture.completedFuture(def)
 }
 
 /**
  * 根据传入的默认值的类型自动匹配 LiveData
  * */
-fun <T> LiveData<*>?.getValueOrNull(frame: ScriptFrame): T? {
-    if (this == null) return null
-    return this.getOrNull(frame) as? T
+fun <T> LiveData<*>?.getValueOrNull(frame: ScriptFrame): CompletableFuture<T?> {
+    if (this == null) return CompletableFuture.completedFuture(null)
+    return this.getOrNull(frame) as? CompletableFuture<T?> ?: CompletableFuture.completedFuture(null)
 }
 
 /**

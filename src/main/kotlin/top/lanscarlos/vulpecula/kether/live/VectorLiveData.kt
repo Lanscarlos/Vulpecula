@@ -8,6 +8,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.utils.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -20,44 +21,65 @@ class VectorLiveData(
     val value: Any
 ) : LiveData<Vector> {
 
-    override fun get(frame: ScriptFrame, def: Vector): Vector {
-
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
-
-        return when (it) {
-            is Vector -> it
-            is org.bukkit.util.Vector -> Vector(it.x, it.y, it.z)
-            is Location -> it.direction
-            is org.bukkit.Location -> it.toProxyLocation().direction
+    override fun get(frame: ScriptFrame, def: Vector): CompletableFuture<Vector> {
+        return when (value) {
             is Triple<*, *, *> -> {
-                val x = (it.first as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val y = (it.second as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val z = (it.third as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                Vector(x, y, z)
+                listOf(
+                    (value.first as? DoubleLiveData)?.getOrNull(frame),
+                    (value.second as? DoubleLiveData)?.getOrNull(frame),
+                    (value.third as? DoubleLiveData)?.getOrNull(frame),
+                ).thenTake().thenApply {
+                    Vector(it[0].toDouble(def.x), it[1].toDouble(def.x), it[2].toDouble(def.x))
+                }
             }
-            else -> def
+            else -> {
+                val future = if (value is ParsedAction<*>) {
+                    frame.run(value)
+                } else CompletableFuture.completedFuture(value)
+
+                future.thenApply {
+                    when (it) {
+                        is Vector -> it
+                        is org.bukkit.util.Vector -> Vector(it.x, it.y, it.z)
+                        is Location -> it.direction
+                        is org.bukkit.Location -> it.toProxyLocation().direction
+                        else -> def
+                    }
+                }
+            }
         }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Vector? {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
-
-        return when (it) {
-            is Vector -> it
-            is org.bukkit.util.Vector -> Vector(it.x, it.y, it.z)
-            is Location -> it.direction
-            is org.bukkit.Location -> it.toProxyLocation().direction
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Vector?> {
+        return when (value) {
             is Triple<*, *, *> -> {
-                val x = (it.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val y = (it.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val z = (it.third as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                Vector(x, y, z)
+                listOf(
+                    (value.first as? DoubleLiveData)?.getOrNull(frame),
+                    (value.second as? DoubleLiveData)?.getOrNull(frame),
+                    (value.third as? DoubleLiveData)?.getOrNull(frame),
+                ).thenTake().thenApply {
+                    Vector(
+                        it[0]?.toDouble() ?: return@thenApply null,
+                        it[1]?.toDouble() ?: return@thenApply null,
+                        it[2]?.toDouble() ?: return@thenApply null
+                    )
+                }
             }
-            else -> null
+            else -> {
+                val future = if (value is ParsedAction<*>) {
+                    frame.run(value)
+                } else CompletableFuture.completedFuture(value)
+
+                future.thenApply {
+                    when (it) {
+                        is Vector -> it
+                        is org.bukkit.util.Vector -> Vector(it.x, it.y, it.z)
+                        is Location -> it.direction
+                        is org.bukkit.Location -> it.toProxyLocation().direction
+                        else -> null
+                    }
+                }
+            }
         }
     }
 

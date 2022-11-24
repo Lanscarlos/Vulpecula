@@ -10,6 +10,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.utils.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -22,69 +23,112 @@ class LocationLiveData(
     val value: Any
 ) : LiveData<Location> {
 
-    override fun get(frame: ScriptFrame, def: Location): Location {
-
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
-
-        return when (it) {
-            is Location -> it
-            is org.bukkit.Location -> it.toProxyLocation()
-            is ProxyPlayer -> it.location
-            is Entity -> it.location.toProxyLocation()
-            is Vector -> Location(def.world, it.x, it.y, it.z)
-            is org.bukkit.util.Vector -> Location(def.world, it.x, it.y, it.z)
+    override fun get(frame: ScriptFrame, def: Location): CompletableFuture<Location> {
+        return when (value) {
             is Triple<*, *, *> -> {
-                val x = (it.first as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val y = (it.second as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val z = (it.third as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                Location(def.world, x, y, z)
+                listOf(
+                    (value.first as? DoubleLiveData)?.getOrNull(frame),
+                    (value.second as? DoubleLiveData)?.getOrNull(frame),
+                    (value.third as? DoubleLiveData)?.getOrNull(frame),
+                ).thenTake().thenApply {
+                    Location(def.world,
+                        it[0].toDouble(def.x),
+                        it[1].toDouble(def.y),
+                        it[2].toDouble(def.z)
+                    )
+                }
             }
             is Pair<*, *> -> {
-                val base = it.first as? Triple<*, *, *> ?: return def
-                val meta = it.second as? Pair<*, *> ?: return def
-                val x = (base.first as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val y = (base.second as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val z = (base.third as? DoubleLiveData)?.get(frame, def.x) ?: def.x
-                val yaw = (meta.first as? DoubleLiveData)?.get(frame, def.yaw.toDouble()) ?: def.yaw
-                val pitch = (meta.second as? DoubleLiveData)?.get(frame, def.pitch.toDouble()) ?: def.pitch
-                Location(def.world, x, y, z, yaw.toFloat(), pitch.toFloat())
+                val base = value.first as? Triple<*, *, *> ?: return CompletableFuture.completedFuture(def)
+                val meta = value.second as? Pair<*, *> ?: return CompletableFuture.completedFuture(def)
+                listOf(
+                    (base.first as? DoubleLiveData)?.getOrNull(frame),
+                    (base.second as? DoubleLiveData)?.getOrNull(frame),
+                    (base.third as? DoubleLiveData)?.getOrNull(frame),
+                    (meta.first as? DoubleLiveData)?.getOrNull(frame),
+                    (meta.second as? DoubleLiveData)?.getOrNull(frame)
+                ).thenTake().thenApply {
+                    Location(def.world,
+                        it[0].toDouble(def.x),
+                        it[1].toDouble(def.y),
+                        it[2].toDouble(def.z),
+                        it[3].toFloat(def.yaw),
+                        it[4].toFloat(def.pitch)
+                    )
+                }
             }
-            else -> def
+            else -> {
+                val future = if (value is ParsedAction<*>) {
+                    frame.run(value)
+                } else CompletableFuture.completedFuture(value)
+
+                return future.thenApply {
+                    when (it) {
+                        is Location -> it
+                        is org.bukkit.Location -> it.toProxyLocation()
+                        is ProxyPlayer -> it.location
+                        is Entity -> it.location.toProxyLocation()
+                        is Vector -> Location(def.world, it.x, it.y, it.z)
+                        is org.bukkit.util.Vector -> Location(def.world, it.x, it.y, it.z)
+                        else -> def
+                    }
+                }
+            }
         }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Location? {
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Location?> {
 
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
-
-        return when (it) {
-            is Location -> it
-            is org.bukkit.Location -> it.toProxyLocation()
-            is ProxyPlayer -> it.location
-            is Entity -> it.location.toProxyLocation()
-            is Vector -> Location(null, it.x, it.y, it.z)
-            is org.bukkit.util.Vector -> Location(null, it.x, it.y, it.z)
+        return when (value) {
             is Triple<*, *, *> -> {
-                val x = (it.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val y = (it.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val z = (it.third as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                Location(null, x, y, z)
+                listOf(
+                    (value.first as? DoubleLiveData)?.getOrNull(frame),
+                    (value.second as? DoubleLiveData)?.getOrNull(frame),
+                    (value.third as? DoubleLiveData)?.getOrNull(frame),
+                ).thenTake().thenApply {
+                    Location(null,
+                        it[0]?.toDouble() ?: return@thenApply null,
+                        it[1]?.toDouble() ?: return@thenApply null,
+                        it[2]?.toDouble() ?: return@thenApply null
+                    )
+                }
             }
             is Pair<*, *> -> {
-                val base = it.first as? Triple<*, *, *> ?: return null
-                val meta = it.second as? Pair<*, *> ?: return null
-                val x = (base.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val y = (base.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val z = (base.third as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val yaw = (meta.first as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                val pitch = (meta.second as? DoubleLiveData)?.getOrNull(frame) ?: return null
-                Location(null, x, y, z, yaw.toFloat(), pitch.toFloat())
+                val base = value.first as? Triple<*, *, *> ?: return CompletableFuture.completedFuture(null)
+                val meta = value.second as? Pair<*, *> ?: return CompletableFuture.completedFuture(null)
+                listOf(
+                    (base.first as? DoubleLiveData)?.getOrNull(frame),
+                    (base.second as? DoubleLiveData)?.getOrNull(frame),
+                    (base.third as? DoubleLiveData)?.getOrNull(frame),
+                    (meta.first as? DoubleLiveData)?.getOrNull(frame),
+                    (meta.second as? DoubleLiveData)?.getOrNull(frame)
+                ).thenTake().thenApply {
+                    Location(null,
+                        it[0]?.toDouble() ?: return@thenApply null,
+                        it[1]?.toDouble() ?: return@thenApply null,
+                        it[2]?.toDouble() ?: return@thenApply null,
+                        it[3]?.toFloat() ?: return@thenApply null,
+                        it[4]?.toFloat() ?: return@thenApply null
+                    )
+                }
             }
-            else -> null
+            else -> {
+                val future = if (value is ParsedAction<*>) {
+                    frame.run(value)
+                } else CompletableFuture.completedFuture(value)
+
+                future.thenApply {
+                    when (it) {
+                        is Location -> it
+                        is org.bukkit.Location -> it.toProxyLocation()
+                        is ProxyPlayer -> it.location
+                        is Entity -> it.location.toProxyLocation()
+                        is Vector -> Location(null, it.x, it.y, it.z)
+                        is org.bukkit.util.Vector -> Location(null, it.x, it.y, it.z)
+                        else -> null
+                    }
+                }
+            }
         }
     }
 

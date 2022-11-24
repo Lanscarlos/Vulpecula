@@ -6,6 +6,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.toBoolean
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -18,22 +19,24 @@ class BooleanLiveData(
     val value: Any
 ) : LiveData<Boolean> {
 
-    override fun get(frame: ScriptFrame, def: Boolean): Boolean {
-        return getOrNull(frame) ?: def
+    override fun get(frame: ScriptFrame, def: Boolean): CompletableFuture<Boolean> {
+        return getOrNull(frame).thenApply { if (it != null) def else def }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Boolean? {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Boolean?> {
+        val future = if (value is ParsedAction<*>) {
+            frame.run(value)
+        } else CompletableFuture.completedFuture(value)
 
-        return when (it) {
-            "~" -> null
-            is Boolean -> it
-            "true", "yes" -> true
-            "false", "no" -> false
-            is Number -> it != 0
-            else -> it?.toBoolean()
+        return future.thenApply {
+            when (it) {
+                "~" -> null
+                is Boolean -> it
+                "true", "yes" -> true
+                "false", "no" -> false
+                is Number -> it != 0
+                else -> it?.toBoolean()
+            }
         }
     }
 

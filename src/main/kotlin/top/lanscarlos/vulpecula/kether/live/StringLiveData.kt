@@ -6,6 +6,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -18,18 +19,20 @@ class StringLiveData(
     val value: Any
 ) : LiveData<String> {
 
-    override fun get(frame: ScriptFrame, def: String): String {
-        return getOrNull(frame) ?: def
+    override fun get(frame: ScriptFrame, def: String): CompletableFuture<String> {
+        return getOrNull(frame).thenApply { if (it != null) def else def }
     }
 
-    override fun getOrNull(frame: ScriptFrame): String? {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<String?> {
+        val future = if (value is ParsedAction<*>) {
+            frame.run(value)
+        } else CompletableFuture.completedFuture(value)
 
-        return when (it) {
-            is String -> it
-            else -> it?.toString()
+        return future.thenApply {
+            when (it) {
+                is String -> it
+                else -> it?.toString()
+            }
         }
     }
 

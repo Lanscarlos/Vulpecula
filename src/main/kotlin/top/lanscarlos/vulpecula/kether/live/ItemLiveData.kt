@@ -9,6 +9,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import taboolib.platform.util.buildItem
 import top.lanscarlos.vulpecula.utils.nextBlock
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -21,39 +22,27 @@ class ItemLiveData(
     val value: Any
 ) : LiveData<ItemStack> {
 
-    override fun get(frame: ScriptFrame, def: ItemStack): ItemStack {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
-
-        return when (it) {
-            is ItemStack -> it
-            is Item -> it.itemStack
-            is String -> {
-                val material = XMaterial.matchXMaterial(it.uppercase()).let { mat ->
-                    if (mat.isPresent) mat.get() else return def
-                }
-                buildItem(material)
-            }
-            else -> def
-        }
+    override fun get(frame: ScriptFrame, def: ItemStack): CompletableFuture<ItemStack> {
+        return getOrNull(frame).thenApply { if (it != null) def else def }
     }
 
-    override fun getOrNull(frame: ScriptFrame): ItemStack? {
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<ItemStack?> {
+        val future = if (value is ParsedAction<*>) {
+            frame.run(value)
+        } else CompletableFuture.completedFuture(value)
 
-        return when (it) {
-            is ItemStack -> it
-            is Item -> it.itemStack
-            is String -> {
-                val material = XMaterial.matchXMaterial(it.uppercase()).let { mat ->
-                    if (mat.isPresent) mat.get() else return null
+        return future.thenApply {
+            when (it) {
+                is ItemStack -> it
+                is Item -> it.itemStack
+                is String -> {
+                    val material = XMaterial.matchXMaterial(it.uppercase()).let { mat ->
+                        if (mat.isPresent) mat.get() else return@thenApply null
+                    }
+                    buildItem(material)
                 }
-                buildItem(material)
+                else -> null
             }
-            else -> null
         }
     }
 }

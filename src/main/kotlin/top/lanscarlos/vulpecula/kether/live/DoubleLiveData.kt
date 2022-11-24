@@ -6,6 +6,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.toDouble
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -18,25 +19,26 @@ class DoubleLiveData(
     val value: Any
 ) : LiveData<Double> {
 
-    override fun get(frame: ScriptFrame, def: Double): Double {
-        return getOrNull(frame) ?: def
+    override fun get(frame: ScriptFrame, def: Double): CompletableFuture<Double> {
+        return getOrNull(frame).thenApply { if (it != null) def else def }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Double? {
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Double?> {
+        val future = if (value is ParsedAction<*>) {
+            frame.run(value)
+        } else CompletableFuture.completedFuture(value)
 
-        val it = if (value is ParsedAction<*>) {
-            frame.run(value).join()
-        } else value
-
-        return when (it) {
-            "~" -> null
-            is Short -> it.toDouble()
-            is Int -> it.toDouble()
-            is Long -> it.toDouble()
-            is Float -> it.toDouble()
-            is Double -> it
-            is String -> it.toDoubleOrNull()
-            else -> it?.toDouble()
+        return future.thenApply {
+            when (it) {
+                "~" -> null
+                is Short -> it.toDouble()
+                is Int -> it.toDouble()
+                is Long -> it.toDouble()
+                is Float -> it.toDouble()
+                is Double -> it
+                is String -> it.toDoubleOrNull()
+                else -> it?.toDouble()
+            }
         }
     }
 

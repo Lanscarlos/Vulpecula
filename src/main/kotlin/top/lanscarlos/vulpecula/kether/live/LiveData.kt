@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.live
 
 import taboolib.module.kether.ScriptFrame
+import top.lanscarlos.vulpecula.utils.thenTake
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -21,7 +22,7 @@ interface LiveData<T: Any> {
 
     fun <R> thenApply(frame: ScriptFrame, def: T, vararg futures: CompletableFuture<*>, func: T.(List<Any?>) -> R): CompletableFuture<R> {
         val future = CompletableFuture<R>()
-        wait(*futures).thenAccept { parameters ->
+        futures.toList().thenTake().thenAccept { parameters ->
             this.get(frame, def).thenAccept {
                 future.complete(func(it, parameters))
             }
@@ -31,50 +32,11 @@ interface LiveData<T: Any> {
 
     fun <R> thenApplyOrNull(frame: ScriptFrame, vararg futures: CompletableFuture<*>, func: T?.(List<Any?>) -> R): CompletableFuture<R> {
         val future = CompletableFuture<R>()
-        wait(*futures).thenAccept { parameters ->
+        futures.toList().thenTake().thenAccept { parameters ->
             this.getOrNull(frame).thenAccept {
                 future.complete(func(it, parameters))
             }
         }
         return future
-    }
-
-    private fun wait(vararg futures: CompletableFuture<*>): CompletableFuture<List<Any?>> {
-        val parameters = CompletableFuture<List<Any?>>()
-        if (futures.isEmpty()) {
-            // 队列为空
-            parameters.complete(listOf())
-        } else if (futures.size == 1) {
-            // 队列仅有一个
-            val future = futures.first()
-            if (future.isDone) {
-                parameters.complete(listOf(future.getNow(null)))
-            } else {
-                future.thenAccept { parameters.complete(listOf(it)) }
-            }
-        } else {
-            // 多个
-            val counter = AtomicInteger(0)
-            for (it in futures) {
-                if (it.isDone) {
-                    val count = counter.incrementAndGet()
-
-                    // 判断 futures 是否全部执行完毕
-                    if (count >= futures.size) {
-                        parameters.complete(futures.map { it.getNow(null) })
-                    }
-                } else {
-                    it.thenRun {
-                        val count = counter.incrementAndGet()
-
-                        // 判断 futures 是否全部执行完毕
-                        if (count >= futures.size) {
-                            parameters.complete(futures.map { it.getNow(null) })
-                        }
-                    }
-                }
-            }
-        }
-        return parameters
     }
 }

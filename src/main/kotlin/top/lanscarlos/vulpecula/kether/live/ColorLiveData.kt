@@ -1,10 +1,13 @@
 package top.lanscarlos.vulpecula.kether.live
 
+import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.expects
+import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.*
 import java.awt.Color
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -17,53 +20,84 @@ class ColorLiveData(
     val value: Any
 ) : LiveData<Color> {
 
-    override fun get(frame: ScriptFrame, def: Color): Color {
+    override fun get(frame: ScriptFrame, def: Color): CompletableFuture<Color> {
         return when (value) {
-            is Color -> value
+            is Color -> CompletableFuture.completedFuture(value)
+            is ParsedAction<*> -> {
+                frame.run(value).thenApply { it as? Color ?: def }
+            }
             is Triple<*, *, *> -> {
-                val red = (value.first as? IntLiveData)?.get(frame, def.red) ?: def.red
-                val green = (value.second as? IntLiveData)?.get(frame, def.green) ?: def.green
-                val blue = (value.third as? IntLiveData)?.get(frame, def.blue) ?: def.blue
-                Color(red, green, blue)
+                listOf(
+                    (value.first as? IntLiveData)?.getOrNull(frame),
+                    (value.second as? IntLiveData)?.getOrNull(frame),
+                    (value.third as? IntLiveData)?.getOrNull(frame)
+                ).thenTake().thenApply {
+                    Color(it[0].toInt(def.red), it[1].toInt(def.green), it[2].toInt(def.blue))
+                }
             }
             is Pair<*, *> -> {
-                val base = value.first as? Triple<*, *, *> ?: return def
-                val red = (base.first as? IntLiveData)?.get(frame, def.red) ?: def.red
-                val green = (base.second as? IntLiveData)?.get(frame, def.green) ?: def.green
-                val blue = (base.third as? IntLiveData)?.get(frame, def.blue) ?: def.blue
-                val alpha = (value.second as? IntLiveData)?.get(frame, def.alpha) ?: def.alpha
-                Color(red, green, blue, alpha)
+                val base = value.first as? Triple<*, *, *> ?: return CompletableFuture.completedFuture(def)
+                listOf(
+                    (base.first as? IntLiveData)?.getOrNull(frame),
+                    (base.second as? IntLiveData)?.getOrNull(frame),
+                    (base.third as? IntLiveData)?.getOrNull(frame),
+                    (value.second as? IntLiveData)?.getOrNull(frame)
+                ).thenTake().thenApply {
+                    Color(it[0].toInt(def.red), it[1].toInt(def.green), it[2].toInt(def.blue), it[3].toInt(def.alpha))
+                }
             }
             is StringLiveData -> {
-                val hex = value.getOrNull(frame) ?: return def
-                Color.decode(if (hex.startsWith("#")) hex.substring(1) else hex)
+                value.getOrNull(frame).thenApply {
+                    val hex = it ?: return@thenApply def
+                    Color.decode(if (hex.startsWith("#")) hex.substring(1) else hex)
+                }
             }
-            else -> def
+            else -> CompletableFuture.completedFuture(def)
         }
     }
 
-    override fun getOrNull(frame: ScriptFrame): Color? {
+    override fun getOrNull(frame: ScriptFrame): CompletableFuture<Color?> {
         return when (value) {
-            is Color -> value
+            is Color -> CompletableFuture.completedFuture(value)
+            is ParsedAction<*> -> {
+                frame.run(value).thenApply { it as? Color }
+            }
             is Triple<*, *, *> -> {
-                val red = (value.first as? IntLiveData)?.getOrNull(frame) ?: return null
-                val green = (value.second as? IntLiveData)?.getOrNull(frame) ?: return null
-                val blue = (value.third as? IntLiveData)?.getOrNull(frame) ?: return null
-                Color(red, green, blue)
+                listOf(
+                    (value.first as? IntLiveData)?.getOrNull(frame),
+                    (value.second as? IntLiveData)?.getOrNull(frame),
+                    (value.third as? IntLiveData)?.getOrNull(frame)
+                ).thenTake().thenApply {
+                    Color(
+                        it[0]?.toInt() ?: return@thenApply null,
+                        it[1]?.toInt() ?: return@thenApply null,
+                        it[2]?.toInt() ?: return@thenApply null
+                    )
+                }
             }
             is Pair<*, *> -> {
-                val base = value.first as? Triple<*, *, *> ?: return null
-                val red = (base.first as? IntLiveData)?.getOrNull(frame) ?: return null
-                val green = (base.second as? IntLiveData)?.getOrNull(frame) ?: return null
-                val blue = (base.third as? IntLiveData)?.getOrNull(frame) ?: return null
-                val alpha = (value.second as? IntLiveData)?.getOrNull(frame) ?: return null
-                Color(red, green, blue, alpha)
+                val base = value.first as? Triple<*, *, *> ?: return CompletableFuture.completedFuture(null)
+                listOf(
+                    (base.first as? IntLiveData)?.getOrNull(frame),
+                    (base.second as? IntLiveData)?.getOrNull(frame),
+                    (base.third as? IntLiveData)?.getOrNull(frame),
+                    (value.second as? IntLiveData)?.getOrNull(frame)
+                ).thenTake().thenApply {
+                    Color(
+                        it[0]?.toInt() ?: return@thenApply null,
+                        it[1]?.toInt() ?: return@thenApply null,
+                        it[2]?.toInt() ?: return@thenApply null,
+                        it[3]?.toInt() ?: return@thenApply null
+                    )
+                }
             }
             is StringLiveData -> {
-                val hex = value.getOrNull(frame) ?: return null
-                Color.decode(if (hex.startsWith("#")) hex.substring(1) else hex)
+                value.getOrNull(frame).thenApply {
+                    val hex = it ?: return@thenApply null
+                    Color.decode(if (hex.startsWith("#")) hex.substring(1) else hex)
+                }
             }
-            else -> null
+            else -> CompletableFuture.completedFuture(null)
         }
     }
 
