@@ -77,10 +77,6 @@ fun QuestReader.tryNextBlock(vararg expected: String): ParsedAction<*>? {
     return if (this.hasNextToken(*expected)) this.nextBlock() else null
 }
 
-fun ParsedAction<*>.run(frame: ScriptFrame): Any? {
-    return frame.newFrame(this).run<Any?>().get()
-}
-
 /**
  * 获取变量
  * */

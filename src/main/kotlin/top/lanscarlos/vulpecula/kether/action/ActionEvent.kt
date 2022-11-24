@@ -3,14 +3,10 @@ package top.lanscarlos.vulpecula.kether.action
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import taboolib.library.kether.ArgTypes
-import taboolib.module.kether.actionNow
-import taboolib.module.kether.scriptParser
-import taboolib.module.kether.switch
+import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.utils.getVariable
-import top.lanscarlos.vulpecula.utils.run
-import top.lanscarlos.vulpecula.utils.toBoolean
-import top.lanscarlos.vulpecula.utils.tryNextAction
+import top.lanscarlos.vulpecula.utils.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -45,23 +41,41 @@ object ActionEvent {
         reader.switch {
             case("cancel") {
                 val next = reader.tryNextAction("to")
-                actionNow {
-                    val cancelled = next?.run(this).toBoolean(true)
-                    val event = source?.run(this) as? Event ?: this.getVariable<Event>("event", "@Event") ?: error("No event selected!")
-                    (event as? Cancellable)?.isCancelled = cancelled
-                    return@actionNow (event as? Cancellable)?.isCancelled
+                actionTake {
+                    listOf(
+                        source?.let { this.run(it) },
+                        next?.let { this.run(it) },
+                    ).thenTake().thenApply {
+                        val event = it[0] as? Event ?: this.getVariable<Event>("event", "@Event") ?: error("No event selected!")
+                        val cancelled = it[1].toBoolean(true)
+
+                        (event as? Cancellable)?.isCancelled = cancelled
+                        return@thenApply (event as? Cancellable)?.isCancelled
+                    }
                 }
             }
             case("cancelled") {
-                actionNow {
-                    val event = source?.run(this) as? Event ?: this.getVariable<Event>("event", "@Event") ?: error("No event selected!")
-                    return@actionNow (event as? Cancellable)?.isCancelled
+                actionTake {
+                    listOf(
+                        source?.let { this.run(it) }
+                    ).thenTake().thenApply {
+                        val event = it[0] as? Event ?: this.getVariable<Event>("event", "@Event") ?: error("No event selected!")
+
+                        return@thenApply (event as? Cancellable)?.isCancelled
+                    }
                 }
             }
             case("name") {
-                actionNow {
-                    val event = source?.run(this) as? Event ?: this.getVariable<Event>("event", "@Event") ?: error("No event selected!")
-                    return@actionNow event.eventName
+                actionTake {
+                    if (source != null) {
+                        this.run(source).thenApply {
+                            (it as? Event)?.eventName ?: error("No event selected!")
+                        }
+                    } else {
+                        CompletableFuture.completedFuture(
+                            this.getVariable<Event>("event", "@Event")?.eventName ?: error("No event selected!")
+                        )
+                    }
                 }
             }
         }
