@@ -21,7 +21,7 @@ interface LiveData<T: Any> {
 
     fun <R> thenApply(frame: ScriptFrame, def: T, vararg futures: CompletableFuture<*>, func: T.(List<Any?>) -> R): CompletableFuture<R> {
         val future = CompletableFuture<R>()
-        then(*futures).thenAccept { parameters ->
+        wait(*futures).thenAccept { parameters ->
             this.get(frame, def).thenAccept {
                 future.complete(func(it, parameters))
             }
@@ -31,7 +31,7 @@ interface LiveData<T: Any> {
 
     fun <R> thenApplyOrNull(frame: ScriptFrame, vararg futures: CompletableFuture<*>, func: T?.(List<Any?>) -> R): CompletableFuture<R> {
         val future = CompletableFuture<R>()
-        then(*futures).thenAccept { parameters ->
+        wait(*futures).thenAccept { parameters ->
             this.getOrNull(frame).thenAccept {
                 future.complete(func(it, parameters))
             }
@@ -39,24 +39,38 @@ interface LiveData<T: Any> {
         return future
     }
 
-    private fun then(vararg futures: CompletableFuture<*>): CompletableFuture<List<Any?>> {
+    private fun wait(vararg futures: CompletableFuture<*>): CompletableFuture<List<Any?>> {
         val parameters = CompletableFuture<List<Any?>>()
-        val counter = AtomicInteger(0)
-        for (it in futures) {
-            if (it.isDone) {
-                val count = counter.incrementAndGet()
-
-                // 判断 futures 是否全部执行完毕
-                if (count >= futures.size) {
-                    parameters.complete(futures.map { it.getNow(null) })
-                }
+        if (futures.isEmpty()) {
+            // 队列为空
+            parameters.complete(listOf())
+        } else if (futures.size == 1) {
+            // 队列仅有一个
+            val future = futures.first()
+            if (future.isDone) {
+                parameters.complete(listOf(future.getNow(null)))
             } else {
-                it.thenRun {
+                future.thenAccept { parameters.complete(listOf(it)) }
+            }
+        } else {
+            // 多个
+            val counter = AtomicInteger(0)
+            for (it in futures) {
+                if (it.isDone) {
                     val count = counter.incrementAndGet()
 
                     // 判断 futures 是否全部执行完毕
                     if (count >= futures.size) {
                         parameters.complete(futures.map { it.getNow(null) })
+                    }
+                } else {
+                    it.thenRun {
+                        val count = counter.incrementAndGet()
+
+                        // 判断 futures 是否全部执行完毕
+                        if (count >= futures.size) {
+                            parameters.complete(futures.map { it.getNow(null) })
+                        }
                     }
                 }
             }

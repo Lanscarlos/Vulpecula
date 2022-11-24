@@ -12,6 +12,7 @@ import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
+import top.lanscarlos.vulpecula.utils.readEntity
 import top.lanscarlos.vulpecula.utils.unsafePlayer
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -26,27 +27,39 @@ import java.util.concurrent.ConcurrentHashMap
 class ActionMemory(
     val key: LiveData<String>,
     val value: ParsedAction<*>?,
-    val entity: ParsedAction<*>?,
-    val global: Boolean
+    val entity: LiveData<Entity>?
 ) : ScriptAction<Any?>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        val key = this.key.get(frame, "UNKNOWN_KEY")
-        val entity = if (!global) {
-            this.entity?.let {
-                frame.run(it).join() as? Entity
-            } ?: (frame.unsafePlayer() as? BukkitPlayer)?.player
-        } else null
-
+        val defKey = "UNKNOWN_KEY"
         return if (this.value != null) {
             // 设置变量
-            val value = frame.run(this.value).join()
-            setMemory(key, value, entity)
-            CompletableFuture.completedFuture(value)
+
+            if (entity != null) {
+                // 全局
+                key.thenApply(frame, defKey, frame.run(value), entity.getOrNull(frame)) {
+                    setMemory(this, it.first(), it.last() as? Entity)
+                }
+            } else {
+                // 非全局
+                key.thenApply(frame, defKey, frame.run(value)) {
+                    setMemory(this, it.first(), null)
+                }
+            }
         } else {
             // 获取变量
-            val value = getMemory(key, entity)
-            CompletableFuture.completedFuture(value)
+
+            if (entity != null) {
+                // 全局
+                key.thenApply(frame, defKey, entity.getOrNull(frame)) {
+                    setMemory(this, it.first(), it.last() as? Entity)
+                }
+            } else {
+                // 非全局
+                key.get(frame, defKey).thenApply {
+                    getMemory(it, null)
+                }
+            }
         }
     }
 
@@ -116,12 +129,11 @@ class ActionMemory(
             } else null
 
             val entity = if (reader.hasNextToken("by")) {
-                reader.nextBlock()
+                reader.readEntity()
             } else null
 
-            val global = reader.hasNextToken("-global", "global", "-g")
-
-            ActionMemory(key, value, entity, global)
+            // 全局变量不以
+            ActionMemory(key, value, entity)
         }
     }
 }
