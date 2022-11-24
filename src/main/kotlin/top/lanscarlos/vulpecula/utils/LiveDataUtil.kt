@@ -43,7 +43,7 @@ fun <T : Any> LiveData<*>?.getValue(frame: ScriptFrame, def: T): CompletableFutu
 /**
  * 根据传入的默认值的类型自动匹配 LiveData
  * */
-fun <T> LiveData<*>?.getValueOrNull(frame: ScriptFrame): CompletableFuture<T?> {
+fun <T: Any> LiveData<*>?.getValueOrNull(frame: ScriptFrame): CompletableFuture<T?> {
     if (this == null) return CompletableFuture.completedFuture(null)
     return this.getOrNull(frame) as? CompletableFuture<T?> ?: CompletableFuture.completedFuture(null)
 }
