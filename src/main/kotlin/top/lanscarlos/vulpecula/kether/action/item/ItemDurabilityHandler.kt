@@ -37,7 +37,7 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
                 }
             }
             "current", "cur", "max" -> {
-                return acceptHandlerNow(source) { item ->
+                return acceptHandleNow(source) { item ->
                     when (next) {
                         "current", "cur" -> item.durability
                         "max" -> item.type.maxDurability
@@ -48,7 +48,7 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
             else -> {
                 // 显示耐久
                 reader.reset()
-                return acceptHandlerNow(source) { item -> item.durability }
+                return acceptHandleNow(source) { item -> item.durability }
             }
         }
     }

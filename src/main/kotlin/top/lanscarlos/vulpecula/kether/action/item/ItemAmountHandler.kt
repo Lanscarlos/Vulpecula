@@ -41,7 +41,7 @@ object ItemAmountHandler : ActionItemStack.Reader {
                 }
             }
             "current", "cur", "max" -> {
-                return acceptHandlerNow(source) { item ->
+                return acceptHandleNow(source) { item ->
                     when (next) {
                         "current", "cur" -> item.amount
                         "max" -> item.maxStackSize
@@ -51,7 +51,7 @@ object ItemAmountHandler : ActionItemStack.Reader {
             }
             else -> {
                 reader.reset()
-                return acceptHandlerNow(source) { item -> item.amount }
+                return acceptHandleNow(source) { item -> item.amount }
             }
         }
     }

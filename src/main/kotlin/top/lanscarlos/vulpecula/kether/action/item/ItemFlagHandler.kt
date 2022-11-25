@@ -77,7 +77,7 @@ object ItemFlagHandler : ActionItemStack.Reader {
             }
             "has", "contains", "contain" -> {
                 val type = reader.readString()
-                return acceptHandlerFuture(source) { item ->
+                return acceptHandleFuture(source) { item ->
                     type.getOrNull(this).thenApply { name ->
                         val flag = ItemFlag.values().firstOrNull { it.name.equals(name, true) } ?: return@thenApply item
                         return@thenApply item.itemMeta?.hasItemFlag(flag) ?: false
@@ -86,7 +86,7 @@ object ItemFlagHandler : ActionItemStack.Reader {
             }
             else -> {
                 reader.reset()
-                return acceptHandlerNow(source) { item -> item.itemMeta?.itemFlags }
+                return acceptHandleNow(source) { item -> item.itemMeta?.itemFlags }
             }
         }
     }

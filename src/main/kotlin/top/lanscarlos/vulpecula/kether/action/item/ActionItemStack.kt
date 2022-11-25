@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action.item
 
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -156,7 +155,7 @@ class ActionItemStack : ScriptAction<Any?>() {
         /**
          * 接收 ItemStack 返回任意对象
          * */
-        fun acceptHandlerNow(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> Any?): Handler {
+        fun acceptHandleNow(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> Any?): Handler {
             return object : Handler {
                 override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?> {
                     return if (source != null) {
@@ -190,7 +189,7 @@ class ActionItemStack : ScriptAction<Any?>() {
         /**
          * 接收 ItemStack 返回任意对象
          * */
-        fun acceptHandlerFuture(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> CompletableFuture<Any?>): Handler {
+        fun acceptHandleFuture(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> CompletableFuture<Any?>): Handler {
             return object : Handler {
                 override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?> {
                     return if (source != null) {

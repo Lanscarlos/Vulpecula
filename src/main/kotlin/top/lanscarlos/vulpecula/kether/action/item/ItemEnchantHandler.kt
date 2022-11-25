@@ -29,7 +29,7 @@ object ItemEnchantHandler : ActionItemStack.Reader {
             "level", "lvl" -> level(reader, source)
             else -> {
                 reader.reset()
-                acceptHandlerNow(source) { item -> item.itemMeta?.enchants }
+                acceptHandleNow(source) { item -> item.itemMeta?.enchants }
             }
         }
     }
@@ -81,12 +81,12 @@ object ItemEnchantHandler : ActionItemStack.Reader {
 
     private fun contains(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         if (reader.hasNextToken("any")) {
-            return acceptHandlerNow(source) { item ->
+            return acceptHandleNow(source) { item ->
                 item.itemMeta?.hasEnchants() ?: false
             }
         } else {
             val type = reader.readString()
-            return acceptHandlerFuture(source) { item ->
+            return acceptHandleFuture(source) { item ->
                 type.getOrNull(this).thenApply { name ->
                     val enchant = name?.asEnchantment() ?: return@thenApply false
 
@@ -100,7 +100,7 @@ object ItemEnchantHandler : ActionItemStack.Reader {
         reader.hasNextToken("by")
         val type = reader.readString()
 
-        return acceptHandlerFuture(source) { item ->
+        return acceptHandleFuture(source) { item ->
             type.getOrNull(this).thenApply { name ->
                 val enchant = name?.asEnchantment() ?: return@thenApply 0
 

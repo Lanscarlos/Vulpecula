@@ -39,7 +39,7 @@ object ItemTagHandler : ActionItemStack.Reader {
         val path = reader.readString()
         val asType = reader.tryReadString("as")
         val defAction = reader.tryNextAction("def")
-        return acceptHandlerFuture(source) { item ->
+        return acceptHandleFuture(source) { item ->
             listOf(
                 path.getOrNull(this),
                 asType?.getOrNull(this),
@@ -84,7 +84,7 @@ object ItemTagHandler : ActionItemStack.Reader {
 
     private fun hasTag(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val path = StringLiveData(reader.nextBlock())
-        return acceptHandlerFuture(source) { item ->
+        return acceptHandleFuture(source) { item ->
             path.getOrNull(this).thenApply { key ->
                 if (key == null) return@thenApply false
                 return@thenApply item.getItemTag().getDeep(key) != null
@@ -93,6 +93,6 @@ object ItemTagHandler : ActionItemStack.Reader {
     }
 
     private fun allTag(source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        return acceptHandlerNow(source) { item -> item.getItemTag() }
+        return acceptHandleNow(source) { item -> item.getItemTag() }
     }
 }

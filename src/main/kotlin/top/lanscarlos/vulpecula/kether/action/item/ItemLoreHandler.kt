@@ -27,7 +27,7 @@ object ItemLoreHandler : ActionItemStack.Reader {
             "clear" -> clear(source)
             else -> {
                 reader.reset()
-                acceptHandlerNow(source) { item -> item.itemMeta?.lore }
+                acceptHandleNow(source) { item -> item.itemMeta?.lore }
             }
         }
     }

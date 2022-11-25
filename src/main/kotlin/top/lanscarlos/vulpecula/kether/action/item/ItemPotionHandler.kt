@@ -37,7 +37,7 @@ object ItemPotionHandler : ActionItemStack.Reader {
             "color" -> color(reader, source)
             else -> {
                 reader.reset()
-                acceptHandlerNow(source) { item -> item.itemMeta?.lore }
+                acceptHandleNow(source) { item -> item.itemMeta?.lore }
             }
         }
     }
@@ -110,12 +110,12 @@ object ItemPotionHandler : ActionItemStack.Reader {
 
     fun contains(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         if (reader.hasNextToken("any")) {
-            return acceptHandlerNow(source) { item ->
+            return acceptHandleNow(source) { item ->
                 (item.itemMeta as? PotionMeta)?.hasCustomEffects() ?: false
             }
         } else {
             val raw = reader.readString()
-            return acceptHandlerFuture(source) { item ->
+            return acceptHandleFuture(source) { item ->
                 raw.getOrNull(this).thenApply { name ->
                     val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
                     val type = name?.asPotionEffectType() ?: return@thenApply item
@@ -130,8 +130,8 @@ object ItemPotionHandler : ActionItemStack.Reader {
         reader.mark()
         return when (val it = reader.nextToken()) {
             "type", "extended", "upgraded" -> {
-                acceptHandlerNow(source) { item ->
-                    val meta = item.itemMeta as? PotionMeta ?: return@acceptHandlerNow null
+                acceptHandleNow(source) { item ->
+                    val meta = item.itemMeta as? PotionMeta ?: return@acceptHandleNow null
                     when (it) {
                         "type" -> meta.basePotionData.type
                         "extended" -> meta.basePotionData.isExtended
@@ -167,7 +167,7 @@ object ItemPotionHandler : ActionItemStack.Reader {
                 }
             }
             else -> {
-                acceptHandlerNow(source) { item ->
+                acceptHandleNow(source) { item ->
                     (item.itemMeta as? PotionMeta)?.basePotionData
                 }
             }
