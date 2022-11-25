@@ -1,8 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action.entity
 
 import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -28,17 +26,15 @@ class ActionEntity : ScriptAction<Any?>() {
     private val handlers = mutableListOf<Handler>()
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        var previous: Entity? = null
+        var previous: CompletableFuture<out Entity?> = CompletableFuture.completedFuture(null)
         for (handler in handlers) {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
             } else {
-                return CompletableFuture.completedFuture(
-                    handler.handle(frame, previous)
-                )
+                return handler.handle(frame, previous) as CompletableFuture<Any?>
             }
         }
-        return CompletableFuture.completedFuture(previous)
+        return previous as CompletableFuture<Any?>
     }
 
     companion object : ClassInjector(packageName = ActionEntity::class.java.packageName) {
@@ -94,14 +90,14 @@ class ActionEntity : ScriptAction<Any?>() {
      * 处理后返回任意对象
      * */
     interface Handler {
-        fun handle(frame: ScriptFrame, previous: Entity?): Any?
+        fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?>
     }
 
     /**
      * 处理后返回 Entity 对象，供下一处理器使用
      * */
     interface Transfer : Handler {
-        override fun handle(frame: ScriptFrame, previous: Entity?): Entity
+        override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity>
     }
 
     /**
@@ -125,10 +121,35 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 返回任意对象
          * */
-        fun handle(func: ScriptFrame.(entity: Entity?) -> Any?): Handler {
+        fun handleNow(func: ScriptFrame.(entity: Entity?) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
-                    return func(frame, previous)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 返回任意对象
+         * */
+        fun handleFuture(func: ScriptFrame.(entity: Entity?) -> CompletableFuture<Any?>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
+                    return if (previous.isDone) {
+                        func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<Any>()
+                        previous.thenAccept { entity ->
+                            func(frame, entity).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -136,35 +157,87 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 接收 Entity 返回任意对象
          * */
-        fun acceptEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Any?): Handler {
+        fun acceptHandleNow(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
-                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
-                    return func(frame, entity)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, wait.getNow(null) ?: error("No entity select."))
+                            )
+                        } else {
+                            wait.thenApply {
+                                func(frame, it ?: error("No entity select."))
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, previous.getNow(null) ?: error("No entity select."))
+                            )
+                        } else {
+                            previous.thenApply {
+                                func(frame, it ?: error("No entity select."))
+                            }
+                        }
+                    }
                 }
             }
         }
 
         /**
-         * 接收 LivingEntity 返回任意对象
+         * 接收 Entity 返回任意对象
          * */
-        fun acceptLivingEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: LivingEntity) -> Any?): Handler {
+        fun acceptHandleFuture(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> CompletableFuture<Any?>): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
-                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
-                    return func(frame, entity as? LivingEntity ?: return entity)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null) ?: error("No entity select."))
+                        } else {
+                            val future = CompletableFuture<Any?>()
+                            wait.thenAccept { entity ->
+                                func(frame, entity ?: error("No entity select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: error("No entity select."))
+                        } else {
+                            val future = CompletableFuture<Any?>()
+                            previous.thenAccept { entity ->
+                                func(frame, entity ?: error("No entity select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }
 
+
         /**
-         * 接收 Player 返回任意对象
+         * 返回 Entity 对象
          * */
-        fun acceptPlayer(source: LiveData<Entity>?, func: ScriptFrame.(player: Player) -> Any?): Handler {
-            return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Any? {
-                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
-                    return func(frame, entity as? Player ?: return entity)
+        fun transferNow(func: ScriptFrame.(entity: Entity?) -> Entity): Handler {
+            return object : Transfer {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
                 }
             }
         }
@@ -172,10 +245,20 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 返回 Entity 对象
          * */
-        fun transfer(func: ScriptFrame.(entity: Entity?) -> Entity): Handler {
+        fun transferFuture(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity?) -> CompletableFuture<Entity>): Transfer {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
-                    return func(frame, previous)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity> {
+                    return if (previous.isDone) {
+                        func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<Entity>()
+                        previous.thenAccept { entity ->
+                            func(frame, entity).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -183,23 +266,33 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 接收 Entity 并返回 Entity 对象
          * */
-        fun applyEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Entity): Transfer {
+        fun acceptTransferNow(source: LiveData<Entity>?, func: ScriptFrame.(vector: Entity) -> Entity): Transfer {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
-                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
-                    return func(frame, entity)
-                }
-            }
-        }
-
-        /**
-         * 接收 LivingEntity 并返回 LivingEntity 对象
-         * */
-        fun applyLivingEntity(source: LiveData<Entity>?, func: ScriptFrame.(entity: LivingEntity) -> LivingEntity): Transfer {
-            return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
-                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
-                    return func(frame, entity as? LivingEntity ?: return entity)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, wait.getNow(null) ?: error("No entity select."))
+                            )
+                        } else {
+                            wait.thenApply {
+                                func(frame, it ?: error("No entity select."))
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, previous.getNow(null) ?: error("No entity select."))
+                            )
+                        } else {
+                            previous.thenApply {
+                                func(frame, it ?: error("No entity select."))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -207,11 +300,37 @@ class ActionEntity : ScriptAction<Any?>() {
         /**
          * 接收 Entity 并返回 Entity 对象
          * */
-        fun applyPlayer(source: LiveData<Entity>?, func: ScriptFrame.(player: Player) -> Player): Transfer {
+        fun acceptTransferFuture(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> CompletableFuture<Entity>): Handler {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: Entity?): Entity {
-                    val entity = previous ?: source?.getOrNull(frame) ?: error("No entity select.")
-                    return func(frame, entity as? Player ?: return entity)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null) ?: error("No entity select."))
+                        } else {
+                            val future = CompletableFuture<Entity>()
+                            wait.thenAccept { entity ->
+                                func(frame, entity ?: error("No entity select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: error("No entity select."))
+                        } else {
+                            val future = CompletableFuture<Entity>()
+                            previous.thenAccept { entity ->
+                                func(frame, entity ?: error("No entity select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }

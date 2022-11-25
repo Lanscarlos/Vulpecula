@@ -1,10 +1,10 @@
 package top.lanscarlos.vulpecula.kether.action.entity
 
 import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
 
@@ -25,7 +25,7 @@ object EntityPotionHandler : ActionEntity.Reader {
         return when (reader.nextToken()) {
             "add", "set" -> addPotion(reader, source)
             "remove", "rm" -> removePotion(reader, source)
-            "clear" -> clearPotion(reader, source)
+            "clear" -> clearPotion(source)
             "contains", "contain", "has" -> containsPotion(reader, source)
             else -> {
                 reader.reset()
@@ -52,46 +52,63 @@ object EntityPotionHandler : ActionEntity.Reader {
             }
         }
 
-        return applyLivingEntity(source) { entity ->
-            val potion = PotionEffect(
-                type.asPotionEffectType(this) ?: PotionEffectType.SLOW,
-                options["duration"].getValue(this, 200),
-                options["amplifier"].getValue(this, 0) - 1,
-                options["ambient"].getValue(this, false),
-                options["particles"].getValue(this, true),
-                options["icon"].getValue(this, true)
-            )
+        return acceptTransferFuture(source) { entity ->
+            listOf(
+                type.getOrNull(this),
+                options["duration"]?.getOrNull(this),
+                options["amplifier"]?.getOrNull(this),
+                options["ambient"]?.getOrNull(this),
+                options["particles"]?.getOrNull(this),
+                options["icon"]?.getOrNull(this)
+            ).thenTake().thenApply {
 
-            entity.also { it.addPotionEffect(potion) }
+                val name = it[0]?.toString() ?: "SLOW"
+                val potion = PotionEffect(
+                    PotionEffectType.values().firstOrNull { name.equals(it.name, true) } ?: PotionEffectType.SLOW,
+                    it[1].toInt(200),
+                    it[2].toInt(1) - 1,
+                    it[3].toBoolean(false),
+                    it[4].toBoolean(true),
+                    it[5].toBoolean(true)
+                )
+
+                (entity as? LivingEntity)?.addPotionEffect(potion)
+                return@thenApply entity
+            }
         }
     }
 
     private fun removePotion(reader: QuestReader, source: LiveData<Entity>?): ActionEntity.Handler {
         val type = reader.readString()
 
-        return applyLivingEntity(source) { entity ->
-            type.asPotionEffectType(this)?.let { entity.removePotionEffect(it) }
-            entity
+        return acceptTransferFuture(source) { entity ->
+            type.getOrNull(this).thenApply { name ->
+                if (name == null) return@thenApply entity
+                PotionEffectType.values().firstOrNull { it.name.equals(name, true) }?.let {
+                    (entity as? LivingEntity)?.removePotionEffect(it)
+                }
+                return@thenApply entity
+            }
         }
     }
 
-    private fun clearPotion(reader: QuestReader, source: LiveData<Entity>?): ActionEntity.Handler {
-        return applyLivingEntity(source) { entity ->
-            entity.activePotionEffects.forEach { entity.removePotionEffect(it.type) }
-            entity
+    private fun clearPotion(source: LiveData<Entity>?): ActionEntity.Handler {
+        return acceptTransferNow(source) { entity ->
+            (entity as? LivingEntity)?.activePotionEffects?.forEach { entity.removePotionEffect(it.type) }
+            return@acceptTransferNow entity
         }
     }
 
     private fun containsPotion(reader: QuestReader, source: LiveData<Entity>?): ActionEntity.Handler {
         val type = reader.readString()
 
-        return acceptLivingEntity(source) { entity ->
-            type.asPotionEffectType(this)?.let { entity.hasPotionEffect(it) } ?: false
+        return acceptHandleFuture(source) { entity ->
+            type.getOrNull(this).thenApply { name ->
+                if (name == null) return@thenApply false
+                return@thenApply PotionEffectType.values().firstOrNull { it.name.equals(name, true) }?.let {
+                    (entity as? LivingEntity)?.hasPotionEffect(it)
+                } ?: false
+            }
         }
-    }
-
-    private fun LiveData<String>.asPotionEffectType(frame: ScriptFrame): PotionEffectType? {
-        val name = this.getOrNull(frame) ?: return null
-        return PotionEffectType.values().firstOrNull { name.equals(it.name, true) }
     }
 }

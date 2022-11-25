@@ -30,12 +30,10 @@ class ActionVector : ScriptAction<Any?>() {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
             } else {
-                return CompletableFuture.completedFuture(
-                    handler.handle(frame, previous)
-                )
+                return handler.handle(frame, previous) as CompletableFuture<Any?>
             }
         }
-        return CompletableFuture.completedFuture(previous)
+        return previous as CompletableFuture<Any?>
     }
 
     companion object : ClassInjector(packageName = ActionVector::class.java.packageName) {

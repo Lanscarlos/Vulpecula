@@ -1,10 +1,9 @@
 package top.lanscarlos.vulpecula.kether.action.entity
 
+import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.kether.action.entity.EntityPotionHandler.source
-import top.lanscarlos.vulpecula.utils.readDouble
-import top.lanscarlos.vulpecula.utils.readEntity
-import top.lanscarlos.vulpecula.utils.tryReadEntity
+import top.lanscarlos.vulpecula.utils.*
 
 /**
  * Vulpecula
@@ -22,8 +21,14 @@ object EntityDamageHandler : ActionEntity.Reader {
         val damage = reader.readDouble()
         val damager = reader.tryReadEntity("by")
 
-        return applyLivingEntity(source) { entity ->
-            entity.also { it.damage(damage.get(this, 0.0), damager?.getOrNull(this)) }
+        return acceptTransferFuture(source) { entity ->
+            listOf(
+                damage.getOrNull(this),
+                damager?.getOrNull(this)
+            ).thenTake().thenApply {
+                (entity as? LivingEntity)?.damage(it[0].toDouble(0.0), it[1] as? Entity)
+                return@thenApply entity
+            }
         }
     }
 }
