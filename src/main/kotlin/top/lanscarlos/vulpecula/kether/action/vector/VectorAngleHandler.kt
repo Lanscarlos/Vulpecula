@@ -20,8 +20,10 @@ object VectorAngleHandler : ActionVector.Reader {
         val source = if (isRoot) VectorLiveData(reader.nextBlock()) else null
         val other = reader.expectVector("with", "using")
 
-        return acceptHandler(source) { vector ->
-            vector.angle(other.get(this, Vector()))
+        return acceptHandleFuture(source) { vector ->
+            other.get(this, Vector()).thenApply {
+                vector.angle(it)
+            }
         }
     }
 }

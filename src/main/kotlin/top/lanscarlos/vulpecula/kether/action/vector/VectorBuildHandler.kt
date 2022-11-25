@@ -19,23 +19,21 @@ object VectorBuildHandler : ActionVector.Reader {
     override val name: Array<String> = arrayOf("build")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionVector.Handler {
-        val def = Location(null, 0.0, 0.0, 0.0)
         if (reader.hasNextToken("by")) {
             val loc = reader.readLocation()
 
-            return transfer {
-                loc.get(this, def).toVector()
+            return transferFuture {
+                loc.getOrNull(this).thenApply { it?.toVector() ?: error("No location selected.") }
             }
         } else if (reader.hasNextToken("from")) {
             val loc = reader.readLocation()
 
-            return transfer {
-                loc.get(this, def).direction
+            return transferFuture {
+                loc.getOrNull(this).thenApply { it?.direction ?: error("No location selected.") }
             }
         } else {
             val vec = reader.readVector(true)
-
-            return transfer {
+            return transferFuture {
                 vec.get(this, Vector())
             }
         }

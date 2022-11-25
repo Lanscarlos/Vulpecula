@@ -22,11 +22,13 @@ object VectorDistanceHandler : ActionVector.Reader {
         val source = if (isRoot) VectorLiveData(reader.nextBlock()) else null
         val other = reader.expectVector("with", "using")
 
-        return acceptHandler(source) { vector ->
-            when (input) {
-                "distance", "dist" -> vector.distance(other.get(this, Vector()))
-                "distance-squared", "dist-sq" -> vector.distanceSquared(other.get(this, Vector()))
-                else -> 0.0
+        return acceptHandleFuture(source) { vector ->
+            other.get(this, Vector()).thenApply {
+                when (input) {
+                    "distance", "dist" -> vector.distance(it)
+                    "distance-squared", "dist-sq" -> vector.distanceSquared(it)
+                    else -> 0.0
+                }
             }
         }
     }

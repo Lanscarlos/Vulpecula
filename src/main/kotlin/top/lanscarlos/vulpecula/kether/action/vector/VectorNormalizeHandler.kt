@@ -18,7 +18,7 @@ object VectorNormalizeHandler : ActionVector.Reader {
         val source = if (isRoot) VectorLiveData(reader.nextBlock()) else null
         val reproduced = reader.isReproduced()
 
-        return acceptTransfer(source, reproduced) { vector ->
+        return acceptTransferNow(source, reproduced) { vector ->
             vector.normalize()
         }
     }

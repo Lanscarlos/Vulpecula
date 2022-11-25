@@ -9,10 +9,7 @@ import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
-import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.nextPeek
-import top.lanscarlos.vulpecula.utils.readDouble
+import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -28,7 +25,7 @@ class ActionVector : ScriptAction<Any?>() {
     private val handlers = mutableListOf<Handler>()
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        var previous: Vector? = null
+        var previous: CompletableFuture<out Vector?> = CompletableFuture.completedFuture(null)
         for (handler in handlers) {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
@@ -98,14 +95,14 @@ class ActionVector : ScriptAction<Any?>() {
      * 处理后返回任意对象
      * */
     interface Handler {
-        fun handle(frame: ScriptFrame, previous: Vector?): Any?
+        fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Any?>
     }
 
     /**
      * 处理后返回 Vector 对象，供下一处理器使用
      * */
     interface Transfer : Handler {
-        override fun handle(frame: ScriptFrame, previous: Vector?): Vector
+        override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Vector>
     }
 
     /**
@@ -151,10 +148,35 @@ class ActionVector : ScriptAction<Any?>() {
         /**
          * 返回任意对象
          * */
-        fun handle(func: ScriptFrame.(vector: Vector?) -> Any?): Handler {
+        fun handleNow(func: ScriptFrame.(vector: Vector?) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: Vector?): Any? {
-                    return func(frame, previous)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Any?> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 返回任意对象
+         * */
+        fun handleFuture(func: ScriptFrame.(vector: Vector?) -> CompletableFuture<Any?>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Any?> {
+                    return if (previous.isDone) {
+                        func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<Any>()
+                        previous.thenAccept { vector ->
+                            func(frame, vector).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -162,11 +184,71 @@ class ActionVector : ScriptAction<Any?>() {
         /**
          * 接收 Vector 返回任意对象
          * */
-        fun acceptHandler(source: LiveData<Vector>?, func: ScriptFrame.(vector: Vector) -> Any?): Handler {
+        fun acceptHandleNow(source: LiveData<Vector>?, func: ScriptFrame.(vector: Vector) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: Vector?): Any? {
-                    val vec = previous ?: source?.getOrNull(frame) ?: error("No vector select.")
-                    return func(frame, vec)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Any?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, wait.getNow(null) ?: error("No vector select."))
+                            )
+                        } else {
+                            wait.thenApply {
+                                func(frame, it ?: error("No vector select."))
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, previous.getNow(null) ?: error("No vector select."))
+                            )
+                        } else {
+                            previous.thenApply {
+                                func(frame, it ?: error("No vector select."))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 接收 Vector 返回任意对象
+         * */
+        fun acceptHandleFuture(source: LiveData<Vector>?, func: ScriptFrame.(vector: Vector) -> CompletableFuture<Any?>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Any?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null) ?: error("No vector select."))
+                        } else {
+                            val future = CompletableFuture<Any?>()
+                            wait.thenAccept { vector ->
+                                func(frame, vector ?: error("No vector select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: error("No vector select."))
+                        } else {
+                            val future = CompletableFuture<Any?>()
+                            previous.thenAccept { vector ->
+                                func(frame, vector ?: error("No vector select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }
@@ -174,10 +256,35 @@ class ActionVector : ScriptAction<Any?>() {
         /**
          * 返回 Vector 对象
          * */
-        fun transfer(func: ScriptFrame.(vector: Vector?) -> Vector): Handler {
+        fun transferNow(func: ScriptFrame.(vector: Vector?) -> Vector): Handler {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: Vector?): Vector {
-                    return func(frame, previous)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Vector> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 返回 Vector 对象
+         * */
+        fun transferFuture(func: ScriptFrame.(vector: Vector?) -> CompletableFuture<Vector>): Handler {
+            return object : Transfer {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Vector> {
+                    return if (previous.isDone) {
+                        func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<Vector>()
+                        previous.thenAccept { vector ->
+                            func(frame, vector).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -185,11 +292,75 @@ class ActionVector : ScriptAction<Any?>() {
         /**
          * 接收 Vector 并返回 Vector 对象
          * */
-        fun acceptTransfer(source: LiveData<Vector>?, reproduced: Boolean, func: ScriptFrame.(vector: Vector) -> Vector): Transfer {
+        fun acceptTransferNow(source: LiveData<Vector>?, reproduced: Boolean, func: ScriptFrame.(vector: Vector) -> Vector): Transfer {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: Vector?): Vector {
-                    val vec = previous ?: source?.getOrNull(frame) ?: error("No vector select.")
-                    return func(frame, vec.let { if (reproduced) vec.clone() else vec })
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Vector> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            val vector = wait.getNow(null)?.let { if (reproduced) it.clone() else it }
+                            CompletableFuture.completedFuture(
+                                func(frame, vector ?: error("No vector select."))
+                            )
+                        } else {
+                            wait.thenApply {
+                                val vector = if (reproduced) it?.clone() else it
+                                func(frame, vector ?: error("No vector select."))
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            val vector = previous.getNow(null)?.let { if (reproduced) it.clone() else it }
+                            CompletableFuture.completedFuture(
+                                func(frame, vector ?: error("No vector select."))
+                            )
+                        } else {
+                            previous.thenApply {
+                                val vector = if (reproduced) it?.clone() else it
+                                func(frame, vector ?: error("No vector select."))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 接收 Vector 并返回 Vector 对象
+         * */
+        fun acceptTransferFuture(source: LiveData<Vector>?, reproduced: Boolean, func: ScriptFrame.(vector: Vector) -> CompletableFuture<Vector>): Transfer {
+            return object : Transfer {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Vector?>): CompletableFuture<out Vector> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null) ?: error("No vector select."))
+                        } else {
+                            val future = CompletableFuture<Vector>()
+                            wait.thenAccept { vector ->
+                                func(frame, vector ?: error("No vector select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: error("No vector select."))
+                        } else {
+                            val future = CompletableFuture<Vector>()
+                            previous.thenAccept { vector ->
+                                func(frame, vector ?: error("No vector select.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }

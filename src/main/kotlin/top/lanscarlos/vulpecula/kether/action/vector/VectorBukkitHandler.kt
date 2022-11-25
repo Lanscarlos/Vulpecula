@@ -19,7 +19,7 @@ object VectorBukkitHandler : ActionVector.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionVector.Handler {
         val source = if (isRoot) VectorLiveData(reader.nextBlock()) else null
 
-        return acceptHandler(source) { vector ->
+        return acceptHandleNow(source) { vector ->
             org.bukkit.util.Vector(vector.x, vector.y, vector.z)
         }
     }

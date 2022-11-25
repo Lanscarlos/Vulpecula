@@ -20,7 +20,7 @@ object VectorLengthHandler : ActionVector.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionVector.Handler {
         val source = if (isRoot) VectorLiveData(reader.nextBlock()) else null
 
-        return acceptHandler(source) { vector ->
+        return acceptHandleNow(source) { vector ->
             when (input) {
                 "length" -> vector.length()
                 "length-squared", "length-sq" -> vector.lengthSquared()

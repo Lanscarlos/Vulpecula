@@ -30,19 +30,23 @@ object VectorModifyHandler : ActionVector.Reader {
                 val other = reader.expectVectorBy("with", "copy", "by")
                 val reproduced = reader.isReproduced()
 
-                return acceptTransfer(source, reproduced) { vector ->
-                    vector.copy(other.get(this, vector))
+                return acceptTransferFuture(source, reproduced) { vector ->
+                    other.get(this, vector).thenApply {
+                        vector.copy(it)
+                    }
                 }
             }
             "add", "multiply", "mul" -> {
                 val other = reader.expectVectorBy("with", "and")
                 val reproduced = reader.isReproduced()
 
-                return acceptTransfer(source, reproduced) { vector ->
-                    when (input) {
-                        "add" -> vector.add(other.get(this, Vector()))
-                        "multiply", "mul" -> vector.multiply(other.get(this, Vector()))
-                        else -> vector
+                return acceptTransferFuture(source, reproduced) { vector ->
+                    other.get(this, Vector()).thenApply {
+                        when (input) {
+                            "add" -> vector.add(it)
+                            "multiply", "mul" -> vector.multiply(it)
+                            else -> vector
+                        }
                     }
                 }
             }
@@ -50,16 +54,18 @@ object VectorModifyHandler : ActionVector.Reader {
                 val other = reader.expectVectorBy("by")
                 val reproduced = reader.isReproduced()
 
-                return acceptTransfer(source, reproduced) { vector ->
-                    when (input) {
-                        "subtract", "sub" -> vector.subtract(other.get(this, Vector()))
-                        "divide", "div" -> vector.divide(other.get(this, Vector()))
-                        else -> vector
+                return acceptTransferFuture(source, reproduced) { vector ->
+                    other.get(this, Vector()).thenApply {
+                        when (input) {
+                            "subtract", "sub" -> vector.subtract(it)
+                            "divide", "div" -> vector.divide(it)
+                            else -> vector
+                        }
                     }
                 }
             }
             else -> {
-                return acceptTransfer(source, false) { vector -> vector }
+                return acceptTransferNow(source, false) { vector -> vector }
             }
         }
     }

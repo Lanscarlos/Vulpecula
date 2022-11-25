@@ -15,6 +15,6 @@ object VectorRandomHandler : ActionVector.Reader {
     override val name: Array<String> = arrayOf("random")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionVector.Handler {
-        return transfer { Vector.getRandom() }
+        return transferNow { Vector.getRandom() }
     }
 }

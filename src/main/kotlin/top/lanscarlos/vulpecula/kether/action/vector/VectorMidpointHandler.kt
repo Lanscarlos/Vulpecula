@@ -21,11 +21,13 @@ object VectorMidpointHandler : ActionVector.Reader {
         val other = reader.expectVector("with", "using")
         val reproduced = reader.isReproduced()
 
-        return acceptTransfer(source, false) { vector ->
-            if (reproduced) {
-                vector.getMidpoint(other.get(this, Vector()))
-            } else {
-                vector.midpoint(other.get(this, Vector()))
+        return acceptTransferFuture(source, false) { vector ->
+            other.get(this, Vector()).thenApply {
+                if (reproduced) {
+                    vector.getMidpoint(it)
+                } else {
+                    vector.midpoint(it)
+                }
             }
         }
     }

@@ -21,11 +21,13 @@ object VectorCrossHandler : ActionVector.Reader {
         val other = reader.expectVector("with", "using")
         val reproduced = reader.isReproduced()
 
-        return acceptTransfer(source, false) { vector ->
-            if (reproduced) {
-                vector.getCrossProduct(other.get(this, Vector()))
-            } else {
-                vector.crossProduct(other.get(this, Vector()))
+        return acceptTransferFuture(source, false) { vector ->
+            other.get(this, Vector()).thenApply {
+                if (reproduced) {
+                    vector.getCrossProduct(it)
+                } else {
+                    vector.crossProduct(it)
+                }
             }
         }
     }

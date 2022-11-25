@@ -18,7 +18,7 @@ object VectorCloneHandler : ActionVector.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionVector.Handler {
         val source = if (isRoot) VectorLiveData(reader.nextBlock()) else null
 
-        return acceptTransfer(source, false) { vector ->
+        return acceptTransferNow(source, false) { vector ->
             vector.clone()
         }
     }
