@@ -6,6 +6,7 @@ import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.readItemStack
 import top.lanscarlos.vulpecula.utils.readString
+import top.lanscarlos.vulpecula.utils.thenTake
 
 /**
  * Vulpecula
@@ -22,7 +23,7 @@ object ItemFlagHandler : ActionItemStack.Reader {
         val source = if (isRoot) reader.readItemStack() else null
         reader.mark()
 
-        return when (val it = reader.nextToken()) {
+        when (val next = reader.nextToken()) {
             "insert", "add",
             "modify", "set",
             "remove", "rm" -> {
@@ -37,57 +38,55 @@ object ItemFlagHandler : ActionItemStack.Reader {
                     raw += reader.readString()
                 }
 
-                applyTransfer(source) { _, meta ->
+                return acceptTransferFuture(source) { item ->
+                    raw.map { it.getOrNull(this) }.thenTake().thenApply { args ->
+                        val meta = item.itemMeta ?: return@thenApply item
+                        val flags = ItemFlag.values().filter { it.name in args }
 
-                    // 加载 flags
-                    val flags = raw.mapNotNull {
-                        it.getOrNull(this)
-                    }.map {
-                        ItemFlag.valueOf(it)
-                    }
-
-                    when (it) {
-                        "insert", "add" -> {
-                            meta.addItemFlags(*flags.toTypedArray())
-                        }
-                        "modify", "set" -> {
-                            meta.itemFlags.forEach {
-                                if (it !in flags) meta.removeItemFlags(it)
+                        when (next) {
+                            "insert", "add" -> {
+                                meta.addItemFlags(*flags.toTypedArray())
                             }
-                            meta.addItemFlags(*flags.toTypedArray())
-                        }
-                        "remove", "rm" -> {
-                            meta.itemFlags.forEach {
-                                if (it !in flags) meta.removeItemFlags(it)
+                            "modify", "set" -> {
+                                meta.itemFlags.forEach {
+                                    if (it !in flags) meta.removeItemFlags(it)
+                                }
+                                meta.addItemFlags(*flags.toTypedArray())
+                            }
+                            "remove", "rm" -> {
+                                meta.itemFlags.forEach {
+                                    if (it !in flags) meta.removeItemFlags(it)
+                                }
                             }
                         }
-                    }
 
-                    return@applyTransfer meta
+                        return@thenApply item.also { it.itemMeta = meta }
+                    }
                 }
             }
             "clear" -> {
-                applyTransfer(source) { _, meta ->
+                return acceptTransferNow(source) { item ->
+                    val meta = item.itemMeta ?: return@acceptTransferNow item
+
                     meta.itemFlags.forEach {
                         meta.removeItemFlags(it)
                     }
-                    return@applyTransfer meta
+
+                    return@acceptTransferNow item.also { it.itemMeta = meta }
                 }
             }
             "has", "contains", "contain" -> {
                 val type = reader.readString()
-                acceptHandler(source) { item ->
-
-                    val flag = type.getOrNull(this)?.let {
-                        ItemFlag.valueOf(it)
-                    } ?: return@acceptHandler false
-
-                    item.itemMeta?.hasItemFlag(flag)
+                return acceptHandlerFuture(source) { item ->
+                    type.getOrNull(this).thenApply { name ->
+                        val flag = ItemFlag.values().firstOrNull { it.name.equals(name, true) } ?: return@thenApply item
+                        return@thenApply item.itemMeta?.hasItemFlag(flag) ?: false
+                    }
                 }
             }
             else -> {
                 reader.reset()
-                acceptHandler(source) { item -> item.itemMeta?.itemFlags }
+                return acceptHandlerNow(source) { item -> item.itemMeta?.itemFlags }
             }
         }
     }

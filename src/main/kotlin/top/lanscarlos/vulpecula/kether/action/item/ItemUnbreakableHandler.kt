@@ -22,19 +22,22 @@ object ItemUnbreakableHandler : ActionItemStack.Reader {
         reader.hasNextToken("to")
         val unbreakable = reader.readBoolean()
 
-        return applyTransfer(source) { _, meta ->
-            val isUnbreakable = unbreakable.get(this, false)
+        return acceptTransferFuture(source) { item ->
+            unbreakable.get(this, false).thenApply { isUnbreakable ->
+                val meta = item.itemMeta ?: return@thenApply item
 
-            try {
-                meta.isUnbreakable = isUnbreakable
-            } catch (ex: NoSuchMethodError) {
                 try {
-                    meta.invokeMethod<Any>("spigot")!!.invokeMethod<Any>("setUnbreakable", isUnbreakable)
-                } catch (ignored: NoSuchMethodException) {
+                    meta.isUnbreakable = isUnbreakable
+                } catch (ex: NoSuchMethodError) {
+                    try {
+                        meta.invokeMethod<Any>("spigot")!!.invokeMethod<Any>("setUnbreakable", isUnbreakable)
+                    } catch (ignored: NoSuchMethodException) {
+                        // 忽略
+                    }
                 }
-            }
 
-            return@applyTransfer meta
+                return@thenApply item.also { it.itemMeta = meta }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.readInt
 import top.lanscarlos.vulpecula.utils.readItemStack
+import top.lanscarlos.vulpecula.utils.toInt
 
 /**
  * Vulpecula
@@ -19,25 +20,29 @@ object ItemAmountHandler : ActionItemStack.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
         reader.mark()
-        return when (val it = reader.nextToken()) {
+        when (val next = reader.nextToken()) {
             "add", "give",
             "sub", "take",
             "set" -> {
                 reader.hasNextToken("to")
                 val amount = reader.readInt()
-                acceptTransfer(source) { item ->
-                    item.amount = when (it) {
-                        "add", "give" -> item.amount + amount.get(this, 0)
-                        "sub", "take" -> item.amount - amount.get(this, 0)
-                        "set" -> amount.get(this, item.amount)
-                        else -> item.amount
-                    }.coerceIn(0, item.maxStackSize)
-                    item
+
+                return acceptTransferFuture(source) { item ->
+                    amount.getOrNull(this).thenApply {
+                        item.amount = when (next) {
+                            "add", "give" -> item.amount + it.toInt(0)
+                            "sub", "take" -> item.amount - it.toInt(0)
+                            "set" -> it.toInt(item.amount)
+                            else -> item.amount
+                        }.coerceIn(0, item.maxStackSize)
+
+                        return@thenApply item
+                    }
                 }
             }
             "current", "cur", "max" -> {
-                acceptHandler(source) { item ->
-                    when (it) {
+                return acceptHandlerNow(source) { item ->
+                    when (next) {
                         "current", "cur" -> item.amount
                         "max" -> item.maxStackSize
                         else -> -1
@@ -46,7 +51,7 @@ object ItemAmountHandler : ActionItemStack.Reader {
             }
             else -> {
                 reader.reset()
-                acceptHandler(source) { item -> item.amount }
+                return acceptHandlerNow(source) { item -> item.amount }
             }
         }
     }

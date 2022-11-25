@@ -7,10 +7,7 @@ import taboolib.module.nms.getItemTag
 import taboolib.module.nms.setItemTag
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
-import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.readItemStack
-import top.lanscarlos.vulpecula.utils.tryNextAction
-import top.lanscarlos.vulpecula.utils.tryReadString
+import top.lanscarlos.vulpecula.utils.*
 
 /**
  * Vulpecula
@@ -39,50 +36,63 @@ object ItemTagHandler : ActionItemStack.Reader {
     }
 
     private fun getTag(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        val path = StringLiveData(reader.nextBlock())
+        val path = reader.readString()
         val asType = reader.tryReadString("as")
         val defAction = reader.tryNextAction("def")
-        return acceptHandler(source) { item ->
-            val tag = item.getItemTag()
-            val def = defAction?.let { this.run(it).join() }
-            val key = path.getOrNull(this) ?: return@acceptHandler def
-            val data = tag.getDeep(key) ?: return@acceptHandler def
-            return@acceptHandler when (asType?.getOrNull(this)) {
-                "boolean", "bool" -> data.asByte() > 0
-                "short" -> data.asShort()
-                "integer", "int" -> data.asInt()
-                "long" -> data.asLong()
-                "float" -> data.asFloat()
-                "double" -> data.asDouble()
-                "string", "str" -> data.asString()
-                else -> data.unsafeData() ?: def
+        return acceptHandlerFuture(source) { item ->
+            listOf(
+                path.getOrNull(this),
+                asType?.getOrNull(this),
+                defAction?.let { this.run(it) }
+            ).thenTake().thenApply { args ->
+                val def = args[2]
+                val key = args[0]?.toString() ?: return@thenApply def
+                val data = item.getItemTag().getDeep(key) ?: return@thenApply def
+
+                return@thenApply when (args[1]?.toString()) {
+                    "boolean", "bool" -> data.asByte() > 0
+                    "short" -> data.asShort()
+                    "integer", "int" -> data.asInt()
+                    "long" -> data.asLong()
+                    "float" -> data.asFloat()
+                    "double" -> data.asDouble()
+                    "string", "str" -> data.asString()
+                    else -> data.unsafeData() ?: def
+                }
             }
         }
     }
 
     private fun setTag(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        val path = StringLiveData(reader.nextBlock())
+        val path = reader.readString()
         val value = reader.nextBlock()
-        return applyTransfer(source) { item, _ ->
-            val tag = item.getItemTag()
-            val key = path.getOrNull(this) ?: error("No path selected.")
-            tag.putDeep(key, this.run(value).join())
-            val newItem = item.setItemTag(tag)
+        return acceptTransferFuture(source) { item ->
+            listOf(
+                path.getOrNull(this),
+                this.run(value)
+            ).thenTake().thenApply { args ->
+                val tag = item.getItemTag()
+                val key = args[0]?.toString() ?: error("No path selected.")
+                tag.putDeep(key, this.run(value).join())
+                val newItem = item.setItemTag(tag)
 
-            // 将 nbt 更新后的新物品 meta 转入原物品
-            return@applyTransfer newItem.itemMeta
+                // 将 nbt 更新后的新物品 meta 转入原物品
+                return@thenApply item.also { it.itemMeta = newItem.itemMeta }
+            }
         }
     }
 
     private fun hasTag(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val path = StringLiveData(reader.nextBlock())
-        return acceptHandler(source) { item ->
-            val key = path.getOrNull(this) ?: return@acceptHandler false
-            return@acceptHandler item.getItemTag().getDeep(key) != null
+        return acceptHandlerFuture(source) { item ->
+            path.getOrNull(this).thenApply { key ->
+                if (key == null) return@thenApply false
+                return@thenApply item.getItemTag().getDeep(key) != null
+            }
         }
     }
 
     private fun allTag(source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        return acceptHandler(source) { item -> item.getItemTag() }
+        return acceptHandlerNow(source) { item -> item.getItemTag() }
     }
 }

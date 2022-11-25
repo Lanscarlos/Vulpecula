@@ -17,7 +17,7 @@ object ItemDestroyHandler : ActionItemStack.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
 
-        return acceptTransfer(source) { item ->
+        return acceptHandlerNow(source) { item ->
             item.also { it.amount = 0 }
         }
     }

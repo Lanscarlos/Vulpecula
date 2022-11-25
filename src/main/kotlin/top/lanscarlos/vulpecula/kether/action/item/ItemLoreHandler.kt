@@ -27,7 +27,7 @@ object ItemLoreHandler : ActionItemStack.Reader {
             "clear" -> clear(source)
             else -> {
                 reader.reset()
-                acceptHandler(source) { item -> item.itemMeta?.lore }
+                acceptHandlerNow(source) { item -> item.itemMeta?.lore }
             }
         }
     }
@@ -36,19 +36,26 @@ object ItemLoreHandler : ActionItemStack.Reader {
         val raw = reader.readStringList()
         val index = if (reader.hasNextToken("to")) reader.readInt() else null
 
-        return applyTransfer(source) { _, meta ->
-            val lore = meta.lore ?: mutableListOf()
+        return acceptTransferFuture(source) { item ->
+            listOf(
+                raw.getOrNull(this),
+                index?.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val meta = item.itemMeta ?: return@thenApply item
+                val lore = meta.lore ?: mutableListOf()
 
-            val list = raw.get(this, listOf())
-            val cursor = index?.getOrNull(this) ?: lore.size
-            if (cursor >= lore.size) {
-                // 下标位于末尾
-                lore.addAll(list)
-            } else {
-                lore.addAll(cursor, list)
+                val list = (args[0] as? List<*>)?.map { it?.toString() } ?: return@thenApply item
+                val cursor = args[1]?.toInt() ?: lore.size
+                if (cursor >= lore.size) {
+                    // 下标位于末尾
+                    lore.addAll(list)
+                } else {
+                    lore.addAll(cursor, list)
+                }
+
+                meta.lore = lore
+                return@thenApply item.also { it.itemMeta = meta }
             }
-
-            meta.also { it.lore = lore }
         }
     }
 
@@ -57,39 +64,54 @@ object ItemLoreHandler : ActionItemStack.Reader {
         reader.hasNextToken("to")
         val raw = StringLiveData(reader.nextBlock())
 
-        return applyTransfer(source) { _, meta ->
-            val lore = meta.lore ?: mutableListOf()
+        return acceptTransferFuture(source) { item ->
 
-            val cursor = index.get(this, lore.size)
-            val line = raw.getOrNull(this) ?: return@applyTransfer meta
-            if (cursor >= lore.size) {
-                // 下标位于末尾
-                lore.add(line)
-            } else {
-                lore[cursor] = line
+            listOf(
+                index.getOrNull(this),
+                raw.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val meta = item.itemMeta ?: return@thenApply item
+                val lore = meta.lore ?: mutableListOf()
+
+                val cursor = args[0]?.toInt() ?: lore.size
+                val line = args[1]?.toString()
+                if (cursor >= lore.size) {
+                    // 下标位于末尾
+                    lore.add(line)
+                } else {
+                    lore[cursor] = line
+                }
+
+                meta.lore = lore
+                return@thenApply item.also { it.itemMeta = meta }
             }
-
-            meta.also { it.lore = lore }
         }
     }
 
     private fun remove(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val index = reader.readInt()
 
-        return applyTransfer(source) { _, meta ->
-            val lore = meta.lore ?: mutableListOf()
+        return acceptTransferFuture(source) { item ->
+            index.getOrNull(this).thenApply { cursor ->
+                val meta = item.itemMeta ?: return@thenApply item
+                val lore = meta.lore ?: mutableListOf()
 
-            val cursor = index.get(this, lore.size)
-            if (cursor >= lore.size) return@applyTransfer meta
-            lore.removeAt(cursor)
+                if (cursor != null && cursor >= 0 && cursor < lore.size) {
+                    lore.removeAt(cursor)
+                } else {
+                    lore.removeLast()
+                }
 
-            meta.also { it.lore = lore }
+                meta.lore = lore
+                return@thenApply item.also { it.itemMeta = meta }
+            }
         }
     }
 
     private fun clear(source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        return applyTransfer(source) { _, meta ->
-            meta.also { it.lore = null }
+        return acceptTransferNow(source) { item ->
+            val meta = item.itemMeta?.also { it.lore = null }
+            return@acceptTransferNow item.also { it.itemMeta = meta }
         }
     }
 }

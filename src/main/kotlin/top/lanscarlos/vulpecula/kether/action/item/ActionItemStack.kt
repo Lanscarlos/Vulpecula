@@ -26,17 +26,17 @@ class ActionItemStack : ScriptAction<Any?>() {
     private val handlers = mutableListOf<Handler>()
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        var previous: ItemStack? = null
+        var previous: CompletableFuture<out ItemStack?> = CompletableFuture.completedFuture(null)
         for (handler in handlers) {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
             } else {
                 return CompletableFuture.completedFuture(
-                    handler.handle(frame, previous)
+                    handler.handle(frame, previous) as CompletableFuture<Any?>
                 )
             }
         }
-        return CompletableFuture.completedFuture(previous)
+        return previous as CompletableFuture<Any?>
     }
 
     companion object : ClassInjector(packageName = ActionItemStack::class.java.packageName) {
@@ -93,14 +93,14 @@ class ActionItemStack : ScriptAction<Any?>() {
      * 处理后返回任意对象
      * */
     interface Handler {
-        fun handle(frame: ScriptFrame, previous: ItemStack?): Any?
+        fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?>
     }
 
     /**
      * 处理后返回 ItemStack 对象，供下一处理器使用
      * */
     interface Transfer : Handler {
-        override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack
+        override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out ItemStack>
     }
 
     /**
@@ -120,10 +120,35 @@ class ActionItemStack : ScriptAction<Any?>() {
         /**
          * 返回任意对象
          * */
-        fun handle(func: ScriptFrame.(item: ItemStack?) -> Any?): Handler {
+        fun handleNow(func: ScriptFrame.(item: ItemStack?) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any? {
-                    return func(frame, previous)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 返回任意对象
+         * */
+        fun handleFuture(func: ScriptFrame.(item: ItemStack?) -> CompletableFuture<Any?>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?> {
+                    return if (previous.isDone) {
+                        func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<Any>()
+                        previous.thenAccept { item ->
+                            func(frame, item).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -131,11 +156,71 @@ class ActionItemStack : ScriptAction<Any?>() {
         /**
          * 接收 ItemStack 返回任意对象
          * */
-        fun acceptHandler(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> Any?): Handler {
+        fun acceptHandlerNow(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> Any?): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): Any? {
-                    val item = previous ?: source?.getOrNull(frame) ?: error("No item select.")
-                    return func(frame, item)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, wait.getNow(null) ?: error("No item selected."))
+                            )
+                        } else {
+                            wait.thenApply {
+                                func(frame, it ?: error("No item selected."))
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, previous.getNow(null) ?: error("No item selected."))
+                            )
+                        } else {
+                            previous.thenApply {
+                                func(frame, it ?: error("No item selected."))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 接收 ItemStack 返回任意对象
+         * */
+        fun acceptHandlerFuture(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> CompletableFuture<Any?>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out Any?> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null) ?: error("No item selected."))
+                        } else {
+                            val future = CompletableFuture<Any?>()
+                            wait.thenAccept { item ->
+                                func(frame, item ?: error("No item selected.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: error("No item selected."))
+                        } else {
+                            val future = CompletableFuture<Any?>()
+                            previous.thenAccept { item ->
+                                func(frame, item ?: error("No item selected.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }
@@ -143,10 +228,35 @@ class ActionItemStack : ScriptAction<Any?>() {
         /**
          * 返回 ItemStack 对象
          * */
-        fun transfer(func: ScriptFrame.(item: ItemStack?) -> ItemStack): Handler {
+        fun transferNow(func: ScriptFrame.(item: ItemStack?) -> ItemStack): Handler {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
-                    return func(frame, previous)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out ItemStack> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 返回 ItemStack 对象
+         * */
+        fun transferFuture(func: ScriptFrame.(item: ItemStack?) -> CompletableFuture<ItemStack>): Handler {
+            return object : Transfer {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out ItemStack> {
+                    return if (previous.isDone) {
+                        func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<ItemStack>()
+                        previous.thenAccept { item ->
+                            func(frame, item).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -154,24 +264,71 @@ class ActionItemStack : ScriptAction<Any?>() {
         /**
          * 接收 ItemStack 并返回 ItemStack 对象
          * */
-        fun acceptTransfer(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> ItemStack): Transfer {
+        fun acceptTransferNow(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> ItemStack): Transfer {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
-                    val item = previous ?: source?.getOrNull(frame) ?: error("No item select.")
-                    return func(frame, item)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out ItemStack> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, wait.getNow(null) ?: error("No item selected."))
+                            )
+                        } else {
+                            wait.thenApply {
+                                func(frame, it ?: error("No item selected."))
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, previous.getNow(null) ?: error("No item selected."))
+                            )
+                        } else {
+                            previous.thenApply {
+                                func(frame, it ?: error("No item selected."))
+                            }
+                        }
+                    }
                 }
             }
         }
 
         /**
-         * 接收 ItemStack 和 ItemMeta 并返回 ItemMeta 对象
+         * 接收 ItemStack 并返回 ItemStack 对象
          * */
-        fun applyTransfer(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack, meta: ItemMeta) -> ItemMeta?): Transfer {
+        fun acceptTransferFuture(source: LiveData<ItemStack>?, func: ScriptFrame.(item: ItemStack) -> CompletableFuture<ItemStack>): Transfer {
             return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: ItemStack?): ItemStack {
-                    val item = previous ?: source?.getOrNull(frame) ?: error("No item select.")
-                    val meta = func(frame, item, item.itemMeta ?: return item)
-                    return item.also { it.itemMeta = meta }
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out ItemStack?>): CompletableFuture<out ItemStack> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null) ?: error("No item selected."))
+                        } else {
+                            val future = CompletableFuture<ItemStack>()
+                            wait.thenAccept { item ->
+                                func(frame, item ?: error("No item selected.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: error("No item selected."))
+                        } else {
+                            val future = CompletableFuture<ItemStack>()
+                            previous.thenAccept { item ->
+                                func(frame, item ?: error("No item selected.")).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }

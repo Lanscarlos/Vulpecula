@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.kether.action.item
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.utils.readInt
 import top.lanscarlos.vulpecula.utils.readItemStack
+import top.lanscarlos.vulpecula.utils.toInt
 
 /**
  * Vulpecula
@@ -18,22 +19,26 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
         reader.mark()
-        return when (val it = reader.nextToken()) {
+        when (val next = reader.nextToken()) {
             "fix", "set", "damage", "dmg" -> {
                 val amount = reader.readInt()
-                acceptTransfer(source) { item ->
-                    item.durability = when (it) {
-                        "fix" -> item.durability - amount.get(this, 0)
-                        "damage", "dmg" -> item.durability + amount.get(this, 0)
-                        "set" -> amount.get(this, item.durability.toInt())
-                        else -> item.durability
-                    }.toShort().coerceIn(0, item.type.maxDurability)
-                    return@acceptTransfer item
+
+                return acceptTransferFuture(source) { item ->
+                    amount.getOrNull(this).thenApply {
+                        item.durability = when (next) {
+                            "fix" -> item.durability - it.toInt(0)
+                            "damage", "dmg" -> item.durability + it.toInt(0)
+                            "set" -> it.toInt(item.durability.toInt())
+                            else -> item.durability
+                        }.toShort().coerceIn(0, item.type.maxDurability)
+
+                        return@thenApply item
+                    }
                 }
             }
             "current", "cur", "max" -> {
-                acceptHandler(source) { item ->
-                    when (it) {
+                return acceptHandlerNow(source) { item ->
+                    when (next) {
                         "current", "cur" -> item.durability
                         "max" -> item.type.maxDurability
                         else -> -1
@@ -43,7 +48,7 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
             else -> {
                 // 显示耐久
                 reader.reset()
-                acceptHandler(source) { item -> item.durability }
+                return acceptHandlerNow(source) { item -> item.durability }
             }
         }
     }

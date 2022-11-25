@@ -16,6 +16,6 @@ object ItemSelectHandler : ActionItemStack.Reader {
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val itemStack = if (isRoot) reader.readItemStack() else null
-        return acceptTransfer(itemStack) { item -> item }
+        return acceptTransferNow(itemStack) { item -> item }
     }
 }

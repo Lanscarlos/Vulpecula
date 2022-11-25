@@ -22,18 +22,19 @@ object ItemColorHandler : ActionItemStack.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null
         reader.hasNextToken("to")
-        val raw = reader.readColor()
+        val next = reader.readColor()
 
-        return applyTransfer(source) { _, meta ->
+        return acceptTransferFuture(source) { item ->
+            next.get(this, Color.WHITE).thenApply { color ->
+                val meta = item.itemMeta ?: return@thenApply item
 
-            val color = raw.get(this, Color.WHITE).toBukkit()
+                when (meta) {
+                    is LeatherArmorMeta -> meta.setColor(color.toBukkit())
+                    is PotionMeta -> meta.color = color.toBukkit()
+                }
 
-            when (meta) {
-                is LeatherArmorMeta -> meta.setColor(color)
-                is PotionMeta -> meta.color = color
+                return@thenApply item.also { it.itemMeta = meta }
             }
-
-            return@applyTransfer meta
         }
     }
 

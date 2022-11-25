@@ -33,36 +33,37 @@ object ItemModifyHandler : ActionItemStack.Reader {
             }
         }
 
-        return acceptHandler(source) { item ->
-            val meta = item.itemMeta
-
-            for (option in options) {
-                when (option.key) {
-                    "material" -> {
-                        val mat = option.value.getValue(this, item.type.name).uppercase()
-                        item.type = XMaterial.matchXMaterial(mat).let {
-                            if (it.isPresent) it.get().parseMaterial() else null
-                        } ?: item.type
-                    }
-                    "amount" -> item.amount = option.value.getValue(this@acceptHandler, item.amount)
-                    "durability" -> item.durability = option.value.getValue(this@acceptHandler, item.durability)
-                    "name" -> {
-                        val name = option.value.getValueOrNull<String>(this@acceptHandler)
-                        meta?.setDisplayName(name?.colored())
-                    }
-                    "model" -> {
-                        val customModelData = option.value.getValue(this@acceptHandler, -1)
-                        try {
-                            if (customModelData != -1) {
-                                meta?.invokeMethod<Void>("setCustomModelData", customModelData)
+        return acceptTransferFuture(source) { item ->
+            options.mapValues { it.value.getOrNull(this) }.thenTake().thenApply { args ->
+                val meta = item.itemMeta
+                for (option in args) {
+                    when (option.key) {
+                        "material" -> {
+                            val mat = option.value?.toString()?.uppercase() ?: continue
+                            item.type = XMaterial.matchXMaterial(mat).let {
+                                if (it.isPresent) it.get().parseMaterial() else null
+                            } ?: item.type
+                        }
+                        "amount" -> item.amount = option.value.toInt(item.amount)
+                        "durability" -> item.durability = option.value.toShort(item.durability)
+                        "name" -> {
+                            val name = option.value?.toString()
+                            meta?.setDisplayName(name?.colored())
+                        }
+                        "model" -> {
+                            val customModelData = option.value.toInt(-1)
+                            try {
+                                if (customModelData != -1) {
+                                    meta?.invokeMethod<Void>("setCustomModelData", customModelData)
+                                }
+                            } catch (ignored: NoSuchMethodException) {
                             }
-                        } catch (ignored: NoSuchMethodException) {
                         }
                     }
                 }
-            }
 
-            item.also { it.itemMeta = meta }
+                item.also { it.itemMeta = meta }
+            }
         }
     }
 }

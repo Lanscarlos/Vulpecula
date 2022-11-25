@@ -35,16 +35,56 @@ fun List<CompletableFuture<*>?>.thenTake(): CompletableFuture<List<Any?>> {
                 val count = counter.incrementAndGet()
 
                 // 判断 futures 是否全部执行完毕
-                if (count >= this.size) {
+                if (!parameters.isDone && count >= this.size) {
                     parameters.complete(this.map { it?.getNow(null) })
+                    return parameters
                 }
             } else {
                 it.thenRun {
                     val count = counter.incrementAndGet()
 
                     // 判断 futures 是否全部执行完毕
-                    if (count >= this.size) {
+                    if (!parameters.isDone && count >= this.size) {
                         parameters.complete(this.map { it?.getNow(null) })
+                    }
+                }
+            }
+        }
+    }
+    return parameters
+}
+
+fun Map<String, CompletableFuture<*>>.thenTake(): CompletableFuture<Map<String, Any?>> {
+    val parameters = CompletableFuture<Map<String, Any?>>()
+    if (this.isEmpty()) {
+        parameters.complete(mapOf())
+    } else if (this.size == 1) {
+        // 队列仅有一个
+        val key = this.keys.first()
+        val future = this[key]
+        if (future == null || future.isDone) {
+            parameters.complete(mapOf(key to future?.getNow(null)))
+        } else {
+            future.thenAccept { parameters.complete(mapOf(key to it)) }
+        }
+    } else {
+        val counter = AtomicInteger(0)
+        for (it in this) {
+            if (it.value.isDone) {
+                val count = counter.incrementAndGet()
+
+                // 判断 futures 是否全部执行完毕
+                if (!parameters.isDone && count >= this.size) {
+                    parameters.complete(this.mapValues { it.value.getNow(null) })
+                    return parameters
+                }
+            } else {
+                it.value.thenRun {
+                    val count = counter.incrementAndGet()
+
+                    // 判断 futures 是否全部执行完毕
+                    if (!parameters.isDone && count >= this.size) {
+                        parameters.complete(this.mapValues { it.value.getNow(null) })
                     }
                 }
             }

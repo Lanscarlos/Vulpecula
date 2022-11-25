@@ -34,26 +34,28 @@ object ItemBuildHandler : ActionItemStack.Reader {
             }
         }
 
-        return transfer {
-            val material = XMaterial.matchXMaterial(type.get(this, "STONE").uppercase()).let {
-                if (it.isPresent) it.get() else XMaterial.STONE
-            }
-            buildItem(material) {
-                for (option in options) {
-                    when (option.key) {
-                        "amount" -> amount = option.value.getValue(this@transfer, amount)
-                        "durability" -> damage = option.value.getValue(this@transfer, damage)
-                        "name" -> name = option.value.getValueOrNull<String>(this@transfer) ?: name
-                        "shiny" -> {
-                            if (option.value.getValue(this@transfer, false)) shiny()
-                        }
-                        "colored" -> {
-                            if (option.value.getValue(this@transfer, true)) colored()
-                        }
-                        "model" -> customModelData = option.value.getValue(this@transfer, customModelData)
-                    }
+        return transferFuture {
+            return@transferFuture listOf(
+                type.getOrNull(this),
+                options["amount"]?.getOrNull(this),
+                options["durability"]?.getOrNull(this),
+                options["name"]?.getOrNull(this),
+                options["shiny"]?.getOrNull(this),
+                options["colored"]?.getOrNull(this),
+                options["model"]?.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val material = XMaterial.matchXMaterial(args[0]?.toString()?.uppercase() ?: "STONE").let {
+                    if (it.isPresent) it.get() else XMaterial.STONE
                 }
-                colored()
+
+                buildItem(material) {
+                    args[1]?.toString()?.toInt()?.let { amount = it }
+                    args[2]?.toString()?.toInt()?.let { damage = it }
+                    args[3]?.toString()?.let { name = it }
+                    args[4]?.toString()?.toBoolean()?.let { if (it) shiny() }
+                    args[5]?.toString()?.toBoolean()?.let { if (it) colored() }
+                    args[6]?.toString()?.toInt()?.let { customModelData = it }
+                }
             }
         }
     }

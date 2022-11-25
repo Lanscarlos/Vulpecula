@@ -61,10 +61,8 @@ object EntityPotionHandler : ActionEntity.Reader {
                 options["particles"]?.getOrNull(this),
                 options["icon"]?.getOrNull(this)
             ).thenTake().thenApply {
-
-                val name = it[0]?.toString() ?: "SLOW"
                 val potion = PotionEffect(
-                    PotionEffectType.values().firstOrNull { name.equals(it.name, true) } ?: PotionEffectType.SLOW,
+                    it[0]?.toString()?.asPotionEffectType() ?: PotionEffectType.SLOW,
                     it[1].toInt(200),
                     it[2].toInt(1) - 1,
                     it[3].toBoolean(false),
@@ -83,8 +81,7 @@ object EntityPotionHandler : ActionEntity.Reader {
 
         return acceptTransferFuture(source) { entity ->
             type.getOrNull(this).thenApply { name ->
-                if (name == null) return@thenApply entity
-                PotionEffectType.values().firstOrNull { it.name.equals(name, true) }?.let {
+                name?.asPotionEffectType()?.let {
                     (entity as? LivingEntity)?.removePotionEffect(it)
                 }
                 return@thenApply entity
@@ -104,11 +101,14 @@ object EntityPotionHandler : ActionEntity.Reader {
 
         return acceptHandleFuture(source) { entity ->
             type.getOrNull(this).thenApply { name ->
-                if (name == null) return@thenApply false
-                return@thenApply PotionEffectType.values().firstOrNull { it.name.equals(name, true) }?.let {
+                return@thenApply name?.asPotionEffectType()?.let {
                     (entity as? LivingEntity)?.hasPotionEffect(it)
                 } ?: false
             }
         }
+    }
+
+    private fun String.asPotionEffectType(): PotionEffectType? {
+        return PotionEffectType.values().firstOrNull { it.name.equals(this, true) }
     }
 }

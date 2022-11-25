@@ -7,7 +7,6 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
@@ -38,7 +37,7 @@ object ItemPotionHandler : ActionItemStack.Reader {
             "color" -> color(reader, source)
             else -> {
                 reader.reset()
-                acceptHandler(source) { item -> item.itemMeta?.lore }
+                acceptHandlerNow(source) { item -> item.itemMeta?.lore }
             }
         }
     }
@@ -61,50 +60,69 @@ object ItemPotionHandler : ActionItemStack.Reader {
             }
         }
 
-        return applyTransfer(source) { _, itemMeta ->
-            val meta = itemMeta as? PotionMeta ?: return@applyTransfer itemMeta
+        return acceptTransferFuture(source) { item ->
+            listOf(
+                type.getOrNull(this),
+                options["duration"]?.getOrNull(this),
+                options["amplifier"]?.getOrNull(this),
+                options["ambient"]?.getOrNull(this),
+                options["particles"]?.getOrNull(this),
+                options["icon"]?.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
+                val potion = PotionEffect(
+                    args[0]?.toString()?.asPotionEffectType() ?: PotionEffectType.SLOW,
+                    args[1].toInt(200),
+                    args[2].toInt(1) - 1,
+                    args[3].toBoolean(false),
+                    args[4].toBoolean(true),
+                    args[5].toBoolean(true)
+                )
+                meta.addCustomEffect(potion, true)
 
-            val potion = PotionEffect(
-                type.asPotionEffectType(this) ?: PotionEffectType.SLOW,
-                options["duration"].getValue(this, 200),
-                options["amplifier"].getValue(this, 1) - 1,
-                options["ambient"].getValue(this, false),
-                options["particles"].getValue(this, true),
-                options["icon"].getValue(this, true)
-            )
-
-            meta.also { it.addCustomEffect(potion, true) }
+                return@thenApply item.also { it.itemMeta = meta }
+            }
         }
     }
 
     fun remove(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val raw = StringLiveData(reader.nextBlock())
 
-        return applyTransfer(source) { _, itemMeta ->
-            val meta = itemMeta as? PotionMeta ?: return@applyTransfer itemMeta
-            val type = raw.asPotionEffectType(this) ?: return@applyTransfer meta
+        return acceptTransferFuture(source) { item ->
+            raw.getOrNull(this).thenApply { name ->
+                val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
+                val type = name?.asPotionEffectType() ?: return@thenApply item
 
-            meta.also { it.removeCustomEffect(type) }
+                meta.removeCustomEffect(type)
+                return@thenApply item.also { it.itemMeta = meta }
+            }
         }
     }
 
     fun clear(source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        return applyTransfer(source) { _, itemMeta ->
-            val meta = itemMeta as? PotionMeta ?: return@applyTransfer itemMeta
-            meta.also { it.clearCustomEffects() }
+        return acceptTransferNow(source) { item ->
+            val meta = item.itemMeta as? PotionMeta ?: return@acceptTransferNow item
+
+            meta.clearCustomEffects()
+            return@acceptTransferNow item.also { it.itemMeta = meta }
         }
     }
 
     fun contains(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
-        val raw = if (!reader.hasNextToken("any")) StringLiveData(reader.nextBlock()) else null
+        if (reader.hasNextToken("any")) {
+            return acceptHandlerNow(source) { item ->
+                (item.itemMeta as? PotionMeta)?.hasCustomEffects() ?: false
+            }
+        } else {
+            val raw = reader.readString()
+            return acceptHandlerFuture(source) { item ->
+                raw.getOrNull(this).thenApply { name ->
+                    val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
+                    val type = name?.asPotionEffectType() ?: return@thenApply item
 
-        return acceptHandler(source) { item ->
-            val meta = item.itemMeta as? PotionMeta ?: return@acceptHandler false
-
-            if (raw == null) return@acceptHandler meta.hasCustomEffects()
-            val type = raw.asPotionEffectType(this) ?: return@acceptHandler false
-
-            meta.hasCustomEffect(type)
+                    return@thenApply meta.hasCustomEffect(type)
+                }
+            }
         }
     }
 
@@ -112,8 +130,8 @@ object ItemPotionHandler : ActionItemStack.Reader {
         reader.mark()
         return when (val it = reader.nextToken()) {
             "type", "extended", "upgraded" -> {
-                acceptHandler(source) { item ->
-                    val meta = item.itemMeta as? PotionMeta ?: return@acceptHandler null
+                acceptHandlerNow(source) { item ->
+                    val meta = item.itemMeta as? PotionMeta ?: return@acceptHandlerNow null
                     when (it) {
                         "type" -> meta.basePotionData.type
                         "extended" -> meta.basePotionData.isExtended
@@ -123,27 +141,33 @@ object ItemPotionHandler : ActionItemStack.Reader {
                 }
             }
             "to" -> {
-                val type = StringLiveData(reader.nextBlock())
+                val type = reader.readString()
                 val extend = if (reader.hasNextToken("with", "by")) {
                     reader.readBoolean() to reader.readBoolean()
                 } else {
                     BooleanLiveData(false) to BooleanLiveData(false)
                 }
 
-                applyTransfer(source) { _, itemMeta ->
-                    val meta = itemMeta as? PotionMeta ?: return@applyTransfer itemMeta
+                acceptTransferFuture(source) { item ->
+                    listOf(
+                        type.getOrNull(this),
+                        extend.first.getOrNull(this),
+                        extend.second.getOrNull(this)
+                    ).thenTake().thenApply { args ->
+                        val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
+                        val potionData = PotionData(
+                            args[0]?.toString()?.asPotionType() ?: PotionType.SLOWNESS,
+                            args[1].toBoolean(false),
+                            args[2].toBoolean(false)
+                        )
 
-                    val potionData = PotionData(
-                        type.asPotionType(this) ?: PotionType.SLOWNESS,
-                        extend.first.get(this, false),
-                        extend.second.get(this, false)
-                    )
-
-                    meta.also { meta.basePotionData = potionData }
+                        meta.basePotionData = potionData
+                        return@thenApply item.also { it.itemMeta = meta }
+                    }
                 }
             }
             else -> {
-                acceptHandler(source) { item ->
+                acceptHandlerNow(source) { item ->
                     (item.itemMeta as? PotionMeta)?.basePotionData
                 }
             }
@@ -153,21 +177,21 @@ object ItemPotionHandler : ActionItemStack.Reader {
     private fun color(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val color = reader.readColor()
 
-        return applyTransfer(source) { _, itemMeta ->
-            val meta = itemMeta as? PotionMeta ?: return@applyTransfer itemMeta
-
-            meta.also { it.color = color.get(this, Color.WHITE).toBukkit() }
+        return acceptTransferFuture(source) { item ->
+            color.get(this, Color.WHITE).thenApply { arg ->
+                val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
+                meta.color = arg.toBukkit()
+                return@thenApply item.also { it.itemMeta = meta }
+            }
         }
     }
 
-    private fun LiveData<String>.asPotionEffectType(frame: ScriptFrame): PotionEffectType? {
-        val name = this.getOrNull(frame) ?: return null
-        return PotionEffectType.values().firstOrNull { name.equals(it.name, true) }
+    private fun String.asPotionEffectType(): PotionEffectType? {
+        return PotionEffectType.values().firstOrNull { it.name.equals(this, true) }
     }
 
-    private fun LiveData<String>.asPotionType(frame: ScriptFrame): PotionType? {
-        val name = this.getOrNull(frame) ?: return null
-        return PotionType.values().firstOrNull { name.equals(it.name, true) }
+    private fun String.asPotionType(): PotionType? {
+        return PotionType.values().firstOrNull { it.name.equals(this, true) }
     }
 
     private fun Color.toBukkit(): org.bukkit.Color {
