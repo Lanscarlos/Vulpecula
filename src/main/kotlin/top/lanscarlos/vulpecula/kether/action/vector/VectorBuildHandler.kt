@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.kether.action.vector
 
-import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.utils.hasNextToken
