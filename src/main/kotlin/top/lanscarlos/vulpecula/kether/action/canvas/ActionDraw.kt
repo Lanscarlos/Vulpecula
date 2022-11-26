@@ -10,8 +10,6 @@ import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.action.ActionLocation
-import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.LocationLiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -27,8 +25,6 @@ import java.util.concurrent.CompletableFuture
 class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-
-        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.unsafePlayer()?.location ?: ActionLocation.def
 
         val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
             frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
@@ -49,54 +45,62 @@ class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
             else -> listOf(frame.player())
         }
 
-        val loc = when (raw) {
+        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.unsafePlayer()?.location
+
+        when (raw) {
             is LocationLiveData -> {
-                raw.get(frame, base)
-            }
-            is VectorLiveData -> {
-                val offset = raw.get(frame, Vector(0, 0, 0))
-                base.clone().add(offset)
-            }
-            is ParsedAction<*> -> {
-                when (val it = frame.run(raw).join()) {
-                    is Location -> it
-                    is org.bukkit.Location -> it.toProxyLocation()
-                    is ProxyPlayer -> it.location
-                    is Entity -> it.location.toProxyLocation()
-                    is Vector -> Location(base.world, it.x, it.y, it.z)
-                    is org.bukkit.util.Vector -> Location(base.world, it.x, it.y, it.z)
-                    is Collection<*> -> {
-                        val locations = it.mapNotNull { content ->
-                            when (content) {
-                                is Location -> content
-                                is org.bukkit.Location -> content.toProxyLocation()
-                                is ProxyPlayer -> content.location
-                                is Entity -> content.location.toProxyLocation()
-                                is Vector -> Location(base.world, content.x, content.y, content.z)
-                                is org.bukkit.util.Vector -> Location(base.world, content.x, content.y, content.z)
-                                else -> null
-                            }
-                        }
-
-                        // 绘制除最后一个坐标外所有坐标
-                        if (locations.size >= 2) {
-                            for (i in 0 until locations.lastIndex) {
-                                brush.draw(locations[i], viewers)
-                            }
-                        }
-
-                        // 返回最后一个坐标
-                        locations.lastOrNull() ?: base
+                return if (base != null) {
+                    raw.get(frame, base).thenApply {
+                        brush.draw(it, viewers)
                     }
-                    else -> base
+                } else {
+                    raw.getOrNull(frame).thenApply {
+                        brush.draw(it ?: error("No location selected."), viewers)
+                    }
                 }
             }
-            else -> base
+            is VectorLiveData -> {
+                return raw.get(frame, Vector(0, 0, 0)).thenApply { offset ->
+                    val location = base?.clone()?.add(offset) ?: error("No base or origin selected.")
+                    brush.draw(location, viewers)
+                }
+            }
+            is ParsedAction<*> -> {
+                return frame.run(raw).thenApply { value ->
+                    val location = when (value) {
+                        is Location -> value
+                        is org.bukkit.Location -> value.toProxyLocation()
+                        is ProxyPlayer -> value.location
+                        is Entity -> value.location.toProxyLocation()
+                        is Vector -> Location(base?.world, value.x, value.y, value.z)
+                        is org.bukkit.util.Vector -> Location(base?.world, value.x, value.y, value.z)
+                        is Collection<*> -> {
+                            val locations = value.mapNotNull { content ->
+                                when (content) {
+                                    is Location -> content
+                                    is org.bukkit.Location -> content.toProxyLocation()
+                                    is ProxyPlayer -> content.location
+                                    is Entity -> content.location.toProxyLocation()
+                                    is Vector -> Location(base?.world, content.x, content.y, content.z)
+                                    is org.bukkit.util.Vector -> Location(base?.world, content.x, content.y, content.z)
+                                    else -> null
+                                }
+                            }
+
+                            for (location in locations) {
+                                brush.draw(location, viewers)
+                            }
+
+                            return@thenApply
+                        }
+                        else -> base
+                    }
+
+                    brush.draw(location ?: error("No location selected."), viewers)
+                }
+            }
+            else -> return CompletableFuture.completedFuture(false)
         }
-
-        brush.draw(loc, viewers)
-
-        return CompletableFuture.completedFuture(null)
     }
 
     companion object {
@@ -128,13 +132,16 @@ class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
             reader.mark()
             when (reader.nextToken()) {
                 "origin", "base" -> {
-                    val raw = reader.readLocation()
-                    actionNow {
-                        this.setVariable(ActionCanvas.VARIABLE_ORIGIN, raw.get(this, this.unsafePlayer()?.location ?: ActionLocation.def))
+                    val location = reader.readLocation()
+                    actionTake {
+                        location.getOrNull(this).thenApply {
+                            this.setVariable(ActionCanvas.VARIABLE_ORIGIN, it ?: this.unsafePlayer()?.location)
+                            return@thenApply it
+                        }
                     }
                 }
                 "by", "with" -> {
-                    ActionDraw(VectorLiveData(reader.nextBlock()))
+                    ActionDraw(reader.readVector(false))
                 }
                 "at" -> {
                     ActionDraw(reader.nextBlock())

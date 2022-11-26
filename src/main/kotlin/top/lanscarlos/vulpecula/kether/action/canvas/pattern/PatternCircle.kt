@@ -4,9 +4,7 @@ import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.utils.getValue
-import top.lanscarlos.vulpecula.utils.nextPeek
-import top.lanscarlos.vulpecula.utils.readDouble
+import top.lanscarlos.vulpecula.utils.*
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -47,41 +45,40 @@ class PatternCircle : CanvasPattern {
         return origin.clone().add(x, yOffset, z)
     }
 
-    class Builder : CanvasPattern.Builder {
-
-        var radius: LiveData<Double>? = null
-        var step: LiveData<Double>? = null
-        var yOffset: LiveData<Double>? = null
-
-        override fun build(frame: ScriptFrame): CanvasPattern {
-            val pattern = PatternCircle()
-            pattern.radius = radius.getValue(frame, pattern.radius)
-            pattern.step = step.getValue(frame, pattern.step)
-            pattern.yOffset = yOffset.getValue(frame, pattern.yOffset)
-            return pattern
-        }
-    }
-
     companion object : CanvasPattern.Reader {
 
-        override val name = setOf("circle")
+        override val name = arrayOf("Circle")
 
-        override fun read(reader: QuestReader): Builder {
-            val builder = Builder()
+        override fun read(reader: QuestReader): CanvasPattern.Builder {
+            val options = mutableMapOf<String, LiveData<*>>()
+
             while (reader.nextPeek().startsWith('-')) {
                 when (reader.nextToken().substring(1)) {
                     "radius", "r" -> {
-                        builder.radius = reader.readDouble()
+                        options["radius"] = reader.readDouble()
                     }
                     "step", "s" -> {
-                        builder.step = reader.readDouble()
+                        options["step"] = reader.readDouble()
                     }
                     "y-offset", "y" -> {
-                        builder.yOffset = reader.readDouble()
+                        options["y-offset"] = reader.readDouble()
                     }
                 }
             }
-            return builder
+
+            return buildFuture {
+                options.mapValues { it.value.getOrNull(this) }.thenTake().thenApply { args ->
+                    val pattern = PatternCircle()
+                    for (option in args) {
+                        when (option.key) {
+                            "radius" -> pattern.radius = option.value?.toDouble() ?: continue
+                            "step" -> pattern.step = option.value?.toDouble() ?: continue
+                            "y-offset" -> pattern.yOffset = option.value?.toDouble() ?: continue
+                        }
+                    }
+                    return@thenApply pattern
+                }
+            }
         }
     }
 }

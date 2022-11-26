@@ -66,6 +66,7 @@ object ItemTagHandler : ActionItemStack.Reader {
     private fun setTag(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
         val path = reader.readString()
         val value = reader.nextBlock()
+
         return acceptTransferFuture(source) { item ->
             listOf(
                 path.getOrNull(this),
@@ -73,7 +74,7 @@ object ItemTagHandler : ActionItemStack.Reader {
             ).thenTake().thenApply { args ->
                 val tag = item.getItemTag()
                 val key = args[0]?.toString() ?: error("No path selected.")
-                tag.putDeep(key, this.run(value).join())
+                tag.putDeep(key, args[1])
                 val newItem = item.setItemTag(tag)
 
                 // 将 nbt 更新后的新物品 meta 转入原物品

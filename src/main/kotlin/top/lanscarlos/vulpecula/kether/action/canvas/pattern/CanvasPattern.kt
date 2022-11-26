@@ -4,6 +4,7 @@ import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.internal.ClassInjector
+import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
 /**
@@ -32,22 +33,6 @@ interface CanvasPattern {
     fun nextPoint(origin: Location): Location
 
     /**
-     * 用于读取脚本
-     * */
-    interface Reader {
-        /**
-         * 图案名
-         * 用于注册构建器
-         * */
-        val name: Collection<String>
-
-        /**
-         * 用于从脚本中读取属性
-         * */
-        fun read(reader: QuestReader): Builder
-    }
-
-    /**
      * 构建器
      * 用于在脚本中构建 CanvasPattern 对象
      * */
@@ -57,7 +42,39 @@ interface CanvasPattern {
          * 构建方法
          * 用于构建对象
          * */
-        fun build(frame: ScriptFrame): CanvasPattern
+        fun build(frame: ScriptFrame): CompletableFuture<CanvasPattern>
+    }
+
+    /**
+     * 用于读取脚本
+     * */
+    interface Reader {
+        /**
+         * 图案名
+         * 用于注册构建器
+         * */
+        val name: Array<String>
+
+        /**
+         * 用于从脚本中读取属性
+         * */
+        fun read(reader: QuestReader): Builder
+
+        fun buildNow(func: ScriptFrame.() -> CanvasPattern): Builder {
+            return object : Builder {
+                override fun build(frame: ScriptFrame): CompletableFuture<CanvasPattern> {
+                    return CompletableFuture.completedFuture(func(frame))
+                }
+            }
+        }
+
+        fun buildFuture(func: ScriptFrame.() -> CompletableFuture<CanvasPattern>): Builder {
+            return object : Builder {
+                override fun build(frame: ScriptFrame): CompletableFuture<CanvasPattern> {
+                    return func(frame)
+                }
+            }
+        }
     }
 
     companion object : ClassInjector(packageName = CanvasPattern::class.java.packageName) {
@@ -65,12 +82,12 @@ interface CanvasPattern {
         private val registry = HashMap<String, Reader>()
 
         fun getReader(name: String): Reader? {
-            return registry[name]
+            return registry[name.lowercase()]
         }
 
         fun register(reader: Reader) {
             reader.name.forEach {
-                registry[it] =  reader
+                registry[it.lowercase()] =  reader
             }
         }
 

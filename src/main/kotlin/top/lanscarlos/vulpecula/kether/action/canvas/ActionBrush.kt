@@ -1,15 +1,15 @@
 package top.lanscarlos.vulpecula.kether.action.canvas
 
 import taboolib.common.platform.ProxyParticle
+import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
-import top.lanscarlos.vulpecula.kether.live.IntLiveData
 import top.lanscarlos.vulpecula.utils.*
+import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -26,10 +26,13 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
         val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
             frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
         }
-        for (it in options) {
-            modify(brush, frame, it.key, it.value)
+        return options.mapValues { it.value.getOrNull(frame) }.thenTake().thenApply { args ->
+            for (it in args) {
+                modify(brush, frame, it.key, it.value)
+            }
+
+            return@thenApply brush
         }
-        return CompletableFuture.completedFuture(brush)
     }
 
     companion object {
@@ -68,10 +71,10 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                     options["offset"] = reader.readVector(!reader.hasNextToken("to"))
                 }
                 "spread", "s" -> {
-                    options["vector"] = reader.readVector(!reader.hasNextToken("to"))
+                    options["spread"] = reader.readVector(!reader.hasNextToken("to"))
                 }
                 "velocity", "vel", "v" -> {
-                    options["vector"] = reader.readVector(!reader.hasNextToken("to"))
+                    options["velocity"] = reader.readVector(!reader.hasNextToken("to"))
                 }
 
                 "size" -> {
@@ -113,23 +116,25 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
          * @param option 属性名
          * @param value 属性值
          * */
-        fun modify(brush: CanvasBrush, frame: ScriptFrame, option: String, value: LiveData<*>) {
+        fun modify(brush: CanvasBrush, frame: ScriptFrame, option: String, value: Any?) {
             when (option) {
                 "type" -> {
-                    brush.particle = ProxyParticle.valueOf(value.getValue(frame, brush.particle.name).uppercase())
+                    val type = value?.toString()?.uppercase() ?: return
+                    brush.particle = ProxyParticle.values().firstOrNull { it.name.equals(type, true) } ?: return
                 }
-                "count" -> brush.count = value.getValue(frame, brush.count)
-                "speed" -> brush.speed = value.getValue(frame, brush.speed)
-                "offset" -> brush.offset = value.getValue(frame, brush.offset)
-                "vector" -> {
+                "count" -> brush.count = value?.toInt() ?: return
+                "speed" -> brush.speed = value?.toDouble() ?: return
+                "offset" -> brush.offset = value as? Vector ?: return
+                "spread" -> brush.vector = value as? Vector ?: return
+                "velocity" -> {
+                    brush.vector = value as? Vector ?: return
                     brush.count = 0
-                    brush.speed = if (brush.speed != 0.0) brush.speed else 0.15
-                    brush.vector = value.getValue(frame, brush.vector)
+                    if (brush.speed == 0.0) brush.speed = 0.15
                 }
 
-                "size" -> brush.size = value.getValue(frame, brush.size.toDouble()).toFloat()
+                "size" -> brush.size = value?.toFloat() ?: return
                 "color" -> {
-                    val color = value.getValue(frame, brush.color)
+                    val color = value as? Color ?: return
                     when (brush.particle) {
                         ProxyParticle.SPELL_MOB,
                         ProxyParticle.SPELL_MOB_AMBIENT -> {
@@ -145,12 +150,12 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                         }
                     }
                 }
-                "transition" -> brush.transition = value.getValue(frame, brush.transition)
-                "material" -> brush.material = value.getValue(frame, brush.material)
-                "data" -> brush.data = value.getValue(frame, brush.data)
-                "name" -> brush.name = value.getValue(frame, brush.name)
-                "lore" -> brush.lore = value.getValue(frame, brush.lore)
-                "model" -> brush.customModelData = value.getValue(frame, brush.customModelData)
+                "transition" -> brush.transition = value as? Color ?: return
+                "material" -> brush.material = value?.toString() ?: return
+                "data" -> brush.data = value?.toInt() ?: return
+                "name" -> brush.name = value?.toString() ?: return
+                "lore" -> brush.lore = value as? List<String> ?: return
+                "model" -> brush.customModelData = value?.toInt() ?: return
             }
         }
     }

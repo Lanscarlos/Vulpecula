@@ -17,9 +17,9 @@ import java.util.concurrent.CompletableFuture
 class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any> {
-        val pattern = builder.build(frame)
-        frame.setVariable(ActionCanvas.VARIABLE_PATTERN, pattern)
-        return CompletableFuture.completedFuture(pattern)
+        return builder.build(frame).thenApply { pattern ->
+            frame.setVariable(ActionCanvas.VARIABLE_PATTERN, pattern)
+        }
     }
 
     companion object {
@@ -46,45 +46,37 @@ class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
         fun parser() = scriptParser { reader ->
             when (val name = reader.nextToken()) {
                 "next" -> {
-                    val originRaw = if (reader.hasNextToken("origin")) {
-                        reader.readLocation()
-                    } else {
-                        null
-                    }
-                    val patternRaw = if (reader.hasNextToken("by")) {
-                        reader.nextBlock()
-                    } else {
-                        null
-                    }
-                    actionFuture { future ->
-                        val pattern = patternRaw?.let {
-                            this.run(it).join() as? CanvasPattern
-                        } ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN) ?: error("No canvas pattern selected.")
+                    val originRaw = if (reader.hasNextToken("origin")) reader.readLocation() else null
+                    val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
 
-                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: player().location
-                        val origin = originRaw?.get(frame = this, base) ?: base
-                        future.complete(pattern.nextPoint(origin))
+                    actionFuture { future ->
+                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.unsafePlayer()?.location
+                        listOf(
+                            if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),
+                            patternRaw?.let { this.run(it) }
+                        ).thenTake().thenApply { args ->
+                            val pattern = args[0] as? CanvasPattern ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN) ?: error("No canvas pattern selected.")
+                            val origin = args[1] as? Location ?: base ?: error("No canvas base or origin location selected.")
+
+                            pattern.nextPoint(origin)
+                        }
                     }
                 }
                 "points" -> {
-                    val originRaw = if (reader.hasNextToken("origin")) {
-                        reader.readLocation()
-                    } else {
-                        null
-                    }
-                    val patternRaw = if (reader.hasNextToken("by")) {
-                        reader.nextBlock()
-                    } else {
-                        null
-                    }
-                    actionFuture { future ->
-                        val pattern = patternRaw?.let {
-                            this.run(it).join() as? CanvasPattern
-                        } ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN) ?: error("No canvas pattern selected.")
+                    val originRaw = if (reader.hasNextToken("origin")) reader.readLocation() else null
+                    val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
 
-                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: player().location
-                        val origin = originRaw?.get(frame = this, base) ?: base
-                        future.complete(pattern.points(origin))
+                    actionTake {
+                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.unsafePlayer()?.location
+                        listOf(
+                            if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),
+                            patternRaw?.let { this.run(it) }
+                        ).thenTake().thenApply { args ->
+                            val pattern = args[0] as? CanvasPattern ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN) ?: error("No canvas pattern selected.")
+                            val origin = args[1] as? Location ?: base ?: error("No canvas base or origin location selected.")
+
+                            pattern.points(origin)
+                        }
                     }
                 }
                 else -> {

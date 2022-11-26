@@ -12,7 +12,9 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.setVariable
+import top.lanscarlos.vulpecula.utils.thenTake
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula
@@ -24,56 +26,99 @@ import java.util.concurrent.CompletableFuture
 class ActionViewers(val raw: Collection<Any>) : ScriptAction<Collection<ProxyPlayer>>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Collection<ProxyPlayer>> {
+        val future = CompletableFuture<Collection<ProxyPlayer>>()
+        val viewers = mutableSetOf<ProxyPlayer>()
+        val wait = mutableSetOf<CompletableFuture<*>>()
 
-        val cache = mutableSetOf<ProxyPlayer>()
-
+        // 处理原始数据
         for (value in raw) {
             when (value) {
-                "*" -> {
-                    cache += onlinePlayers()
+                '*', "*" -> {
+                    viewers += onlinePlayers()
                     break
                 }
                 is String -> {
-                    cache += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
+                    viewers += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
                 }
                 is ParsedAction<*> -> {
-                    frame.run(value).join()?.let { result ->
-                        when (result) {
-                            is ProxyPlayer -> cache += result
-                            is Player -> cache += adaptPlayer(result)
-                            is String -> cache += adaptPlayer(Bukkit.getPlayerExact(result) ?: return@let)
-                            is Collection<*> -> {
-                                result.forEach {
-                                    when (it) {
-                                        is ProxyPlayer -> cache += it
-                                        is Player -> cache += adaptPlayer(it)
-                                        is String -> cache += adaptPlayer(Bukkit.getPlayerExact(it) ?: return@let)
-                                    }
-                                }
-                            }
-                            is Array<*> -> {
-                                result.forEach {
-                                    when (it) {
-                                        is ProxyPlayer -> cache += it
-                                        is Player -> cache += adaptPlayer(it)
-                                        is String -> cache += adaptPlayer(Bukkit.getPlayerExact(it) ?: return@let)
-                                    }
-                                }
-                            }
-                            else -> return@let
-                        }
-                    }
+                    wait += frame.run(value)
                 }
             }
         }
 
-        val viewers = if (cache.isNotEmpty()) {
-            cache.distinctBy { it.uniqueId.toString() }
+        if (wait.isNotEmpty()) {
+            // 处理等待列表
+            val counter = AtomicInteger(0)
+            for (it in wait) {
+                if (it.isDone) {
+                    viewers.tryPlus(it.getNow(null))
+
+                    val count = counter.incrementAndGet()
+                    // 判断等待队列是否全部执行完毕
+                    if (!future.isDone && count >= wait.size) {
+                        future.complete(viewers)
+                    }
+                } else {
+                    it.thenAccept { value ->
+                        viewers.tryPlus(value)
+
+                        val count = counter.incrementAndGet()
+                        // 判断等待队列是否全部执行完毕
+                        if (!future.isDone && count >= wait.size) {
+                            future.complete(viewers)
+                        }
+                    }
+                }
+            }
+
+            return future.thenApply {
+                frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
+
+                return@thenApply if (it.isNotEmpty()) {
+                    it.distinctBy { player -> player.uniqueId.toString() }
+                } else {
+                    listOf(frame.player())
+                }
+            }
         } else {
-            listOf(frame.player())
+            frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
+            future.complete(
+                if (viewers.isNotEmpty()) {
+                    viewers.distinctBy { player -> player.uniqueId.toString() }
+                } else {
+                    listOf(frame.player())
+                }
+            )
+
+            return future
         }
-        frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
-        return CompletableFuture.completedFuture(viewers)
+    }
+
+    private fun MutableCollection<ProxyPlayer>.tryPlus(value: Any?) {
+        if (value == null) return
+        when (value) {
+            is ProxyPlayer -> this += value
+            is Player -> this += adaptPlayer(value)
+            is String -> this += adaptPlayer(Bukkit.getPlayerExact(value) ?: return)
+            is Collection<*> -> {
+                value.forEach {
+                    when (it) {
+                        is ProxyPlayer -> this += it
+                        is Player -> this += adaptPlayer(it)
+                        is String -> this += adaptPlayer(Bukkit.getPlayerExact(it) ?: return)
+                    }
+                }
+            }
+            is Array<*> -> {
+                value.forEach {
+                    when (it) {
+                        is ProxyPlayer -> this += it
+                        is Player -> this += adaptPlayer(it)
+                        is String -> this += adaptPlayer(Bukkit.getPlayerExact(it) ?: return)
+                    }
+                }
+            }
+        }
     }
 
     companion object {

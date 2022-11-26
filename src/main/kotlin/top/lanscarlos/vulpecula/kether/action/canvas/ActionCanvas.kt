@@ -2,11 +2,13 @@ package top.lanscarlos.vulpecula.kether.action.canvas
 
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
+import taboolib.common.platform.function.submit
 import taboolib.library.kether.ParsedAction
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
+import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.IntLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
@@ -23,8 +25,9 @@ import java.util.concurrent.CompletableFuture
  */
 class ActionCanvas : ScriptAction<Any?>() {
 
-    var unique: Any? = null
-    var force: Boolean = false
+    var uniqueMain: LiveData<String>? = null
+    var uniqueExtend: ParsedAction<*>? = null
+    var force: LiveData<Boolean> = BooleanLiveData(false)
     var period: LiveData<Int> = IntLiveData(20)
     var condition: ParsedAction<*>? = null
     val actions = mutableListOf<ParsedAction<*>>()
@@ -32,50 +35,47 @@ class ActionCanvas : ScriptAction<Any?>() {
     var postHandle = mutableListOf<ParsedAction<*>>()
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
+        return listOf(
+            uniqueMain?.getOrNull(frame),
+            uniqueExtend?.let { frame.run(it) },
+            force.getOrNull(frame),
+            period.getOrNull(frame)
+        ).thenTake().thenApply { args ->
 
-        /*
-        * 获取本次任务的 id
-        * */
-        val uniqueId = when (val it = unique) {
-            "false" -> "temp_" + UUID.randomUUID().toString()
-            is String -> it + '_' + frame.unsafePlayer()?.uniqueId?.toString()
-            is Pair<*, *> -> {
-                val id = (it.first as? StringLiveData)?.get(frame, "temp") ?: "temp"
-                val extend = (it.second as? ParsedAction<*>)?.let { action ->
-                    when (val result = frame.run(action).join()) {
-                        is Block -> result.location.toString()
-                        is Entity -> result.uniqueId.toString()
-                        else -> result?.toString()
+            // 处理绘画任务 ID
+            val mainId = args[0]?.toString() ?: frame.unsafePlayer()?.uniqueId?.toString() ?: error("No canvas unique id selected.")
+            val extendId = when (val it = args[1]) {
+                is Block -> it.location.toString()
+                is Entity -> it.uniqueId.toString()
+                else -> it?.toString()
+            }
+
+            val uniqueId =  if (extendId != null) mainId + '_' + extendId else mainId
+            val force = args[2].toBoolean(false)
+            val period = args[3].toInt(20)
+            val condition = this.condition
+            val body = ParsedAction(ActionBlock(actions))
+            val preHandle = ParsedAction(ActionBlock(this.preHandle))
+            val postHandle = ParsedAction(ActionBlock(this.postHandle))
+
+            if (period <= 0 || condition == null) {
+                // 循环条件未定义 任务只执行一次
+                submit(async = true) {
+                    frame.run(preHandle).thenRun {
+                        frame.run(body).thenRun {
+                            frame.run(postHandle)
+                        }
                     }
                 }
-                id + '_' + extend
-            }
-            else -> null
-        } ?: frame.player().uniqueId.toString()
-
-        frame.setVariable(VARIABLE_BRUSH, CanvasBrush())
-
-        val period = period.get(frame, 20)
-        val condition = this.condition
-        val body = ParsedAction(ActionBlock(actions))
-        val preHandle = ParsedAction(ActionBlock(this.preHandle))
-        val postHandle = ParsedAction(ActionBlock(this.postHandle))
-
-        if (period <= 0 || condition == null) {
-            // 循环条件未定义 任务只执行一次
-            frame.run(preHandle).thenRun {
-                frame.run(body).thenRun {
-                    frame.run(postHandle)
-                }
-            }
 //            warning("Canvas Condition not defined.")
-        } else {
-            val quest = CanvasQuest(uniqueId, period, condition, body, preHandle, postHandle)
-            // 提交绘画任务
-            CanvasScriptContext.submit(quest, frame.deepVars(), force)
-        }
+            } else {
+                val quest = CanvasQuest(uniqueId, period, condition, body, preHandle, postHandle)
+                // 提交绘画任务
+                CanvasScriptContext.submit(quest, frame.deepVars(), force)
+            }
 
-        return CompletableFuture.completedFuture(null)
+            return@thenApply null
+        }
     }
 
     companion object {
@@ -108,18 +108,16 @@ class ActionCanvas : ScriptAction<Any?>() {
                 reader.mark()
                 when (reader.nextToken().lowercase()) {
                     "unique" -> {
-                        val id = reader.readString()
-                        canvas.unique = if (reader.hasNextToken("with")) {
-                            Pair(id, reader.nextBlock())
-                        } else {
-                            id
+                        canvas.uniqueMain = reader.readString()
+                        if (reader.hasNextToken("with")) {
+                            canvas.uniqueExtend = reader.nextBlock()
                         }
                     }
                     "period" -> {
                         canvas.period = reader.readInt()
                     }
                     "force" -> {
-                        canvas.force = reader.nextToken().toBoolean(false)
+                        canvas.force = reader.readBoolean()
                     }
                     "condition" -> {
                         canvas.condition = reader.nextBlock()

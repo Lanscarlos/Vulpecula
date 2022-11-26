@@ -17,7 +17,7 @@ import java.awt.Color
  */
 class CanvasBrush {
 
-    var particle = ProxyParticle.SPELL_MOB
+    var particle = ProxyParticle.FLAME
     var count = 1
     var speed = 0.0
     var offset = Vector(0, 0, 0)

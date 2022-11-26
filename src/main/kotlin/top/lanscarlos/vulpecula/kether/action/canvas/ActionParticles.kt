@@ -7,7 +7,6 @@ import taboolib.common.util.Location
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.action.ActionLocation
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
@@ -20,38 +19,38 @@ import java.util.concurrent.CompletableFuture
  * @since 2022-11-10 19:29
  */
 class ActionParticles(
-    val location: LiveData<Location>?,
     val viewers: ParsedAction<*>,
     val options: Map<String, LiveData<*>>
 ) : ScriptAction<Any?>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
+        return options.mapValues {
+            it.value.getOrNull(frame)
+        }.plus("viewers" to frame.run(viewers)).thenTake().thenApply { args ->
 
-        val brush = CanvasBrush()
-        for (it in options) {
-            ActionBrush.modify(brush, frame, it.key, it.value)
-        }
-
-        val loc = location.getValue(frame, frame.unsafePlayer()?.location ?: ActionLocation.def)
-
-        val viewers = when (val value = frame.run(this.viewers).join()) {
-            is ProxyPlayer -> listOf(value)
-            is Player -> listOf(adaptPlayer(value))
-            is Collection<*> -> {
-                value.mapNotNull {
-                    when (it) {
-                        is ProxyPlayer -> it
-                        is Player -> adaptPlayer(it)
-                        else -> null
+            val brush = CanvasBrush()
+            val location = args["location"] as? Location ?: frame.unsafePlayer()?.location ?: error("No location selected.")
+            val viewers = when (val value = args["viewers"]) {
+                is ProxyPlayer -> listOf(value)
+                is Player -> listOf(adaptPlayer(value))
+                is Collection<*> -> {
+                    value.mapNotNull {
+                        when (it) {
+                            is ProxyPlayer -> it
+                            is Player -> adaptPlayer(it)
+                            else -> null
+                        }
                     }
                 }
+                else -> listOf(frame.player())
             }
-            else -> listOf(frame.player())
+
+            for (option in args) {
+                ActionBrush.modify(brush, frame, option.key, option.value)
+            }
+
+            brush.draw(location, viewers)
         }
-
-        brush.draw(loc, viewers)
-
-        return CompletableFuture.completedFuture(null)
     }
 
     companion object {
@@ -68,14 +67,12 @@ class ActionParticles(
         fun parser() = scriptParser { reader ->
             reader.switch {
                 case("play") {
+                    val options = mutableMapOf<String, LiveData<*>>()
 
-                    val loc = if (reader.hasNextToken("at")) {
-                        reader.readLocation()
-                    } else {
-                        null
+                    if (reader.hasNextToken("at")) {
+                        options["location"] = reader.readLocation()
                     }
 
-                    val options = mutableMapOf<String, LiveData<*>>()
                     val viewers = mutableSetOf<Any>()
 
                     while (reader.nextPeek().startsWith('-')) {
@@ -87,7 +84,7 @@ class ActionParticles(
                         }
                     }
 
-                    ActionParticles(loc, ParsedAction(ActionViewers(viewers)), options)
+                    ActionParticles(ParsedAction(ActionViewers(viewers)), options)
                 }
             }
         }
