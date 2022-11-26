@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action.target.selector
 
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.player
 import taboolib.module.kether.script
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
 
@@ -17,7 +16,7 @@ object SelfSelector : ActionTarget.Reader {
     override val name: Array<String> = arrayOf("self")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
-        return handle { collection ->
+        return handleNow { collection ->
             this.script().sender?.let { collection += it }
             collection
         }

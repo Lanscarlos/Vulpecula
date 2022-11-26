@@ -6,6 +6,7 @@ import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.readString
+import top.lanscarlos.vulpecula.utils.thenTake
 
 /**
  * Vulpecula
@@ -29,33 +30,35 @@ object TypeFilter : ActionTarget.Reader {
             types += reader.readString()
         }
 
-        return acceptHandler(source) { collection ->
-            val exclude = mutableSetOf<String>()
-            val include = mutableSetOf<String>()
+        return acceptHandlerFuture(source) { collection ->
+            types.map { it.getOrNull(this) }.thenTake().thenApply { args ->
 
-            for (live in types) {
-                val type = live.getOrNull(this) ?: continue
-                if (type.startsWith('!')) {
-                    // 排除类型
-                    exclude += type.substring(1).uppercase()
-                } else {
-                    // 包含类型
-                    include += type.uppercase()
+                val exclude = mutableSetOf<String>()
+                val include = mutableSetOf<String>()
+
+                for (type in args.mapNotNull { it?.toString() }) {
+                    if (type.startsWith('!')) {
+                        // 排除类型
+                        exclude += type.substring(1).uppercase()
+                    } else {
+                        // 包含类型
+                        include += type.uppercase()
+                    }
                 }
+
+                val iterator = collection.iterator()
+                while (iterator.hasNext()) {
+                    val it = iterator.next()
+                    if (exclude.isNotEmpty()) {
+                        if (it !is Entity || it.type.name in exclude) iterator.remove()
+                    }
+                    if (include.isNotEmpty()) {
+                        if (it !is Entity || it.type.name !in include) iterator.remove()
+                    }
+                }
+
+                return@thenApply collection
             }
-
-            val iterator = collection.iterator()
-            while (iterator.hasNext()) {
-                val it = iterator.next()
-                if (exclude.isNotEmpty()) {
-                    if (it !is Entity || it.type.name in exclude) iterator.remove()
-                }
-                if (include.isNotEmpty()) {
-                    if (it !is Entity || it.type.name !in include) iterator.remove()
-                }
-            }
-
-            collection
         }
     }
 }

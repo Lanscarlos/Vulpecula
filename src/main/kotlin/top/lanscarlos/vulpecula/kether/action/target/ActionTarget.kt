@@ -1,7 +1,5 @@
 package top.lanscarlos.vulpecula.kether.action.target
 
-import org.bukkit.entity.Entity
-import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -10,9 +8,7 @@ import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextPeek
 import top.lanscarlos.vulpecula.utils.readCollection
-import top.lanscarlos.vulpecula.utils.readEntity
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -28,15 +24,13 @@ class ActionTarget : ScriptAction<Any>() {
     private val handlers = mutableListOf<Handler>()
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any> {
-        var collection: MutableCollection<Any> = mutableSetOf()
+        var collection: CompletableFuture<MutableCollection<Any>> = CompletableFuture.completedFuture(mutableSetOf())
         for (handler in handlers) {
             collection = handler.handle(frame, collection)
         }
 
-        return if (collection.size == 1) {
-            CompletableFuture.completedFuture(collection.single())
-        } else {
-            CompletableFuture.completedFuture(collection)
+        return collection.thenApply {
+            if (it.size == 1) it.single() else it
         }
     }
 
@@ -115,7 +109,7 @@ class ActionTarget : ScriptAction<Any>() {
      * 处理后返回 Collection 对象
      * */
     interface Handler {
-        fun handle(frame: ScriptFrame, collection: MutableCollection<Any>): MutableCollection<Any>
+        fun handle(frame: ScriptFrame, previous: CompletableFuture<MutableCollection<Any>>): CompletableFuture<MutableCollection<Any>>
     }
 
     interface Reader {
@@ -131,10 +125,35 @@ class ActionTarget : ScriptAction<Any>() {
         /**
          * 处理后返回 Collection 对象
          * */
-        fun handle(func: ScriptFrame.(collection: MutableCollection<Any>) -> MutableCollection<Any>): Handler {
+        fun handleNow(func: ScriptFrame.(MutableCollection<Any>) -> MutableCollection<Any>): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, collection: MutableCollection<Any>): MutableCollection<Any> {
-                    return func(frame, collection)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<MutableCollection<Any>>): CompletableFuture<MutableCollection<Any>> {
+                    return if (previous.isDone) {
+                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
+                    } else {
+                        previous.thenApply { func(frame, it) }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 处理后返回 Collection 对象
+         * */
+        fun handleFuture(func: ScriptFrame.(MutableCollection<Any>) -> CompletableFuture<MutableCollection<Any>>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<MutableCollection<Any>>): CompletableFuture<MutableCollection<Any>> {
+                    if (previous.isDone) {
+                        return func(frame, previous.getNow(null))
+                    } else {
+                        val future = CompletableFuture<MutableCollection<Any>>()
+                        previous.thenAccept { collection ->
+                            func(frame, collection).thenAccept {
+                                future.complete(it)
+                            }
+                        }
+                        return future
+                    }
                 }
             }
         }
@@ -142,11 +161,71 @@ class ActionTarget : ScriptAction<Any>() {
         /**
          * 接收 Collection 并返回 Collection 对象
          * */
-        fun acceptHandler(source: LiveData<Collection<*>>?, func: ScriptFrame.(collection: MutableCollection<Any>) -> MutableCollection<Any>): Handler {
+        fun acceptHandlerNow(source: LiveData<Collection<*>>?, func: ScriptFrame.(collection: MutableCollection<Any>) -> MutableCollection<Any>): Handler {
             return object : Handler {
-                override fun handle(frame: ScriptFrame, collection: MutableCollection<Any>): MutableCollection<Any> {
-                    val collections = source?.getOrNull(frame)?.mapNotNull { it }?.toMutableSet() ?: collection
-                    return func(frame, collections)
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<MutableCollection<Any>>): CompletableFuture<MutableCollection<Any>> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, wait.getNow(null)?.filterNotNull()?.toMutableSet() ?: mutableSetOf())
+                            )
+                        } else {
+                            wait.thenApply {
+                                func(frame, it?.filterNotNull()?.toMutableSet() ?: mutableSetOf())
+                            }
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            CompletableFuture.completedFuture(
+                                func(frame, previous.getNow(null) ?: mutableSetOf())
+                            )
+                        } else {
+                            previous.thenApply {
+                                func(frame, it ?: mutableSetOf())
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 接收 Collection 并返回 Collection 对象
+         * */
+        fun acceptHandlerFuture(source: LiveData<Collection<*>>?, func: ScriptFrame.(collection: MutableCollection<Any>) -> CompletableFuture<MutableCollection<Any>>): Handler {
+            return object : Handler {
+                override fun handle(frame: ScriptFrame, previous: CompletableFuture<MutableCollection<Any>>): CompletableFuture<MutableCollection<Any>> {
+                    return if (source != null) {
+                        // root
+                        val wait = source.getOrNull(frame)
+                        if (wait.isDone) {
+                            func(frame, wait.getNow(null)?.filterNotNull()?.toMutableSet() ?: mutableSetOf())
+                        } else {
+                            val future = CompletableFuture<MutableCollection<Any>>()
+                            wait.thenAccept { collection ->
+                                func(frame, collection?.filterNotNull()?.toMutableSet() ?: mutableSetOf()).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    } else {
+                        // not root
+                        if (previous.isDone) {
+                            func(frame, previous.getNow(null) ?: mutableSetOf())
+                        } else {
+                            val future = CompletableFuture<MutableCollection<Any>>()
+                            previous.thenAccept { collection ->
+                                func(frame, collection ?: mutableSetOf()).thenAccept {
+                                    future.complete(it)
+                                }
+                            }
+                            future
+                        }
+                    }
                 }
             }
         }

@@ -8,15 +8,11 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.QuestReader
+import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.utils.bukkit
-import top.lanscarlos.vulpecula.utils.tryNextBlock
-import top.lanscarlos.vulpecula.utils.tryReadBoolean
-import top.lanscarlos.vulpecula.utils.unsafePlayer
+import top.lanscarlos.vulpecula.utils.*
 
 /**
  * Vulpecula
@@ -40,38 +36,56 @@ object InWorldSelector : ActionTarget.Reader {
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
         val type = Type.values().firstOrNull { input.lowercase() in it.namespace }
-        val raw = reader.tryNextBlock("at")
-        val includeSelf = reader.tryReadBoolean("-self", "-include-self")
 
-        return handle { collection ->
-            val world = when (val it = raw?.let { this.run(it).join() }) {
-                is World -> it
-                is String -> Bukkit.getWorld(it)
-                is Location -> it.world
-                is taboolib.common.util.Location -> it.toBukkitLocation().world
-                is Entity -> it.world
-                is ProxyPlayer -> it.location.toBukkitLocation().world
-                else -> null
-            } ?: this.unsafePlayer()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
+        if (reader.hasNextToken("at")) {
+            val raw = reader.nextBlock()
+            val includeSelf = reader.hasNextToken("-self")
 
-            when (type) {
-                Type.PlayersInWorld -> world.players
-                Type.EntitiesInWorld -> world.entities
-                Type.LivingEntitiesInWorld -> world.entities.filterIsInstance<LivingEntity>()
-                Type.AnimalsInWorld -> world.entities.filterIsInstance<Animals>()
-                else -> null
-            }?.let {
-                collection.addAll(it)
-            }
+            return handleFuture { collection ->
+                // 解析 world
+                this.run(raw).thenApply {
+                    val world = when (it) {
+                        is World -> it
+                        is String -> Bukkit.getWorld(it)
+                        is Location -> it.world
+                        is taboolib.common.util.Location -> it.toBukkitLocation().world
+                        is Entity -> it.world
+                        is ProxyPlayer -> it.location.toBukkitLocation().world
+                        else -> null
+                    } ?: this.unsafePlayer()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
 
-            // 排除自己
-            if (includeSelf?.get(this, false) == false) {
-                this.unsafePlayer()?.bukkit()?.let {
-                    collection.remove(it)
+                    return@thenApply collection.process(this, type, world, includeSelf)
                 }
             }
+        } else {
+            val includeSelf = reader.hasNextToken("-self")
 
-            collection
+            return handleNow { collection ->
+                val world = this.unsafePlayer()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
+
+                return@handleNow collection.process(this, type, world, includeSelf)
+            }
         }
+    }
+
+    private fun MutableCollection<Any>.process(frame: ScriptFrame, type: Type?, world: World, includeSelf: Boolean): MutableCollection<Any> {
+        when (type) {
+            Type.PlayersInWorld -> world.players
+            Type.EntitiesInWorld -> world.entities
+            Type.LivingEntitiesInWorld -> world.entities.filterIsInstance<LivingEntity>()
+            Type.AnimalsInWorld -> world.entities.filterIsInstance<Animals>()
+            else -> null
+        }?.let { element ->
+            this.addAll(element)
+        }
+
+        // 排除自己
+        if (!includeSelf) {
+            frame.unsafePlayer()?.bukkit()?.let { self ->
+                this.remove(self)
+            }
+        }
+
+        return this
     }
 }

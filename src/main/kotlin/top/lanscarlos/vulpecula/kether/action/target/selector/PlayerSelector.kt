@@ -19,12 +19,12 @@ object PlayerSelector : ActionTarget.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
         val name = reader.readString()
 
-        return handle { collection ->
-            val player = name.getOrNull(this)?.let {
-                Bukkit.getPlayerExact(it)
-            } ?: return@handle collection
-
-            collection.also { collection.add(player) }
+        return handleFuture { collection ->
+            name.getOrNull(this).thenApply { arg ->
+                if (arg == null) return@thenApply collection
+                Bukkit.getPlayerExact(arg)?.let { collection += it }
+                return@thenApply collection
+            }
         }
     }
 }

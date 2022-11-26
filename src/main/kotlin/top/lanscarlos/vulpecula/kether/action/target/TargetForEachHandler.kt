@@ -1,8 +1,9 @@
 package top.lanscarlos.vulpecula.kether.action.target
 
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula
@@ -18,21 +19,28 @@ object TargetForEachHandler : ActionTarget.Reader {
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
         val source = if (isRoot) reader.readCollection() else null
         val token = if (reader.hasNextToken("by")) reader.nextToken() else "it"
-        val loopBody = reader.nextBlock()
+        val body = reader.nextBlock()
 
-        return acceptHandler(source) { collection ->
-            // 临时存储原有变量
-            val origin = this.getVariable<Any?>(token)
+        return acceptHandlerFuture(source) { collection ->
 
-            for (it in collection) {
-                // 覆盖变量
-                this.setVariable(token, it)
-                this.run(loopBody).join()
+            val counter = AtomicInteger(0)
+            val future = CompletableFuture<MutableCollection<Any>>()
+
+            for (element in collection) {
+                this.newFrame(body).also {
+                    // 覆盖变量
+                    it.variables().set(token, element)
+                    it.run<Any?>().thenRun {
+                        val count = counter.incrementAndGet()
+                        // 判断 collection 是否全部遍历完毕
+                        if (!future.isDone && count >= collection.size) {
+                            future.complete(collection)
+                        }
+                    }
+                }
             }
 
-            // 恢复原有变量
-            this.setVariable(token, origin)
-            collection
+            return@acceptHandlerFuture future
         }
     }
 }

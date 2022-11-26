@@ -3,10 +3,10 @@ package top.lanscarlos.vulpecula.kether.action.target.selector
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -43,9 +43,15 @@ object InRingSelector : ActionTarget.Reader {
         var maxY: LiveData<Double> = DoubleLiveData(1)
         var maxZ: LiveData<Double> = DoubleLiveData(1)
 
-        var includeSelf: LiveData<Boolean> = BooleanLiveData(false)
+        var includeSelf = false
 
         while (reader.nextPeek().startsWith('-')) {
+
+            if (reader.nextPeek() == "-self") {
+                includeSelf = true
+                continue
+            }
+
             when (reader.nextToken().substring(1)) {
                 "location", "loc" -> center = reader.readLocation()
                 "min" -> {
@@ -66,47 +72,56 @@ object InRingSelector : ActionTarget.Reader {
                 "max-x" -> maxX = reader.readDouble()
                 "max-y" -> maxY = reader.readDouble()
                 "max-z" -> maxZ = reader.readDouble()
-                "include-self", "self" -> includeSelf = reader.readBoolean()
             }
         }
 
-        return handle { collection ->
-            val loc = (center?.getOrNull(this) ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No loc selected.")
+        return handleFuture { collection ->
+            listOf(
+                center?.getOrNull(this),
 
-            // 获取最小圈内实体（排除）
-            val exclude = loc.world?.getNearbyEntities(
-                loc,
-                minX.get(this, 1.0),
-                minY.get(this, 1.0),
-                minZ.get(this, 1.0)
-            ) ?: setOf()
+                minX.getOrNull(this),
+                minY.getOrNull(this),
+                minZ.getOrNull(this),
 
-            // 获取最大圈内所有实体
-            loc.world?.getNearbyEntities(
-                loc,
-                maxX.get(this, 1.0),
-                maxY.get(this, 1.0),
-                maxZ.get(this, 1.0)
-            )?.forEach { entity ->
-                if (entity in exclude) return@forEach
-                val filtered = when (type) {
-                    Type.EntitiesInRing -> true
-                    Type.LivingEntitiesInRing -> entity is LivingEntity
-                    Type.PlayersInRing -> entity is Player
-                    Type.AnimalsInRing -> entity is Animals
-                    else -> false
+                maxX.getOrNull(this),
+                maxY.getOrNull(this),
+                maxZ.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val loc = (args[0] as? Location ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No location selected.")
+
+                val exclude = loc.world?.getNearbyEntities(
+                    loc,
+                    args[1].toDouble(1.0),
+                    args[2].toDouble(1.0),
+                    args[3].toDouble(1.0)
+                ) ?: setOf()
+
+                loc.world?.getNearbyEntities(
+                    loc,
+                    args[4].toDouble(1.0),
+                    args[5].toDouble(1.0),
+                    args[6].toDouble(1.0)
+                )?.forEach { entity ->
+                    if (entity in exclude) return@forEach
+                    val filtered = when (type) {
+                        Type.EntitiesInRing -> true
+                        Type.LivingEntitiesInRing -> entity is LivingEntity
+                        Type.PlayersInRing -> entity is Player
+                        Type.AnimalsInRing -> entity is Animals
+                        else -> false
+                    }
+                    if (filtered) collection += entity
                 }
-                if (filtered) collection += entity
-            }
 
-            // 排除自己
-            if (!includeSelf.get(this, false)) {
-                this.unsafePlayer()?.bukkit()?.let {
-                    collection.remove(it)
+                // 排除自己
+                if (!includeSelf) {
+                    this.unsafePlayer()?.bukkit()?.let {
+                        collection.remove(it)
+                    }
                 }
-            }
 
-            collection
+                return@thenApply collection
+            }
         }
     }
 }

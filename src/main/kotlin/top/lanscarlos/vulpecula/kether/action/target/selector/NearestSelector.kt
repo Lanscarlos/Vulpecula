@@ -3,10 +3,10 @@ package top.lanscarlos.vulpecula.kether.action.target.selector
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -54,30 +54,35 @@ object NearestSelector : ActionTarget.Reader {
             }
         }
 
-        return handle { collection ->
-            val loc = (center?.getOrNull(this) ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No loc selected.")
-
-            val self = this.unsafePlayer()?.bukkit()
-
-            loc.world?.getNearbyEntities(
-                loc,
-                radiusX.get(this, 1.0),
-                radiusY.get(this, 1.0),
-                radiusZ.get(this, 1.0)
-            )?.filter { entity ->
-                if (self != null && entity == self) return@filter false
-                when (type) {
-                    Type.NearestEntity -> true
-                    Type.NearestLivingEntity -> entity is LivingEntity
-                    Type.NearestPlayer -> entity is Player
-                    Type.NearestAnimal -> entity is Animals
-                    else -> false
+        return handleFuture { collection ->
+            listOf(
+                center?.getOrNull(this),
+                radiusX.getOrNull(this),
+                radiusY.getOrNull(this),
+                radiusZ.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val loc = (args[0] as? Location ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No location selected.")
+                val self = this.unsafePlayer()?.bukkit()
+                loc.world?.getNearbyEntities(
+                    loc,
+                    args[1].toDouble(1.0),
+                    args[2].toDouble(1.0),
+                    args[3].toDouble(1.0)
+                )?.filter { entity ->
+                    if (self != null && entity == self) return@filter false
+                    when (type) {
+                        Type.NearestEntity -> true
+                        Type.NearestLivingEntity -> entity is LivingEntity
+                        Type.NearestPlayer -> entity is Player
+                        Type.NearestAnimal -> entity is Animals
+                        else -> false
+                    }
+                }?.minByOrNull { it.location.distance(loc) }?.let {
+                    collection += it
                 }
-            }?.minByOrNull { it.location.distance(loc) }?.let {
-                collection += it
-            }
 
-            collection
+                collection
+            }
         }
     }
 }

@@ -3,11 +3,10 @@ package top.lanscarlos.vulpecula.kether.action.target.selector
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
-import taboolib.common.platform.function.info
+import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -39,9 +38,15 @@ object InRadiusSelector : ActionTarget.Reader {
         var radiusX: LiveData<Double> = DoubleLiveData(1)
         var radiusY: LiveData<Double> = DoubleLiveData(1)
         var radiusZ: LiveData<Double> = DoubleLiveData(1)
-        var includeSelf: LiveData<Boolean> = BooleanLiveData(false)
+        var includeSelf = false
 
         while (reader.nextPeek().startsWith('-')) {
+
+            if (reader.nextPeek() == "-self") {
+                includeSelf = true
+                continue
+            }
+
             when (reader.nextToken().substring(1)) {
                 "location", "loc" -> center = reader.readLocation()
                 "radius", "r" -> {
@@ -53,37 +58,43 @@ object InRadiusSelector : ActionTarget.Reader {
                 "radius-x", "r-x", "x" -> radiusX = reader.readDouble()
                 "radius-y", "r-y", "y" -> radiusY = reader.readDouble()
                 "radius-z", "r-z", "z" -> radiusZ = reader.readDouble()
-                "include-self", "self" -> includeSelf = reader.readBoolean()
             }
         }
 
-        return handle { collection ->
-            val loc = (center?.getOrNull(this) ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No loc selected.")
+        return handleFuture { collection ->
+            listOf(
+                center?.getOrNull(this),
+                radiusX.getOrNull(this),
+                radiusY.getOrNull(this),
+                radiusZ.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                val loc = (args[0] as? Location ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No location selected.")
 
-            loc.world?.getNearbyEntities(
-                loc,
-                radiusX.get(this, 1.0),
-                radiusY.get(this, 1.0),
-                radiusZ.get(this, 1.0)
-            )?.forEach { entity ->
-                val filtered = when (type) {
-                    Type.EntitiesInRadius -> true
-                    Type.LivingEntitiesInRadius -> entity is LivingEntity
-                    Type.PlayersInRadius -> entity is Player
-                    Type.AnimalsInRadius -> entity is Animals
-                    else -> false
+                loc.world?.getNearbyEntities(
+                    loc,
+                    args[1].toDouble(1.0),
+                    args[2].toDouble(1.0),
+                    args[3].toDouble(1.0)
+                )?.forEach { entity ->
+                    val filtered = when (type) {
+                        Type.EntitiesInRadius -> true
+                        Type.LivingEntitiesInRadius -> entity is LivingEntity
+                        Type.PlayersInRadius -> entity is Player
+                        Type.AnimalsInRadius -> entity is Animals
+                        else -> false
+                    }
+                    if (filtered) collection += entity
                 }
-                if (filtered) collection += entity
-            }
 
-            // 排除自己
-            if (!includeSelf.get(this, false)) {
-                this.unsafePlayer()?.bukkit()?.let {
-                    collection.remove(it)
+                // 排除自己
+                if (!includeSelf) {
+                    this.unsafePlayer()?.bukkit()?.let {
+                        collection.remove(it)
+                    }
                 }
-            }
 
-            collection
+                return@thenApply collection
+            }
         }
     }
 }

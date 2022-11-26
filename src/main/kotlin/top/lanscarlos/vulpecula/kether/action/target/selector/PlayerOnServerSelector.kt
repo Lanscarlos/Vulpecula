@@ -4,7 +4,7 @@ import org.bukkit.Bukkit
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
 import top.lanscarlos.vulpecula.utils.bukkit
-import top.lanscarlos.vulpecula.utils.tryReadBoolean
+import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.unsafePlayer
 
 /**
@@ -19,11 +19,11 @@ object PlayerOnServerSelector : ActionTarget.Reader {
     override val name: Array<String> = arrayOf("player-on-server", "PlayerOnServer", "Server")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
-        val includeSelf = reader.tryReadBoolean("-self", "-include-self")
+        val includeSelf = reader.hasNextToken("-self")
 
-        return handle { collection ->
+        return handleNow { collection ->
 
-            val self = if (includeSelf?.get(this, false) == false) {
+            val self = if (!includeSelf) {
                 this.unsafePlayer()?.bukkit()
             } else null
 
