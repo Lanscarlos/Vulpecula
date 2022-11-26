@@ -16,4 +16,4 @@ Vulpecula 是基于 [TabooLib 6.0](https://github.com/TabooLib/taboolib) 开发�
 
 [Vulpecula 文档](https://www.yuque.com/lanscarlos/vulpecula-doc)
 
-[Kether 烹饪食用指南](https://www.yuque.com/lanscarlos/vulpecula-doc)
+[Kether 烹饪食用指南](https://www.yuque.com/lanscarlos/kether-cooking)
