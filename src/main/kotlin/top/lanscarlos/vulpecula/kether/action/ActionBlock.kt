@@ -28,31 +28,27 @@ class ActionBlock(
         } else if (block.size == 1) {
             return frame.run(block[0])
         } else {
+            var previous: CompletableFuture<Any?> = frame.run(block.first())
+            for (i in 1 until block.size) {
+                previous = handle(previous, frame, block[i])
+            }
+            return previous
+        }
+    }
+
+    fun handle(previous: CompletableFuture<Any?>, frame: ScriptFrame, action: ParsedAction<*>): CompletableFuture<Any?> {
+        if (previous.isDone) {
+            return frame.run(action)
+        } else {
             val future = CompletableFuture<Any?>()
-            val futures = block.map { frame.run(it) }
-            val counter = AtomicInteger(0)
-            for (it in futures) {
-                if (it.isDone) {
-                    val count = counter.incrementAndGet()
-
-                    // 判断 futures 是否全部执行完毕
-                    if (count >= futures.size) {
-                        future.complete(futures.last().getNow(null))
-                    }
-                } else {
-                    it.thenRun {
-                        val count = counter.incrementAndGet()
-
-                        // 判断 futures 是否全部执行完毕
-                        if (count >= futures.size) {
-                            future.complete(futures.last().getNow(null))
-                        }
-                    }
-                }
+            previous.thenRun {
+                frame.run(action).thenAccept { future.complete(it) }
             }
             return future
         }
     }
+
+
 
     companion object {
         @VulKetherParser(

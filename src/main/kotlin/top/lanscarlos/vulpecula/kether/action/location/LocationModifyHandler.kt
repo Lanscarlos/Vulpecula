@@ -89,7 +89,10 @@ object LocationModifyHandler : ActionLocation.Reader {
             val reproduced = this.isReproduced(reader)
 
             return acceptTransferFuture(source, reproduced) { location ->
-                other.getOrNull(this).thenApply {
+                val base = this.unsafePlayer()?.location
+                val target = if (base != null) other.get(this, base) else other.getOrNull(this)
+
+                target.thenApply {
                     if (it == null) return@thenApply location
                     when (input) {
                         "add" -> location.add(it)

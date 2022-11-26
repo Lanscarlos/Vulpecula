@@ -74,7 +74,7 @@ class ActionLocation : ScriptAction<Any?>() {
                 val it = reader.nextToken()
                 val isRoot = action.handlers.isEmpty()
 
-                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at item action.")
+                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at location action.")
 
                 // 判断管道是否已关闭
                 if (action.handlers.lastOrNull() !is Transfer) {
