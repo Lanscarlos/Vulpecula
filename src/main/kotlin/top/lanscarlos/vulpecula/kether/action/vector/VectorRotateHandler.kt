@@ -50,8 +50,8 @@ object VectorRotateHandler : ActionVector.Reader {
                     ).thenTake().thenApply {
                         val newVector = VectorUtils.rotateVector(
                             vector,
-                            it[0].toFloat(0f),
-                            it[1].toFloat(0f)
+                            it[0].coerceFloat(0f),
+                            it[1].coerceFloat(0f)
                         )
                         if (reproduced) newVector else vector.copy(newVector)
                     }
@@ -68,8 +68,8 @@ object VectorRotateHandler : ActionVector.Reader {
                         angle.getOrNull(this,)
                     ).thenTake().thenApply {
                         when (rotate) {
-                            "axis" -> vector.rotateAroundAxis(it[0] as Vector, it[1].toDouble(0.0))
-                            "non-unit-axis", "n-axis" -> vector.rotateAroundNonUnitAxis(it[0] as Vector, it[1].toDouble(0.0))
+                            "axis" -> vector.rotateAroundAxis(it[0] as Vector, it[1].coerceDouble(0.0))
+                            "non-unit-axis", "n-axis" -> vector.rotateAroundNonUnitAxis(it[0] as Vector, it[1].coerceDouble(0.0))
                             else -> vector
                         }
                     }

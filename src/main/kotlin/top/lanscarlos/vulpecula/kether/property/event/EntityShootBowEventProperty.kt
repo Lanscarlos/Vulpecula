@@ -5,7 +5,7 @@ import org.bukkit.event.entity.EntityShootBowEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toBoolean
+import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
  * Vulpecula
@@ -38,7 +38,7 @@ class EntityShootBowEventProperty : VulScriptProperty<EntityShootBowEvent>("enti
     override fun writeProperty(instance: EntityShootBowEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "consumable" -> {
-                instance.setConsumeItem(value?.toBoolean() ?: return OpenResult.successful())
+                instance.setConsumeItem(value?.coerceBoolean() ?: return OpenResult.successful())
             }
             "projectile" -> {
                 instance.projectile = value as? Entity ?: return OpenResult.successful()

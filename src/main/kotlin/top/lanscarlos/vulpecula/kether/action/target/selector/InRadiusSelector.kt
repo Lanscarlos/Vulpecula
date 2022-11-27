@@ -68,13 +68,13 @@ object InRadiusSelector : ActionTarget.Reader {
                 radiusY.getOrNull(this),
                 radiusZ.getOrNull(this)
             ).thenTake().thenApply { args ->
-                val loc = (args[0] as? Location ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No location selected.")
+                val loc = (args[0] as? Location ?: this.playerOrNull()?.location)?.toBukkitLocation() ?: error("No location selected.")
 
                 loc.world?.getNearbyEntities(
                     loc,
-                    args[1].toDouble(1.0),
-                    args[2].toDouble(1.0),
-                    args[3].toDouble(1.0)
+                    args[1].coerceDouble(1.0),
+                    args[2].coerceDouble(1.0),
+                    args[3].coerceDouble(1.0)
                 )?.forEach { entity ->
                     val filtered = when (type) {
                         Type.EntitiesInRadius -> true
@@ -88,7 +88,7 @@ object InRadiusSelector : ActionTarget.Reader {
 
                 // 排除自己
                 if (!includeSelf) {
-                    this.unsafePlayer()?.bukkit()?.let {
+                    this.playerOrNull()?.toBukkit()?.let {
                         collection.remove(it)
                     }
                 }

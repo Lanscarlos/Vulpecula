@@ -64,11 +64,11 @@ object LocationModifyHandler : ActionLocation.Reader {
             options.mapValues { it.value.getOrNull(this) }.thenTake().thenApply { args ->
                 for (option in args) {
                     when (option.key) {
-                        "x" -> location.x = option.value.toDouble(location.x)
-                        "y" -> location.y = option.value.toDouble(location.y)
-                        "z" -> location.z = option.value.toDouble(location.z)
-                        "yaw" -> location.yaw = option.value.toFloat(location.yaw)
-                        "pitch" -> location.pitch = option.value.toFloat(location.pitch)
+                        "x" -> location.x = option.value.coerceDouble(location.x)
+                        "y" -> location.y = option.value.coerceDouble(location.y)
+                        "z" -> location.z = option.value.coerceDouble(location.z)
+                        "yaw" -> location.yaw = option.value.coerceFloat(location.yaw)
+                        "pitch" -> location.pitch = option.value.coerceFloat(location.pitch)
                     }
                 }
 
@@ -89,7 +89,7 @@ object LocationModifyHandler : ActionLocation.Reader {
             val reproduced = this.isReproduced(reader)
 
             return acceptTransferFuture(source, reproduced) { location ->
-                val base = this.unsafePlayer()?.location
+                val base = this.playerOrNull()?.location
                 val target = if (base != null) other.get(this, base) else other.getOrNull(this)
 
                 target.thenApply {
@@ -154,20 +154,20 @@ object LocationModifyHandler : ActionLocation.Reader {
 
     private fun Float.operation(input: String, value: Any?): Float {
         return when (input) {
-            "add" -> this + value.toFloat(0f)
-            "subtract", "sub" -> this - value.toFloat(0f)
-            "multiply", "mul" -> this * value.toFloat(1f)
-            "divide", "div" -> this / value.toFloat(1f)
+            "add" -> this + value.coerceFloat(0f)
+            "subtract", "sub" -> this - value.coerceFloat(0f)
+            "multiply", "mul" -> this * value.coerceFloat(1f)
+            "divide", "div" -> this / value.coerceFloat(1f)
             else -> this
         }
     }
 
     private fun Double.operation(input: String, value: Any?): Double {
         return when (input) {
-            "add" -> this + value.toDouble(0.0)
-            "subtract", "sub" -> this - value.toDouble(0.0)
-            "multiply", "mul" -> this * value.toDouble(1.0)
-            "divide", "div" -> this / value.toDouble(1.0)
+            "add" -> this + value.coerceDouble(0.0)
+            "subtract", "sub" -> this - value.coerceDouble(0.0)
+            "multiply", "mul" -> this * value.coerceDouble(1.0)
+            "divide", "div" -> this / value.coerceDouble(1.0)
             else -> this
         }
     }

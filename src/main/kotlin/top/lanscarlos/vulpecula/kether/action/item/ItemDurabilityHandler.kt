@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.kether.action.item
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.utils.readInt
 import top.lanscarlos.vulpecula.utils.readItemStack
-import top.lanscarlos.vulpecula.utils.toInt
+import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**
  * Vulpecula
@@ -26,9 +26,9 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
                 return acceptTransferFuture(source) { item ->
                     amount.getOrNull(this).thenApply {
                         item.durability = when (next) {
-                            "fix" -> item.durability - it.toInt(0)
-                            "damage", "dmg" -> item.durability + it.toInt(0)
-                            "set" -> it.toInt(item.durability.toInt())
+                            "fix" -> item.durability - it.coerceInt(0)
+                            "damage", "dmg" -> item.durability + it.coerceInt(0)
+                            "set" -> it.coerceInt(item.durability.toInt())
                             else -> item.durability
                         }.toShort().coerceIn(0, item.type.maxDurability)
 

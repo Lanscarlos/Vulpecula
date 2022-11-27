@@ -45,7 +45,7 @@ object ItemLoreHandler : ActionItemStack.Reader {
                 val lore = meta.lore ?: mutableListOf()
 
                 val list = (args[0] as? List<*>)?.map { it?.toString() } ?: return@thenApply item
-                val cursor = args[1]?.toInt() ?: lore.size
+                val cursor = args[1]?.coerceInt() ?: lore.size
                 if (cursor >= lore.size) {
                     // 下标位于末尾
                     lore.addAll(list)
@@ -73,7 +73,7 @@ object ItemLoreHandler : ActionItemStack.Reader {
                 val meta = item.itemMeta ?: return@thenApply item
                 val lore = meta.lore ?: mutableListOf()
 
-                val cursor = args[0]?.toInt() ?: lore.size
+                val cursor = args[0]?.coerceInt() ?: lore.size
                 val line = args[1]?.toString()
                 if (cursor >= lore.size) {
                     // 下标位于末尾

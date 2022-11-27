@@ -6,8 +6,8 @@ import taboolib.common.util.Vector
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toDouble
-import top.lanscarlos.vulpecula.utils.toFloat
+import top.lanscarlos.vulpecula.utils.coerceDouble
+import top.lanscarlos.vulpecula.utils.coerceFloat
 
 /**
  * Vulpecula
@@ -53,19 +53,19 @@ class LocationTabooProperty : VulScriptProperty<Location>("location-taboo") {
                 instance.direction = value as? Vector ?: return OpenResult.successful()
             }
             "pitch" -> {
-                instance.pitch = value?.toFloat(0f) ?: return OpenResult.successful()
+                instance.pitch = value?.coerceFloat(0f) ?: return OpenResult.successful()
             }
             "x" -> {
-                instance.x = value?.toDouble() ?: return OpenResult.successful()
+                instance.x = value?.coerceDouble() ?: return OpenResult.successful()
             }
             "y" -> {
-                instance.y = value?.toDouble() ?: return OpenResult.successful()
+                instance.y = value?.coerceDouble() ?: return OpenResult.successful()
             }
             "yaw" -> {
-                instance.yaw = value?.toFloat() ?: return OpenResult.successful()
+                instance.yaw = value?.coerceFloat() ?: return OpenResult.successful()
             }
             "z" -> {
-                instance.z = value?.toDouble() ?: return OpenResult.successful()
+                instance.z = value?.coerceDouble() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

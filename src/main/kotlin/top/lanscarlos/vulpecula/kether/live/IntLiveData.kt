@@ -5,7 +5,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.toInt
+import top.lanscarlos.vulpecula.utils.coerceInt
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -37,7 +37,7 @@ class IntLiveData(
                 is Float -> it.toInt()
                 is Double -> it.toInt()
                 is String -> it.toIntOrNull()
-                else -> it?.toInt()
+                else -> it?.coerceInt()
             }
         }
     }

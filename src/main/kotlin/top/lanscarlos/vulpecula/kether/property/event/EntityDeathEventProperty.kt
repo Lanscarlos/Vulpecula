@@ -4,7 +4,7 @@ import org.bukkit.event.entity.EntityDeathEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toInt
+import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**
  * Vulpecula
@@ -33,7 +33,7 @@ class EntityDeathEventProperty : VulScriptProperty<EntityDeathEvent>("entity-dea
     override fun writeProperty(instance: EntityDeathEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "droppedExp", "dropped-exp", "exp" -> {
-                instance.droppedExp = value?.toInt() ?: return OpenResult.successful()
+                instance.droppedExp = value?.coerceInt() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

@@ -122,8 +122,8 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                     val type = value?.toString()?.uppercase() ?: return
                     brush.particle = ProxyParticle.values().firstOrNull { it.name.equals(type, true) } ?: return
                 }
-                "count" -> brush.count = value?.toInt() ?: return
-                "speed" -> brush.speed = value?.toDouble() ?: return
+                "count" -> brush.count = value?.coerceInt() ?: return
+                "speed" -> brush.speed = value?.coerceDouble() ?: return
                 "offset" -> brush.offset = value as? Vector ?: return
                 "spread" -> brush.vector = value as? Vector ?: return
                 "velocity" -> {
@@ -132,7 +132,7 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                     if (brush.speed == 0.0) brush.speed = 0.15
                 }
 
-                "size" -> brush.size = value?.toFloat() ?: return
+                "size" -> brush.size = value?.coerceFloat() ?: return
                 "color" -> {
                     val color = value as? Color ?: return
                     when (brush.particle) {
@@ -152,10 +152,10 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 }
                 "transition" -> brush.transition = value as? Color ?: return
                 "material" -> brush.material = value?.toString() ?: return
-                "data" -> brush.data = value?.toInt() ?: return
+                "data" -> brush.data = value?.coerceInt() ?: return
                 "name" -> brush.name = value?.toString() ?: return
                 "lore" -> brush.lore = value as? List<String> ?: return
-                "model" -> brush.customModelData = value?.toInt() ?: return
+                "model" -> brush.customModelData = value?.coerceInt() ?: return
             }
         }
     }

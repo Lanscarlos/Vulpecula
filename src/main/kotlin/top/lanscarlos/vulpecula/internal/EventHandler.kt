@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.internal
 import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.lang.asLangText
@@ -124,8 +123,8 @@ class EventHandler(
          * */
         private fun loadFromFile(file: File): Set<EventHandler> {
             val loaded = mutableSetOf<EventHandler>()
-            file.toConfig().forEachSections { key, section ->
-                if (section.getBoolean("disable", false)) return@forEachSections
+            file.toConfig().forEachSection { key, section ->
+                if (section.getBoolean("disable", false)) return@forEachSection
                 loaded += EventHandler(key, section)
             }
             return loaded

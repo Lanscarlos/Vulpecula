@@ -7,7 +7,7 @@ import org.bukkit.event.entity.EntityDamageEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toDouble
+import top.lanscarlos.vulpecula.utils.coerceDouble
 
 /**
  * Vulpecula
@@ -56,7 +56,7 @@ class EntityDamageEventProperty : VulScriptProperty<EntityDamageEvent>("entity-d
     override fun writeProperty(instance: EntityDamageEvent, key: String, value: Any?): OpenResult {
         when (key) {
             "damage" -> {
-                instance.damage = value?.toDouble() ?: return OpenResult.successful()
+                instance.damage = value?.coerceDouble() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

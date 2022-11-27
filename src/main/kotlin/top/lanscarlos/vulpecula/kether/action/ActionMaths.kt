@@ -4,7 +4,7 @@ import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.readDouble
-import top.lanscarlos.vulpecula.utils.toDouble
+import top.lanscarlos.vulpecula.utils.coerceDouble
 import kotlin.math.*
 
 /**
@@ -22,7 +22,7 @@ object ActionMaths {
         val power = reader.readDouble()
         actionTake {
             base.thenApplyOrNull(this, power.getOrNull(this)) {
-                this?.pow(it.first().toDouble(0.0)) ?: 0.0
+                this?.pow(it.first().coerceDouble(0.0)) ?: 0.0
             }
         }
     }
@@ -51,7 +51,7 @@ object ActionMaths {
         val natural = reader.readDouble() // 真数
         actionTake {
             base.thenApplyOrNull(this, natural.getOrNull(this)) {
-                log(it.first().toDouble(0.0), this ?: 0.0)
+                log(it.first().coerceDouble(0.0), this ?: 0.0)
             }
         }
     }

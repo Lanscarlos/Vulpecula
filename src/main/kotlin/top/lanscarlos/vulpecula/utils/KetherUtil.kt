@@ -102,11 +102,15 @@ fun <T> ScriptFrame.getVariable(vararg keys: String): T? {
  * 设置变量
  * */
 fun ScriptFrame.setVariable(key: String, value: Any?, deep: Boolean = true) {
-    var root = this
-    while (root.parent().isPresent) {
-        root = root.parent().get()
+    if (deep) {
+        var root = this
+        while (root.parent().isPresent) {
+            root = root.parent().get()
+        }
+        root.variables().set(key, value)
+    } else {
+        this.variables().set(key, value)
     }
-    return root.variables().set(key, value)
 }
 
 /**
@@ -118,10 +122,10 @@ fun ScriptContext.setVariable(vararg keys: String, value: Any?) {
     }
 }
 
-fun QuestContext.Frame.unsafePlayer(): ProxyPlayer? {
+fun QuestContext.Frame.playerOrNull(): ProxyPlayer? {
     return script().sender as? ProxyPlayer
 }
 
-fun ProxyPlayer.bukkit(): Player? {
+fun ProxyPlayer.toBukkit(): Player? {
     return (this as? BukkitPlayer)?.player
 }

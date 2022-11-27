@@ -37,7 +37,7 @@ class ActionIfElse(
                     val first = stack.pop()
                     val second = stack.pop()
                     val future = listOf(first, second).thenTake().thenApply {
-                        it[0].toBoolean(false) && it[1].toBoolean(false)
+                        it[0].coerceBoolean(false) && it[1].coerceBoolean(false)
                     }
                     stack.push(future)
                 }
@@ -45,7 +45,7 @@ class ActionIfElse(
                     val first = stack.pop()
                     val second = stack.pop()
                     val future = listOf(first, second).thenTake().thenApply {
-                        it[0].toBoolean(false) || it[1].toBoolean(false)
+                        it[0].coerceBoolean(false) || it[1].coerceBoolean(false)
                     }
                     stack.push(future)
                 }
@@ -187,7 +187,7 @@ class ActionIfElse(
         val condition: ParsedAction<*>
     ) : Condition {
         override fun run(frame: ScriptFrame): CompletableFuture<Boolean> {
-            return frame.run(condition).thenApply { it.toBoolean(false) }
+            return frame.run(condition).thenApply { it.coerceBoolean(false) }
         }
     }
 

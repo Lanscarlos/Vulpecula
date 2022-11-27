@@ -5,7 +5,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.toBoolean
+import top.lanscarlos.vulpecula.utils.coerceBoolean
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -35,7 +35,7 @@ class BooleanLiveData(
                 "true", "yes" -> true
                 "false", "no" -> false
                 is Number -> it != 0
-                else -> it?.toBoolean()
+                else -> it?.coerceBoolean()
             }
         }
     }

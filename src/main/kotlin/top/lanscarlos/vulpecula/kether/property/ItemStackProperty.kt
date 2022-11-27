@@ -7,9 +7,9 @@ import org.bukkit.material.MaterialData
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toBoolean
-import top.lanscarlos.vulpecula.utils.toInt
-import top.lanscarlos.vulpecula.utils.toShort
+import top.lanscarlos.vulpecula.utils.coerceBoolean
+import top.lanscarlos.vulpecula.utils.coerceInt
+import top.lanscarlos.vulpecula.utils.coerceShort
 
 /**
  * Vulpecula
@@ -61,13 +61,13 @@ class ItemStackProperty : VulScriptProperty<ItemStack>("itemstack") {
     override fun writeProperty(instance: ItemStack, key: String, value: Any?): OpenResult {
         when (key) {
             "amount", "amt" -> {
-                instance.amount = value.toInt(instance.amount)
+                instance.amount = value.coerceInt(instance.amount)
             }
             "data" -> {
                 instance.data = value as? MaterialData
             }
             "durability", "dura" -> {
-                instance.durability = value.toShort(instance.durability)
+                instance.durability = value.coerceShort(instance.durability)
             }
             "item-meta", "meta" -> {
                 instance.itemMeta = value as? ItemMeta
@@ -97,11 +97,11 @@ class ItemStackProperty : VulScriptProperty<ItemStack>("itemstack") {
             }
             "custom-model-data", "custom-model", "model-data", "model" -> {
                 val meta = instance.itemMeta
-                meta?.setCustomModelData(value.toInt(meta.customModelData))
+                meta?.setCustomModelData(value.coerceInt(meta.customModelData))
                 instance.itemMeta = meta
             }
             "unbreakable", "unbreak" -> {
-                instance.itemMeta?.isUnbreakable = value.toBoolean(instance.itemMeta?.isUnbreakable)
+                instance.itemMeta?.isUnbreakable = value.coerceBoolean(instance.itemMeta?.isUnbreakable)
             }
             "localized-name", "localized" -> {
                 instance.itemMeta?.setLocalizedName(value?.toString())

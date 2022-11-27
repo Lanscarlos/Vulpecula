@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toBoolean
+import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
  * Vulpecula
@@ -39,7 +39,7 @@ class EventProperty : VulScriptProperty<Event>("event") {
         when (key) {
             "isCancelled", "cancelled", "cancel" -> {
                 val cancellable = instance as? Cancellable ?: return OpenResult.failed()
-                cancellable.isCancelled = value?.toBoolean() ?: return OpenResult.successful()
+                cancellable.isCancelled = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

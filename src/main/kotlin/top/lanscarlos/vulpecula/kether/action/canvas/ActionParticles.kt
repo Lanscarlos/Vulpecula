@@ -29,7 +29,7 @@ class ActionParticles(
         }.plus("viewers" to frame.run(viewers)).thenTake().thenApply { args ->
 
             val brush = CanvasBrush()
-            val location = args["location"] as? Location ?: frame.unsafePlayer()?.location ?: error("No location selected.")
+            val location = args["location"] as? Location ?: frame.playerOrNull()?.location ?: error("No location selected.")
             val viewers = when (val value = args["viewers"]) {
                 is ProxyPlayer -> listOf(value)
                 is Player -> listOf(adaptPlayer(value))

@@ -4,7 +4,7 @@ import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.library.kether.QuestContext
 import taboolib.module.kether.*
-import top.lanscarlos.vulpecula.utils.toBoolean
+import top.lanscarlos.vulpecula.utils.coerceBoolean
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -114,7 +114,7 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
                 task = submit(async = true, period = quest.period.toLong()) {
                     try {
                         // 判断运行条件, 用 join() 阻塞
-                        if (!quest.condition.process(this@CanvasNamedFrame).join().toBoolean(false)) {
+                        if (!quest.condition.process(this@CanvasNamedFrame).join().coerceBoolean(false)) {
                             // 条件不满足，结束
                             cancel()
 

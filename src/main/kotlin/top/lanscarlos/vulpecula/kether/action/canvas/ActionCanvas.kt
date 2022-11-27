@@ -11,9 +11,7 @@ import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
 import top.lanscarlos.vulpecula.kether.live.IntLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
-import java.util.*
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -43,7 +41,7 @@ class ActionCanvas : ScriptAction<Any?>() {
         ).thenTake().thenApply { args ->
 
             // 处理绘画任务 ID
-            val mainId = args[0]?.toString() ?: frame.unsafePlayer()?.uniqueId?.toString() ?: error("No canvas unique id selected.")
+            val mainId = args[0]?.toString() ?: frame.playerOrNull()?.uniqueId?.toString() ?: error("No canvas unique id selected.")
             val extendId = when (val it = args[1]) {
                 is Block -> it.location.toString()
                 is Entity -> it.uniqueId.toString()
@@ -51,8 +49,8 @@ class ActionCanvas : ScriptAction<Any?>() {
             }
 
             val uniqueId =  if (extendId != null) mainId + '_' + extendId else mainId
-            val force = args[2].toBoolean(false)
-            val period = args[3].toInt(20)
+            val force = args[2].coerceBoolean(false)
+            val period = args[3].coerceInt(20)
             val condition = this.condition
             val body = ParsedAction(ActionBlock(actions))
             val preHandle = ParsedAction(ActionBlock(this.preHandle))

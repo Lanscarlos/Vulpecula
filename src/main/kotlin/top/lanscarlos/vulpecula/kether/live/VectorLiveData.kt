@@ -29,7 +29,7 @@ class VectorLiveData(
                     (value.second as? DoubleLiveData)?.getOrNull(frame),
                     (value.third as? DoubleLiveData)?.getOrNull(frame),
                 ).thenTake().thenApply {
-                    Vector(it[0].toDouble(def.x), it[1].toDouble(def.x), it[2].toDouble(def.x))
+                    Vector(it[0].coerceDouble(def.x), it[1].coerceDouble(def.x), it[2].coerceDouble(def.x))
                 }
             }
             else -> {
@@ -59,9 +59,9 @@ class VectorLiveData(
                     (value.third as? DoubleLiveData)?.getOrNull(frame),
                 ).thenTake().thenApply {
                     Vector(
-                        it[0]?.toDouble() ?: return@thenApply null,
-                        it[1]?.toDouble() ?: return@thenApply null,
-                        it[2]?.toDouble() ?: return@thenApply null
+                        it[0]?.coerceDouble() ?: return@thenApply null,
+                        it[1]?.coerceDouble() ?: return@thenApply null,
+                        it[2]?.coerceDouble() ?: return@thenApply null
                     )
                 }
             }

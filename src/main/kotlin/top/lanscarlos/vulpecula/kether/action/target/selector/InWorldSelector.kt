@@ -52,7 +52,7 @@ object InWorldSelector : ActionTarget.Reader {
                         is Entity -> it.world
                         is ProxyPlayer -> it.location.toBukkitLocation().world
                         else -> null
-                    } ?: this.unsafePlayer()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
+                    } ?: this.playerOrNull()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
 
                     return@thenApply collection.process(this, type, world, includeSelf)
                 }
@@ -61,7 +61,7 @@ object InWorldSelector : ActionTarget.Reader {
             val includeSelf = reader.hasNextToken("-self")
 
             return handleNow { collection ->
-                val world = this.unsafePlayer()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
+                val world = this.playerOrNull()?.location?.toBukkitLocation()?.world ?: error("No world selected.")
 
                 return@handleNow collection.process(this, type, world, includeSelf)
             }
@@ -81,7 +81,7 @@ object InWorldSelector : ActionTarget.Reader {
 
         // 排除自己
         if (!includeSelf) {
-            frame.unsafePlayer()?.bukkit()?.let { self ->
+            frame.playerOrNull()?.toBukkit()?.let { self ->
                 this.remove(self)
             }
         }

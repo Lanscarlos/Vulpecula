@@ -47,7 +47,7 @@ object ActionEvent {
                         next?.let { this.run(it) },
                     ).thenTake().thenApply {
                         val event = it[0] as? Event ?: this.getVariable<Event>("event", "@Event") ?: error("No event selected!")
-                        val cancelled = it[1].toBoolean(true)
+                        val cancelled = it[1].coerceBoolean(true)
 
                         (event as? Cancellable)?.isCancelled = cancelled
                         return@thenApply (event as? Cancellable)?.isCancelled

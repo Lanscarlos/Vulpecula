@@ -257,8 +257,8 @@ class EventDispatcher(
 
         private fun loadFromFile(file: File): Set<EventDispatcher> {
             val loaded = mutableSetOf<EventDispatcher>()
-            file.toConfig().forEachSections { key, section ->
-                if (section.getBoolean("disable", false)) return@forEachSections
+            file.toConfig().forEachSection { key, section ->
+                if (section.getBoolean("disable", false)) return@forEachSection
                 loaded += EventDispatcher(key, section)
             }
             return loaded

@@ -87,20 +87,20 @@ object InRingSelector : ActionTarget.Reader {
                 maxY.getOrNull(this),
                 maxZ.getOrNull(this)
             ).thenTake().thenApply { args ->
-                val loc = (args[0] as? Location ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No location selected.")
+                val loc = (args[0] as? Location ?: this.playerOrNull()?.location)?.toBukkitLocation() ?: error("No location selected.")
 
                 val exclude = loc.world?.getNearbyEntities(
                     loc,
-                    args[1].toDouble(1.0),
-                    args[2].toDouble(1.0),
-                    args[3].toDouble(1.0)
+                    args[1].coerceDouble(1.0),
+                    args[2].coerceDouble(1.0),
+                    args[3].coerceDouble(1.0)
                 ) ?: setOf()
 
                 loc.world?.getNearbyEntities(
                     loc,
-                    args[4].toDouble(1.0),
-                    args[5].toDouble(1.0),
-                    args[6].toDouble(1.0)
+                    args[4].coerceDouble(1.0),
+                    args[5].coerceDouble(1.0),
+                    args[6].coerceDouble(1.0)
                 )?.forEach { entity ->
                     if (entity in exclude) return@forEach
                     val filtered = when (type) {
@@ -115,7 +115,7 @@ object InRingSelector : ActionTarget.Reader {
 
                 // 排除自己
                 if (!includeSelf) {
-                    this.unsafePlayer()?.bukkit()?.let {
+                    this.playerOrNull()?.toBukkit()?.let {
                         collection.remove(it)
                     }
                 }

@@ -26,7 +26,7 @@ object EntityDamageHandler : ActionEntity.Reader {
                 damage.getOrNull(this),
                 damager?.getOrNull(this)
             ).thenTake().thenApply {
-                (entity as? LivingEntity)?.damage(it[0].toDouble(0.0), it[1] as? Entity)
+                (entity as? LivingEntity)?.damage(it[0].coerceDouble(0.0), it[1] as? Entity)
                 return@thenApply entity
             }
         }

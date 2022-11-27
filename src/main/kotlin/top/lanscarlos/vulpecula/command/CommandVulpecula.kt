@@ -5,8 +5,6 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.subCommand
-import taboolib.common.platform.function.info
-import taboolib.module.kether.Kether
 import top.lanscarlos.vulpecula.Context
 import top.lanscarlos.vulpecula.utils.eval
 
@@ -24,8 +22,12 @@ object CommandVulpecula {
     val eval = subCommand {
         dynamic {
             execute<Player> { player, _, argument ->
-                val result = eval(argument, player, args = mapOf("player" to player)).get()
-                player.sendMessage("运行结果：$result")
+                eval(argument, player, args = mapOf(
+                    "player" to player,
+                    "hand" to player.equipment?.itemInMainHand
+                )).thenAccept {
+                    player.sendMessage("§7[§f§lResult§7]§r $it")
+                }
             }
         }
     }
@@ -34,11 +36,8 @@ object CommandVulpecula {
     val reload = subCommand {
         execute<CommandSender> { sender, _, _ ->
             val info = Context.load()
-            if (sender is Player) {
-                info.forEach {
-                    sender.sendMessage(it)
-                }
-            }
+            val player = sender as? Player ?: return@execute
+            info.forEach { player.sendMessage(it) }
         }
     }
 

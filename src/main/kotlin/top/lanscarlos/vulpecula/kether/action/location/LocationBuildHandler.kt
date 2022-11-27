@@ -41,8 +41,8 @@ object LocationBuildHandler : ActionLocation.Reader {
                     Location(
                         args[1]?.toString(),
                         vec.x, vec.y, vec.z,
-                        args[2].toFloat(0f),
-                        args[3].toFloat(0f)
+                        args[2].coerceFloat(0f),
+                        args[3].coerceFloat(0f)
                     )
                 }
             }
@@ -64,11 +64,11 @@ object LocationBuildHandler : ActionLocation.Reader {
                 options.mapValues { it.value.getOrNull(this) }.thenTake().thenApply { args ->
                     Location(
                         args["world"]?.toString(),
-                        args["x"].toDouble(0.0),
-                        args["y"].toDouble(0.0),
-                        args["z"].toDouble(0.0),
-                        args["yaw"].toFloat(0f),
-                        args["pitch"].toFloat(0f)
+                        args["x"].coerceDouble(0.0),
+                        args["y"].coerceDouble(0.0),
+                        args["z"].coerceDouble(0.0),
+                        args["yaw"].coerceFloat(0f),
+                        args["pitch"].coerceFloat(0f)
                     )
                 }
             }

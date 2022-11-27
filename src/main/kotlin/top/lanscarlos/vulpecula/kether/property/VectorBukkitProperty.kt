@@ -4,7 +4,7 @@ import org.bukkit.util.Vector
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toDouble
+import top.lanscarlos.vulpecula.utils.coerceDouble
 
 /**
  * Vulpecula
@@ -43,13 +43,13 @@ class VectorBukkitProperty : VulScriptProperty<Vector>("vector-bukkit") {
     override fun writeProperty(instance: Vector, key: String, value: Any?): OpenResult {
         when (key) {
             "x" -> {
-                instance.x = value?.toDouble() ?: return OpenResult.successful()
+                instance.x = value?.coerceDouble() ?: return OpenResult.successful()
             }
             "y" -> {
-                instance.y = value?.toDouble() ?: return OpenResult.successful()
+                instance.y = value?.coerceDouble() ?: return OpenResult.successful()
             }
             "z" -> {
-                instance.z = value?.toDouble() ?: return OpenResult.successful()
+                instance.z = value?.coerceDouble() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

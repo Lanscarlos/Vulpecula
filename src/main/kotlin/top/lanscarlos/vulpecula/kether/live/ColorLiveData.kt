@@ -32,7 +32,7 @@ class ColorLiveData(
                     (value.second as? IntLiveData)?.getOrNull(frame),
                     (value.third as? IntLiveData)?.getOrNull(frame)
                 ).thenTake().thenApply {
-                    Color(it[0].toInt(def.red), it[1].toInt(def.green), it[2].toInt(def.blue))
+                    Color(it[0].coerceInt(def.red), it[1].coerceInt(def.green), it[2].coerceInt(def.blue))
                 }
             }
             is Pair<*, *> -> {
@@ -43,7 +43,7 @@ class ColorLiveData(
                     (base.third as? IntLiveData)?.getOrNull(frame),
                     (value.second as? IntLiveData)?.getOrNull(frame)
                 ).thenTake().thenApply {
-                    Color(it[0].toInt(def.red), it[1].toInt(def.green), it[2].toInt(def.blue), it[3].toInt(def.alpha))
+                    Color(it[0].coerceInt(def.red), it[1].coerceInt(def.green), it[2].coerceInt(def.blue), it[3].coerceInt(def.alpha))
                 }
             }
             is StringLiveData -> {
@@ -69,9 +69,9 @@ class ColorLiveData(
                     (value.third as? IntLiveData)?.getOrNull(frame)
                 ).thenTake().thenApply {
                     Color(
-                        it[0]?.toInt() ?: return@thenApply null,
-                        it[1]?.toInt() ?: return@thenApply null,
-                        it[2]?.toInt() ?: return@thenApply null
+                        it[0]?.coerceInt() ?: return@thenApply null,
+                        it[1]?.coerceInt() ?: return@thenApply null,
+                        it[2]?.coerceInt() ?: return@thenApply null
                     )
                 }
             }
@@ -84,10 +84,10 @@ class ColorLiveData(
                     (value.second as? IntLiveData)?.getOrNull(frame)
                 ).thenTake().thenApply {
                     Color(
-                        it[0]?.toInt() ?: return@thenApply null,
-                        it[1]?.toInt() ?: return@thenApply null,
-                        it[2]?.toInt() ?: return@thenApply null,
-                        it[3]?.toInt() ?: return@thenApply null
+                        it[0]?.coerceInt() ?: return@thenApply null,
+                        it[1]?.coerceInt() ?: return@thenApply null,
+                        it[2]?.coerceInt() ?: return@thenApply null,
+                        it[3]?.coerceInt() ?: return@thenApply null
                     )
                 }
             }

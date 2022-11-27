@@ -61,13 +61,13 @@ object NearestSelector : ActionTarget.Reader {
                 radiusY.getOrNull(this),
                 radiusZ.getOrNull(this)
             ).thenTake().thenApply { args ->
-                val loc = (args[0] as? Location ?: this.unsafePlayer()?.location)?.toBukkitLocation() ?: error("No location selected.")
-                val self = this.unsafePlayer()?.bukkit()
+                val loc = (args[0] as? Location ?: this.playerOrNull()?.location)?.toBukkitLocation() ?: error("No location selected.")
+                val self = this.playerOrNull()?.toBukkit()
                 loc.world?.getNearbyEntities(
                     loc,
-                    args[1].toDouble(1.0),
-                    args[2].toDouble(1.0),
-                    args[3].toDouble(1.0)
+                    args[1].coerceDouble(1.0),
+                    args[2].coerceDouble(1.0),
+                    args[3].coerceDouble(1.0)
                 )?.filter { entity ->
                     if (self != null && entity == self) return@filter false
                     when (type) {

@@ -48,7 +48,7 @@ object ItemEnchantHandler : ActionItemStack.Reader {
                 val meta = item.itemMeta ?: return@thenApply item
                 val enchant = args[0]?.toString()?.asEnchantment() ?: return@thenApply item
 
-                meta.addEnchant(enchant, args[1].toInt(1), ignoreLevelRestriction)
+                meta.addEnchant(enchant, args[1].coerceInt(1), ignoreLevelRestriction)
 
                 return@thenApply item.also { it.itemMeta = meta }
             }

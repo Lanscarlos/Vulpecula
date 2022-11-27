@@ -4,7 +4,7 @@ import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.readInt
 import top.lanscarlos.vulpecula.utils.readItemStack
-import top.lanscarlos.vulpecula.utils.toInt
+import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**
  * Vulpecula
@@ -30,9 +30,9 @@ object ItemAmountHandler : ActionItemStack.Reader {
                 return acceptTransferFuture(source) { item ->
                     amount.getOrNull(this).thenApply {
                         item.amount = when (next) {
-                            "add", "give" -> item.amount + it.toInt(0)
-                            "sub", "take" -> item.amount - it.toInt(0)
-                            "set" -> it.toInt(item.amount)
+                            "add", "give" -> item.amount + it.coerceInt(0)
+                            "sub", "take" -> item.amount - it.coerceInt(0)
+                            "set" -> it.coerceInt(item.amount)
                             else -> item.amount
                         }.coerceIn(0, item.maxStackSize)
 

@@ -5,7 +5,7 @@ import taboolib.module.kether.scriptParser
 import taboolib.module.kether.switch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.readDouble
-import top.lanscarlos.vulpecula.utils.toDouble
+import top.lanscarlos.vulpecula.utils.coerceDouble
 
 /**
  * Vulpecula
@@ -36,7 +36,7 @@ object ActionCoerce {
                 val max = reader.readDouble()
                 actionTake {
                     next.thenApplyOrNull(this, min.getOrNull(this), max.getOrNull(this)) {
-                        this?.coerceIn(it.first().toDouble(0.0), it.last().toDouble(0.0)) ?: 0.0
+                        this?.coerceIn(it.first().coerceDouble(0.0), it.last().coerceDouble(0.0)) ?: 0.0
                     }
                 }
             }
@@ -44,7 +44,7 @@ object ActionCoerce {
                 val min = reader.readDouble()
                 actionTake {
                     next.thenApplyOrNull(this, min.getOrNull(this)) {
-                        this?.coerceAtLeast(it.first().toDouble(0.0)) ?: 0.0
+                        this?.coerceAtLeast(it.first().coerceDouble(0.0)) ?: 0.0
                     }
                 }
             }
@@ -52,7 +52,7 @@ object ActionCoerce {
                 val max = reader.readDouble()
                 actionTake {
                     next.thenApplyOrNull(this, max.getOrNull(this)) {
-                        this?.coerceAtMost(it.first().toDouble(0.0)) ?: 0.0
+                        this?.coerceAtMost(it.first().coerceDouble(0.0)) ?: 0.0
                     }
                 }
             }

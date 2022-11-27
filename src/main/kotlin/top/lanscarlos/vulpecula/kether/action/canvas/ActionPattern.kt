@@ -50,7 +50,7 @@ class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
                     val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
 
                     actionFuture { future ->
-                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.unsafePlayer()?.location
+                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
                         listOf(
                             if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),
                             patternRaw?.let { this.run(it) }
@@ -67,7 +67,7 @@ class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
                     val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
 
                     actionTake {
-                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.unsafePlayer()?.location
+                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
                         listOf(
                             if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),
                             patternRaw?.let { this.run(it) }

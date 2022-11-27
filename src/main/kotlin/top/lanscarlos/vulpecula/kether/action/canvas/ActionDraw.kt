@@ -45,7 +45,7 @@ class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
             else -> listOf(frame.player())
         }
 
-        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.unsafePlayer()?.location
+        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.playerOrNull()?.location
 
         when (raw) {
             is LocationLiveData -> {
@@ -135,7 +135,7 @@ class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
                     val location = reader.readLocation()
                     actionTake {
                         location.getOrNull(this).thenApply {
-                            this.setVariable(ActionCanvas.VARIABLE_ORIGIN, it ?: this.unsafePlayer()?.location)
+                            this.setVariable(ActionCanvas.VARIABLE_ORIGIN, it ?: this.playerOrNull()?.location)
                             return@thenApply it
                         }
                     }

@@ -32,9 +32,9 @@ class LocationLiveData(
                     (value.third as? DoubleLiveData)?.getOrNull(frame),
                 ).thenTake().thenApply {
                     Location(def.world,
-                        it[0].toDouble(def.x),
-                        it[1].toDouble(def.y),
-                        it[2].toDouble(def.z)
+                        it[0].coerceDouble(def.x),
+                        it[1].coerceDouble(def.y),
+                        it[2].coerceDouble(def.z)
                     )
                 }
             }
@@ -49,11 +49,11 @@ class LocationLiveData(
                     (meta.second as? DoubleLiveData)?.getOrNull(frame)
                 ).thenTake().thenApply {
                     Location(def.world,
-                        it[0].toDouble(def.x),
-                        it[1].toDouble(def.y),
-                        it[2].toDouble(def.z),
-                        it[3].toFloat(def.yaw),
-                        it[4].toFloat(def.pitch)
+                        it[0].coerceDouble(def.x),
+                        it[1].coerceDouble(def.y),
+                        it[2].coerceDouble(def.z),
+                        it[3].coerceFloat(def.yaw),
+                        it[4].coerceFloat(def.pitch)
                     )
                 }
             }
@@ -87,9 +87,9 @@ class LocationLiveData(
                     (value.third as? DoubleLiveData)?.getOrNull(frame),
                 ).thenTake().thenApply {
                     Location(null,
-                        it[0]?.toDouble() ?: return@thenApply null,
-                        it[1]?.toDouble() ?: return@thenApply null,
-                        it[2]?.toDouble() ?: return@thenApply null
+                        it[0]?.coerceDouble() ?: return@thenApply null,
+                        it[1]?.coerceDouble() ?: return@thenApply null,
+                        it[2]?.coerceDouble() ?: return@thenApply null
                     )
                 }
             }
@@ -104,11 +104,11 @@ class LocationLiveData(
                     (meta.second as? DoubleLiveData)?.getOrNull(frame)
                 ).thenTake().thenApply {
                     Location(null,
-                        it[0]?.toDouble() ?: return@thenApply null,
-                        it[1]?.toDouble() ?: return@thenApply null,
-                        it[2]?.toDouble() ?: return@thenApply null,
-                        it[3]?.toFloat() ?: return@thenApply null,
-                        it[4]?.toFloat() ?: return@thenApply null
+                        it[0]?.coerceDouble() ?: return@thenApply null,
+                        it[1]?.coerceDouble() ?: return@thenApply null,
+                        it[2]?.coerceDouble() ?: return@thenApply null,
+                        it[3]?.coerceFloat() ?: return@thenApply null,
+                        it[4]?.coerceFloat() ?: return@thenApply null
                     )
                 }
             }

@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toFloat
+import top.lanscarlos.vulpecula.utils.coerceFloat
 
 /**
  * Vulpecula
@@ -71,7 +71,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
                 instance.setItemInHand(value as? ItemStack)
             }
             "drop-chance-hand*", "chance-hand*" -> {
-                instance.itemInHandDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.itemInHandDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
 
             "main", "main-hand", "hand" -> {
@@ -80,7 +80,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             "drop-chance-main", "chance-main",
             "drop-chance-main-hand", "chance-main-hand",
             "drop-chance-hand", "chance-hand" -> {
-                instance.itemInMainHandDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.itemInMainHandDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
 
             "off", "off-hand" -> {
@@ -88,7 +88,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             }
             "drop-chance-off", "chance-off",
             "drop-chance-off-hand", "chance-off-hand" -> {
-                instance.itemInOffHandDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.itemInOffHandDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
 
             "helmet", "head" -> {
@@ -96,7 +96,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             }
             "drop-chance-helmet", "chance-helmet",
             "drop-chance-head", "chance-head" -> {
-                instance.helmetDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.helmetDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
 
             "chestplate", "chest" -> {
@@ -104,7 +104,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             }
             "drop-chance-chestplate", "chance-chestplate",
             "drop-chance-chest", "chance-chest" -> {
-                instance.chestplateDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.chestplateDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
 
             "leggings", "legs", "leg" -> {
@@ -113,7 +113,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             "drop-chance-leggings", "chance-leggings",
             "drop-chance-legs", "chance-legs",
             "drop-chance-leg", "chance-leg" -> {
-                instance.leggingsDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.leggingsDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
 
             "boots", "feet", "foot" -> {
@@ -122,7 +122,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             "drop-chance-boots", "chance-boots",
             "drop-chance-feet", "chance-feet",
             "drop-chance-foot", "chance-foot" -> {
-                instance.bootsDropChance = value?.toFloat() ?: return OpenResult.failed()
+                instance.bootsDropChance = value?.coerceFloat() ?: return OpenResult.failed()
             }
             else -> return OpenResult.failed()
         }

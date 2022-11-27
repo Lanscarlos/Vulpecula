@@ -49,12 +49,12 @@ object ItemBuildHandler : ActionItemStack.Reader {
                 }
 
                 buildItem(material) {
-                    args[1]?.toString()?.toInt()?.let { amount = it }
-                    args[2]?.toString()?.toInt()?.let { damage = it }
+                    args[1]?.toString()?.coerceInt()?.let { amount = it }
+                    args[2]?.toString()?.coerceInt()?.let { damage = it }
                     args[3]?.toString()?.let { name = it }
-                    args[4]?.toString()?.toBoolean()?.let { if (it) shiny() }
-                    args[5]?.toString()?.toBoolean()?.let { if (it) colored() }
-                    args[6]?.toString()?.toInt()?.let { customModelData = it }
+                    args[4]?.toString()?.coerceBoolean()?.let { if (it) shiny() }
+                    args[5]?.toString()?.coerceBoolean()?.let { if (it) colored() }
+                    args[6]?.toString()?.coerceInt()?.let { customModelData = it }
                 }
             }
         }

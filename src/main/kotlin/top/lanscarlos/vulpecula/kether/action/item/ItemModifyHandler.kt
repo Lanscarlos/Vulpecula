@@ -44,14 +44,14 @@ object ItemModifyHandler : ActionItemStack.Reader {
                                 if (it.isPresent) it.get().parseMaterial() else null
                             } ?: item.type
                         }
-                        "amount" -> item.amount = option.value.toInt(item.amount)
-                        "durability" -> item.durability = option.value.toShort(item.durability)
+                        "amount" -> item.amount = option.value.coerceInt(item.amount)
+                        "durability" -> item.durability = option.value.coerceShort(item.durability)
                         "name" -> {
                             val name = option.value?.toString()
                             meta?.setDisplayName(name?.colored())
                         }
                         "model" -> {
-                            val customModelData = option.value.toInt(-1)
+                            val customModelData = option.value.coerceInt(-1)
                             try {
                                 if (customModelData != -1) {
                                     meta?.invokeMethod<Void>("setCustomModelData", customModelData)

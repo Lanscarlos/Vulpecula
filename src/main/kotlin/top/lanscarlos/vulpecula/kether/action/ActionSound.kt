@@ -37,8 +37,8 @@ class ActionSound(
             ) {
                 val resource = this ?: error("No sound resource selected.")
                 val loc = (it[0] as? Location)?.toBukkitLocation() ?: error("No location selected.")
-                val volume = it[1].toFloat(1f)
-                val pitch = it[2].toFloat(1f)
+                val volume = it[1].coerceFloat(1f)
+                val pitch = it[2].coerceFloat(1f)
 
                 if (resource.startsWith("resource:")) {
                     loc.world?.playSound(loc, resource.substring("resource:".length), volume, pitch)
@@ -54,10 +54,10 @@ class ActionSound(
                 meta.second.getOrNull(frame) // pitch
             ) {
                 val resource = this ?: error("No sound resource selected.")
-                val player = (it[0] as? Player)?.let { bukkit -> adaptPlayer(bukkit) } ?: frame.unsafePlayer() ?: error("No player selected.")
+                val player = (it[0] as? Player)?.let { bukkit -> adaptPlayer(bukkit) } ?: frame.playerOrNull() ?: error("No player selected.")
                 val loc = (it[1] as? Location) ?: player.location
-                val volume = it[2].toFloat(1f)
-                val pitch = it[3].toFloat(1f)
+                val volume = it[2].coerceFloat(1f)
+                val pitch = it[3].coerceFloat(1f)
 
                 if (resource.startsWith("resource:")) {
                     player.playSoundResource(loc, resource.substring("resource:".length), volume, pitch)

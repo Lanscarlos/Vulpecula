@@ -3,9 +3,9 @@ package top.lanscarlos.vulpecula.kether.action.target.selector
 import org.bukkit.Bukkit
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.utils.bukkit
+import top.lanscarlos.vulpecula.utils.toBukkit
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.unsafePlayer
+import top.lanscarlos.vulpecula.utils.playerOrNull
 
 /**
  * Vulpecula
@@ -24,7 +24,7 @@ object PlayerOnServerSelector : ActionTarget.Reader {
         return handleNow { collection ->
 
             val self = if (!includeSelf) {
-                this.unsafePlayer()?.bukkit()
+                this.playerOrNull()?.toBukkit()
             } else null
 
             Bukkit.getOnlinePlayers().forEach {

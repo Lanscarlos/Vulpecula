@@ -63,11 +63,11 @@ object EntityPotionHandler : ActionEntity.Reader {
             ).thenTake().thenApply {
                 val potion = PotionEffect(
                     it[0]?.toString()?.asPotionEffectType() ?: PotionEffectType.SLOW,
-                    it[1].toInt(200),
-                    it[2].toInt(1) - 1,
-                    it[3].toBoolean(false),
-                    it[4].toBoolean(true),
-                    it[5].toBoolean(true)
+                    it[1].coerceInt(200),
+                    it[2].coerceInt(1) - 1,
+                    it[3].coerceBoolean(false),
+                    it[4].coerceBoolean(true),
+                    it[5].coerceBoolean(true)
                 )
 
                 (entity as? LivingEntity)?.addPotionEffect(potion)

@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.kether.action.canvas.pattern
 
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
 import kotlin.math.cos
@@ -71,9 +70,9 @@ class PatternCircle : CanvasPattern {
                     val pattern = PatternCircle()
                     for (option in args) {
                         when (option.key) {
-                            "radius" -> pattern.radius = option.value?.toDouble() ?: continue
-                            "step" -> pattern.step = option.value?.toDouble() ?: continue
-                            "y-offset" -> pattern.yOffset = option.value?.toDouble() ?: continue
+                            "radius" -> pattern.radius = option.value?.coerceDouble() ?: continue
+                            "step" -> pattern.step = option.value?.coerceDouble() ?: continue
+                            "y-offset" -> pattern.yOffset = option.value?.coerceDouble() ?: continue
                         }
                     }
                     return@thenApply pattern

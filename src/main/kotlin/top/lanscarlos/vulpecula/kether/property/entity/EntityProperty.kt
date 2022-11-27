@@ -6,9 +6,9 @@ import org.bukkit.util.Vector
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.toBoolean
-import top.lanscarlos.vulpecula.utils.toFloat
-import top.lanscarlos.vulpecula.utils.toInt
+import top.lanscarlos.vulpecula.utils.coerceBoolean
+import top.lanscarlos.vulpecula.utils.coerceFloat
+import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**
  * Vulpecula
@@ -84,26 +84,26 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
     override fun writeProperty(instance: Entity, key: String, value: Any?): OpenResult {
         when (key) {
             "isCustomNameVisible", "custom-name-visible" -> {
-                instance.isCustomNameVisible = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isCustomNameVisible = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             "fallDistance", "fall-distance" -> {
-                instance.fallDistance = value?.toFloat() ?: return OpenResult.successful()
+                instance.fallDistance = value?.coerceFloat() ?: return OpenResult.successful()
             }
             "fireTicks", "fire-ticks" -> {
-                instance.fireTicks = value?.toInt() ?: return OpenResult.successful()
+                instance.fireTicks = value?.coerceInt() ?: return OpenResult.successful()
             }
             "freezeTicks", "freeze-ticks" -> {
-                instance.freezeTicks = value?.toInt() ?: return OpenResult.successful()
+                instance.freezeTicks = value?.coerceInt() ?: return OpenResult.successful()
             }
             "isGlowing", "glowing" -> {
-                instance.isGlowing = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isGlowing = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             "gravity" -> {
-                instance.setGravity(value?.toBoolean() ?: return OpenResult.successful())
+                instance.setGravity(value?.coerceBoolean() ?: return OpenResult.successful())
             }
             "isInsideVehicle", "inside-vehicle" -> instance.isInsideVehicle
             "isInvulnerable", "invulnerable" -> {
-                instance.isInvulnerable = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isInvulnerable = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             "lastDamageCause", "last-damage-cause" -> {
                 instance.lastDamageCause = value as? EntityDamageEvent
@@ -112,29 +112,29 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
                 instance.setPassenger(value as? Entity ?: return OpenResult.successful())
             }
             "isPersistent", "persistent" -> {
-                instance.isPersistent = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isPersistent = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             "portalCooldown", "portal-cooldown" -> {
-                instance.portalCooldown = value?.toInt() ?: return OpenResult.successful()
+                instance.portalCooldown = value?.coerceInt() ?: return OpenResult.successful()
             }
             "rotation" -> {
                 val pair = value as? Pair<*, *> ?: return OpenResult.successful()
                 instance.setRotation(
-                    pair.first.toFloat(0f),
-                    pair.second.toFloat(0f)
+                    pair.first.coerceFloat(0f),
+                    pair.second.coerceFloat(0f)
                 )
             }
             "isSilent", "silent" -> {
-                instance.isSilent = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isSilent = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             "ticks-lived" -> {
-                instance.ticksLived = value?.toInt() ?: return OpenResult.successful()
+                instance.ticksLived = value?.coerceInt() ?: return OpenResult.successful()
             }
             "velocity" -> {
                 instance.velocity = value as? Vector ?: Vector(0, 0, 0)
             }
             "isVisualFire", "visual-fire" -> {
-                instance.isVisualFire = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isVisualFire = value?.coerceBoolean() ?: return OpenResult.successful()
             }
 
             // Nameable
@@ -144,7 +144,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
 
             // ServerOperator
             "isOp", "op" -> {
-                instance.isOp = value?.toBoolean() ?: return OpenResult.successful()
+                instance.isOp = value?.coerceBoolean() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }

@@ -72,11 +72,11 @@ object ItemPotionHandler : ActionItemStack.Reader {
                 val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
                 val potion = PotionEffect(
                     args[0]?.toString()?.asPotionEffectType() ?: PotionEffectType.SLOW,
-                    args[1].toInt(200),
-                    args[2].toInt(1) - 1,
-                    args[3].toBoolean(false),
-                    args[4].toBoolean(true),
-                    args[5].toBoolean(true)
+                    args[1].coerceInt(200),
+                    args[2].coerceInt(1) - 1,
+                    args[3].coerceBoolean(false),
+                    args[4].coerceBoolean(true),
+                    args[5].coerceBoolean(true)
                 )
                 meta.addCustomEffect(potion, true)
 
@@ -157,8 +157,8 @@ object ItemPotionHandler : ActionItemStack.Reader {
                         val meta = item.itemMeta as? PotionMeta ?: return@thenApply item
                         val potionData = PotionData(
                             args[0]?.toString()?.asPotionType() ?: PotionType.SLOWNESS,
-                            args[1].toBoolean(false),
-                            args[2].toBoolean(false)
+                            args[1].coerceBoolean(false),
+                            args[2].coerceBoolean(false)
                         )
 
                         meta.basePotionData = potionData

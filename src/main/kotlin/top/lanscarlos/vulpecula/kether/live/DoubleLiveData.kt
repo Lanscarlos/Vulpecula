@@ -5,7 +5,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.toDouble
+import top.lanscarlos.vulpecula.utils.coerceDouble
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -37,7 +37,7 @@ class DoubleLiveData(
                 is Float -> it.toDouble()
                 is Double -> it
                 is String -> it.toDoubleOrNull()
-                else -> it?.toDouble()
+                else -> it?.coerceDouble()
             }
         }
     }
