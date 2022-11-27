@@ -43,10 +43,10 @@ object EventMapping {
                 cache[key] = value
             }
 
-            console().sendLang("Mapping-Load-Automatic-Succeeded", file.name, cache.size, timing(start))
+            console().sendLang("Event-Mapping-Load-Automatic-Succeeded", file.name, cache.size, timing(start))
         } catch (e: Exception) {
             e.printStackTrace()
-            console().sendLang("Mapping-Load-Automatic-Failed", file.name, e.localizedMessage)
+            console().sendLang("Event-Mapping-Load-Automatic-Failed", file.name, e.localizedMessage)
         }
     }
 
@@ -63,12 +63,12 @@ object EventMapping {
             // 添加监听器
             folder.addWatcher { onFileChanged(this) }
 
-            console().asLangText("Mapping-Load-Succeeded", cache.size, timing(start)).also {
+            console().asLangText("Event-Mapping-Load-Succeeded", cache.size, timing(start)).also {
                 console().sendMessage(it)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            console().asLangText("Mapping-Load-Failed", e.localizedMessage).also {
+            console().asLangText("Event-Mapping-Load-Failed", e.localizedMessage).also {
                 console().sendMessage(it)
             }
         }
