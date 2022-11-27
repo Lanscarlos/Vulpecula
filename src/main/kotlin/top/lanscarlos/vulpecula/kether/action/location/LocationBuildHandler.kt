@@ -78,22 +78,33 @@ object LocationBuildHandler : ActionLocation.Reader {
     }
 
     fun readLegacy(reader: QuestReader): ActionLocation.Handler {
-        val world = reader.nextToken()
-        val x = reader.nextDouble()
-        val y = reader.nextDouble()
-        val z = reader.nextDouble()
+        val world = reader.readString()
+        val x = reader.readDouble()
+        val y = reader.readDouble()
+        val z = reader.readDouble()
 
         val extend = if (reader.hasNextToken("and")) {
-            reader.nextDouble() to reader.nextDouble()
+            reader.readDouble() to reader.readDouble()
         } else null
 
-        return transferNow {
-            Location(
-                world,
-                x, y, z,
-                extend?.first?.toFloat() ?: 0f,
-                extend?.first?.toFloat() ?: 0f,
-            )
+        return transferFuture {
+            listOf(
+                world.getOrNull(this),
+                x.getOrNull(this),
+                y.getOrNull(this),
+                z.getOrNull(this),
+                extend?.first?.getOrNull(this),
+                extend?.second?.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                Location(
+                    args[0]?.toString() ?: this.playerOrNull()?.world ?: "world",
+                    args[1].coerceDouble(0.0),
+                    args[2].coerceDouble(0.0),
+                    args[3].coerceDouble(0.0),
+                    args[4].coerceFloat(0f),
+                    args[5].coerceFloat(0f)
+                )
+            }
         }
     }
 }
