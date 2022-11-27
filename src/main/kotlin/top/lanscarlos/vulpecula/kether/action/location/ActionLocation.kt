@@ -7,9 +7,10 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
+import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
 import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextPeek
+import top.lanscarlos.vulpecula.kether.live.StringLiveData
+import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -71,10 +72,15 @@ class ActionLocation : ScriptAction<Any?>() {
         fun parser() = scriptParser { reader ->
             val action = ActionLocation()
             do {
+                reader.mark()
                 val it = reader.nextToken()
                 val isRoot = action.handlers.isEmpty()
 
-                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at location action.")
+                action.handlers += registry[it]?.read(reader, it, isRoot) ?: let { _ ->
+                    // 兼容 TabooLib 原生 location 语句的构建坐标功能
+                    reader.reset()
+                    LocationBuildHandler.read(reader, it, isRoot)
+                }
 
                 // 判断管道是否已关闭
                 if (action.handlers.lastOrNull() !is Transfer) {
