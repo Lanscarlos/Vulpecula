@@ -76,10 +76,10 @@ class ActionLocation : ScriptAction<Any?>() {
                 val it = reader.nextToken()
                 val isRoot = action.handlers.isEmpty()
 
-                action.handlers += registry[it]?.read(reader, it, isRoot) ?: let { _ ->
+                action.handlers += registry[it]?.read(reader, it, isRoot) ?: let {
                     // 兼容 TabooLib 原生 location 语句的构建坐标功能
                     reader.reset()
-                    LocationBuildHandler.read(reader, it, isRoot)
+                    LocationBuildHandler.readLegacy(reader)
                 }
 
                 // 判断管道是否已关闭

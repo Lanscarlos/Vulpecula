@@ -48,9 +48,11 @@ object LocationBuildHandler : ActionLocation.Reader {
             }
         } else {
             val options = mutableMapOf<String, LiveData<*>>()
+
             options["x"] = reader.readDouble()
             options["y"] = reader.readDouble()
             options["z"] = reader.readDouble()
+
             while (reader.nextPeek().startsWith('-')) {
                 when (val it = reader.nextToken().substring(1)) {
                     "world" -> options["world"] = StringLiveData(reader.nextBlock())
@@ -71,6 +73,37 @@ object LocationBuildHandler : ActionLocation.Reader {
                         args["pitch"].coerceFloat(0f)
                     )
                 }
+            }
+        }
+    }
+
+    fun readLegacy(reader: QuestReader): ActionLocation.Handler {
+        val world = reader.readString()
+        val x = reader.readDouble()
+        val y = reader.readDouble()
+        val z = reader.readDouble()
+
+        val extend = if (reader.hasNextToken("and")) {
+            reader.readDouble() to reader.readDouble()
+        } else null
+
+        return transferFuture {
+            listOf(
+                world.getOrNull(this),
+                x.getOrNull(this),
+                y.getOrNull(this),
+                z.getOrNull(this),
+                extend?.first?.getOrNull(this),
+                extend?.second?.getOrNull(this)
+            ).thenTake().thenApply { args ->
+                Location(
+                    args[0]?.toString(),
+                    args[1].coerceDouble(0.0),
+                    args[2].coerceDouble(0.0),
+                    args[3].coerceDouble(0.0),
+                    args[4].coerceFloat(0f),
+                    args[5].coerceFloat(0f)
+                )
             }
         }
     }
