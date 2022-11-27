@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action.location
 
+import taboolib.common.platform.function.platformLocation
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
@@ -31,12 +32,12 @@ class ActionLocation : ScriptAction<Any?>() {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
             } else {
-                return CompletableFuture.completedFuture(
-                    handler.handle(frame, previous) as CompletableFuture<Any?>
-                )
+                return handler.handle(frame, previous).thenApply {
+                    if (it is Location) platformLocation<Any>(it) else it
+                }
             }
         }
-        return previous as CompletableFuture<Any?>
+        return previous.thenApply { if (it != null) platformLocation<Any>(it) else it }
     }
 
 
@@ -66,7 +67,7 @@ class ActionLocation : ScriptAction<Any?>() {
 
         @VulKetherParser(
             id = "location",
-            name = ["loc", "location"],
+            name = ["loc*", "location*"],
             override = ["loc", "location"]
         )
         fun parser() = scriptParser { reader ->
@@ -151,7 +152,7 @@ class ActionLocation : ScriptAction<Any?>() {
                     return if (previous.isDone) {
                         func(frame, previous.getNow(null))
                     } else {
-                        val future = CompletableFuture<Any>()
+                        val future = CompletableFuture<Any?>()
                         previous.thenAccept { location ->
                             func(frame, location).thenAccept {
                                 future.complete(it)

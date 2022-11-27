@@ -30,9 +30,7 @@ class ActionItemStack : ScriptAction<Any?>() {
             if (handler is Transfer) {
                 previous = handler.handle(frame, previous)
             } else {
-                return CompletableFuture.completedFuture(
-                    handler.handle(frame, previous) as CompletableFuture<Any?>
-                )
+                return handler.handle(frame, previous) as CompletableFuture<Any?>
             }
         }
         return previous as CompletableFuture<Any?>
