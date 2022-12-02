@@ -66,7 +66,7 @@ class ActionTarget : ScriptAction<Any>() {
             } as? Reader ?: return
 
             // 注册
-            val type = reader::class.java.packageName.split('.').lastOrNull() ?: return
+            val type = reader::class.java.`package`.name.split('.').lastOrNull() ?: return
             when (type) {
                 "selector" -> registerSelector(reader)
                 "filter" -> registerFilter(reader)
