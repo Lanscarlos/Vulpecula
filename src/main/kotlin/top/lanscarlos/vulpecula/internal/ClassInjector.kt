@@ -25,36 +25,26 @@ abstract class ClassInjector(
     val packageName: String
 ) {
 
-    open fun visit(field: ClassField, clazz: Class<*>, supplier: Supplier<*>?) {}
+//    open fun visit(field: ClassField, clazz: Class<*>, supplier: Supplier<*>?) {}
 
     open fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {}
 
-    open fun visitEnd(clazz: Class<*>, supplier: Supplier<*>?) {}
+//    open fun visitEnd(clazz: Class<*>, supplier: Supplier<*>?) {}
 
     open fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {}
 
     @Awake(LifeCycle.LOAD)
-    companion object : ClassVisitor(1) {
+    object KetherClassInjector : ClassVisitor(0) {
 
-        private val injectors: List<ClassInjector> = listOf(
-            CanvasPattern.Companion,
-            ActionEntity.Companion,
-            ActionItemStack.Companion,
-            ActionLocation.Companion,
-            ActionTarget.Companion,
-            ActionVector.Companion
-        )
+        private val ketherRegistry = KetherRegistry
+        private val injectors = mutableListOf<ClassInjector>()
 
         override fun getLifeCycle() = LifeCycle.LOAD
 
-        override fun visit(field: ClassField, clazz: Class<*>, supplier: Supplier<*>?) {
-            injectors.forEach {
-                if (!clazz.packageName.startsWith(it.packageName)) return@forEach
-                it.visit(field, clazz, supplier)
-            }
-        }
-
         override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
+            if (!clazz.packageName.startsWith(ketherRegistry.packageName)) return
+            ketherRegistry.visit(method, clazz, supplier)
+
             injectors.forEach {
                 if (!clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visit(method, clazz, supplier)
@@ -62,35 +52,13 @@ abstract class ClassInjector(
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
+            if (!clazz.packageName.startsWith(ketherRegistry.packageName)) return
+            ketherRegistry.visitStart(clazz, supplier)
+
             injectors.forEach {
                 if (!clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visitStart(clazz, supplier)
             }
-        }
-
-        override fun visitEnd(clazz: Class<*>, supplier: Supplier<*>?) {
-            injectors.forEach {
-                if (!clazz.packageName.startsWith(it.packageName)) return@forEach
-                it.visitEnd(clazz, supplier)
-            }
-        }
-    }
-
-    @Awake(LifeCycle.LOAD)
-    object KetherClassInjector : ClassVisitor(0) {
-
-        private val injector = KetherRegistry
-
-        override fun getLifeCycle() = LifeCycle.LOAD
-
-        override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
-            if (!clazz.packageName.startsWith(injector.packageName)) return
-            injector.visit(method, clazz, supplier)
-        }
-
-        override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
-            if (!clazz.packageName.startsWith(injector.packageName)) return
-            injector.visitStart(clazz, supplier)
         }
     }
 }
