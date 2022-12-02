@@ -41,7 +41,7 @@ class ActionLocation : ScriptAction<Any?>() {
     }
 
 
-    companion object : ClassInjector(packageName = ActionLocation::class.java.packageName) {
+    companion object : ClassInjector(ActionLocation::class.java.packageName) {
 
         private val registry = mutableMapOf<String, Reader>()
 

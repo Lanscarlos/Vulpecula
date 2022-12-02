@@ -22,8 +22,7 @@ import java.util.function.Supplier
  * @since 2022-11-13 14:15
  */
 abstract class ClassInjector(
-    val priority: Int = 0,
-    val packageName: String? = null
+    val packageName: String
 ) {
 
     open fun visit(field: ClassField, clazz: Class<*>, supplier: Supplier<*>?) {}
@@ -50,28 +49,28 @@ abstract class ClassInjector(
 
         override fun visit(field: ClassField, clazz: Class<*>, supplier: Supplier<*>?) {
             injectors.forEach {
-                if (it.packageName != null && !clazz.packageName.startsWith(it.packageName)) return@forEach
+                if (!clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visit(field, clazz, supplier)
             }
         }
 
         override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
             injectors.forEach {
-                if (it.packageName != null && !clazz.packageName.startsWith(it.packageName)) return@forEach
+                if (!clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visit(method, clazz, supplier)
             }
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
             injectors.forEach {
-                if (it.packageName != null && !clazz.packageName.startsWith(it.packageName)) return@forEach
+                if (!clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visitStart(clazz, supplier)
             }
         }
 
         override fun visitEnd(clazz: Class<*>, supplier: Supplier<*>?) {
             injectors.forEach {
-                if (it.packageName != null && !clazz.packageName.startsWith(it.packageName)) return@forEach
+                if (!clazz.packageName.startsWith(it.packageName)) return@forEach
                 it.visitEnd(clazz, supplier)
             }
         }
@@ -85,12 +84,12 @@ abstract class ClassInjector(
         override fun getLifeCycle() = LifeCycle.LOAD
 
         override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
-            if (injector.packageName != null && !clazz.packageName.startsWith(injector.packageName)) return
+            if (!clazz.packageName.startsWith(injector.packageName)) return
             injector.visit(method, clazz, supplier)
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
-            if (injector.packageName != null && !clazz.packageName.startsWith(injector.packageName)) return
+            if (!clazz.packageName.startsWith(injector.packageName)) return
             injector.visitStart(clazz, supplier)
         }
     }

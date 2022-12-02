@@ -34,7 +34,7 @@ class ActionTarget : ScriptAction<Any>() {
         }
     }
 
-    companion object : ClassInjector(packageName = ActionTarget::class.java.packageName) {
+    companion object : ClassInjector(ActionTarget::class.java.packageName) {
 
         private val selectors = mutableMapOf<String, Reader>()
         private val filters = mutableMapOf<String, Reader>()

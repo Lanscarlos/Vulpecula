@@ -77,7 +77,7 @@ interface CanvasPattern {
         }
     }
 
-    companion object : ClassInjector(packageName = CanvasPattern::class.java.packageName) {
+    companion object : ClassInjector(CanvasPattern::class.java.packageName) {
 
         private val registry = HashMap<String, Reader>()
 

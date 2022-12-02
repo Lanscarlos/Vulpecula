@@ -24,6 +24,7 @@ class ActionVector : ScriptAction<Any?>() {
 
     private val handlers = mutableListOf<Handler>()
 
+    @Suppress("UNCHECKED_CAST")
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
         var previous: CompletableFuture<out Vector?> = CompletableFuture.completedFuture(null)
         for (handler in handlers) {
@@ -36,7 +37,7 @@ class ActionVector : ScriptAction<Any?>() {
         return previous as CompletableFuture<Any?>
     }
 
-    companion object : ClassInjector(packageName = ActionVector::class.java.packageName) {
+    companion object : ClassInjector(ActionVector::class.java.packageName) {
 
         private val registry = mutableMapOf<String, Reader>()
 
