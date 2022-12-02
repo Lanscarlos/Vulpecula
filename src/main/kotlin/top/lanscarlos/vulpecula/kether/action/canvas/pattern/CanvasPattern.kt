@@ -1,9 +1,11 @@
 package top.lanscarlos.vulpecula.kether.action.canvas.pattern
 
+import taboolib.common.LifeCycle
+import taboolib.common.inject.ClassVisitor
+import taboolib.common.platform.Awake
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.internal.ClassInjector
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -77,7 +79,10 @@ interface CanvasPattern {
         }
     }
 
-    companion object : ClassInjector(CanvasPattern::class.java.packageName) {
+    @Awake(LifeCycle.LOAD)
+    companion object : ClassVisitor(1) {
+
+        override fun getLifeCycle() = LifeCycle.LOAD
 
         private val registry = HashMap<String, Reader>()
 

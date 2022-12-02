@@ -1,11 +1,13 @@
 package top.lanscarlos.vulpecula.kether.action.vector
 
+import taboolib.common.LifeCycle
+import taboolib.common.inject.ClassVisitor
+import taboolib.common.platform.Awake
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
-import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
@@ -37,7 +39,10 @@ class ActionVector : ScriptAction<Any?>() {
         return previous as CompletableFuture<Any?>
     }
 
-    companion object : ClassInjector(ActionVector::class.java.packageName) {
+    @Awake(LifeCycle.LOAD)
+    companion object : ClassVisitor(1) {
+
+        override fun getLifeCycle() = LifeCycle.LOAD
 
         private val registry = mutableMapOf<String, Reader>()
 
