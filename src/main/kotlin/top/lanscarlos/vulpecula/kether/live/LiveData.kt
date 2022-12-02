@@ -20,6 +20,7 @@ interface LiveData<T: Any> {
 
     fun getOrNull(frame: ScriptFrame): CompletableFuture<T?>
 
+    @Deprecated("Use List<CompletedFuture<*>>.thenTake()")
     fun <R> thenApply(frame: ScriptFrame, def: T, vararg futures: CompletableFuture<*>, func: T.(List<Any?>) -> R): CompletableFuture<R> {
         val future = CompletableFuture<R>()
         futures.toList().thenTake().thenAccept { parameters ->
@@ -30,6 +31,7 @@ interface LiveData<T: Any> {
         return future
     }
 
+    @Deprecated("Use List<CompletedFuture<*>>.thenTake()")
     fun <R> thenApplyOrNull(frame: ScriptFrame, vararg futures: CompletableFuture<*>, func: T?.(List<Any?>) -> R): CompletableFuture<R> {
         val future = CompletableFuture<R>()
         futures.toList().thenTake().thenAccept { parameters ->

@@ -46,6 +46,13 @@ fun QuestReader.hasNextToken(vararg expected: String): Boolean {
 }
 
 /**
+ * 尝试通过前缀获取 Token
+ * */
+fun QuestReader.tryNextToken(vararg expected: String): String? {
+    return if (this.hasNextToken(*expected)) this.nextToken() else null
+}
+
+/**
  * 尝试通过前缀解析 Action
  * */
 fun QuestReader.tryNextAction(vararg expected: String): ParsedAction<*>? {
