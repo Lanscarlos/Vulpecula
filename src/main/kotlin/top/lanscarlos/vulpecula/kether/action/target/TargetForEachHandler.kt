@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.kether.action.target
 
 import taboolib.library.kether.QuestReader
+import top.lanscarlos.vulpecula.kether.live.readCollection
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger

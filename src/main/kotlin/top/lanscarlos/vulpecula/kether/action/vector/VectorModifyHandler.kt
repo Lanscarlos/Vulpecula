@@ -6,8 +6,8 @@ import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.readDouble
-import top.lanscarlos.vulpecula.utils.readVector
+import top.lanscarlos.vulpecula.kether.live.readDouble
+import top.lanscarlos.vulpecula.kether.live.readVector
 
 /**
  * Vulpecula

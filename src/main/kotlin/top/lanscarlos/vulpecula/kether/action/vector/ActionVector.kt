@@ -11,6 +11,7 @@ import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
+import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier

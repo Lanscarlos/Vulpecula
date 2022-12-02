@@ -4,6 +4,7 @@ import taboolib.common.util.Location
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.action.canvas.pattern.CanvasPattern
+import top.lanscarlos.vulpecula.kether.live.readLocation
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 

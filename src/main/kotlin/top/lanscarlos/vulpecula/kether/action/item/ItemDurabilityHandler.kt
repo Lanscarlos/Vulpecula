@@ -1,8 +1,8 @@
 package top.lanscarlos.vulpecula.kether.action.item
 
 import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.utils.readInt
-import top.lanscarlos.vulpecula.utils.readItemStack
+import top.lanscarlos.vulpecula.kether.live.readInt
+import top.lanscarlos.vulpecula.kether.live.readItemStack
 import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**

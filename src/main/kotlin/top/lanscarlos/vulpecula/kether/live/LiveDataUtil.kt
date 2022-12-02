@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils
+package top.lanscarlos.vulpecula.kether.live
 
 import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
@@ -6,8 +6,8 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.*
+import top.lanscarlos.vulpecula.utils.hasNextToken
+import top.lanscarlos.vulpecula.utils.nextBlock
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 

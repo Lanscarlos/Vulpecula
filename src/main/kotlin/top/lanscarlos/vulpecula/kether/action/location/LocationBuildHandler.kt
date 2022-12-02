@@ -1,13 +1,9 @@
 package top.lanscarlos.vulpecula.kether.action.location
 
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.platformLocation
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.StringLiveData
+import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
 
 /**

@@ -4,6 +4,7 @@ import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import taboolib.module.effect.VectorUtils
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
+import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.*
 
 /**

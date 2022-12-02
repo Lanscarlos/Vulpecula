@@ -3,6 +3,8 @@ package top.lanscarlos.vulpecula.kether.action.entity
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import taboolib.library.kether.QuestReader
+import top.lanscarlos.vulpecula.kether.live.readDouble
+import top.lanscarlos.vulpecula.kether.live.tryReadEntity
 import top.lanscarlos.vulpecula.utils.*
 
 /**

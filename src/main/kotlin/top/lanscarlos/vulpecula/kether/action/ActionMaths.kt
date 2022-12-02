@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.kether.action
 import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.utils.readDouble
+import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.coerceDouble
 import kotlin.math.*
 

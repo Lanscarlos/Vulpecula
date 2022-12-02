@@ -5,6 +5,8 @@ import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
+import top.lanscarlos.vulpecula.kether.live.readBoolean
+import top.lanscarlos.vulpecula.kether.live.readInt
 import top.lanscarlos.vulpecula.utils.*
 
 /**

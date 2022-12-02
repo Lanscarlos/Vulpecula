@@ -8,8 +8,7 @@ import taboolib.common.util.Location
 import taboolib.module.kether.*
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
-import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 

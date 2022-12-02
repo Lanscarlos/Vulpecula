@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextPeek
-import top.lanscarlos.vulpecula.utils.readEntity
+import top.lanscarlos.vulpecula.kether.live.readEntity
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 

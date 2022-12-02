@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.kether.action.location
 
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
-import top.lanscarlos.vulpecula.utils.readLocation
+import top.lanscarlos.vulpecula.kether.live.readLocation
 
 /**
  * Vulpecula

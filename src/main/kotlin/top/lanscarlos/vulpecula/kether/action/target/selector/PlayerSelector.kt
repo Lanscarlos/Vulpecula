@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.kether.action.target.selector
 import org.bukkit.Bukkit
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.utils.readString
+import top.lanscarlos.vulpecula.kether.live.readString
 
 /**
  * Vulpecula

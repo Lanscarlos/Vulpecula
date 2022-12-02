@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.kether.action.canvas.pattern
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.*
 import kotlin.math.cos
 import kotlin.math.sin

@@ -4,8 +4,8 @@ import org.bukkit.inventory.ItemFlag
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.readItemStack
-import top.lanscarlos.vulpecula.utils.readString
+import top.lanscarlos.vulpecula.kether.live.readItemStack
+import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.utils.thenTake
 
 /**

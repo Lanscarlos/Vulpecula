@@ -10,7 +10,7 @@ import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.readCollection
+import top.lanscarlos.vulpecula.kether.live.readCollection
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 

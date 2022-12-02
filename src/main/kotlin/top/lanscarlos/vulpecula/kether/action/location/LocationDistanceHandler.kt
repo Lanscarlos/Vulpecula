@@ -5,8 +5,8 @@ import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.LocationLiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.readDouble
-import top.lanscarlos.vulpecula.utils.readLocation
+import top.lanscarlos.vulpecula.kether.live.readDouble
+import top.lanscarlos.vulpecula.kether.live.readLocation
 import top.lanscarlos.vulpecula.utils.playerOrNull
 
 /**

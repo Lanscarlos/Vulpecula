@@ -13,8 +13,8 @@ import taboolib.module.kether.run
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.utils.*
-import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 

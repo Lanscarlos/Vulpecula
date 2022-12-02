@@ -4,6 +4,8 @@ import org.bukkit.event.player.PlayerTeleportEvent
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
+import top.lanscarlos.vulpecula.kether.live.readLocation
+import top.lanscarlos.vulpecula.kether.live.tryReadString
 import top.lanscarlos.vulpecula.utils.*
 
 /**

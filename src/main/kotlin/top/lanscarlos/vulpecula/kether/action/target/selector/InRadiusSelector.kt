@@ -7,8 +7,7 @@ import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
-import top.lanscarlos.vulpecula.kether.live.DoubleLiveData
-import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
 
 /**

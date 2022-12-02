@@ -5,7 +5,7 @@ import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.readString
+import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.utils.thenTake
 
 /**

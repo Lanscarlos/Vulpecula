@@ -4,7 +4,7 @@ import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import taboolib.module.kether.switch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.utils.readDouble
+import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.coerceDouble
 
 /**

@@ -3,8 +3,8 @@ package top.lanscarlos.vulpecula.kether.action.vector
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.readLocation
-import top.lanscarlos.vulpecula.utils.readVector
+import top.lanscarlos.vulpecula.kether.live.readLocation
+import top.lanscarlos.vulpecula.kether.live.readVector
 
 /**
  * Vulpecula

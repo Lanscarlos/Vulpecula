@@ -2,10 +2,9 @@ package top.lanscarlos.vulpecula.kether.action.canvas.pattern
 
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.readLocation
+import top.lanscarlos.vulpecula.kether.live.readLocation
 import top.lanscarlos.vulpecula.utils.thenTake
 
 /**

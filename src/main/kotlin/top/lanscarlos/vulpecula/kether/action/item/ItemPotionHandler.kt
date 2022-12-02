@@ -7,9 +7,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.potion.PotionType
 import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.kether.live.BooleanLiveData
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.StringLiveData
+import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
 import java.awt.Color
 

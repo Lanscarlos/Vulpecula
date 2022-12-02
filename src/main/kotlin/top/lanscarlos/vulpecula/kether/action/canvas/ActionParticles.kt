@@ -8,6 +8,7 @@ import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
+import top.lanscarlos.vulpecula.kether.live.readLocation
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 
