@@ -42,9 +42,6 @@ object LocationDistanceHandler : ActionLocation.Reader {
     /**
      * 读取期望 Location 数据
      * 主要用于运算
-     *
-     * @param expect 期望前缀，若找不到则使用 other 来构建 Location
-     * @param other 用来标识构建 Location 的前缀
      * */
     private fun QuestReader.expectVector(): LiveData<Location> {
         return if (this.hasNextToken("with")) {

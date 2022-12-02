@@ -28,7 +28,7 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
         }
         return options.mapValues { it.value.getOrNull(frame) }.thenTake().thenApply { args ->
             for (it in args) {
-                modify(brush, frame, it.key, it.value)
+                modify(brush, it.key, it.value)
             }
 
             return@thenApply brush
@@ -116,7 +116,8 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
          * @param option 属性名
          * @param value 属性值
          * */
-        fun modify(brush: CanvasBrush, frame: ScriptFrame, option: String, value: Any?) {
+        @Suppress("UNCHECKED_CAST")
+        fun modify(brush: CanvasBrush, option: String, value: Any?) {
             when (option) {
                 "type" -> {
                     val type = value?.toString()?.uppercase() ?: return

@@ -47,7 +47,7 @@ class ActionParticles(
             }
 
             for (option in args) {
-                ActionBrush.modify(brush, frame, option.key, option.value)
+                ActionBrush.modify(brush, option.key, option.value)
             }
 
             brush.draw(location, viewers)

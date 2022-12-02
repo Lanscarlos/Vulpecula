@@ -113,6 +113,6 @@ object ItemEnchantHandler : ActionItemStack.Reader {
     }
 
     fun String.asEnchantment(): Enchantment? {
-        return Enchantment.values().firstOrNull { it.name.equals(this, true) }
+        return Enchantment.values().firstOrNull { it.key.key.equals(this, true) }
     }
 }
