@@ -124,7 +124,7 @@ class ActionEventWait(
             val action = ActionEventWait(reader.readString())
 
             while (reader.nextPeek().startsWith('-')) {
-                when (val next = reader.nextToken().substring(1)) {
+                when (reader.nextToken().substring(1)) {
                     "priority", "p" -> action.priority = reader.readString()
                     "filter", "condition" -> action.condition = reader.readBoolean()
                     "async", "a" -> action.async = reader.readBoolean()
