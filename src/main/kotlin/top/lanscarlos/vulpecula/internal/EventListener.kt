@@ -34,7 +34,7 @@ private constructor(
         val isCancelled = (event as? Cancellable)?.isCancelled ?: false
 
         if (dispatchers.isEmpty()) {
-            // 不存在调度器，销毁调度器
+            // 不存在调度器，销毁监听器
             destroy()
             return
         }

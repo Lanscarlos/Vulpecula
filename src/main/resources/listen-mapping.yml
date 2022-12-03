@@ -4,22 +4,22 @@
 
 
 # 实体受伤事件
-on-entity-damage: 'org.bukkit.event.entity.EntityDamageEvent'
+entity-damage: 'org.bukkit.event.entity.EntityDamageEvent'
 
 # 实体受其他实体攻击事件
-on-entity-damage-by-entity: 'org.bukkit.event.entity.EntityDamageByEventEvent'
+entity-damage-by-entity: 'org.bukkit.event.entity.EntityDamageByEventEvent'
 
 # 实体死亡事件
-on-entity-death: 'org.bukkit.event.entity.EntityDeathEvent'
+entity-death: 'org.bukkit.event.entity.EntityDeathEvent'
 
 # 玩家执行命令事件
-on-player-command: 'org.bukkit.event.player.PlayerCommandPreprocessEvent'
+player-command: 'org.bukkit.event.player.PlayerCommandPreprocessEvent'
 
 # 玩家交互事件
-on-player-interact: 'org.bukkit.event.player.PlayerInteractEvent'
+player-interact: 'org.bukkit.event.player.PlayerInteractEvent'
 
 # 玩家破坏方块事件
-on-player-break: 'org.bukkit.event.block.BlockBreakEvent'
+player-break: 'org.bukkit.event.block.BlockBreakEvent'
 
 # 实体射箭事件
-on-entity-shoot: 'org.bukkit.event.entity.EntityShootBowEvent'
+entity-shoot: 'org.bukkit.event.entity.EntityShootBowEvent'

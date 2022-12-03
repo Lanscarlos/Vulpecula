@@ -2,10 +2,10 @@ package top.lanscarlos.vulpecula.utils
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
-import taboolib.library.kether.ArgTypes
-import taboolib.library.kether.ParsedAction
-import taboolib.library.kether.QuestContext
-import taboolib.library.kether.QuestReader
+import taboolib.common.platform.function.info
+import taboolib.common.platform.function.severe
+import taboolib.common.platform.function.warning
+import taboolib.library.kether.*
 import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.script
