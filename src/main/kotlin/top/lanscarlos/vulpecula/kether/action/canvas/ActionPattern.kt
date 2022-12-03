@@ -50,7 +50,7 @@ class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
                     val originRaw = if (reader.hasNextToken("origin")) reader.readLocation() else null
                     val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
 
-                    actionFuture { future ->
+                    actionTake {
                         val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
                         listOf(
                             if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),

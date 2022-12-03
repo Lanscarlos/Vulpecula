@@ -62,6 +62,10 @@ log:
   shared: true
   inject-default-namespace: true
 
+memory:
+  shared: true
+  inject-default-namespace: true
+
 particles:
   shared: true
   inject-default-namespace: true

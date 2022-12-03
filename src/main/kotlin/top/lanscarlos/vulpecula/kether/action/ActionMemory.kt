@@ -44,9 +44,9 @@ class ActionMemory(
 
             if (value != null) {
                 // 设置变量
-                setMemory(key, value, unique, storage)
+                setMemory(frame, key, value, unique, storage)
             } else {
-                getMemory(key, unique, storage)
+                getMemory(frame, key, unique, storage)
             }
         }
     }
@@ -70,18 +70,17 @@ class ActionMemory(
          * @param unique 对应实体，若为 null 则为全局变量
          * @param storage 存储容器，默认使用 cache 存储
          * */
-        fun getMemory(key: String, unique: Any?, storage: String? = null): Any? {
+        fun getMemory(frame: ScriptFrame, key: String, unique: Any?, storage: String? = null): Any? {
             when (storage?.lowercase()) {
                 "luckperms", "lp" -> {
                     val api = luckPermsAPI ?: error("No LuckPerms plugin service found.")
                     val user = when (unique) {
                         is Player -> api.getPlayerAdapter(Player::class.java).getUser(unique)
                         else -> {
-                            Bukkit.getPlayerExact(unique.toString())?.let {
-                                api.getPlayerAdapter(Player::class.java).getUser(it)
-                            }
+                            val player = Bukkit.getPlayerExact(unique.toString()) ?: frame.playerOrNull()?.toBukkit()
+                            api.getPlayerAdapter(Player::class.java).getUser(player ?: error("No LuckPerms player selected."))
                         }
-                    } ?: error("No LuckPerms user service found.")
+                    }
 
                     return user.cachedData.metaData.getMetaValue(key)
                 }
@@ -106,20 +105,19 @@ class ActionMemory(
          *
          * @return value 的值
          * */
-        fun setMemory(key: String, value: Any?, unique: Any?, storage: String? = null): Any? {
+        fun setMemory(frame: ScriptFrame, key: String, value: Any?, unique: Any?, storage: String? = null): Any? {
             when (storage?.lowercase()) {
                 "luckperms", "lp" -> {
                     val api = luckPermsAPI ?: error("No LuckPerms plugin service found.")
                     val user = when (unique) {
                         is Player -> api.getPlayerAdapter(Player::class.java).getUser(unique)
                         else -> {
-                            Bukkit.getPlayerExact(unique.toString())?.let {
-                                api.getPlayerAdapter(Player::class.java).getUser(it)
-                            }
+                            val player = Bukkit.getPlayerExact(unique.toString()) ?: frame.playerOrNull()?.toBukkit()
+                            api.getPlayerAdapter(Player::class.java).getUser(player ?: error("No LuckPerms player selected."))
                         }
-                    } ?: error("No LuckPerms user service found.")
+                    }
 
-                    user.data().clear(NodeType.META.predicate { it.metaKey == key })
+                    user.data().clear(NodeType.META.predicate { it.metaKey.equals(key, true) })
 
                     if (value != null) {
                         val node = MetaNode.builder(key, value.toString()).build()
