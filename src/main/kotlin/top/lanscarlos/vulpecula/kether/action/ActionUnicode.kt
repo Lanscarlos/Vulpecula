@@ -152,8 +152,8 @@ object ActionUnicode {
         try {
             while (matcher.find()) {
                 val found = matcher.group()
-                val transfer = Character.toString(Integer.parseInt(found.substring(2), 16))
-                matcher.appendReplacement(builder, transfer)
+                val transfer = Integer.parseInt(found.substring(2), 16).toChar()
+                matcher.appendReplacement(builder, transfer.toString())
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -170,7 +170,7 @@ object ActionUnicode {
         val source = StringLiveData(reader.nextBlock())
         actionTake {
             source.getOrNull(this).thenApply {
-                it?.mappingUnicode()
+                it?.mappingUnicode()?.replaceUnicode()
             }
         }
     }

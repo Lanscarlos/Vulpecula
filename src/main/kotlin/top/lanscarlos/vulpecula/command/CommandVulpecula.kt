@@ -21,12 +21,16 @@ object CommandVulpecula {
     @CommandBody
     val eval = subCommand {
         dynamic {
-            execute<Player> { player, _, argument ->
-                eval(argument, player, args = mapOf(
-                    "player" to player,
-                    "hand" to player.equipment?.itemInMainHand
-                )).thenAccept {
-                    player.sendMessage("§7[§f§lResult§7]§r $it")
+            execute<CommandSender> { sender, _, argument ->
+                val args = if (sender is Player) {
+                    mapOf(
+                        "player" to sender,
+                        "hand" to sender.equipment?.itemInMainHand
+                    )
+                } else null
+
+                eval(argument, sender, args = args).thenAccept {
+                    sender.sendMessage("§7[§f§lResult§7]§r $it")
                 }
             }
         }
