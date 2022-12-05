@@ -145,19 +145,19 @@ object ActionUnicode {
 
         val pattern = "\\\\u[A-Za-z0-9]{4}".toPattern()
         val matcher = pattern.matcher(this)
-        val builder = java.lang.StringBuilder()
+        val buffer = StringBuffer()
 
         try {
             while (matcher.find()) {
                 val found = matcher.group()
                 val transfer = Integer.parseInt(found.substring(2), 16).toChar()
-                matcher.appendReplacement(builder, transfer.toString())
+                matcher.appendReplacement(buffer, transfer.toString())
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        return matcher.appendTail(builder).toString()
+        return matcher.appendTail(buffer).toString()
     }
 
     @VulKetherParser(
