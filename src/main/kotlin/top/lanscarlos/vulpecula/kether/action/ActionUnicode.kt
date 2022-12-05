@@ -11,8 +11,6 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
-import java.util.regex.Pattern
-import kotlin.text.StringBuilder
 
 /**
  * Vulpecula
@@ -147,7 +145,7 @@ object ActionUnicode {
 
         val pattern = "\\\\u[A-Za-z0-9]{4}".toPattern()
         val matcher = pattern.matcher(this)
-        val builder = StringBuilder()
+        val builder = java.lang.StringBuilder()
 
         try {
             while (matcher.find()) {
