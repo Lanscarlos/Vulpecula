@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
+import java.util.regex.Pattern
 import kotlin.text.StringBuilder
 
 /**
@@ -79,7 +80,7 @@ object ActionUnicode {
         }
     }
 
-    private fun String.replaceUnicode(keyword: Char = '@', prefix: Char = '{', suffix: Char = '}'): String {
+    private fun String.mappingUnicode(keyword: Char = '@', prefix: Char = '{', suffix: Char = '}'): String {
         val content = this.toCharArray()
         var index = 0
         val builder = StringBuilder()
@@ -141,13 +142,37 @@ object ActionUnicode {
         return ((( (uppercase or lowercase) or digit ) shr Character.getType(char.code)) and 1) != 0
     }
 
+    private fun String.replaceUnicode(): String {
+        if (!this.contains("\\u")) return this
+
+        val pattern = "\\\\u[A-Za-z0-9]{4}".toPattern()
+        val matcher = pattern.matcher(this)
+        val builder = StringBuilder()
+
+        try {
+            while (matcher.find()) {
+                val found = matcher.group()
+                val transfer = Character.toString(Integer.parseInt(found.substring(2), 16))
+                matcher.appendReplacement(builder, transfer)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return matcher.appendTail(builder).toString()
+    }
+
     @VulKetherParser(
         id = "unicode",
         name = ["unicode"]
     )
     fun parser() = scriptParser { reader ->
         val source = StringLiveData(reader.nextBlock())
-        actionTake { source.getOrNull(this).thenApply { it?.replaceUnicode() } }
+        actionTake {
+            source.getOrNull(this).thenApply {
+                it?.mappingUnicode()
+            }
+        }
     }
 
 }
