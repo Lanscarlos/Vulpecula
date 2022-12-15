@@ -8,7 +8,7 @@ Plugin-Loading: '&8[&3Vul&bpecula&8] &a良好 &8| &7Loading... &f{0}'
 Plugin-Enabled: '&8[&3Vul&bpecula&8] &a良好 &8| &3Plugin has been enabled. Currently running version &2{0}&7.'
 Plugin-Reloaded: '&8[&3Vul&bpecula&8] &a良好 &8| &3Plugin has been reloaded.'
 Plugin-Debug-Normal: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0}'
-Plugin-Debug-Detail: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0} {1}'
+Plugin-Debug-Detail: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0} &8(class: {1})'
 
 
 
@@ -28,6 +28,26 @@ Kether-Override-Action-Remote-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 同
 Kether-Action-Register-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 注册语句时遇到了问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+
+
+
+# 日程模块
+
+Schedule-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个日程模块！ &8({2} ms)'
+Schedule-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Schedule-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个日程模块！ &8({1} ms)'
+Schedule-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 日程模块加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Schedule-Load-Conflict:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块时发生 id 冲突：&a{0}'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
+Schedule-Load-Failed-Details:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Schedule-Execution-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 的执行脚本未定义！'
 
 
 

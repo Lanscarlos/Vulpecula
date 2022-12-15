@@ -1,3 +1,19 @@
 
+schedule-setting:
+  # 指定默认情况下的日期格式
+  # yyyy - 年份
+  # MM - 月份
+  # dd - 当月的天数
+  # HH - 二十四小时制
+  # hh - 十二小时制
+  # mm - 分钟
+  # ss - 秒
+  date-format: 'yyyy-MM-dd HH:mm:ss'
+
 # 调试等级
-debug: false
+# off - 关闭
+# normal - 普通
+# high - 高
+# highest - 最高
+# monitor - 观察
+debug: off

@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.utils
 
 import taboolib.common.platform.function.console
-import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
 
 /**
@@ -20,16 +19,13 @@ object Debug {
     val HIGHEST = 3
     val MONITOR = 4
 
-    var level = OFF
-        private set
-
-    fun setLevel(level: Int) {
-        this.level = if (level <= OFF) {
-            OFF
-        } else if (level >= MONITOR) {
-            MONITOR
-        } else {
-            level
+    val level by bindConfigNode("debug") {
+        when (it.toString().lowercase()) {
+            "normal", "1" -> NORMAL
+            "high", "2" -> HIGH
+            "highest", "3" -> HIGHEST
+            "monitor", "4" -> MONITOR
+            else -> OFF
         }
     }
 
@@ -40,19 +36,9 @@ object Debug {
     fun Any.debug(level: Int, message: String) {
         if (level > Debug.level) return
         if (Debug.level >= HIGHEST) {
-            console().sendLang("Plugin-Debug-Detail", this.javaClass.simpleName, message)
+            console().sendLang("Plugin-Debug-Detail", message, this.javaClass.simpleName)
         } else {
             console().sendLang("Plugin-Debug-Normal", message)
-        }
-    }
-
-    fun load(config: Configuration) {
-        level = when (config.getString("debug")?.lowercase()) {
-            "normal" -> NORMAL
-            "high" -> HIGH
-            "highest" -> HIGHEST
-            "monitor" -> MONITOR
-            else -> OFF
         }
     }
 }

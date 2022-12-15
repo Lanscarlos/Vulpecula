@@ -1,18 +1,12 @@
 package top.lanscarlos.vulpecula
 
-import taboolib.common.LifeCycle
-import taboolib.common.platform.Awake
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.releaseResourceFile
-import taboolib.module.configuration.ConfigFile
+import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
 import top.lanscarlos.vulpecula.internal.*
+import top.lanscarlos.vulpecula.internal.schedule.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.ActionUnicode
-import top.lanscarlos.vulpecula.utils.Debug
-import top.lanscarlos.vulpecula.utils.toConfig
-import java.io.File
 
 /**
  * Vulpecula
@@ -23,36 +17,22 @@ import java.io.File
  */
 object VulpeculaContext {
 
-    private val file by lazy {
-        File(getDataFolder(), "config.yml")
-    }
-
-    private lateinit var _config: Configuration
-    val config: Configuration get() = _config
-
-    @Awake(LifeCycle.LOAD)
-    private fun loadConfig() {
-        if (!file.exists()) {
-            releaseResourceFile("config.yml", true)
-        }
-        _config = file.toConfig()
-    }
+    @Config
+    lateinit var config: Configuration
+        private set
 
     /**
      * @return 返回相关加载信息
      * */
     fun load(loadConfig: Boolean = true): List<String> {
 
-        // 加载
-        if (loadConfig) loadConfig()
+        // 加载主配置
+        if (loadConfig) config.reload()
 
         val messages = mutableListOf<String>()
 
         // 清理脚本缓存
         KetherShell.mainCache.scriptMap.clear()
-
-        // 加载调试模块
-        Debug.load(config)
 
         // 加载映射文件
         messages += EventMapping.load()
@@ -77,9 +57,10 @@ object VulpeculaContext {
         // 注册监听器
         EventListener.registerAll()
 
+        // 加载日程计划
+        messages += ScheduleTask.load()
+
         return messages
     }
 
 }
-
-typealias Context = VulpeculaContext

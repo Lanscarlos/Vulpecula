@@ -1,0 +1,9 @@
+
+# 示例日程计划
+daily-message:
+  disable: true
+  start: '2022-12-15 00:00:00'
+  end: '2022-12-15 13:40:00'
+  period: '1m'
+  execute: |-
+    print running...

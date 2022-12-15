@@ -5,7 +5,7 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.subCommand
-import top.lanscarlos.vulpecula.Context
+import top.lanscarlos.vulpecula.VulpeculaContext
 import top.lanscarlos.vulpecula.utils.eval
 
 /**
@@ -39,7 +39,7 @@ object CommandVulpecula {
     @CommandBody
     val reload = subCommand {
         execute<CommandSender> { sender, _, _ ->
-            val info = Context.load()
+            val info = VulpeculaContext.load()
             val player = sender as? Player ?: return@execute
             info.forEach { player.sendMessage(it) }
         }
