@@ -8,7 +8,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
-import top.lanscarlos.vulpecula.internal.EventMapping
+import top.lanscarlos.vulpecula.internal.EventMapper
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readBoolean
@@ -47,7 +47,7 @@ class ActionEventWait(
             timeout?.getOrNull(frame),
         ).thenTake().thenAccept { args ->
 
-            val eventName = EventMapping.mapping(args[0].toString()) ?: let {
+            val eventName = EventMapper.mapping(args[0].toString()) ?: let {
                 future.complete(null)
                 warning("Cannot get listen event mapping: \"${args[0]}\"")
                 return@thenAccept

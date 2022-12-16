@@ -11,16 +11,21 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
 import taboolib.common.platform.event.EventPriority
+import taboolib.common.platform.event.ProxyListener
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
+import taboolib.library.kether.ParsedAction
+import taboolib.library.kether.Quest
+import taboolib.module.kether.Script
+import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.internal.EventListener.Companion.getListener
-import top.lanscarlos.vulpecula.internal.compiler.DispatcherCompiler
+import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -32,28 +37,245 @@ import java.util.concurrent.TimeUnit
  */
 class EventDispatcher(
     val id: String,
-    val config: ConfigurationSection
-) {
+    val path: String,
+    val wrapper: VulConfig
+) : ScriptCompiler {
 
-    val eventName = config.getString("listen")?.let {
-        EventMapping.mapping(it) ?: error("Cannot get Dispatcher \"$id\" 's listen event mapping: \"$it\"")
-    } ?: error("Dispatcher \"$id\" 's listen event is undefined!")
+    val eventName by wrapper.read("listen") { name ->
+        name?.toString()?.let {
+            EventMapper.mapping(it) ?: error("Cannot get Dispatcher \"$id\" 's listen event mapping: \"$it\"")
+        } ?: error("Dispatcher \"$id\" 's listen event is undefined!")
+    }
 
-    val priority = config.getString("priority")?.let {
-        EventPriority.valueOf(it.uppercase())
-    } ?: EventPriority.NORMAL
+    val priority by wrapper.read("priority") {
+        EventPriority.values().firstOrNull { priority ->
+            priority.name.equals(it?.toString(), true)
+        } ?: EventPriority.NORMAL
+    }
 
-    val ignoreCancelled = config.getBoolean("ignore-cancelled", true)
-    private val baffle = config.getConfigurationSection("baffle")?.let { initBaffle(it) }
+    val ignoreCancelled by wrapper.readBoolean("ignore-cancelled", true)
 
-    val handlerCache = mutableSetOf<String>()
-    val handlers = mutableSetOf<String>()
+    val preHandle by wrapper.read("pre-handle") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
 
-    private val compiler = DispatcherCompiler(this)
+    val postHandle by wrapper.read("post-handle") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
+
+    val exception by wrapper.read("exception") {
+        if (it != null) buildException(it) else emptyList()
+    }
+
+    val variables by wrapper.read("variables") { value ->
+        if (value is Map<*, *>) {
+            value.mapNotNull {
+                if (it.key == null || it.value == null) return@mapNotNull null
+                it.key!!.toString() to it.value!!.toString()
+            }.toMap()
+        } else mapOf()
+    }
+
+    val baffle by wrapper.read("baffle") { value ->
+        if (value == null) return@read null
+
+        val section = if (value is ConfigurationSection) {
+            value.toMap()
+        } else value as Map<*, *>
+
+        when {
+            "time" in section -> {
+                // 按时间阻断
+                val time = section["time"].coerceInt(-1)
+                if (time > 0) {
+                    Baffle.of(time * 50L, TimeUnit.MILLISECONDS)
+                } else {
+                    warning("Illegal baffle time \"$time\" at EventDispatcher \"$id\"!")
+                    null
+                }
+            }
+            "count" in section -> {
+                // 按次数阻断
+                val count = section["count"].coerceInt(-1)
+                if (count > 0) {
+                    Baffle.of(count)
+                } else {
+                    warning("Illegal baffle count \"$count\" at EventDispatcher \"$id\"!")
+                    null
+                }
+            }
+            else -> null
+        }
+    }
+
+    val handlers = mutableListOf<EventHandler>()
+
+    lateinit var listener: ProxyListener
+
+    /* 含主方法的方法体 */
+    lateinit var source: StringBuilder
+
+    /* 包含主方法的可执行脚本 */
+    lateinit var script: Script
+
+    fun registerListener() {
+        try {
+            val eventClass = Class.forName(this.eventName)
+
+            unregisterListener()
+
+            listener = registerBukkitListener(eventClass, priority, ignoreCancelled) {
+                if (it !is Event) return@registerBukkitListener
+                run(it)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+//                warning("Illegal event class: \"$this.eventName\" at dispatcher \"${this.id}\"!")
+            console().sendLang("Dispatcher-Load-Failed-Event-Class-Not-Found", this.id, this.eventName)
+        }
+    }
+
+    fun unregisterListener() {
+        if (::listener.isInitialized) {
+            unregisterListener(listener)
+        }
+    }
+
+    override fun buildSource(): StringBuilder {
+        val builder = StringBuilder()
+
+        /*
+        * 构建变量
+        * set $key to $value
+        * set $key to {
+        *   ...$value
+        * }
+        * */
+        if (variables.isNotEmpty()) {
+            variables.forEach { (key, value) ->
+                if (value.contains('\n')) {
+                    // 含有换行
+                    builder.append("set $key to {\n")
+                    builder.appendWithIndent(value, suffix = "\n")
+                    builder.append("}\n\n")
+                } else {
+                    // 不含有换行
+                    builder.append("set $key to $value\n\n")
+                }
+            }
+        }
+
+        /*
+        * 构建预处理语句
+        * */
+        if (preHandle.isNotEmpty()) {
+            builder.append(preHandle.toString())
+            builder.append("\n\n")
+        }
+
+        /*
+        * 构建调度语句
+        * call $handler_<hash>
+        * */
+        if (handlers.isNotEmpty()) {
+            // 根据处理器优先级升序排序，优先级越高越先被执行
+            handlers.sortBy { it.priority }
+
+            handlers.forEach {
+                builder.append("call ${it.hashName}\n")
+            }
+            builder.append('\n')
+        }
+
+        /*
+        * 构建尾处理语句
+        * */
+        if (postHandle.isNotEmpty()) {
+            builder.append(postHandle.toString())
+            builder.append('\n')
+        }
+
+        /*
+        * 构建异常处理
+        * try {
+        *   ...$content
+        * } catch with "..." {
+        *   ...
+        * }
+        * */
+        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
+            // 提取先前所有内容
+            val content = builder.extract()
+
+            builder.append("try {\n")
+            builder.append(content)
+            builder.append("\n}")
+
+            for (it in exception) {
+                if (it.second.isEmpty()) continue
+
+                builder.append(" catch")
+                if (it.first.isNotEmpty()) {
+                    builder.append(" with \"")
+                    builder.append(it.first.joinToString(separator = "|"))
+                    builder.append("\" ")
+                }
+                builder.append("{\n")
+                builder.appendWithIndent(it.second.toString(), suffix = "\n")
+                builder.append("}")
+            }
+        }
+
+        /*
+        * 收尾
+        * 构建主方法
+        * def main = {
+        *   ...$content
+        * }
+        * */
+
+        // 提取先前所有内容
+        val content = builder.extract()
+
+        // 构建方法体
+        builder.append("def main = {\n")
+        builder.appendWithIndent(content, suffix = "\n")
+        builder.append("}")
+
+        return builder
+    }
+
+    override fun compileScript() {
+        try {
+            // 尝试构建脚本
+            val source = buildSource()
+            val quest = source.toString().parseKetherScript()
+
+
+            // 获取主方法对应的语句块
+            info("dispatcher $id blocks: ${quest.blocks}")
+            val mainBlock = quest.getBlock("main").let {
+                info("dispatcher get main block: ${it.isPresent}")
+                if (it.isPresent) {
+                    it.get()
+                } else null
+            } ?: return
+
+            script = DispatcherQuest(this, mainBlock)
+            this.source = source
+
+            debug(Debug.HIGHEST, "dispatcher \"$id\" build source:\n$source")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     fun run(event: Event) {
 
-        if (compiler.compiled == null) return
+        if (!::script.isInitialized) {
+            warning("Script of Dispatcher \"$id\" has built failed. Please check config!")
+            return
+        }
 
         val player = when (event) {
             is PlayerEvent -> event.player
@@ -72,7 +294,7 @@ class EventDispatcher(
             else -> null
         }
 
-        if (baffle != null) {
+        baffle?.let { baffle ->
             val key = player?.name ?: event.eventName
             if (!baffle.hasNext(key)) return
         }
@@ -80,7 +302,7 @@ class EventDispatcher(
         debug(Debug.HIGHEST, "调度器 $id 正在运行...")
 
         // 执行脚本
-        compiler.compiled?.runActions {
+        script.runActions {
             setVariable(
                 "@Event", "event",
                 value = event
@@ -92,13 +314,26 @@ class EventDispatcher(
         }
     }
 
-    fun postLoad() {
-        compiler.buildSource()
-        compiler.compile()
+    /**
+     * 对照并尝试更新
+     * */
+    fun contrast(section: ConfigurationSection) {
+        var relisten = false
+        var recompile = false
+
+        wrapper.updateSource(section).forEach {
+            when (it.first) {
+                "listen", "priority", "ignore-cancelled" -> relisten = true
+                "pre-handle", "post-handle", "variables", "exception" -> recompile = true
+            }
+        }
+
+        if (recompile) compileScript()
+        if (relisten) registerListener()
     }
 
     fun releaseBaffle(player: Player? = null) {
-        if (baffle != null) {
+        baffle?.let { baffle ->
             if (player != null) {
                 baffle.reset(player.name)
             } else {
@@ -107,50 +342,47 @@ class EventDispatcher(
         }
     }
 
-    fun addHandler(handler: EventHandler, replace: Boolean = false) {
-        if (handler.id in handlers || handler.id in handlerCache) {
-            // 已存在相同 id 的 Handler
-            if (!replace) return
-            handlers.remove(handler.id)
+    fun addHandler(handler: EventHandler) {
+        if (handler !in handlers) {
+            handlers += handler
         }
-        handlerCache += handler.id
     }
 
-    fun removeHandler(id: String) {
-        handlerCache.remove(id)
-    }
-
-    private fun initBaffle(config: ConfigurationSection): Baffle? {
-        return when (val it = config.getString("type")) {
-            "time" -> {
-                val time = config.getInt("time", -1)
-                if (time > 0) {
-                    Baffle.of(time * 50L, TimeUnit.MILLISECONDS)
-                } else {
-                    warning("Illegal baffle time \"$time\" at EventDispatcher \"$id\"!")
-                    null
-                }
-            }
-            "count" -> {
-                val count = config.getInt("count", -1)
-                if (count > 0) {
-                    Baffle.of(count)
-                } else {
-                    warning("Illegal baffle count \"$count\" at EventDispatcher \"$id\"!")
-                    null
-                }
-            }
-            else -> {
-                if (it != null) {
-                    warning("Unknown baffle type \"$it\" at EventDispatcher \"$id\"!")
-                }
-                null
-            }
-        }
+    fun removeHandler(handler: EventHandler) {
+        handlers.remove(handler)
     }
 
     override fun toString(): String {
         return "EventDispatcher(id='$id')"
+    }
+
+    class DispatcherQuest(
+        val dispatcher: EventDispatcher,
+        val main: Quest.Block
+    ) : Quest {
+
+        val mapping = dispatcher.handlers.associateBy { it.hashName }
+
+        override fun getId(): String {
+            return dispatcher.id
+        }
+
+        override fun getBlock(label: String): Optional<Quest.Block> {
+            if (label == "main") return Optional.of(main)
+            return mapping[label]?.let { Optional.of(it.scriptBlock) } ?: Optional.empty()
+        }
+
+        override fun getBlocks(): Map<String, Quest.Block> {
+            return mapping.mapValues { it.value.scriptBlock }.plus("main" to main)
+        }
+
+        override fun blockOf(action: ParsedAction<*>): Optional<Quest.Block> {
+            if (action in main.actions) return Optional.of(main)
+            dispatcher.handlers.forEach {
+                if (action in it.scriptBlock.actions) return Optional.of(it.scriptBlock)
+            }
+            return Optional.empty()
+        }
     }
 
     companion object {
@@ -159,7 +391,6 @@ class EventDispatcher(
             File(getDataFolder(), "dispatchers")
         }
 
-        private val fileCache = mutableMapOf<File, MutableSet<String>>()
         private val cache = mutableMapOf<String, EventDispatcher>()
 
         fun get(id: String): EventDispatcher? = cache[id]
@@ -168,114 +399,83 @@ class EventDispatcher(
             val start = timing()
             try {
 
-                // 获取已存在的 Dispatcher
-                val existing = fileCache.remove(file)?.mapNotNull {
-                    cache.remove(it)
-                }?.associateBy { it.id }?.toMutableMap()
+                var counter = 0
+                val path = file.canonicalPath
+                val config = file.toConfig()
+                val keys = config.getKeys(false).toMutableSet()
 
-                debug("查看旧对象 -> ${existing?.map { it.value.id }}")
+                // 遍历已存在的调度器
+                val iterator = cache.iterator()
+                while (iterator.hasNext()) {
+                    val dispatcher = iterator.next().value
+                    if (dispatcher.path != path) continue
 
-                // 加载新的 Handler
-                val loaded = loadFromFile(file)
+                    if (dispatcher.id in keys) {
+                        // 调度器仍然存在于文件中，尝试更新调度器属性
+                        config.getConfigurationSection(dispatcher.id)?.let { section ->
+                            if (section.getBoolean("disable", false)) return@let null
 
-                // 遍历新对象
-                for (dispatcher in loaded) {
+                            debug(Debug.HIGH, "Dispatcher contrasting \"${dispatcher.id}\"")
+                            dispatcher.contrast(section)
+                            counter += 1
+                        } ?: let {
+                            // 节点寻找失败，删除调度器
+                            dispatcher.unregisterListener()
+                            iterator.remove()
+                            debug(Debug.HIGH, "Dispatcher delete \"${dispatcher.id}\"")
+                        }
 
-                    if (dispatcher.id in cache) {
-                        // id 冲突
-                        val conflict = fileCache.filter { dispatcher.id in it.value }.firstNotNullOfOrNull { it.key }
-                        console().sendLang("Dispatcher-Load-Failed-Conflict", dispatcher.id, file.canonicalPath, conflict?.canonicalPath ?: "UNKNOWN_FILE")
+                        // 移除该 id
+                        keys -= dispatcher.id
+                    } else {
+                        // 该调度器已被用户删除
+                        dispatcher.unregisterListener()
+                        iterator.remove()
+                        debug(Debug.HIGH, "Dispatcher delete \"${dispatcher.id}\"")
+                    }
+                }
+
+                // 遍历新的调度器
+                for (key in keys) {
+
+                    // 检查 id 冲突
+                    if (key in cache) {
+                        val conflict = cache[key]!!
+                        console().sendLang("Dispatcher-Load-Failed-Conflict", key, conflict.path, path)
                         continue
                     }
 
-                    // 获取对应的监听器对象
-                    val listener = dispatcher.getListener() ?: continue
+                    config.getConfigurationSection(key)?.let { section ->
+                        if (section.getBoolean("disable", false)) return@let
 
-                    // 尝试获取旧对象
-                    val old = existing?.remove(dispatcher.id)
+                        val dispatcher = EventDispatcher(key, path, section.wrapper())
+                        cache[key] = dispatcher
 
-                    if (old != null) {
-
-                        // 载入旧对象的所有 Handler
-                        dispatcher.handlerCache += old.handlers
-                        dispatcher.handlerCache += old.handlerCache
-
-                        // 比对新旧对象的监听器/事件要素
-                        if (listener.id != old.getListener()?.id) {
-                            // 新对象发生改变，更改监听器
-                            old.getListener()?.removeDispatcher(old.id)
+                        // 绑定 handler
+                        EventHandler.getAll().filter { dispatcher.id in it.binding }.forEach {
+                            dispatcher.addHandler(it)
                         }
+                        
+                        // 注册监听器
+                        dispatcher.registerListener()
 
-                        // 构建脚本源码
-                        dispatcher.compiler.buildSource()
-
-                        // 比对新旧对象的脚本源码
-                        if (dispatcher.compiler.source.toString() != old.compiler.source.toString()) {
-                            // 脚本源码不一致，重新编译脚本
-                            if (!dispatcher.compiler.compile()) {
-                                // 编译失败
-                                old.compiler.compiled?.let {
-                                    dispatcher.compiler._compiled = it
-                                }
-                            }
-                        }
-                    } else {
-                        // 不存在旧对象
-
-                        // 获取与该 Dispatcher 绑定的 Handler
-                        val handlers = EventHandler.getAll().filter { dispatcher.id in it.binding }.map { it.id }
-                        dispatcher.handlerCache += handlers
-
-                        // 构建脚本源码
-                        dispatcher.compiler.buildSource()
-                        // 编译脚本
-                        dispatcher.compiler.compile()
+                        counter += 1
+                        debug(Debug.HIGH, "Dispatcher loaded \"$key\"")
                     }
-
-                    // 尝试注册监听器
-                    listener.addDispatcher(dispatcher, true)
-                    listener.register()
-
-                    // 存入缓存
-                    cache[dispatcher.id] = dispatcher
-                    // 记录文件映射信息
-                    fileCache.computeIfAbsent(file) { mutableSetOf() } += dispatcher.id
-
                 }
 
-                // 遍历剩余旧对象
-                existing?.values?.forEach { dispatcher ->
-                    debug("遍历旧对象 -> ${dispatcher.id}")
-                    dispatcher.getListener()?.removeDispatcher(dispatcher.id)
-                }
-
-                console().sendLang("Dispatcher-Load-Automatic-Succeeded", file.name, loaded.size, timing(start))
+                console().sendLang("Dispatcher-Load-Automatic-Succeeded", file.name, counter, timing(start))
             } catch (e: Exception) {
                 console().sendLang("Dispatcher-Load-Automatic-Failed", file.name, e.localizedMessage, timing(start))
             }
-        }
-
-        private fun loadFromFile(file: File): Set<EventDispatcher> {
-            val loaded = mutableSetOf<EventDispatcher>()
-            file.toConfig().forEachSection { key, section ->
-                if (section.getBoolean("disable", false)) return@forEachSection
-                loaded += EventDispatcher(key, section)
-            }
-            return loaded
         }
 
         fun load(): String {
             val start = timing()
             return try {
 
-                // 移除文件监听器
-                fileCache.keys.forEach { it.removeWatcher() }
-
                 // 清除缓存
                 cache.clear()
-                fileCache.clear()
-
-                val mapping = mutableMapOf<String, File>()
 
                 folder.ifNotExists {
                     listOf(
@@ -283,28 +483,25 @@ class EventDispatcher(
                     ).forEach { releaseResourceFile("dispatchers/$it", true) }
                 }.getFiles().forEach { file ->
 
-                    loadFromFile(file).forEach inner@{ dispatcher ->
-                        if (dispatcher.id in mapping) {
-                            // id 冲突
-                            val conflict = mapping[dispatcher.id]!!
-                            console().sendLang("Dispatcher-Load-Failed-Conflict", dispatcher.id, conflict.canonicalPath, file.canonicalPath)
-                            return@inner
-                        }
-
-                        // 生成监听器
-                        dispatcher.getListener()?.addDispatcher(dispatcher)
-
-                        // 记录临时映射信息
-                        mapping[dispatcher.id] = file
-
-                        // 载入缓存
-                        cache[dispatcher.id] = dispatcher
-                        // 记录文件映射信息
-                        fileCache.computeIfAbsent(file) { mutableSetOf() } += dispatcher.id
-                    }
+                    val path = file.canonicalPath
 
                     // 添加文件监听器
                     file.addWatcher(false) { onFileChanged(this) }
+
+                    // 加载文件
+                    file.toConfig().forEachSection { key, section ->
+                        if (section.getBoolean("disable", false)) return@forEachSection
+
+                        // 检查 id 冲突
+                        if (key in cache) {
+                            val conflict = cache[key]!!
+                            console().sendLang("Handler-Load-Failed-Conflict", key, conflict.path, path)
+                            return@forEachSection
+                        }
+
+                        cache[key] = EventDispatcher(key, path, section.wrapper())
+                        debug(Debug.HIGH, "Handler loaded \"$key\"")
+                    }
                 }
 
                 console().asLangText("Dispatcher-Load-Succeeded", cache.size, timing(start)).also {
@@ -329,7 +526,10 @@ class EventDispatcher(
             }
 
             cache.values.forEach {
-                it.postLoad()
+                // 编译脚本
+                it.compileScript()
+                // 注册事件监听器
+                it.registerListener()
             }
         }
     }

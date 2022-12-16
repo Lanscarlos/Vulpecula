@@ -39,3 +39,21 @@ fun Any?.coerceDouble(def: Double? = null): Double {
     if (this == null && def != null) return def
     return Coerce.toDouble(this)
 }
+
+inline fun <reified T> Any?.coerceList(def: List<T> = emptyList(), transfer: (Any?) -> T): List<T> {
+    return when (this) {
+        is T -> listOf(this)
+        is Array<*> -> this.map(transfer)
+        is Collection<*> -> this.map(transfer)
+        else -> def
+    }
+}
+
+inline fun <reified T: Any> Any?.coerceListNotNull(def: List<T> = emptyList(), transfer: (Any?) -> T?): List<T> {
+    return when (this) {
+        is T -> listOf(this)
+        is Array<*> -> this.mapNotNull(transfer)
+        is Collection<*> -> this.mapNotNull(transfer)
+        else -> def
+    }
+}

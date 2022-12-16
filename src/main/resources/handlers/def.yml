@@ -4,8 +4,13 @@ example-handler-1:
   # 处理模块的优先级，越低越先被执行
   # 默认为 8
   priority: 8
+  # 条件
+  condition: 'xxx'
+  # 条件不满足时
+  deny: 'xxx'
   # 需要执行的代码
   handle:
     - type: 'ke'
       content: |-
         tell "Hello Vulpecula!"
+  exception:

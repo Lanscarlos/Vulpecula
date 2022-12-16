@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.internal.schedule
+package top.lanscarlos.vulpecula.internal
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
@@ -34,9 +34,7 @@ class ScheduleTask(
         SimpleDateFormat(it?.toString() ?: defDateFormat)
     }
 
-    val async by wrapper.read("async") {
-        it.coerceBoolean(false)
-    }
+    val async by wrapper.readBoolean("async", false)
 
     val startOf by wrapper.read("start") {
         if (it == null) return@read -1L
@@ -74,18 +72,14 @@ class ScheduleTask(
         Duration.ofSeconds(seconds)
     }
 
-    val namespace by wrapper.read("namespace") {
-        if (it is Collection<*>) {
-            it.mapNotNull { content -> content?.toString() }
-        } else emptyList()
-    }
+    val namespace by wrapper.readStringList("namespace", listOf("vulpecula"))
 
-    val executable by wrapper.read("execute") {
+    val executable by wrapper.read("execute") { value ->
         val def = "print *\"${console().asLangText("Schedule-Execution-Undefined", id)}\""
-        val body = when (it) {
-            is String -> listOf(it)
-            is Array<*> -> it.mapNotNull { it?.toString() }
-            is Collection<*> -> it.mapNotNull { it?.toString() }
+        val body = when (value) {
+            is String -> listOf(value)
+            is Array<*> -> value.mapNotNull { it?.toString() }
+            is Collection<*> -> value.mapNotNull { it?.toString() }
             else -> listOf(def)
         }.joinToString(separator = "\n")
 
@@ -111,7 +105,7 @@ class ScheduleTask(
         var restart = false // 是否重启任务
 
         wrapper.updateSource(section).forEach {
-            when (it) {
+            when (it.first) {
                 "namespace", "execute" -> {
                     refresh = true
                 }

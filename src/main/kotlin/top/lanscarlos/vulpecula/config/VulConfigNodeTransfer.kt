@@ -10,34 +10,39 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2022-12-15 21:36
  */
-class VulConfigNodeTransfer<R: Any>(
+
+@Suppress("UNCHECKED_CAST")
+class VulConfigNodeTransfer<R>(
     val path: String,
     val wrapper: VulConfig,
     private val transfer: ConfigurationSection.(Any?) -> R
 ) : VulConfigNode<R> {
 
-    lateinit var value: R
-
+    var isInitialized = false
     var raw: Any? = null
+    var value: R? = null
 
     override operator fun getValue(any: Any?, property: KProperty<*>): R {
-        if (!::value.isInitialized) {
+        if (!isInitialized) {
             raw = wrapper.source[path]
             value = transfer(wrapper.source, raw)
+            isInitialized = true
         }
-        return value
+        return value as R
     }
 
     /**
      * 更新数据源
-     * @return 返回数值发生变化的节点名
+     * @return 若数据发生变化则返回旧值与新值，反之 null
      * */
-    fun update(config: ConfigurationSection): Boolean {
+    fun update(config: ConfigurationSection): Pair<R, R>? {
         val newRaw = config[path]
-        if (raw == newRaw) return false
+        if (raw == newRaw) return null
 
         // 前后数值发生变化
-        this.value = transfer(config, newRaw)
-        return true
+        val oldValue = this.value as R
+        val newValue = transfer(config, newRaw)
+        this.value = newValue
+        return oldValue to newValue
     }
 }

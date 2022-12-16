@@ -5,7 +5,6 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.internal.compiler.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap

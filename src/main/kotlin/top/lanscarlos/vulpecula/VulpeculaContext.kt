@@ -4,7 +4,7 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
 import top.lanscarlos.vulpecula.internal.*
-import top.lanscarlos.vulpecula.internal.schedule.ScheduleTask
+import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.ActionUnicode
 
@@ -35,7 +35,7 @@ object VulpeculaContext {
         KetherShell.mainCache.scriptMap.clear()
 
         // 加载映射文件
-        messages += EventMapping.load()
+        messages += EventMapper.load()
 
         // 加载脚本片段
         messages += ScriptFragment.load()
@@ -53,9 +53,6 @@ object VulpeculaContext {
 
         // 调度器处理后续数据
         EventDispatcher.postLoad()
-
-        // 注册监听器
-        EventListener.registerAll()
 
         // 加载日程计划
         messages += ScheduleTask.load()

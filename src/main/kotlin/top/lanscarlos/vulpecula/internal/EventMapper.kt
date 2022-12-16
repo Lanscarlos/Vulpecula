@@ -15,7 +15,7 @@ import java.io.File
  * @author Lanscarlos
  * @since 2022-08-21 15:45
  */
-object EventMapping {
+object EventMapper {
 
     private val folder by lazy {
         File(getDataFolder(), "listen-mapping.yml")

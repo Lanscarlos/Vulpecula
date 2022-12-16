@@ -3,12 +3,16 @@ package top.lanscarlos.vulpecula.internal
 import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.configuration.ConfigurationSection
+import taboolib.library.kether.Quest
+import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.internal.compiler.HandlerCompiler
+import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.utils.*
+import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
 
 /**
@@ -20,14 +24,209 @@ import java.io.File
  */
 class EventHandler(
     val id: String,
-    val config: ConfigurationSection
-) {
+    val path: String,
+    val wrapper: VulConfig
+) : ScriptCompiler {
 
     val hash = id.digest("md5")
-    val binding = config.getStringOrList("binding")
-    val priority = config.getInt("priority", 8)
+    val hashName = "handler_$hash"
+    val binding by wrapper.readStringList("binding")
+    val priority by wrapper.readInt("priority", 8)
+    val condition by wrapper.read("condition") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
+    val deny by wrapper.read("deny") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
+    val handle by wrapper.read("handle") {
+        if (it != null) buildSection(it) else StringBuilder("null")
+    }
+    val exception by wrapper.read("exception") {
+        if (it != null) buildException(it) else emptyList()
+    }
 
-    val compiler = HandlerCompiler(this)
+    val dispatchers = mutableSetOf<EventDispatcher>()
+
+    /* 不包含主方法的方法体 */
+    lateinit var source: StringBuilder
+
+    /* 与方法体对应的语句块 */
+    lateinit var scriptBlock: Quest.Block
+
+    init {
+        // 编译脚本
+        compileScript()
+    }
+
+    override fun buildSource(): StringBuilder {
+        val builder = StringBuilder()
+
+        /*
+        * 构建核心语句
+        * */
+        builder.append(handle.toString())
+
+        /*
+        * 构建异常捕捉
+        * try {
+        *   ...$handle
+        * } catch with "...$first_1...|...$first_2..." {
+        *   ...$second
+        * }
+        * */
+        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
+            // 提取先前所有内容
+            val content = builder.extract()
+
+            // 不为空
+            builder.append("try {\n")
+            builder.append(content)
+            builder.append("\n}")
+
+            for (it in exception) {
+                if (it.second.isEmpty()) continue
+
+                builder.append(" catch")
+                if (it.first.isNotEmpty()) {
+                    builder.append(" with \"")
+                    builder.append(it.first.joinToString(separator = "|"))
+                    builder.append("\" ")
+                }
+                builder.append("{\n")
+                builder.appendWithIndent(it.second.toString(), suffix = "\n")
+                builder.append("}")
+            }
+        }
+
+        /*
+        * 构建条件体
+        * if {
+        *   ...$condition
+        * } then {
+        *   ...$content
+        * } else {
+        *   ...$deny
+        * }
+        * */
+        if (condition.isNotEmpty()) {
+            // 提取先前所有内容
+            val content = builder.extract()
+
+            builder.append("if {\n")
+            builder.appendWithIndent(condition.toString(), suffix = "\n")
+            builder.append("} then {\n")
+            builder.appendWithIndent(content, suffix = "\n")
+            builder.append("}")
+
+            if (deny.isNotEmpty()) {
+                builder.append(" else {\n")
+                builder.appendWithIndent(deny.toString(), suffix = "\n")
+                builder.append("}")
+            }
+        }
+
+        /*
+        * 收尾
+        * 构建方法体
+        * def handler_$hash = {
+        *   ...$content
+        * }
+        * */
+
+        // 提取先前所有内容
+        val content = builder.extract()
+
+        // 构建方法体
+        builder.append("def $hashName = {\n")
+        builder.appendWithIndent(content, suffix = "\n")
+        builder.append("}")
+
+        return builder
+    }
+
+    override fun compileScript() {
+        try {
+            // 尝试构建脚本
+            val source = buildSource()
+            val quest = source.toString().parseKetherScript()
+
+            quest.getBlock(hashName).let {
+                if (it.isPresent) {
+                    // 编译通过
+                    scriptBlock = it.get()
+                    this.source = source
+
+                    debug(Debug.HIGHEST, "handler \"$id\" build source:\n$source")
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * 绑定调度模块
+     * @param reorder 是否令已绑定的调度模块重新排序
+     * */
+    fun bind(reorder: Boolean) {
+        val iterator = dispatchers.iterator()
+        while (iterator.hasNext()) {
+            val dispatcher = iterator.next()
+            if (dispatcher.id in binding) {
+                // 仍然处于绑定状态
+                if (reorder) dispatcher.compileScript()
+            } else {
+                // 处于解绑状态
+                dispatcher.removeHandler(this)
+                // 重新编译脚本
+                dispatcher.compileScript()
+                // 移出队列
+                iterator.remove()
+            }
+        }
+
+        // 获取已绑定的 ID
+        val existing = dispatchers.map { it.id }
+        binding.forEach { id ->
+            if (id in existing) {
+                // 已绑定
+                return@forEach
+            }
+
+            EventDispatcher.get(id)?.let {
+                it.addHandler(this)
+                it.compileScript()
+            }
+        }
+    }
+
+    /**
+     * 解绑所有调度模块
+     * */
+    fun unbind() {
+        dispatchers.forEach { it.removeHandler(this) }
+        dispatchers.clear()
+    }
+
+    /**
+     * 对照并尝试更新
+     * */
+    fun contrast(section: ConfigurationSection) {
+        var rebind = false
+        var reorder = false
+        var recompile = false
+
+        wrapper.updateSource(section).forEach {
+            when (it.first) {
+                "binding" -> rebind = true
+                "priority" -> reorder = true
+                "condition", "deny", "handle", "exception" -> recompile = true
+            }
+        }
+
+        if (recompile) compileScript()
+        if (rebind) bind(reorder)
+    }
 
     override fun toString(): String {
         return "EventHandler(id='$id')"
@@ -39,7 +238,6 @@ class EventHandler(
             File(getDataFolder(), "handlers")
         }
 
-        private val fileCache = mutableMapOf<File, MutableSet<String>>()
         private val cache = mutableMapOf<String, EventHandler>()
 
         fun get(id: String): EventHandler? = cache[id]
@@ -50,84 +248,65 @@ class EventHandler(
             val start = timing()
             try {
 
-                // 获取已存在的 Handler
-                val existing = fileCache.remove(file)?.mapNotNull {
-                    cache.remove(it)
-                }?.associateBy { it.id }?.toMutableMap()
+                var counter = 0
+                val path = file.canonicalPath
+                val config = file.toConfig()
+                val keys = config.getKeys(false).toMutableSet()
 
-                // 加载新的 Handler
-                val loaded = loadFromFile(file)
+                // 遍历已存在的处理器
+                val iterator = cache.iterator()
+                while (iterator.hasNext()) {
+                    val handler = iterator.next().value
+                    if (handler.path != path) continue
 
-                // 受到影响的 Dispatcher
-                val affected = mutableSetOf<EventDispatcher>()
+                    if (handler.id in keys) {
+                        // 处理器仍然存在于文件中，尝试更新处理器属性
+                        config.getConfigurationSection(handler.id)?.let { section ->
+                            if (section.getBoolean("disable", false)) return@let null
 
-                // 遍历新对象
-                for (handler in loaded) {
+                            debug(Debug.HIGH, "Handler contrasting \"${handler.id}\"")
+                            handler.contrast(section)
+                            counter += 1
+                        } ?: let {
+                            // 节点寻找失败，删除处理器
+                            handler.unbind()
+                            iterator.remove()
+                            debug(Debug.HIGH, "Handler delete \"${handler.id}\"")
+                        }
 
-                    if (handler.id in cache) {
-                        // id 冲突
-                        val conflict = fileCache.filter { handler.id in it.value }.firstNotNullOfOrNull { it.key }
-                        console().sendLang("Handler-Load-Failed-Conflict", handler.id, file.canonicalPath, conflict?.canonicalPath ?: "UNKNOWN_FILE")
+                        // 移除该 id
+                        keys -= handler.id
+                    } else {
+                        // 该处理器已被用户删除
+                        handler.unbind()
+                        iterator.remove()
+                        debug(Debug.HIGH, "Handler delete \"${handler.id}\"")
+                    }
+                }
+
+                // 遍历新的调度器
+                for (key in keys) {
+
+                    // 检查 id 冲突
+                    if (key in cache) {
+                        val conflict = cache[key]!!
+                        console().sendLang("Handler-Load-Failed-Conflict", key, conflict.path, path)
                         continue
                     }
 
-                    // 尝试获取旧对象
-                    val old = existing?.remove(handler.id)
+                    config.getConfigurationSection(key)?.let { section ->
+                        if (section.getBoolean("disable", false)) return@let
 
-                    old?.binding?.forEach {
-                        if (it !in handler.binding) {
-                            // 新对象解除了 Dispatcher 绑定
-                            EventDispatcher.get(it)?.let { dispatcher ->
-                                dispatcher.removeHandler(old.id)
-                                affected += dispatcher
-                            }
-                        }
-                    }
-
-                    // 更新新对象所绑定的 Dispatcher
-                    handler.binding.forEach {
-                        EventDispatcher.get(it)?.let { dispatcher ->
-                            dispatcher.addHandler(handler, true)
-                            affected += dispatcher
-                        }
-                    }
-
-                    // 存入缓存
-                    cache[handler.id] = handler
-                    // 记录文件映射信息
-                    fileCache.computeIfAbsent(file) { mutableSetOf() } += handler.id
-                }
-
-                // 遍历剩余旧对象
-                existing?.values?.forEach { handler ->
-                    handler.binding.forEach {
-                        // 解绑剩余旧对象的 Dispatcher
-                        EventDispatcher.get(it)?.let { dispatcher ->
-                            dispatcher.removeHandler(handler.id)
-                            affected += dispatcher
-                        }
+                        cache[key] = EventHandler(key, path, section.wrapper())
+                        counter += 1
+                        debug(Debug.HIGH, "Handler loaded \"$key\"")
                     }
                 }
 
-                // 重载所有受到影响的 Dispatcher
-                affected.forEach { it.postLoad() }
-
-                console().sendLang("Handler-Load-Automatic-Succeeded", file.name, loaded.size, timing(start))
+                console().sendLang("Handler-Load-Automatic-Succeeded", file.name, counter, timing(start))
             } catch (e: Exception) {
                 console().sendLang("Handler-Load-Automatic-Failed", file.name, e.localizedMessage, timing(start))
             }
-        }
-
-        /**
-         * @return 返回加载的结果
-         * */
-        private fun loadFromFile(file: File): Set<EventHandler> {
-            val loaded = mutableSetOf<EventHandler>()
-            file.toConfig().forEachSection { key, section ->
-                if (section.getBoolean("disable", false)) return@forEachSection
-                loaded += EventHandler(key, section)
-            }
-            return loaded
         }
 
         fun load(): String {
@@ -135,14 +314,8 @@ class EventHandler(
 
             return try {
 
-                // 移除文件监听器
-                fileCache.keys.forEach { it.removeWatcher() }
-
                 // 清除缓存
                 cache.clear()
-                fileCache.clear()
-
-                val mapping = mutableMapOf<String, File>()
 
                 folder.ifNotExists {
                     listOf(
@@ -150,25 +323,25 @@ class EventHandler(
                     ).forEach { releaseResourceFile("handlers/$it", true) }
                 }.getFiles().forEach { file ->
 
-                    loadFromFile(file).forEach inner@{ handler ->
-                        if (handler.id in mapping) {
-                            // id 冲突
-                            val conflict = mapping[handler.id]!!
-                            console().sendLang("Handler-Load-Failed-Conflict", handler.id, conflict.canonicalPath, file.canonicalPath)
-                            return@inner
-                        }
-
-                        // 记录临时映射信息
-                        mapping[handler.id] = file
-
-                        // 载入缓存
-                        cache[handler.id] = handler
-                        // 记录文件映射信息
-                        fileCache.computeIfAbsent(file) { mutableSetOf() } += handler.id
-                    }
+                    val path = file.canonicalPath
 
                     // 添加文件监听器
                     file.addWatcher(false) { onFileChanged(this) }
+
+                    // 加载文件
+                    file.toConfig().forEachSection { key, section ->
+                        if (section.getBoolean("disable", false)) return@forEachSection
+
+                        // 检查 id 冲突
+                        if (key in cache) {
+                            val conflict = cache[key]!!
+                            console().sendLang("Handler-Load-Failed-Conflict", key, conflict.path, path)
+                            return@forEachSection
+                        }
+
+                        cache[key] = EventHandler(key, path, section.wrapper())
+                        debug(Debug.HIGH, "Handler loaded \"$key\"")
+                    }
                 }
 
                 console().asLangText("Handler-Load-Succeeded", cache.size, timing(start)).also {

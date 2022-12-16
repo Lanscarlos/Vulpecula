@@ -26,7 +26,7 @@ class CanvasQuest(
         return uniqueId
     }
 
-    override fun getBlock(p0: String): Optional<Quest.Block> {
+    override fun getBlock(label: String): Optional<Quest.Block> {
         return Optional.of(block)
     }
 
