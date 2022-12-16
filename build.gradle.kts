@@ -20,7 +20,7 @@ taboolib {
     install("expansion-javascript")
     install("platform-bukkit")
     classifier = null
-    version = "6.0.10-21"
+    version = "6.0.10-31"
 }
 
 repositories {
