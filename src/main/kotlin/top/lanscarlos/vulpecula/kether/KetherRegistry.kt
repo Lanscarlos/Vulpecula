@@ -11,6 +11,7 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.StandardChannel
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.utils.timing
 import top.lanscarlos.vulpecula.utils.toConfig
 import java.io.File
@@ -24,9 +25,7 @@ import java.util.function.Supplier
  * @since 2022-10-18 16:33
  */
 @Awake(LifeCycle.LOAD)
-object KetherRegistry : ClassVisitor(0) {
-
-    override fun getLifeCycle() = LifeCycle.LOAD
+object KetherRegistry : ClassInjector() {
 
     // 仅加载一次
     private val actionConfig by lazy {

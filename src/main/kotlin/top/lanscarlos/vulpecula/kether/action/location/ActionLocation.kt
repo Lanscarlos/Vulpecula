@@ -9,6 +9,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
+import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -41,9 +42,7 @@ class ActionLocation : ScriptAction<Any?>() {
     }
 
     @Awake(LifeCycle.LOAD)
-    companion object : ClassVisitor(1) {
-
-        override fun getLifeCycle() = LifeCycle.LOAD
+    companion object : ClassInjector() {
 
         private val registry = mutableMapOf<String, Reader>()
 

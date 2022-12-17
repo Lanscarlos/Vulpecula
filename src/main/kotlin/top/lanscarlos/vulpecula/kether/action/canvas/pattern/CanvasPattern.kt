@@ -6,6 +6,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
+import top.lanscarlos.vulpecula.internal.ClassInjector
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -80,9 +81,7 @@ interface CanvasPattern {
     }
 
     @Awake(LifeCycle.LOAD)
-    companion object : ClassVisitor(1) {
-
-        override fun getLifeCycle() = LifeCycle.LOAD
+    companion object : ClassInjector() {
 
         private val registry = HashMap<String, Reader>()
 
