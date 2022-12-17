@@ -31,6 +31,23 @@ Kether-Action-Register-Failed:
 
 
 
+# 映射模块
+
+Event-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
+Event-Mapping-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Event-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个事件映射！ &8({1} ms)'
+Event-Mapping-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Event-Mapping-Failed-Undefined:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射 &a{1}&7 未被定义！'
+Event-Mapping-Failed-Class-Not-Found:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射 &a{0}&7 对应的事件类 &a{1}&7 不存在！'
+
+
+
 # 日程模块
 
 Schedule-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个日程模块！ &8({2} ms)'
@@ -51,19 +68,6 @@ Schedule-Execution-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &
 
 
 
-# 映射模块
-
-Event-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
-Event-Mapping-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
-Event-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个事件映射！ &8({1} ms)'
-Event-Mapping-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-
-
-
 # 调度模块
 
 Dispatcher-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个调度模块！ &8({2} ms)'
@@ -77,8 +81,6 @@ Dispatcher-Load-Failed:
 Dispatcher-Load-Conflict:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块时发生 id 冲突：&a{0}'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
-Dispatcher-Load-Failed-Event-Class-Not-Found:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 调度模块 &a{0}&7 指定的事件 &a{1}&7 不存在！'
 Dispatcher-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'

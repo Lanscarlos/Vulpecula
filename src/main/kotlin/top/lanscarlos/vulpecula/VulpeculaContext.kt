@@ -34,6 +34,9 @@ object VulpeculaContext {
         // 清理脚本缓存
         KetherShell.mainCache.scriptMap.clear()
 
+        // 注销所有监听器
+        EventListener.unregisterAll()
+
         // 加载映射文件
         messages += EventMapper.load()
 

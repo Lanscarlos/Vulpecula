@@ -11,7 +11,6 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
 import taboolib.common.platform.event.EventPriority
-import taboolib.common.platform.event.ProxyListener
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
@@ -42,9 +41,7 @@ class EventDispatcher(
 ) : ScriptCompiler {
 
     val eventName by wrapper.read("listen") { name ->
-        name?.toString()?.let {
-            EventMapper.mapping(it) ?: error("Cannot get Dispatcher \"$id\" 's listen event mapping: \"$it\"")
-        } ?: error("Dispatcher \"$id\" 's listen event is undefined!")
+        name?.toString() ?: error("Dispatcher \"$id\" 's listen event is undefined!")
     }
 
     val priority by wrapper.read("priority") {
@@ -110,8 +107,6 @@ class EventDispatcher(
 
     val handlers = mutableListOf<EventHandler>()
 
-    lateinit var listener: ProxyListener
-
     /* 含主方法的方法体 */
     lateinit var source: StringBuilder
 
@@ -119,26 +114,16 @@ class EventDispatcher(
     lateinit var script: Script
 
     fun registerListener() {
-        try {
-            val eventClass = Class.forName(this.eventName)
+        // 注销将先前的事件任务
+        unregisterListener()
 
-            unregisterListener()
-
-            listener = registerBukkitListener(eventClass, priority, ignoreCancelled) {
-                if (it !is Event) return@registerBukkitListener
-                run(it)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-//                warning("Illegal event class: \"$this.eventName\" at dispatcher \"${this.id}\"!")
-            console().sendLang("Dispatcher-Load-Failed-Event-Class-Not-Found", this.id, this.eventName)
+        EventListener.registerTask(eventName, priority, ignoreCancelled, "dispatcher-$id") { event ->
+            call(event)
         }
     }
 
     fun unregisterListener() {
-        if (::listener.isInitialized) {
-            unregisterListener(listener)
-        }
+        EventListener.unregisterTask("dispatcher-$id")
     }
 
     override fun buildSource(): StringBuilder {
@@ -253,9 +238,7 @@ class EventDispatcher(
 
 
             // 获取主方法对应的语句块
-            info("dispatcher $id blocks: ${quest.blocks}")
             val mainBlock = quest.getBlock("main").let {
-                info("dispatcher get main block: ${it.isPresent}")
                 if (it.isPresent) {
                     it.get()
                 } else null
@@ -270,7 +253,7 @@ class EventDispatcher(
         }
     }
 
-    fun run(event: Event) {
+    fun call(event: Event) {
 
         if (!::script.isInitialized) {
             warning("Script of Dispatcher \"$id\" has built failed. Please check config!")
@@ -322,6 +305,7 @@ class EventDispatcher(
         var recompile = false
 
         wrapper.updateSource(section).forEach {
+            debug(Debug.MONITOR, "Dispatcher $id contrast ${it.first} to ${it.second}")
             when (it.first) {
                 "listen", "priority", "ignore-cancelled" -> relisten = true
                 "pre-handle", "post-handle", "variables", "exception" -> recompile = true

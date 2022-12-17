@@ -8,6 +8,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
+import top.lanscarlos.vulpecula.internal.EventListener
 import top.lanscarlos.vulpecula.internal.EventMapper
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.live.LiveData
@@ -29,11 +30,28 @@ class ActionEventWait(
     val eventName: LiveData<String>
 ) : ScriptAction<Any?>() {
 
+    /* 事件处理语句 */
     val actions = mutableListOf<ParsedAction<*>>()
+
+    /* 事件任务 ID */
+    var taskId: LiveData<String>? = null
+
+    /* 事件监听等级 */
     var priority: LiveData<String>? = null
+
+    /* 事件监听等级 */
+    var ignoredCancelled: LiveData<Boolean>? = null
+
+    /* 事件过滤条件 */
     var condition: LiveData<Boolean>? = null
+
+    /* 是否异步监听 */
     var async: LiveData<Boolean>? = null
+
+    /* 超时时间 */
     var timeout: LiveData<Int>? = null
+
+    /* 超时处理语句 */
     var onTimeout: ParsedAction<*>? = null
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
@@ -43,11 +61,13 @@ class ActionEventWait(
         listOf(
             eventName.getOrNull(frame),
             priority?.getOrNull(frame),
+            ignoredCancelled?.getOrNull(frame),
+            taskId?.getOrNull(frame),
             async?.getOrNull(frame),
             timeout?.getOrNull(frame),
         ).thenTake().thenAccept { args ->
 
-            val eventName = EventMapper.mapping(args[0].toString()) ?: let {
+            val mapper = args[0]?.toString() ?: let {
                 future.complete(null)
                 warning("Cannot get listen event mapping: \"${args[0]}\"")
                 return@thenAccept
@@ -57,25 +77,36 @@ class ActionEventWait(
                 EventPriority.values().firstOrNull { it.name.equals(name, true) }
             } ?: EventPriority.NORMAL
 
-            if (args[2].coerceBoolean(false)) {
+            val ignoredCancelled = args[2].coerceBoolean(true)
+
+            // 获取任务 ID
+            val taskId = args[3]?.toString() ?: UUID.randomUUID().toString()
+
+            if (args[4].coerceBoolean(false)) {
                 // 异步执行
                 future.complete(null)
             }
 
-            val timeout = args[3].coerceInt(-1)
+            val timeout = args[5].coerceInt(-1)
             if (timeout > 0) {
                 // 设置超时
                 submit(delay = timeout.toLong()) {
                     if (future.isDone) return@submit
+
+                    // 设置变量通信
                     frame.setVariable("@Timeout", true)
-                    // 超时
+
+                    // 注销事件任务
+                    EventListener.unregisterTask(taskId)
+
+                    // 超时处理
                     onTimeout?.let { action ->
                         frame.run(action).thenAccept { future.complete(it) }
                     } ?: future.complete(null)
                 }
             }
 
-            EventListener.registerTask(eventName, priority, UUID.randomUUID().toString()) { event ->
+            EventListener.registerTask(mapper, priority, ignoredCancelled, taskId) { event ->
 
                 // 检测是否超时
                 if (frame.variables().get<Boolean>("@Timeout").let { if (it.isPresent) it.get() else false }) {
@@ -125,6 +156,7 @@ class ActionEventWait(
 
             while (reader.nextPeek().startsWith('-')) {
                 when (reader.nextToken().substring(1)) {
+                    "unique", "id" -> action.taskId = reader.readString()
                     "priority", "p" -> action.priority = reader.readString()
                     "filter", "condition" -> action.condition = reader.readBoolean()
                     "async", "a" -> action.async = reader.readBoolean()
@@ -137,6 +169,7 @@ class ActionEventWait(
                 while (!reader.hasNextToken("}")) {
                     reader.mark()
                     when (reader.nextToken()) {
+                        "-unique", "-id" -> action.taskId = reader.readString()
                         "-filter", "-condition" -> action.condition = reader.readBoolean()
                         "-priority", "-p" -> action.priority = reader.readString()
                         "-async", "-a" -> action.async = reader.readBoolean()
