@@ -2,7 +2,9 @@ package top.lanscarlos.vulpecula.kether.property.event
 
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
+import org.bukkit.event.block.BlockEvent
 import org.bukkit.event.entity.EntityEvent
+import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
@@ -25,7 +27,9 @@ class EventProperty : VulScriptProperty<Event>("event") {
 
     override fun readProperty(instance: Event, key: String): OpenResult {
         val property: Any = when (key) {
+            "block" -> (instance as? BlockEvent)?.block ?: OpenResult.failed()
             "entity" -> (instance as? EntityEvent)?.entity ?: OpenResult.failed()
+            "inventory", "inv" -> (instance as? InventoryEvent)?.inventory ?: OpenResult.failed()
             "player" -> (instance as? PlayerEvent)?.player ?: OpenResult.failed()
             "eventName", "event-name", "name" -> instance.eventName
             "isAsynchronous", "asynchronous", "async" -> instance.isAsynchronous

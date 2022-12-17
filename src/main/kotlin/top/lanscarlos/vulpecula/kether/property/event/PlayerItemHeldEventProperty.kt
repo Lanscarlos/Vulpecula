@@ -26,7 +26,6 @@ class PlayerItemHeldEventProperty : VulScriptProperty<PlayerItemHeldEvent>("play
             "previousSlot", "previous-slot", "old-slot" -> instance.previousSlot
             "new-item" -> instance.player.inventory.getItem(instance.newSlot)
             "previous-item","old-item" -> instance.player.inventory.getItem(instance.previousSlot)
-            "player" -> instance.player
             else -> return OpenResult.failed()
         }
         return OpenResult.successful(property)
