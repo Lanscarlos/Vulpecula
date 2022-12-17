@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.config
 
+import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import kotlin.reflect.KProperty
 
@@ -38,6 +39,9 @@ class VulConfigNodeTransfer<R>(
     fun update(config: ConfigurationSection): Pair<R, R>? {
         val newRaw = config[path]
         if (raw == newRaw) return null
+
+        // 更新原始数据
+        raw = newRaw
 
         // 前后数值发生变化
         val oldValue = this.value as R
