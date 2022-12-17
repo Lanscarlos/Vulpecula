@@ -455,7 +455,10 @@ class EventDispatcher(
                         EventHandler.getAll().filter { dispatcher.id in it.binding }.forEach {
                             dispatcher.addHandler(it)
                         }
-                        
+
+                        // 构建脚本
+                        dispatcher.compileScript()
+
                         // 注册监听器
                         dispatcher.registerListener()
 
