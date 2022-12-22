@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.kether
 import taboolib.common.OpenResult
 import taboolib.common.platform.function.info
 import taboolib.module.kether.ScriptProperty
+import taboolib.module.kether.action.ActionProperty
 
 /**
  * Vulpecula
@@ -94,6 +95,16 @@ abstract class VulScriptProperty<T : Any>(
             val result = it.readProperty(instance, key)
             if (result.isSuccessful) return result
         }
+
+        // 使用原版读取
+        ActionProperty.getScriptProperty(instance).filterIsInstance<ScriptProperty<Any?>>().forEach {
+            // 排除自己，防止无限调用
+            if (this.id == it.id) return@forEach
+
+            // 这里不再使用泛型写入，防止套娃
+            val result = it.read(instance, key)
+            if (result.isSuccessful) return result
+        }
         return OpenResult.failed()
     }
 
@@ -104,6 +115,16 @@ abstract class VulScriptProperty<T : Any>(
         KetherRegistry.getScriptProperties(instance).forEach {
             // 这里不再使用泛型写入，防止套娃
             val result = it.writeProperty(instance, key, value)
+            if (result.isSuccessful) return result
+        }
+
+        // 使用原版写入
+        ActionProperty.getScriptProperty(instance).filterIsInstance<ScriptProperty<Any?>>().forEach {
+            // 排除自己，防止无限调用
+            if (this.id == it.id) return@forEach
+
+            // 这里不再使用泛型写入，防止套娃
+            val result = it.write(instance, key, value)
             if (result.isSuccessful) return result
         }
         return OpenResult.failed()
