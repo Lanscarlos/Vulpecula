@@ -17,6 +17,7 @@ taboolib {
     install("module-metrics")
     install("module-nms")
     install("module-nms-util")
+    install("expansion-command-helper")
     install("expansion-javascript")
     install("platform-bukkit")
     classifier = null
@@ -30,6 +31,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly("com.google.guava:guava:31.1-jre")
 
     compileOnly("net.luckperms:api:5.4")
 
