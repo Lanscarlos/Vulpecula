@@ -11,13 +11,15 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2022-12-15 22:05
  */
-class VulConfigNodeBinding<R: Any>(
+@Suppress("UNCHECKED_CAST")
+class VulConfigNodeBinding<R>(
     val path: String,
     bind: String,
     private val transfer: ConfigurationSection.(Any?) -> R
 ) : VulConfigNode<R>, Runnable {
 
-    lateinit var value: R
+    var isInitialized = false
+    var value: R? = null
 
     val config by lazy {
         ConfigLoader.files[bind]?.conf?.also {
@@ -30,7 +32,9 @@ class VulConfigNodeBinding<R: Any>(
     }
 
     override fun getValue(any: Any?, property: KProperty<*>): R {
-        if (!::value.isInitialized) value = transfer(config, config[path])
-        return value
+        if (!isInitialized) {
+            value = transfer(config, config[path])
+        }
+        return value as R
     }
 }

@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.internal
 import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.Quest
@@ -11,6 +10,7 @@ import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
+import top.lanscarlos.vulpecula.script.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -61,68 +61,21 @@ class EventHandler(
     override fun buildSource(): StringBuilder {
         val builder = StringBuilder()
 
-        /*
-        * 构建核心语句
-        * */
+        /* 构建核心语句 */
         builder.append(handle.toString())
 
-        /*
-        * 构建异常捕捉
-        * try {
-        *   ...$handle
-        * } catch with "...$first_1...|...$first_2..." {
-        *   ...$second
-        * }
-        * */
+        /* 构建异常处理 */
         if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
             // 提取先前所有内容
             val content = builder.extract()
-
-            // 不为空
-            builder.append("try {\n")
-            builder.append(content)
-            builder.append("\n}")
-
-            for (it in exception) {
-                if (it.second.isEmpty()) continue
-
-                builder.append(" catch")
-                if (it.first.isNotEmpty()) {
-                    builder.append(" with \"")
-                    builder.append(it.first.joinToString(separator = "|"))
-                    builder.append("\" ")
-                }
-                builder.append("{\n")
-                builder.appendWithIndent(it.second.toString(), suffix = "\n")
-                builder.append("}")
-            }
+            compileException(builder, content, exception)
         }
 
-        /*
-        * 构建条件体
-        * if {
-        *   ...$condition
-        * } then {
-        *   ...$content
-        * } else {
-        *   ...$deny
-        * }
-        * */
+        /* 构建条件处理 */
         if (condition.isNotEmpty()) {
             // 提取先前所有内容
             val content = builder.extract()
-
-            builder.append("if {\n")
-            builder.appendWithIndent(condition.toString(), suffix = "\n")
-            builder.append("} then {\n")
-            builder.appendWithIndent(content, suffix = "\n")
-            builder.append("}")
-
-            if (deny.isNotEmpty()) {
-                builder.append(" else {\n")
-                builder.appendWithIndent(deny.toString(), suffix = "\n")
-                builder.append("}")
-            }
+            compileCondition(builder, content, condition, deny)
         }
 
         /*
@@ -234,9 +187,7 @@ class EventHandler(
 
     companion object {
 
-        private val folder by lazy {
-            File(getDataFolder(), "handlers")
-        }
+        private val folder = File(getDataFolder(), "handlers")
 
         private val cache = mutableMapOf<String, EventHandler>()
 

@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.internal
 import taboolib.common.platform.function.console
 import taboolib.library.kether.LoadError
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.script.ScriptCompiler
 
 /**
  * Vulpecula

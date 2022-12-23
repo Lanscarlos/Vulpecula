@@ -4,8 +4,12 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
+import taboolib.common.platform.command.mainCommand
 import taboolib.common.platform.command.subCommand
+import taboolib.expansion.createHelper
+import taboolib.platform.util.sendLang
 import top.lanscarlos.vulpecula.VulpeculaContext
+import top.lanscarlos.vulpecula.script.VulWorkspace
 import top.lanscarlos.vulpecula.utils.eval
 
 /**
@@ -17,6 +21,11 @@ import top.lanscarlos.vulpecula.utils.eval
  */
 @CommandHeader(name = "vulpecula", aliases = ["vul"])
 object CommandVulpecula {
+
+    @CommandBody
+    val main = mainCommand {
+        createHelper()
+    }
 
     @CommandBody
     val eval = subCommand {
@@ -44,5 +53,8 @@ object CommandVulpecula {
             info.forEach { player.sendMessage(it) }
         }
     }
+
+    @CommandBody
+    val script = subCommand(CommandScript.main)
 
 }

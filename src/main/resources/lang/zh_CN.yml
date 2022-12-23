@@ -31,6 +31,59 @@ Kether-Action-Register-Failed:
 
 
 
+# 脚本编译模块
+
+Script-Compile-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动编译 &a{0}&7 源脚本 &8({1} ms)'
+Script-Compile-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动编译 &a{0}&7 源脚本时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Compile-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功编译 &a{0}&7 个源脚本！ &8({1} ms)'
+Script-Compile-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 源脚本编译失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Script-Compile-Load-Failed-Conflict:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本时发生 id 冲突：&a{0}'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
+Script-Compile-Load-Failed-Details:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本 &a{0}&7 内的 &a{1}&7 时出现问题！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+
+
+
+# 脚本运行模块
+
+Script-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 脚本 &8({1} ms)'
+Script-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 脚本时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个脚本！ &8({1} ms)'
+Script-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Script-Load-Failed-Conflict:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载脚本时发生 id 冲突：&a{0}'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}'
+Script-Load-Failed-Details:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载脚本 &a{0}&7 内的 &a{1}&7 时出现问题！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Script-Run-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功运行脚本 &a{0}'
+Script-Run-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 运行脚本 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Stop-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止脚本 &a{0}'
+Script-Stop-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止脚本 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所有脚本'
+Script-Stop-All-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有脚本时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Script-List:
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 所有脚本: &f{0}'
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 运行脚本: &f{1}'
+
+
+
 # 映射模块
 
 Event-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'

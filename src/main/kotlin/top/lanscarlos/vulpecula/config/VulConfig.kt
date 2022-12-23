@@ -33,42 +33,64 @@ class VulConfig(
     fun readBoolean(path: String, def: Boolean = false): VulConfigNode<Boolean> {
         return VulConfigNodeTransfer(path, this) {
             it.coerceBoolean(def)
+        }.also {
+            nodes += it
         }
     }
 
     fun readShort(path: String, def: Short = 0): VulConfigNode<Short> {
         return VulConfigNodeTransfer(path, this) {
             it.coerceShort(def)
+        }.also {
+            nodes += it
         }
     }
 
     fun readInt(path: String, def: Int = 0): VulConfigNode<Int> {
         return VulConfigNodeTransfer(path, this) {
             it.coerceInt(def)
+        }.also {
+            nodes += it
         }
     }
 
     fun readLong(path: String, def: Long = 0): VulConfigNode<Long> {
         return VulConfigNodeTransfer(path, this) {
             it.coerceLong(def)
+        }.also {
+            nodes += it
         }
     }
 
     fun readFloat(path: String, def: Float = 0f): VulConfigNode<Float> {
         return VulConfigNodeTransfer(path, this) {
             it.coerceFloat(def)
+        }.also {
+            nodes += it
         }
     }
 
     fun readDouble(path: String, def: Double = 0.0): VulConfigNode<Double> {
         return VulConfigNodeTransfer(path, this) {
             it.coerceDouble(def)
+        }.also {
+            nodes += it
         }
     }
 
-    fun readString(path: String, def: String = ""): VulConfigNode<String> {
+    fun readString(path: String): VulConfigNode<String?> {
+        return VulConfigNodeTransfer(path, this) {
+            it?.toString()
+        }.also {
+            nodes += it
+        }
+    }
+
+    fun readString(path: String, def: String): VulConfigNode<String> {
         return VulConfigNodeTransfer(path, this) {
             it?.toString() ?: def
+        }.also {
+            nodes += it
         }
     }
 
@@ -81,6 +103,8 @@ class VulConfig(
                 is Collection<*> -> value.mapNotNull { it?.coerceInt() }
                 else -> def
             }
+        }.also {
+            nodes += it
         }
     }
 
@@ -92,6 +116,8 @@ class VulConfig(
                 is Collection<*> -> value.mapNotNull { it?.toString() }
                 else -> def
             }
+        }.also {
+            nodes += it
         }
     }
 

@@ -1,0 +1,46 @@
+
+# 导入命名空间
+namespace:
+  - chemdah
+
+# 主语句
+main: |-
+    pring "Running Example Script."
+    print func color-tips with [ "&d新年快乐！" ]
+    print "今天翻的是书，${next}"
+    print &example-tips
+
+# 前置变量
+variables:
+  example-tips: |-
+      color "&f[温馨小贴士&f] $tips"
+
+# 条件
+# 当条件满足时，执行 main 里面的语句
+# 否则执行 deny 里面的语句
+condition: |-
+    check 5 > 3
+
+deny: |-
+    print "条件不通过，5 怎么可能大于 3 呢？"
+
+# 异常处理
+# 当 main 内的语句运行时发生异常则执行下面的语句
+exception: |-
+    print "检测到报错，是什么问题？"
+
+# 自定义函数
+functions:
+  color-tips:
+    # 定义参数名
+    args: [ 'input' ]
+    # 函数体
+    content: |-
+        color &input
+
+# 自定义片段
+# 可使用 $id 或 ${id} 来替换脚本内的片段
+# 注意，请勿在片段内使用 $id 或 ${id} 套娃
+fragments:
+  next: '明天数的是钱！'
+  tips: '丈母娘喜欢有学历的女婿'

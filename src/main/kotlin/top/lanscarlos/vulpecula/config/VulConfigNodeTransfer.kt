@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.config
 
-import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import kotlin.reflect.KProperty
 

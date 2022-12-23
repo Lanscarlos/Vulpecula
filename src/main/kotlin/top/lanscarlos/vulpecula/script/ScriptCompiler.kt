@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.internal
+package top.lanscarlos.vulpecula.script
 
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.utils.coerceListNotNull
@@ -15,6 +15,97 @@ interface ScriptCompiler {
     fun buildSource(): StringBuilder
 
     fun compileScript()
+
+    /*
+    * 构建变量
+    * set $key to $value
+    * set $key to {
+    *   ...$value
+    * }
+    * */
+    fun compileVariables(builder: StringBuilder, variables: Map<String, String>) {
+        variables.forEach { (key, value) ->
+            if (value.contains('\n')) {
+                // 含有换行
+                builder.append("set $key to {\n")
+                builder.appendWithIndent(value, suffix = "\n")
+                builder.append("}\n")
+            } else {
+                // 不含有换行
+                builder.append("set $key to $value\n")
+            }
+        }
+    }
+
+    /*
+    * 构建异常捕捉
+    * try {
+    *   ...$handle
+    * } catch with "...$first_1...|...$first_2..." {
+    *   ...$second
+    * }
+    * */
+    fun compileException(builder: StringBuilder, content: String, exception: List<Pair<Set<String>, StringBuilder>>) {
+        builder.append("try {\n")
+        builder.appendWithIndent(content)
+        builder.append("\n}")
+
+        for (it in exception) {
+            if (it.second.isEmpty()) continue
+
+            builder.append(" catch ")
+            if (it.first.isNotEmpty()) {
+                builder.append("with \"")
+                builder.append(it.first.joinToString(separator = "|"))
+                builder.append("\" ")
+            }
+            builder.append("{\n")
+            builder.appendWithIndent(it.second.toString(), suffix = "\n")
+            builder.append("}")
+        }
+    }
+
+    /*
+    * 构建条件体
+    * if {
+    *   ...$condition
+    * } then {
+    *   ...$content
+    * } else {
+    *   ...$deny
+    * }
+    * */
+    fun compileCondition(builder: StringBuilder, content: String, condition: StringBuilder, deny: StringBuilder) {
+        builder.append("if\n")
+        builder.appendWithIndent(condition.toString(), suffix = "\n")
+        builder.append("then {\n")
+        builder.appendWithIndent(content, suffix = "\n")
+        builder.append("}")
+
+        if (deny.isNotEmpty()) {
+            builder.append(" else {\n")
+            builder.appendWithIndent(deny.toString(), suffix = "\n")
+            builder.append("}")
+        }
+    }
+
+    fun buildVariables(value: Any?, def: Map<String, String>): Map<String, String> {
+        return when (value) {
+            is ConfigurationSection -> {
+                value.toMap().mapNotNull {
+                    if (it.value == null) return@mapNotNull null
+                    it.key to it.value!!.toString()
+                }.toMap()
+            }
+            is Map<*, *> -> {
+                value.mapNotNull {
+                    if (it.key == null || it.value == null) return@mapNotNull null
+                    it.key!!.toString() to it.value!!.toString()
+                }.toMap()
+            }
+            else -> def
+        }
+    }
 
     fun buildException(value: Any): List<Pair<Set<String>, StringBuilder>> {
         val types = mutableSetOf<String>()
@@ -79,6 +170,7 @@ interface ScriptCompiler {
                 }
             }
         }
+
         return builder
     }
 

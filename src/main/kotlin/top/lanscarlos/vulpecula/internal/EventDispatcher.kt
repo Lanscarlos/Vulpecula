@@ -21,6 +21,7 @@ import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
+import top.lanscarlos.vulpecula.script.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -65,12 +66,7 @@ class EventDispatcher(
     }
 
     val variables by wrapper.read("variables") { value ->
-        if (value is Map<*, *>) {
-            value.mapNotNull {
-                if (it.key == null || it.value == null) return@mapNotNull null
-                it.key!!.toString() to it.value!!.toString()
-            }.toMap()
-        } else mapOf()
+        buildVariables(value, mapOf())
     }
 
     val baffle by wrapper.read("baffle") { value ->
@@ -130,24 +126,11 @@ class EventDispatcher(
         val builder = StringBuilder()
 
         /*
-        * 构建变量
-        * set $key to $value
-        * set $key to {
-        *   ...$value
-        * }
+        * 构建前置变量
         * */
         if (variables.isNotEmpty()) {
-            variables.forEach { (key, value) ->
-                if (value.contains('\n')) {
-                    // 含有换行
-                    builder.append("set $key to {\n")
-                    builder.appendWithIndent(value, suffix = "\n")
-                    builder.append("}\n\n")
-                } else {
-                    // 不含有换行
-                    builder.append("set $key to $value\n\n")
-                }
-            }
+            compileVariables(builder, variables)
+            builder.append('\n')
         }
 
         /*

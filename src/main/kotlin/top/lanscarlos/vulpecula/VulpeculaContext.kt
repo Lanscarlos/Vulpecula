@@ -7,6 +7,8 @@ import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.ActionUnicode
+import top.lanscarlos.vulpecula.script.VulScript
+import top.lanscarlos.vulpecula.script.VulWorkspace
 
 /**
  * Vulpecula
@@ -47,6 +49,10 @@ object VulpeculaContext {
         if (KetherRegistry.hasAction("unicode")) {
             messages += ActionUnicode.load()
         }
+
+        // 加载脚本
+        messages += VulScript.load()
+        messages += VulWorkspace.load()
 
         // 初步加载调度模块
         messages += EventDispatcher.load()

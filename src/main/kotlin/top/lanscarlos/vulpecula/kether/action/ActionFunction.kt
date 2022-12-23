@@ -1,61 +1,59 @@
 package top.lanscarlos.vulpecula.kether.action
 
-import taboolib.module.kether.actionNow
+import taboolib.module.kether.actionTake
+import taboolib.module.kether.run
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.nextPeek
+import top.lanscarlos.vulpecula.utils.thenTake
+import top.lanscarlos.vulpecula.utils.tryNextActionList
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action
+ * top.lanscarlos.vulpecula.script
  *
  * @author Lanscarlos
- * @since 2022-11-12 00:01
+ * @since 2022-12-23 21:24
  */
-class ActionFunction {
+object ActionFunction {
 
-    companion object {
+    /**
+     * func xxx
+     * func xxx with [ arg0 arg1 ]
+     * */
+    @VulKetherParser(
+        id = "func",
+        name = ["func"],
+        namespace = "vulpecula-script"
+    )
+    fun parser() = scriptParser { reader ->
+        val name = reader.nextToken()
+        val args = reader.tryNextActionList("with")
 
-        /**
-         *
-         * fun import xxx
-         * fun name {...}
-         * fun name ( arg1 arg2 = xxx arg3... ) {...}
-         *
-         * */
-        @VulKetherParser(
-            id = "function",
-            name = ["function", "fun"]
-        )
-        fun parser() = scriptParser { reader ->
-            if (reader.hasNextToken("import")) {
-                // 函数导入
-            }
+        actionTake {
+            val function = this.context().quest.blocks["function_$name"] ?: error("function \"$name\" not found")
+            val newFrame = newFrame(name)
+            newFrame.setNext(function)
+            addClosable(newFrame)
 
-            val name = reader.nextToken()
+            if (args != null) {
+                val future = CompletableFuture<Any?>()
 
-            if (reader.hasNextToken("(")) {
-                // 有参数
-                while (!reader.hasNextToken(")")) {
-                    // 读取参数
+                args.map { this.run(it) }.thenTake().thenAccept { values ->
+                    for ((i, arg) in values.withIndex()) {
+                        newFrame.variables().set("arg${i}", arg)
+                    }
+                    newFrame.variables()["args"] = values
+
+                    newFrame.run<Any?>().thenAccept {
+                        future.complete(it)
+                    }
                 }
+
+                return@actionTake future
             } else {
-                // 跳过空括号
-                reader.hasNextToken("()")
+                return@actionTake newFrame.run<Any?>()
             }
-
-            // 判断方法体前缀
-            if (reader.nextPeek() != "{") {
-                // 不合法的方法体
-                error("Should be entered \"{\" is actually ${reader.nextPeek()}")
-            }
-
-            // 读取方法体
-            val body = reader.nextBlock()
-
-            actionNow { null }
         }
     }
 }
