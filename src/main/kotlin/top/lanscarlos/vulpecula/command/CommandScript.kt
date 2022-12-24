@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.command
 
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.command.CommandBuilder
@@ -7,6 +8,7 @@ import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.platform.util.sendLang
+import top.lanscarlos.vulpecula.script.VulScript
 import top.lanscarlos.vulpecula.script.VulWorkspace
 
 /**
@@ -21,6 +23,7 @@ object CommandScript {
     val main: CommandBuilder.CommandComponent.() -> Unit = {
         literal("run", literal = run)
         literal("stop", literal = stop)
+        literal("compile", "build", literal = compile)
         literal("list", literal = list)
         literal("reload", literal = reload)
         literal("debug", literal = debug)
@@ -46,7 +49,7 @@ object CommandScript {
                 execute<CommandSender> { sender, context, viewer ->
                     val file = context.argument(-1)
                     try {
-                        VulWorkspace.runScript(file, viewer)
+                        VulWorkspace.runScript(file, Bukkit.getPlayerExact(viewer))
                         sender.sendLang("Script-Run-Succeeded", file)
                     } catch (e: Exception) {
                         sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
@@ -57,7 +60,7 @@ object CommandScript {
                 dynamic("args", optional = true) {
                     execute<CommandSender> { sender, context, args ->
                         val file = context.argument(-2)
-                        val viewer = context.argument(-1)
+                        val viewer = Bukkit.getPlayerExact(context.argument(-1))
                         try {
                             VulWorkspace.runScript(file, viewer, args.split(' ').toTypedArray())
                             sender.sendLang("Script-Run-Succeeded", file)
@@ -92,6 +95,33 @@ object CommandScript {
                     sender.sendLang("Script-Stop-Succeeded", file)
                 } catch (e: Exception) {
                     sender.sendLang("Script-Stop-Failed", file, e.localizedMessage)
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    val compile: CommandBuilder.CommandComponent.() -> Unit = {
+        execute<CommandSender> { sender, _, _ ->
+            try {
+                VulScript.getAll().forEach { it.compileScript() }
+                sender.sendLang("Script-Compile-Command-All-Succeeded")
+            } catch (e: Exception) {
+                sender.sendLang("Script-Compile-Command-All-Failed", e.localizedMessage)
+                e.printStackTrace()
+            }
+        }
+
+        dynamic("file", optional = true) {
+            suggestion<CommandSender> { _, _ ->
+                VulScript.getAll().map { it.id }
+            }
+            execute<CommandSender> { sender, _, file ->
+                try {
+                    VulScript.get(file)?.compileScript()
+                    sender.sendLang("Script-Compile-Command-Succeeded", file)
+                } catch (e: Exception) {
+                    sender.sendLang("Script-Compile-Command-Failed", file, e.localizedMessage)
                     e.printStackTrace()
                 }
             }
