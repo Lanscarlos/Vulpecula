@@ -93,7 +93,7 @@ class VulScript(
     }
 
     override fun buildSource(): StringBuilder {
-        val builder = java.lang.StringBuilder()
+        val builder = StringBuilder()
 
         /* 构建前置变量 */
         if (variables.isNotEmpty()) {
@@ -155,6 +155,7 @@ class VulScript(
             val keys = fragments.keys.joinToString("|")
             val pattern = "\\\$($keys)(?=\\b)|\\\$\\{($keys)\\}".toPattern()
             val matcher = pattern.matcher(builder.extract())
+            val buffer = StringBuffer()
 
             while (matcher.find()) {
                 val found = matcher.group().substring(1).let {
@@ -162,31 +163,36 @@ class VulScript(
                         it.substring(1, it.lastIndex)
                     } else it
                 }
-                matcher.appendReplacement(builder, fragments[found] ?: "")
+                matcher.appendReplacement(buffer, fragments[found] ?: "")
             }
-            matcher.appendTail(builder)
+            // 兼容 Github 构建系统
+            builder.append(matcher.appendTail(buffer))
         }
 
         /* 消除注释 */
         if (singleCommentPattern != "[]" && multiCommentPattern != "[]") {
             val pattern = "${singleCommentPattern}|${multiCommentPattern}".toPattern()
             val matcher = pattern.matcher(builder.extract())
+            val buffer = StringBuffer()
 
             while (matcher.find()) {
-                matcher.appendReplacement(builder, "")
+                matcher.appendReplacement(buffer, "")
             }
-            matcher.appendTail(builder)
+            // 兼容 Github 构建系统
+            builder.append(matcher.appendTail(buffer))
         }
 
         /* 转义 Unicode */
         if (escapeUnicode) {
             val pattern = "\\\\u([A-Za-z0-9]{4})".toPattern()
             val matcher = pattern.matcher(builder.extract())
+            val buffer = StringBuffer()
 
             while (matcher.find()) {
-                matcher.appendReplacement(builder, Integer.parseInt(matcher.group(1), 16).toChar().toString())
+                matcher.appendReplacement(buffer, Integer.parseInt(matcher.group(1), 16).toChar().toString())
             }
-            matcher.appendTail(builder)
+            // 兼容 Github 构建系统
+            builder.append(matcher.appendTail(buffer))
         }
 
         return builder
