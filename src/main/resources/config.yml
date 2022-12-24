@@ -1,4 +1,14 @@
 
+script-setting:
+  # 注释匹配规则
+  comment-pattern:
+    # 单行注释
+    # 匹配 // 及其后所有字符直至换行
+    single-line: '(?<!\\)//[^\n]*(?=\n)'
+    # 多行注释
+    # 匹配 /* 直到 */
+    multi-line: '(?<!\\)/\*[^(\*/)]*\*/'
+
 schedule-setting:
   # 指定默认情况下的日期格式
   # yyyy - 年份

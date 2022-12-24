@@ -2,11 +2,7 @@ package top.lanscarlos.vulpecula.script
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.MultimapBuilder
-import org.bukkit.Bukkit
-import taboolib.common.platform.function.adaptCommandSender
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.warning
+import taboolib.common.platform.function.*
 import taboolib.library.kether.ExitStatus
 import taboolib.module.kether.KetherScriptLoader
 import taboolib.module.kether.Script
@@ -29,26 +25,21 @@ import java.util.concurrent.CompletableFuture
 @Suppress("UnstableApiUsage")
 object VulWorkspace {
 
-//    val commentPattern by bindConfigNode("script-setting.comment-pattern") {
-//        (it?.toString() ?: "").toPattern()
-//    }
-
     val namespace = listOf("Vulpecula", "vulpecula-script")
-
     val folder = File(getDataFolder(), "scripts/.compiled")
-
+    val scriptLoader = KetherScriptLoader()
     val scripts = HashMap<String, Script>()
-    val runningScripts = MultimapBuilder.hashKeys().arrayListValues().build<String, ScriptContext>()!!
+    val runningScripts = MultimapBuilder.hashKeys().arrayListValues().build<String, ScriptContext>()
 
     fun getRunningScript(): List<ScriptContext> {
         return ImmutableList.copyOf(runningScripts.values())
     }
 
-    fun runScript(id: String, sender: String? = null, args: Array<String> = emptyArray()): CompletableFuture<Any>? {
+    fun runScript(id: String, sender: Any? = null, args: Array<Any?> = emptyArray()): CompletableFuture<Any>? {
         val script = scripts[id] ?: return null
         return runScript(id, ScriptContext.create(script) {
             if (sender != null) {
-                this.sender = Bukkit.getPlayerExact(sender)?.let { adaptCommandSender(it) }
+                this.sender = adaptCommandSender(sender)
             }
             for ((i, arg) in args.withIndex()) {
                 rootFrame().variables().set("arg${i}", arg)
@@ -78,12 +69,17 @@ object VulWorkspace {
         getRunningScript().forEach { terminateScript(it) }
     }
 
+    fun loadScript(file: File, name: String) {
+        // 读取文件
+        val source = file.readText(StandardCharsets.UTF_8)
+        scripts[name] = scriptLoader.load(ScriptService, name, source.toByteArray(StandardCharsets.UTF_8), namespace)
+    }
+
     fun onFileChanged(file: File) {
         val start = timing()
         try {
             val name = folder.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '.').substringBeforeLast('.')
-            val source = file.readText(StandardCharsets.UTF_8)
-            scripts[name] = KetherScriptLoader().load(ScriptService, name, source.toByteArray(StandardCharsets.UTF_8), namespace)
+            loadScript(file, name)
 
             console().sendLang("Script-Load-Automatic-Succeeded", name, timing(start))
         } catch (e: Exception) {
@@ -97,7 +93,6 @@ object VulWorkspace {
         return try {
             scripts.clear()
 
-            val loader = KetherScriptLoader()
             val folder = folder.toPath()
 
             if (java.nio.file.Files.notExists(folder)) {
@@ -116,13 +111,10 @@ object VulWorkspace {
                 if (path.fileName.toString().startsWith("#")) continue
 
                 val name = folder.relativize(path).toString().replace(File.separatorChar, '.').substringBeforeLast('.')
-
                 val file = path.toFile().addWatcher(false) { onFileChanged(this) }
-
                 // 读取文件
                 try {
-                    val source = file.readText(StandardCharsets.UTF_8)
-                    scripts[name] = loader.load(ScriptService, name, source.toByteArray(StandardCharsets.UTF_8), namespace)
+                    loadScript(file, name)
                 } catch (e: Exception) {
                     warning("Unexpected exception while parsing kether script:")
                     e.localizedMessage?.split('\n')?.forEach { warning(it) }

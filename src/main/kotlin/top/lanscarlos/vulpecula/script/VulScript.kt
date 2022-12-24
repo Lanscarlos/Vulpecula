@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.script
 import taboolib.common.io.newFile
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
@@ -26,10 +25,21 @@ class VulScript(
     val wrapper: VulConfig
 ) : ScriptCompiler {
 
-    val target by wrapper.read("target") {
-        val path = it?.toString() ?: id.substringBeforeLast('.')
-        File(VulWorkspace.folder, path.replace('.', File.separatorChar) + ".ks")
+    val targetPath by wrapper.read("build-setting.target-path") { value ->
+        val def = id.substringBeforeLast('.').replace('.', File.separatorChar) + ".ks"
+        val path = value?.toString()?.let { if (!it.substringAfterLast('/').contains('.')) "$it.ks" else it }
+        if (path?.startsWith("/") == true) {
+            File(".$path")
+        } else {
+            File(VulWorkspace.folder, path ?: def)
+        }
     }
+
+    val targetOverride by wrapper.readBoolean("build-setting.target-override", true)
+
+    val escapeUnicode by wrapper.readBoolean("build-setting.escape-unicode", false)
+
+    val autoCompile by wrapper.readBoolean("build-setting.auto-compile", true)
 
     val namespace by wrapper.readStringList("namespace")
 
@@ -79,7 +89,7 @@ class VulScript(
         }
 
         // 编译脚本
-        compileScript()
+        if (autoCompile) compileScript()
     }
 
     override fun buildSource(): StringBuilder {
@@ -152,8 +162,29 @@ class VulScript(
                         it.substring(1, it.lastIndex)
                     } else it
                 }
-                info("found -> $found")
-                matcher.appendReplacement(builder, fragments[found])
+                matcher.appendReplacement(builder, fragments[found] ?: "")
+            }
+            matcher.appendTail(builder)
+        }
+
+        /* 消除注释 */
+        if (singleCommentPattern != "[]" && multiCommentPattern != "[]") {
+            val pattern = "${singleCommentPattern}|${multiCommentPattern}".toPattern()
+            val matcher = pattern.matcher(builder.extract())
+
+            while (matcher.find()) {
+                matcher.appendReplacement(builder, "")
+            }
+            matcher.appendTail(builder)
+        }
+
+        /* 转义 Unicode */
+        if (escapeUnicode) {
+            val pattern = "\\\\u([A-Za-z0-9]{4})".toPattern()
+            val matcher = pattern.matcher(builder.extract())
+
+            while (matcher.find()) {
+                matcher.appendReplacement(builder, Integer.parseInt(matcher.group(1), 16).toChar().toString())
             }
             matcher.appendTail(builder)
         }
@@ -167,14 +198,14 @@ class VulScript(
             this.source = buildSource()
 
             // 导出脚本
-            if (!target.exists()) {
+            if (!targetPath.exists()) {
                 // 脚本文件不存在
-                newFile(target, create = true)
-            } else if (!compileOverride) {
+                newFile(targetPath, create = true)
+            } else if (!targetOverride) {
                 // 不覆盖脚本文件
                 return
             }
-            target.outputStream().use {
+            targetPath.outputStream().use {
                 it.write(source.toString().toByteArray())
             }
         } catch (e: Exception) {
@@ -218,14 +249,18 @@ class VulScript(
      * */
     fun contrast(section: Configuration) {
         if (wrapper.updateSource(section).isNotEmpty()) {
-            compileScript()
+            if (autoCompile) compileScript()
         }
     }
 
     companion object {
 
-        val compileOverride by bindConfigNode("script-setting.compile-override") {
-            it.coerceBoolean(true)
+        val singleCommentPattern by bindConfigNode("script-setting.comment-pattern.single-line") {
+            it?.toString() ?: "[]"
+        }
+
+        val multiCommentPattern by bindConfigNode("script-setting.comment-pattern.multi-line") {
+            it?.toString() ?: "[]"
         }
 
         val folder = File(getDataFolder(), "scripts")

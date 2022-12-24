@@ -63,6 +63,6 @@ fun ConfigurationSection.wrapper(): VulConfig {
     return VulConfig(this)
 }
 
-fun <T: Any> bindConfigNode(path: String, bind: String = "config.yml", func: ConfigurationSection.(Any?) -> T): VulConfigNode<T> {
+fun <T> bindConfigNode(path: String, bind: String = "config.yml", func: ConfigurationSection.(Any?) -> T): VulConfigNode<T> {
     return VulConfigNodeBinding(path, bind, func)
 }

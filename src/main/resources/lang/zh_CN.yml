@@ -47,6 +47,14 @@ Script-Compile-Load-Failed-Conflict:
 Script-Compile-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本 &a{0}&7 内的 &a{1}&7 时出现问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Script-Compile-Command-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功编译脚本 &a{0}'
+Script-Compile-Command-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译脚本 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Compile-Command-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功编译所有脚本.'
+Script-Compile-Command-All-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译所有脚本时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
 
 
 
@@ -74,7 +82,7 @@ Script-Stop-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止脚本 &a
 Script-Stop-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止脚本 &a{0}&7 时出现问题'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
-Script-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所有脚本'
+Script-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所有脚本.'
 Script-Stop-All-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有脚本时出现问题'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'

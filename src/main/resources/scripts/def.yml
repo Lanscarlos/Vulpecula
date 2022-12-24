@@ -1,3 +1,21 @@
+# 编译构建设置
+build-setting:
+  # 指定编译结果的文件路径
+  # 默认情况下以 .compile/ 为根路径
+  # 若路径以 / 开头，则默认以服务器所在路径为根路径
+  target-path: '/plugins/Vulpecula/.compile/abc'
+
+  # 编译时，若目标文件存在是否将其覆盖
+  # 默认为 true
+  target-override: true
+
+  # 当文件发生变化时是否自动编译
+  # 默认为 true
+  auto-compile: true
+
+  # 是否转义 unicode
+  # 默认为 false
+  escape-unicode: true
 
 # 导入命名空间
 namespace:
