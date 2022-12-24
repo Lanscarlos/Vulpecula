@@ -42,9 +42,6 @@ object VulpeculaContext {
         // 加载映射文件
         messages += EventMapper.load()
 
-        // 加载脚本片段
-        messages += ScriptFragment.load()
-
         // 加载 Unicode 映射文件
         if (KetherRegistry.hasAction("unicode")) {
             messages += ActionUnicode.load()
