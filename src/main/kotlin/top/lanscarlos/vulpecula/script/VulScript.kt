@@ -93,7 +93,7 @@ class VulScript(
     }
 
     override fun buildSource(): StringBuilder {
-        val builder = StringBuilder()
+        val builder = java.lang.StringBuilder()
 
         /* 构建前置变量 */
         if (variables.isNotEmpty()) {
