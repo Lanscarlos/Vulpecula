@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.google.guava:guava:31.1-jre")
+    compileOnly("com.google.guava:guava:17.0")
 
     compileOnly("net.luckperms:api:5.4")
 
