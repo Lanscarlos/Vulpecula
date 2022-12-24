@@ -3,7 +3,7 @@ build-setting:
   # 指定编译结果的文件路径
   # 默认情况下以 .compile/ 为根路径
   # 若路径以 / 开头，则默认以服务器所在路径为根路径
-  target-path: '/plugins/Vulpecula/.compile/abc'
+#  target-path: './output'
 
   # 编译时，若目标文件存在是否将其覆盖
   # 默认为 true
