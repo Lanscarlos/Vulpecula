@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
+import top.lanscarlos.vulpecula.command.CustomCommand
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
@@ -50,6 +51,9 @@ object VulpeculaContext {
         // 加载脚本
         messages += VulScript.load()
         messages += VulWorkspace.load()
+
+        // 加载自定义命令
+        messages += CustomCommand.load()
 
         // 初步加载调度模块
         messages += EventDispatcher.load()

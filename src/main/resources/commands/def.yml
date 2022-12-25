@@ -1,0 +1,93 @@
+
+# 是否禁用该命令
+disable: true
+
+# [必填] 命令的名字
+name: 'example'
+
+# [选填] 命令的别名
+aliases: [ 'exam' ]
+
+# [选填] 命令的描述
+description: '示例命令的描述'
+
+# [选填] 使用示例
+usage: '示例用例'
+
+# [选填] 所需权限
+permission: 'vulpecula.command.example'
+
+# 默认权限类型
+# op - 默认仅 op 可用
+# not-op - 默认非 op 可用
+# true - 默认所有人可用
+# false - 默认所有人不可用
+permission-default: op
+
+# 缺少权限时的消息
+permission-message: '看你麻麻.'
+
+components:
+
+  # 主命令
+  # 仅执行 /example 时触发
+  main:
+    # 是否创建命令帮手
+    create-helper: true
+
+    # 是否仅玩家可用
+    player-only: false
+
+    # 命令执行时的处理
+    # 如果启用了命令助手，该选项不会生效
+    execute: |-
+      print "Happy New Year!"
+
+  # 开始定义第一层静态命令参数
+  literal:
+
+    # 定义第一层的第一个静态参数 reload
+    # 等价于：/example reload
+    reload:
+      # 执行命令时触发的 Kether 语句
+      # 变量：
+      # &sender -> 代表命令执行者
+      # &player -> 当命令执行者为玩家时，代表玩家
+      # &args -> 命令的所有参数，可通过 &args[0]、&args[1] 获取对应参数
+      # &arg -> 命令的当前参数，此处指 “reload”
+      execute: |-
+        print "假装我在重载...all"
+
+    # 定义第一层的第二个静态参数 script
+    # 等价于：/example script
+    script:
+      # 开始定义第二层参数
+      literal:
+        # 定义第二层第一个参数 reload
+        # 等价于：/example script reload
+        reload:
+          execute: |-
+            print "假装我在重载...script"
+
+        # 定义第二层第一个参数 run
+        # 等价于：/example script run
+        run:
+          execute: |-
+            print "假装运行所有脚本..."
+
+          # 定义第三层的动态参数
+          # 等价于：/example script run <文件>
+          dynamic:
+            # 动态参数的注释，方便用于构建命令助手
+            comment: '文件'
+            # 指定该层的动态参数是否为可选
+            # 若为 false 则执行 /example script run 时会提示缺少参数
+            optional: true
+            # 执行命令时是否检查参数
+            # 若参数不符合 suggest 所给则提示参数错误
+            uncheck: false
+            # 可供选择的参数
+            # 此外，suggest 支持使用脚本返回参数，但请确保返回的值类型是数组或集合
+            suggest: [ 'def', 'niu' ]
+            execute: |-
+              print inline "假装运行脚本 {{ &arg }}..."

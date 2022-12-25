@@ -121,7 +121,7 @@ class VulConfig(
         }
     }
 
-    fun updateSource(config: ConfigurationSection): List<Pair<*, *>> {
+    fun updateSource(config: ConfigurationSection): List<Pair<String, Pair<Any?, Any?>>> {
         this.source = config
         this.root = root()
         return nodes.mapNotNull {

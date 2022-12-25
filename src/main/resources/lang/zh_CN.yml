@@ -92,6 +92,19 @@ Script-List:
 
 
 
+# 自定义命令模块
+
+Custom-Command-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件！ &8({1} ms)'
+Custom-Command-Load-Automatic-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Custom-Command-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个自定义命令！ &8({1} ms)'
+Custom-Command-Load-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自定义命令加载失败！'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+
+
+
 # 映射模块
 
 Event-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'

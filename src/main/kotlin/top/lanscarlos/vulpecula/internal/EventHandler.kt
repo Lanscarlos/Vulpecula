@@ -262,7 +262,6 @@ class EventHandler(
 
         fun load(): String {
             val start = timing()
-
             return try {
 
                 // 清除缓存
