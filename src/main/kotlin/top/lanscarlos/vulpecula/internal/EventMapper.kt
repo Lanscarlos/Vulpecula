@@ -22,8 +22,8 @@ object EventMapper {
         File(getDataFolder(), "listen-mapping.yml")
     }
 
-    private val cache = mutableMapOf<String, String>()
-    private val linked = mutableMapOf<String, MutableSet<EventListener>>()
+    val cache = mutableMapOf<String, String>()
+    val linked = mutableMapOf<String, MutableSet<EventListener>>()
 
     /**
      * 获取事件类

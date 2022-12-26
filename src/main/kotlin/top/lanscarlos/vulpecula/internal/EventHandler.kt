@@ -187,9 +187,8 @@ class EventHandler(
 
     companion object {
 
-        private val folder = File(getDataFolder(), "handlers")
-
-        private val cache = mutableMapOf<String, EventHandler>()
+        val folder = File(getDataFolder(), "handlers")
+        val cache = mutableMapOf<String, EventHandler>()
 
         fun get(id: String): EventHandler? = cache[id]
 

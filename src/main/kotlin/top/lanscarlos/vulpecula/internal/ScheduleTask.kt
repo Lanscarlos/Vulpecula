@@ -191,11 +191,8 @@ class ScheduleTask(
             it?.toString() ?: "yyyy-MM-dd HH:mm:ss"
         }
 
-        private val folder by lazy {
-            File(getDataFolder(), "schedules")
-        }
-
-        private val cache = mutableMapOf<String, ScheduleTask>()
+        val folder = File(getDataFolder(), "schedules")
+        val cache = mutableMapOf<String, ScheduleTask>()
 
         fun get(id: String) = cache[id]
 

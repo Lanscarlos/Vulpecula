@@ -354,11 +354,8 @@ class EventDispatcher(
 
     companion object {
 
-        private val folder by lazy {
-            File(getDataFolder(), "dispatchers")
-        }
-
-        private val cache = mutableMapOf<String, EventDispatcher>()
+        val folder = File(getDataFolder(), "dispatchers")
+        val cache = mutableMapOf<String, EventDispatcher>()
 
         fun get(id: String): EventDispatcher? = cache[id]
 
