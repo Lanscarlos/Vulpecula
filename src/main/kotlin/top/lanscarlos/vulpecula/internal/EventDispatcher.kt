@@ -332,7 +332,7 @@ class EventDispatcher(
         }
 
         override fun getBlock(label: String): Optional<Quest.Block> {
-            return mapping[label]?.let { Optional.of(it) } ?: Optional.empty()
+            return Optional.ofNullable(mapping[label])
         }
 
         override fun getBlocks(): Map<String, Quest.Block> {
@@ -340,8 +340,7 @@ class EventDispatcher(
         }
 
         override fun blockOf(action: ParsedAction<*>): Optional<Quest.Block> {
-            val block = mapping.values.firstOrNull { action in it.actions }
-            return block?.let { Optional.of(it) } ?: Optional.empty()
+            return Optional.ofNullable(mapping.values.firstOrNull { action in it.actions })
         }
     }
 
