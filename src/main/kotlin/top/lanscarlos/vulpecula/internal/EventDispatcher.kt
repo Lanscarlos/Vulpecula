@@ -220,15 +220,9 @@ class EventDispatcher(
             val quest = source.toString().parseKetherScript()
 
 
-            // 获取主方法对应的语句块
-            val mainBlock = quest.getBlock("main").let {
-                if (it.isPresent) {
-                    it.get()
-                } else null
-            } ?: return
-
-            script = DispatcherQuest(this, mainBlock)
+            // 编译通过
             this.source = source
+            script = DispatcherQuest(this, quest.blocks)
 
             debug(Debug.HIGHEST, "dispatcher \"$id\" build source:\n$source")
         } catch (e: Exception) {
@@ -325,30 +319,29 @@ class EventDispatcher(
 
     class DispatcherQuest(
         val dispatcher: EventDispatcher,
-        val main: Quest.Block
+        val main: Map<String, Quest.Block>
     ) : Quest {
 
-        val mapping = dispatcher.handlers.associateBy { it.hashName }
+        val mapping = mutableMapOf<String, Quest.Block>().also {
+            it.putAll(main)
+            it.putAll(dispatcher.handlers.flatMap { it.scriptBlocks.values }.associateBy { it.label })
+        }
 
         override fun getId(): String {
             return dispatcher.id
         }
 
         override fun getBlock(label: String): Optional<Quest.Block> {
-            if (label == "main") return Optional.of(main)
-            return mapping[label]?.let { Optional.of(it.scriptBlock) } ?: Optional.empty()
+            return mapping[label]?.let { Optional.of(it) } ?: Optional.empty()
         }
 
         override fun getBlocks(): Map<String, Quest.Block> {
-            return mapping.mapValues { it.value.scriptBlock }.plus("main" to main)
+            return mapping
         }
 
         override fun blockOf(action: ParsedAction<*>): Optional<Quest.Block> {
-            if (action in main.actions) return Optional.of(main)
-            dispatcher.handlers.forEach {
-                if (action in it.scriptBlock.actions) return Optional.of(it.scriptBlock)
-            }
-            return Optional.empty()
+            val block = mapping.values.firstOrNull { action in it.actions }
+            return block?.let { Optional.of(it) } ?: Optional.empty()
         }
     }
 

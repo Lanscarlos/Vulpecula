@@ -51,7 +51,7 @@ class EventHandler(
     lateinit var source: StringBuilder
 
     /* 与方法体对应的语句块 */
-    lateinit var scriptBlock: Quest.Block
+    lateinit var scriptBlocks: Map<String, Quest.Block>
 
     init {
         // 编译脚本
@@ -103,15 +103,11 @@ class EventHandler(
             val source = buildSource()
             val quest = source.toString().parseKetherScript()
 
-            quest.getBlock(hashName).let {
-                if (it.isPresent) {
-                    // 编译通过
-                    scriptBlock = it.get()
-                    this.source = source
+            // 编译通过
+            this.source = source
+            this.scriptBlocks = quest.blocks
 
-                    debug(Debug.HIGHEST, "handler \"$id\" build source:\n$source")
-                }
-            }
+            debug(Debug.HIGHEST, "handler \"$id\" build source:\n$source")
         } catch (e: Exception) {
             e.printStackTrace()
         }
