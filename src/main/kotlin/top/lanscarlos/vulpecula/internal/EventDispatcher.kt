@@ -322,7 +322,7 @@ class EventDispatcher(
         val main: Map<String, Quest.Block>
     ) : Quest {
 
-        val mapping = mutableMapOf<String, Quest.Block>().also {
+        val mapping get() = mutableMapOf<String, Quest.Block>().also {
             it.putAll(main)
             it.putAll(dispatcher.handlers.flatMap { it.scriptBlocks.values }.associateBy { it.label })
         }
