@@ -322,9 +322,9 @@ class EventDispatcher(
         val main: Map<String, Quest.Block>
     ) : Quest {
 
-        val mapping get() = mutableMapOf<String, Quest.Block>().also {
-            it.putAll(main)
-            it.putAll(dispatcher.handlers.flatMap { it.scriptBlocks.values }.associateBy { it.label })
+        val mapping get() = mutableMapOf<String, Quest.Block>().also { map ->
+            map.putAll(main)
+            map.putAll(dispatcher.handlers.flatMap { it.scriptBlocks.values }.associateBy { it.label })
         }
 
         override fun getId(): String {
@@ -377,6 +377,9 @@ class EventDispatcher(
                         } ?: let {
                             // 节点寻找失败，删除调度器
                             dispatcher.unregisterListener()
+                            dispatcher.handlers.forEach { it.unbind(dispatcher) }
+                            dispatcher.handlers.clear()
+
                             iterator.remove()
                             debug(Debug.HIGH, "Dispatcher delete \"${dispatcher.id}\"")
                         }
@@ -386,6 +389,9 @@ class EventDispatcher(
                     } else {
                         // 该调度器已被用户删除
                         dispatcher.unregisterListener()
+                        dispatcher.handlers.forEach { it.unbind(dispatcher) }
+                        dispatcher.handlers.clear()
+
                         iterator.remove()
                         debug(Debug.HIGH, "Dispatcher delete \"${dispatcher.id}\"")
                     }
@@ -408,8 +414,9 @@ class EventDispatcher(
                         cache[key] = dispatcher
 
                         // 绑定 handler
-                        EventHandler.getAll().filter { dispatcher.id in it.binding }.forEach {
-                            dispatcher.addHandler(it)
+                        for (handler in EventHandler.getAll()) {
+                            if (dispatcher.id !in handler.binding) continue
+                            handler.bind(dispatcher)
                         }
 
                         // 构建脚本
@@ -474,16 +481,6 @@ class EventDispatcher(
         }
 
         fun postLoad() {
-
-            // 绑定 Dispatcher
-            EventHandler.getAll().forEach { handler ->
-                handler.binding.mapNotNull {
-                    get(it)
-                }.forEach { dispatcher ->
-                    dispatcher.addHandler(handler)
-                }
-            }
-
             cache.values.forEach {
                 // 编译脚本
                 it.compileScript()

@@ -4,6 +4,7 @@ import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.Quest
 import taboolib.module.kether.parseKetherScript
@@ -56,6 +57,17 @@ class EventHandler(
     init {
         // 编译脚本
         compileScript()
+
+        // 绑定调度器
+        for (id in binding) {
+            val dispatcher = EventDispatcher.get(id)
+            if (dispatcher == null) {
+                console().sendLang("Handler-Load-Dispatcher-Not-Found", this.id, id)
+                continue
+            }
+
+            bind(dispatcher)
+        }
     }
 
     override fun buildSource(): StringBuilder {
@@ -114,10 +126,32 @@ class EventHandler(
     }
 
     /**
-     * 绑定调度模块
+     * 绑定调度器
+     * @param dispatcher 调度器
+     * */
+    fun bind(dispatcher: EventDispatcher) {
+        if (dispatcher in dispatchers) return
+
+        dispatchers += dispatcher
+        dispatcher.addHandler(this)
+    }
+
+    /**
+     * 解绑调度器
+     * @param dispatcher 调度器
+     * */
+    fun unbind(dispatcher: EventDispatcher) {
+        dispatchers -= dispatcher
+        console().sendLang("Handler-Load-Dispatcher-Unbind", this.id, id)
+    }
+
+    /**
+     * 重新绑定调度模块
      * @param reorder 是否令已绑定的调度模块重新排序
      * */
-    fun bind(reorder: Boolean) {
+    fun rebind(reorder: Boolean) {
+
+        // 检查已绑定的调度器
         val iterator = dispatchers.iterator()
         while (iterator.hasNext()) {
             val dispatcher = iterator.next()
@@ -125,7 +159,7 @@ class EventHandler(
                 // 仍然处于绑定状态
                 if (reorder) dispatcher.compileScript()
             } else {
-                // 处于解绑状态
+                // 解绑
                 dispatcher.removeHandler(this)
                 // 重新编译脚本
                 dispatcher.compileScript()
@@ -134,26 +168,31 @@ class EventHandler(
             }
         }
 
-        // 获取已绑定的 ID
+        // 加载未绑定的调度器
         val existing = dispatchers.map { it.id }
-        binding.forEach { id ->
-            if (id in existing) {
-                // 已绑定
-                return@forEach
+        for (id in binding) {
+            if (id in existing) continue
+
+            val dispatcher = EventDispatcher.get(id)
+            if (dispatcher == null) {
+                console().sendLang("Handler-Load-Dispatcher-Not-Found", this.id, id)
+                continue
             }
 
-            EventDispatcher.get(id)?.let {
-                it.addHandler(this)
-                it.compileScript()
-            }
+            // 绑定调度器
+            bind(dispatcher)
+            if (reorder) dispatcher.compileScript()
         }
     }
 
     /**
      * 解绑所有调度模块
      * */
-    fun unbind() {
-        dispatchers.forEach { it.removeHandler(this) }
+    fun unbindAll() {
+        dispatchers.forEach {
+            it.removeHandler(this)
+            it.compileScript()
+        }
         dispatchers.clear()
     }
 
@@ -167,14 +206,17 @@ class EventHandler(
 
         wrapper.updateSource(section).forEach {
             when (it.first) {
-                "binding" -> rebind = true
+                "binding" -> {
+                    rebind = true
+                    reorder = true
+                }
                 "priority" -> reorder = true
                 "condition", "deny", "handle", "exception" -> recompile = true
             }
         }
 
         if (recompile) compileScript()
-        if (rebind) bind(reorder)
+        if (rebind) rebind(reorder)
     }
 
     override fun toString(): String {
@@ -215,7 +257,7 @@ class EventHandler(
                             counter += 1
                         } ?: let {
                             // 节点寻找失败，删除处理器
-                            handler.unbind()
+                            handler.unbindAll()
                             iterator.remove()
                             debug(Debug.HIGH, "Handler delete \"${handler.id}\"")
                         }
@@ -224,7 +266,7 @@ class EventHandler(
                         keys -= handler.id
                     } else {
                         // 该处理器已被用户删除
-                        handler.unbind()
+                        handler.unbindAll()
                         iterator.remove()
                         debug(Debug.HIGH, "Handler delete \"${handler.id}\"")
                     }
@@ -243,7 +285,10 @@ class EventHandler(
                     config.getConfigurationSection(key)?.let { section ->
                         if (section.getBoolean("disable", false)) return@let
 
-                        cache[key] = EventHandler(key, path, section.wrapper())
+                        cache[key] = EventHandler(key, path, section.wrapper()).apply {
+                            this.dispatchers.forEach { it.compileScript() }
+                        }
+
                         counter += 1
                         debug(Debug.HIGH, "Handler loaded \"$key\"")
                     }

@@ -177,6 +177,8 @@ Handler-Load-Failed-Conflict:
 Handler-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载处理模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Handler-Load-Dispatcher-Not-Found: '&8[&3Vul&bpecula&8] &e警告 &8|&7 处理模块 &a{0}&7 加载时未能找到 &a{1}&7 调度模块！'
+Handler-Load-Dispatcher-Unbind: '&8[&3Vul&bpecula&8] &e警告 &8|&7 处理模块 &a{0}&7 正在与调度模块 &a{1}&7 解绑！'
 
 
 
