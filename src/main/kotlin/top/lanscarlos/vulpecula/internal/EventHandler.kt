@@ -4,10 +4,8 @@ import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
-import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.Quest
-import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
@@ -113,7 +111,7 @@ class EventHandler(
         try {
             // 尝试构建脚本
             val source = buildSource()
-            val quest = source.toString().parseKetherScript()
+            val quest = source.toString().compileKetherScript()
 
             // 编译通过
             this.source = source

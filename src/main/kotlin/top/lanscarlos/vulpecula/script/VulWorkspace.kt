@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture
 @Suppress("UnstableApiUsage")
 object VulWorkspace {
 
-    val namespace = listOf("Vulpecula", "vulpecula-script")
+    val namespace = listOf("vulpecula", "vulpecula-script")
     val folder = File(getDataFolder(), "scripts/.compiled")
     val scriptLoader = KetherScriptLoader()
     val scripts = HashMap<String, Script>()

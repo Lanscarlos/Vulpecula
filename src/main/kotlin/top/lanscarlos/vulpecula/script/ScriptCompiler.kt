@@ -1,6 +1,8 @@
 package top.lanscarlos.vulpecula.script
 
 import taboolib.library.configuration.ConfigurationSection
+import taboolib.module.kether.Script
+import taboolib.module.kether.parseKetherScript
 import top.lanscarlos.vulpecula.utils.coerceListNotNull
 
 /**
@@ -183,6 +185,10 @@ interface ScriptCompiler {
             "kf", "fragment" -> "fragment $content"
             else -> null
         }
+    }
+
+    fun String.compileKetherScript(namespace: Set<String> = emptySet()): Script {
+        return this.parseKetherScript(namespace.plus(setOf("vulpecula")).toList())
     }
 
     /**
