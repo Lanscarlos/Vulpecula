@@ -2,7 +2,14 @@
 
 ## Vulpecula
 
-Vulpecula 是基于 [TabooLib 6.0](https://github.com/TabooLib/taboolib) 开发的一款 Kether 拓展插件，主要提供额外功能语句以及针对原生语句进行功能上的拓展。
+Vulpecula 是基于 [TabooLib 6.0](https://github.com/TabooLib/taboolib) 开发的一款 Kether 拓展插件，旨在为 Kether 提供更多元化的功能。
+
+- 更多的拓展语句、拓展属性
+- 简化部分原生语句或增强其功能
+- 支持事件处理
+- 支持自定义定时任务
+- 支持自定义脚本
+- 支持自定义命令
 
 <br>
 
