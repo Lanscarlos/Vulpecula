@@ -17,6 +17,8 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-13 20:32
  */
+
+@SuppressWarnings("deprecation")
 object ItemModifyHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("modify", "set")

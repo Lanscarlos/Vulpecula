@@ -22,6 +22,7 @@ import top.lanscarlos.vulpecula.utils.coerceInt
     id = "entity",
     bind = Entity::class
 )
+@SuppressWarnings("deprecation")
 class EntityProperty : VulScriptProperty<Entity>("entity") {
 
     override fun readProperty(instance: Entity, key: String): OpenResult {

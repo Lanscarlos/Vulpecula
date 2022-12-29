@@ -19,6 +19,8 @@ import top.lanscarlos.vulpecula.utils.coerceFloat
     id = "equipment",
     bind = EntityEquipment::class
 )
+@Suppress("UNCHECKED_CAST")
+@SuppressWarnings("deprecation")
 class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
 
     override fun readProperty(instance: EntityEquipment, key: String): OpenResult {

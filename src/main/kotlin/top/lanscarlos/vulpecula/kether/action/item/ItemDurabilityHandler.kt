@@ -12,6 +12,8 @@ import top.lanscarlos.vulpecula.utils.coerceInt
  * @author Lanscarlos
  * @since 2022-11-13 20:35
  */
+
+@SuppressWarnings("deprecation")
 object ItemDurabilityHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("durability", "dura")

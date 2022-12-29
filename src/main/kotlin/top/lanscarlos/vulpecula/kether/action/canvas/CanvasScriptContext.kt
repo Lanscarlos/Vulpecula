@@ -101,7 +101,7 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
         * 覆盖 SimpleNamedFrame 的 run() 方法
         * 实现自定义脚本运行
         * */
-        @SuppressWarnings("unchecked")
+        @Suppress("UNCHECKED_CAST")
         override fun <T : Any?> run(): CompletableFuture<T> {
             varTable.initialize(this)
             future = CompletableFuture<Any?>()

@@ -23,6 +23,7 @@ import top.lanscarlos.vulpecula.utils.coerceShort
     id = "itemstack",
     bind = ItemStack::class
 )
+@SuppressWarnings("deprecation")
 class ItemStackProperty : VulScriptProperty<ItemStack>("itemstack") {
     override fun readProperty(instance: ItemStack, key: String): OpenResult {
         val property: Any? = when (key) {
