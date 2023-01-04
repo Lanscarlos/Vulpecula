@@ -187,8 +187,8 @@ interface ScriptCompiler {
         }
     }
 
-    fun String.compileKetherScript(namespace: Set<String> = emptySet()): Script {
-        return this.parseKetherScript(namespace.plus(setOf("vulpecula")).toList())
+    fun String.compileKetherScript(namespace: List<String> = emptyList()): Script {
+        return this.parseKetherScript(namespace.plus(setOf("vulpecula")))
     }
 
     /**

@@ -1,6 +1,6 @@
 example-handler-1:
   # 绑定的监听器 支持单行&多行模式
-  binding: 'on-player-interact'
+  bind: 'on-player-interact'
   # 处理模块的优先级，越低越先被执行
   # 默认为 8
   priority: 8

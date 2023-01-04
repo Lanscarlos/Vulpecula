@@ -8,6 +8,7 @@ import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.platform.util.sendLang
+import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.script.VulScript
 import top.lanscarlos.vulpecula.script.VulWorkspace
 
@@ -141,6 +142,9 @@ object CommandScript {
     val reload: CommandBuilder.CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             VulWorkspace.terminateAllScript()
+            VulScript.load().let {
+                if (sender is Player) sender.sendMessage(it)
+            }
             VulWorkspace.load().let {
                 if (sender is Player) sender.sendMessage(it)
             }

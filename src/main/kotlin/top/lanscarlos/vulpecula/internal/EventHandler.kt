@@ -29,8 +29,11 @@ class EventHandler(
 
     val hash = id.digest("md5")
     val hashName = "handler_$hash"
-    val binding by wrapper.readStringList("binding")
+    val binding by wrapper.readStringList("bind")
     val priority by wrapper.readInt("priority", 8)
+
+    val namespace by wrapper.readStringList("namespace")
+
     val condition by wrapper.read("condition") {
         if (it != null) buildSection(it) else StringBuilder()
     }
@@ -111,7 +114,7 @@ class EventHandler(
         try {
             // 尝试构建脚本
             val source = buildSource()
-            val quest = source.toString().compileKetherScript()
+            val quest = source.toString().compileKetherScript(namespace)
 
             // 编译通过
             this.source = source
@@ -209,7 +212,7 @@ class EventHandler(
                     reorder = true
                 }
                 "priority" -> reorder = true
-                "condition", "deny", "handle", "exception" -> recompile = true
+                "namespace", "condition", "deny", "handle", "exception" -> recompile = true
             }
         }
 

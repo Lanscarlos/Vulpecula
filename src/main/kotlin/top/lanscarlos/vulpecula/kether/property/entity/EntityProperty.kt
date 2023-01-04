@@ -29,6 +29,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
         val property: Any? = when (key) {
             "boundingBox", "bounding-box" -> instance.boundingBox
             "entityId", "entity-id", "id" -> instance.entityId
+            "facing*" -> instance.facing.name
             "facing" -> instance.facing
             "fallDistance", "fall-distance" -> instance.fallDistance
             "fireTicks", "fire-ticks" -> instance.fireTicks
@@ -47,7 +48,8 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
             "server" -> instance.server
             "spawn-category" -> instance.spawnCategory
             "ticks-lived" -> instance.ticksLived
-            "type" -> instance.type
+            "type*" -> instance.type.name
+            "type" -> instance.type.name
             "uniqueId", "unique-id", "uuid" -> instance.uniqueId
             "vehicle" -> instance.vehicle
             "velocity" -> instance.velocity
@@ -102,7 +104,6 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
             "gravity" -> {
                 instance.setGravity(value?.coerceBoolean() ?: return OpenResult.successful())
             }
-            "isInsideVehicle", "inside-vehicle" -> instance.isInsideVehicle
             "isInvulnerable", "invulnerable" -> {
                 instance.isInvulnerable = value?.coerceBoolean() ?: return OpenResult.successful()
             }

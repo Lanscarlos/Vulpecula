@@ -47,7 +47,7 @@ class VulScriptFunction(
         /* 构建参数转换 */
         if (parameters.isNotEmpty()) {
             for ((index, arg) in parameters.withIndex()) {
-                builder.append("set $arg to &args[$index]\n")
+                builder.append("set $arg to &arg$index\n")
             }
             builder.append('\n')
         }

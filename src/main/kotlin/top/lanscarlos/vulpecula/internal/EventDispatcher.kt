@@ -52,6 +52,8 @@ class EventDispatcher(
 
     val ignoreCancelled by wrapper.readBoolean("ignore-cancelled", true)
 
+    val namespace by wrapper.readStringList("namespace")
+
     val preHandle by wrapper.read("pre-handle") {
         if (it != null) buildSection(it) else StringBuilder()
     }
@@ -146,7 +148,7 @@ class EventDispatcher(
         * */
         if (handlers.isNotEmpty()) {
             // 根据处理器优先级升序排序，优先级越高越先被执行
-            handlers.sortBy { it.priority }
+            handlers.sortByDescending { it.priority }
 
             handlers.forEach {
                 builder.append("call ${it.hashName}\n")
@@ -216,7 +218,7 @@ class EventDispatcher(
         try {
             // 尝试构建脚本
             val source = buildSource()
-            val quest = source.toString().compileKetherScript()
+            val quest = source.toString().compileKetherScript(namespace)
 
 
             // 编译通过
@@ -284,7 +286,7 @@ class EventDispatcher(
             debug(Debug.MONITOR, "Dispatcher $id contrast ${it.first} to ${it.second}")
             when (it.first) {
                 "listen", "priority", "ignore-cancelled" -> relisten = true
-                "pre-handle", "post-handle", "variables", "exception" -> recompile = true
+                "namespace", "pre-handle", "post-handle", "variables", "exception" -> recompile = true
             }
         }
 
