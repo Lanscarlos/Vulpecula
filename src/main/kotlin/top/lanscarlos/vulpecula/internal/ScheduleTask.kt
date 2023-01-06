@@ -109,7 +109,7 @@ class ScheduleTask(
                 "namespace", "execute" -> {
                     refresh = true
                 }
-                "async", "start", "end", "duration" -> {
+                "async", "period", "start", "end", "duration" -> {
                     restart = true
                 }
             }
