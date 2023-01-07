@@ -6,6 +6,7 @@ import net.luckperms.api.node.types.MetaNode
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
@@ -15,6 +16,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.utils.*
+import top.maplex.abolethcore.AbolethUtils
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 
@@ -42,10 +44,11 @@ class ActionMemory(
             val value = args[1]
             val unique = args[2]
 
-            if (value != null) {
+            if (this.value != null) {
                 // 设置变量
                 setMemory(frame, key, value, unique, storage)
             } else {
+                // 获取变量
                 getMemory(frame, key, unique, storage)
             }
         }
@@ -83,6 +86,16 @@ class ActionMemory(
                     }
 
                     return user.cachedData.metaData.getMetaValue(key)
+                }
+                "aboleth", "abo" -> {
+                    val uuid = when (unique) {
+                        is Player -> unique.uniqueId
+                        is ProxyPlayer -> unique.uniqueId
+                        is String -> Bukkit.getPlayerExact(unique)?.uniqueId
+                        else -> null
+                    }
+
+                    return AbolethUtils.get(uuid ?: AbolethUtils.getServerUUID(), key)
                 }
                 else -> {
                     val map = if (unique is Entity) {
@@ -123,6 +136,20 @@ class ActionMemory(
                         val node = MetaNode.builder(key, value.toString()).build()
                         user.data().add(node)
                         api.userManager.saveUser(user)
+                    }
+                }
+                "aboleth", "abo" -> {
+                    val uuid = when (unique) {
+                        is Player -> unique.uniqueId
+                        is ProxyPlayer -> unique.uniqueId
+                        is String -> Bukkit.getPlayerExact(unique)?.uniqueId
+                        else -> null
+                    }
+
+                    if (value != null) {
+                        AbolethUtils.set(uuid ?: AbolethUtils.getServerUUID(), key, value)
+                    } else {
+                        AbolethUtils.remove(uuid ?: AbolethUtils.getServerUUID(), key)
                     }
                 }
                 else -> {
@@ -170,14 +197,14 @@ class ActionMemory(
                 reader.nextBlock()
             } else null
 
-            val entity = if (reader.hasNextToken("by", "with")) {
+            val unique = if (reader.hasNextToken("by", "with")) {
                 reader.nextParsedAction()
             } else null
 
             val storage = reader.tryNextToken("using")
 
             // 全局变量不以
-            ActionMemory(key, value, entity, storage)
+            ActionMemory(key, value, unique, storage)
         }
     }
 }
