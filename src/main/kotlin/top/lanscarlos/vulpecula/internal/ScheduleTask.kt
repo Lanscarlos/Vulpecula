@@ -11,6 +11,7 @@ import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
+import top.lanscarlos.vulpecula.script.VulWorkspace
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -75,23 +76,27 @@ class ScheduleTask(
     val namespace by wrapper.readStringList("namespace", listOf("vulpecula"))
 
     val executable by wrapper.read("execute") { value ->
-        val def = "print *\"${console().asLangText("Schedule-Execution-Undefined", id)}\""
         val body = when (value) {
             is String -> listOf(value)
             is Array<*> -> value.mapNotNull { it?.toString() }
             is Collection<*> -> value.mapNotNull { it?.toString() }
-            else -> listOf(def)
-        }.joinToString(separator = "\n")
+            else -> {
+                null
+//                listOf("print *\"${console().asLangText("Schedule-Execution-Undefined", id)}\"")
+            }
+        }?.joinToString(separator = "\n")
 
-        return@read "def main = { $body }"
+        return@read if (body != null) "def main = { $body }" else null
     }
 
-    var script: Script? = null
+    val script by wrapper.readString("script")
+
+    var quest: Script? = null
     private var task: PlatformExecutor.PlatformTask? = null
 
     init {
-        script = try {
-            executable.parseKetherScript(namespace)
+        quest = try {
+            executable?.parseKetherScript(namespace)
         } catch (e: Exception) {
             null
         }
@@ -115,7 +120,14 @@ class ScheduleTask(
             }
         }
 
-        if (refresh) script = executable.parseKetherScript(namespace)
+        if (refresh) {
+            quest = try {
+                executable?.parseKetherScript(namespace)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
         if (restart) run()
 
         if (refresh || restart) {
@@ -129,6 +141,12 @@ class ScheduleTask(
     fun run() {
         // 取消上一次未结束的任务
         terminate()
+
+        if (quest == null && script == null) {
+            // 未指定运行内容
+            console().sendLang("Schedule-Execution-Undefined", id)
+            return
+        }
 
         val now = System.currentTimeMillis()
 
@@ -171,8 +189,11 @@ class ScheduleTask(
 
             debug("ScheduleTask $id running...")
 
-            script?.let {
+            quest?.let {
                 ScriptContext.create(it).runActions()
+            } ?: script?.let {
+                // 运行脚本
+                VulWorkspace.runScript(it)
             } ?: console().sendLang("Schedule-Execution-Undefined", id)
         }
     }
