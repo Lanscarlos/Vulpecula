@@ -151,7 +151,7 @@ class ScheduleTask(
         val now = System.currentTimeMillis()
 
         // 已超过结束时间
-        if (now >= endOf) {
+        if (endOf in 1..now) {
             debug("ScheduleTask $id has completed. {now=${dateFormat.format(now)}, end-of=${dateFormat.format(endOf)}}")
             return
         }
@@ -181,7 +181,7 @@ class ScheduleTask(
 
         // 开始新的任务
         task = submit(async = async, delay = delay / 50L + 10, period = period / 50L) {
-            if (System.currentTimeMillis() >= endOf) {
+            if (endOf > 0 && System.currentTimeMillis() >= endOf) {
                 debug("ScheduleTask $id has completed. {end-of=${dateFormat.format(endOf)}}")
                 terminate()
                 return@submit
