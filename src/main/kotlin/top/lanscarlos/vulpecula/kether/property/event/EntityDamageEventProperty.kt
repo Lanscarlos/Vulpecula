@@ -44,7 +44,7 @@ class EntityDamageEventProperty : VulScriptProperty<EntityDamageEvent>("entity-d
                             else -> source
                         }
                     }
-                    else -> return OpenResult.failed()
+                    else -> null
                 }
             }
             "finalDamage", "final-damage", "final-dmg", "final" -> instance.finalDamage
