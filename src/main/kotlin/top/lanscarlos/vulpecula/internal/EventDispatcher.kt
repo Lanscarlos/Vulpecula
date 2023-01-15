@@ -23,6 +23,7 @@ import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.script.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
+import top.maplex.abolethcore.taboolib.common.reflect.Reflex.Companion.getProperty
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -69,6 +70,9 @@ class EventDispatcher(
     val variables by wrapper.read("variables") { value ->
         buildVariables(value, mapOf())
     }
+
+    /* 玩家字段，用于反射获取一些奇怪事件中的玩家对象 */
+    val playerReference by wrapper.readString("player-ref")
 
     val baffle by wrapper.read("baffle") { value ->
         if (value == null) return@read null
@@ -252,7 +256,15 @@ class EventDispatcher(
             is EntityEvent -> (event.entity as? Player)
             is InventoryClickEvent -> event.whoClicked as? Player
             is InventoryEvent -> event.view.player as? Player
-            else -> null
+            else -> {
+                playerReference?.let { ref ->
+                    try {
+                        event.getProperty<Any>(ref, false) as? Player
+                    } catch (ignored: Exception) {
+                        null
+                    }
+                }
+            }
         }
 
         baffle?.let { baffle ->
