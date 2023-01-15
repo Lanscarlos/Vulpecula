@@ -78,9 +78,9 @@ interface ScriptCompiler {
     * }
     * */
     fun compileCondition(builder: StringBuilder, content: String, condition: StringBuilder, deny: StringBuilder) {
-        builder.append("if\n")
+        builder.append("if {\n")
         builder.appendWithIndent(condition.toString(), suffix = "\n")
-        builder.append("then {\n")
+        builder.append("} then {\n")
         builder.appendWithIndent(content, suffix = "\n")
         builder.append("}")
 
