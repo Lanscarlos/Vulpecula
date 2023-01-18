@@ -22,8 +22,8 @@ class PlayerCommandEventProperty : VulScriptProperty<PlayerCommandPreprocessEven
 
     override fun readProperty(instance: PlayerCommandPreprocessEvent, key: String): OpenResult {
         val property: Any = when (key) {
-            "message", "msg" -> instance.message
-            "player" -> instance.player
+            "command", "cmd", "message", "msg" -> instance.message
+            "player", "sender" -> instance.player
             else -> return OpenResult.failed()
         }
         return OpenResult.successful(property)
@@ -31,10 +31,10 @@ class PlayerCommandEventProperty : VulScriptProperty<PlayerCommandPreprocessEven
 
     override fun writeProperty(instance: PlayerCommandPreprocessEvent, key: String, value: Any?): OpenResult {
         when (key) {
-            "message", "msg" -> {
+            "command", "cmd", "message", "msg" -> {
                 instance.message = value?.toString() ?: return OpenResult.successful()
             }
-            "player" -> {
+            "player", "sender" -> {
                 instance.player = value as? Player ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()

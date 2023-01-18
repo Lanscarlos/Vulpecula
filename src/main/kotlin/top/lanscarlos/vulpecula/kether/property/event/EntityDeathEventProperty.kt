@@ -1,5 +1,9 @@
 package top.lanscarlos.vulpecula.kether.property.event
 
+import org.bukkit.entity.Projectile
+import org.bukkit.event.entity.EntityDamageByBlockEvent
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
@@ -24,7 +28,28 @@ class EntityDeathEventProperty : VulScriptProperty<EntityDeathEvent>("entity-dea
         val property: Any? = when (key) {
             "droppedExp", "dropped-exp", "exp" -> instance.droppedExp
             "drops" -> instance.drops
-            "cause" -> instance.entity.lastDamageCause?.cause?.name
+            "cause" -> instance.entity.lastDamageCause?.cause?.name ?: "UNKNOWN"
+            "damage", "dmg" -> instance.entity.lastDamageCause?.damage ?: 0.0
+            "finalDamage", "final-damage", "final-dmg", "final" -> instance.entity.lastDamageCause?.finalDamage ?: 0.0
+            "damager*" -> {
+                when (val lastDamageCause = instance.entity.lastDamageCause) {
+                    is EntityDamageByBlockEvent -> lastDamageCause.damager
+                    is EntityDamageByEntityEvent -> lastDamageCause.damager
+                    else -> null
+                }
+            }
+            "damager" -> {
+                when (val lastDamageCause = instance.entity.lastDamageCause) {
+                    is EntityDamageByBlockEvent -> lastDamageCause.damager
+                    is EntityDamageByEntityEvent -> {
+                        when (val source = lastDamageCause.damager) {
+                            is Projectile -> source.shooter
+                            else -> source
+                        }
+                    }
+                    else -> null
+                }
+            }
             else -> return OpenResult.failed()
         }
         return OpenResult.successful(property)

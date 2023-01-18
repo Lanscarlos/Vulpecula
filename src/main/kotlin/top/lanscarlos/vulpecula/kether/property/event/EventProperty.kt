@@ -27,11 +27,11 @@ import top.lanscarlos.vulpecula.utils.coerceBoolean
 class EventProperty : VulScriptProperty<Event>("event") {
 
     override fun readProperty(instance: Event, key: String): OpenResult {
-        val property: Any = when (key) {
-            "block" -> (instance as? BlockEvent)?.block ?: OpenResult.failed()
-            "entity" -> (instance as? EntityEvent)?.entity ?: OpenResult.failed()
-            "inventory", "inv" -> (instance as? InventoryEvent)?.inventory ?: OpenResult.failed()
-            "player" -> (instance as? PlayerEvent)?.player ?: OpenResult.failed()
+        val property: Any? = when (key) {
+            "block" -> (instance as? BlockEvent)?.block
+            "entity" -> (instance as? EntityEvent)?.entity
+            "inventory", "inv" -> (instance as? InventoryEvent)?.inventory
+            "player" -> (instance as? PlayerEvent)?.player
             "eventName", "event-name", "name" -> instance.eventName
             "isAsynchronous", "asynchronous", "async" -> instance.isAsynchronous
             "isCancelled", "cancelled", "cancel" -> (instance as? Cancellable)?.isCancelled ?: false
@@ -43,8 +43,9 @@ class EventProperty : VulScriptProperty<Event>("event") {
     override fun writeProperty(instance: Event, key: String, value: Any?): OpenResult {
         when (key) {
             "isCancelled", "cancelled", "cancel" -> {
-                val cancellable = instance as? Cancellable ?: return OpenResult.failed()
-                cancellable.isCancelled = value?.coerceBoolean() ?: return OpenResult.successful()
+                (instance as? Cancellable)?.let {
+                    it.isCancelled = value?.coerceBoolean() ?: return OpenResult.successful()
+                }
             }
             else -> return OpenResult.failed()
         }

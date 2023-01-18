@@ -23,8 +23,8 @@ class PlayerRespawnEventProperty : VulScriptProperty<PlayerRespawnEvent>("player
     override fun readProperty(instance: PlayerRespawnEvent, key: String): OpenResult {
         val property: Any = when (key) {
             "respawn-location", "respawn-loc", "location", "loc" -> instance.respawnLocation
-            "anchor-spawn", "anchor" -> instance.isAnchorSpawn
-            "bed", "bed-spawn" -> instance.isBedSpawn
+            "use-anchor", "anchor" -> instance.isAnchorSpawn
+            "use-bed", "bed" -> instance.isBedSpawn
             else -> return OpenResult.failed()
         }
         return OpenResult.successful(property)

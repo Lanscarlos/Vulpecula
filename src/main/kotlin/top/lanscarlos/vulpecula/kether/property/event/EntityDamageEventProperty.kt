@@ -32,7 +32,7 @@ class EntityDamageEventProperty : VulScriptProperty<EntityDamageEvent>("entity-d
                 when (instance) {
                     is EntityDamageByBlockEvent -> instance.damager
                     is EntityDamageByEntityEvent -> instance.damager
-                    else -> return OpenResult.failed()
+                    else -> null
                 }
             }
             "damager" -> {

@@ -22,9 +22,9 @@ class PlayerItemHeldEventProperty : VulScriptProperty<PlayerItemHeldEvent>("play
 
     override fun readProperty(instance: PlayerItemHeldEvent, key: String): OpenResult {
         val property: Any? = when (key) {
-            "newSlot", "new-slot" -> instance.newSlot
-            "previousSlot", "previous-slot", "old-slot" -> instance.previousSlot
-            "new-item" -> instance.player.inventory.getItem(instance.newSlot)
+            "new-slot", "slot" -> instance.newSlot
+            "previous-slot", "old-slot" -> instance.previousSlot
+            "new-item", "item" -> instance.player.inventory.getItem(instance.newSlot)
             "previous-item","old-item" -> instance.player.inventory.getItem(instance.previousSlot)
             else -> return OpenResult.failed()
         }

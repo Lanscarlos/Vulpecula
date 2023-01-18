@@ -23,12 +23,11 @@ class EntityShootBowEventProperty : VulScriptProperty<EntityShootBowEvent>("enti
 
     override fun readProperty(instance: EntityShootBowEvent, key: String): OpenResult {
         val property: Any? = when (key) {
-            "bow" -> instance.bow
+            "bow", "item" -> instance.bow
             "consumable" -> instance.consumable
             "force" -> instance.force
-            "hand*" -> instance.hand
             "hand" -> instance.hand.name
-            "projectile" -> instance.projectile
+            "projectile", "arrow" -> instance.projectile
             "should-consume-item", "is-consume-item", "is-consume" -> instance.shouldConsumeItem()
             else -> return OpenResult.failed()
         }
