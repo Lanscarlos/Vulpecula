@@ -21,6 +21,7 @@ import top.lanscarlos.vulpecula.utils.coerceFloat
 )
 @Suppress("UNCHECKED_CAST")
 @SuppressWarnings("deprecation")
+@Deprecated("See LivingEntityProperty")
 class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
 
     override fun readProperty(instance: EntityEquipment, key: String): OpenResult {
@@ -66,14 +67,14 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
     override fun writeProperty(instance: EntityEquipment, key: String, value: Any?): OpenResult {
         when (key) {
             "armorContents", "armors" -> {
-                instance.armorContents = value as? Array<out ItemStack> ?: return OpenResult.failed()
+                instance.armorContents = value as? Array<out ItemStack> ?: return OpenResult.successful()
             }
 
             "hand*" -> {
                 instance.setItemInHand(value as? ItemStack)
             }
             "drop-chance-hand*", "chance-hand*" -> {
-                instance.itemInHandDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.itemInHandDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "main", "main-hand", "hand" -> {
@@ -82,7 +83,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             "drop-chance-main", "chance-main",
             "drop-chance-main-hand", "chance-main-hand",
             "drop-chance-hand", "chance-hand" -> {
-                instance.itemInMainHandDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.itemInMainHandDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "off", "off-hand" -> {
@@ -90,7 +91,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             }
             "drop-chance-off", "chance-off",
             "drop-chance-off-hand", "chance-off-hand" -> {
-                instance.itemInOffHandDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.itemInOffHandDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "helmet", "head" -> {
@@ -98,7 +99,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             }
             "drop-chance-helmet", "chance-helmet",
             "drop-chance-head", "chance-head" -> {
-                instance.helmetDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.helmetDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "chestplate", "chest" -> {
@@ -106,7 +107,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             }
             "drop-chance-chestplate", "chance-chestplate",
             "drop-chance-chest", "chance-chest" -> {
-                instance.chestplateDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.chestplateDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "leggings", "legs", "leg" -> {
@@ -115,7 +116,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             "drop-chance-leggings", "chance-leggings",
             "drop-chance-legs", "chance-legs",
             "drop-chance-leg", "chance-leg" -> {
-                instance.leggingsDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.leggingsDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "boots", "feet", "foot" -> {
@@ -124,7 +125,7 @@ class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
             "drop-chance-boots", "chance-boots",
             "drop-chance-feet", "chance-feet",
             "drop-chance-foot", "chance-foot" -> {
-                instance.bootsDropChance = value?.coerceFloat() ?: return OpenResult.failed()
+                instance.bootsDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
             else -> return OpenResult.failed()
         }
