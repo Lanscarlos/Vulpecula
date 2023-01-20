@@ -4,6 +4,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
+import taboolib.common.platform.command.component.CommandBase
+import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.component.CommandComponentDynamic
+import taboolib.common.platform.command.component.CommandComponentLiteral
 import taboolib.common.platform.function.*
 import taboolib.expansion.createHelper
 import taboolib.library.configuration.ConfigurationSection
@@ -42,12 +46,12 @@ class CustomCommand(
         } ?: PermissionDefault.OP
     }
     val component by wrapper.read("components") { section ->
-        val root = CommandBuilder.CommandBase()
+        val root = CommandBase()
         if (section !is ConfigurationSection) return@read root
 
         // 处理执行语句
         section.getString("main.execute")?.let {
-            root.executeScript(it, section.getBoolean("main.player-only", false))
+            root.executeScript(it, section.getBoolean("main.player-only", false), false)
         }
 
         // 遍历下一层 Dynamic
@@ -105,8 +109,9 @@ class CustomCommand(
         unregisterCommand(name ?: return)
     }
 
-    fun buildDynamic(parent: CommandBuilder.CommandComponent, section: ConfigurationSection) {
-        val dynamic = CommandBuilder.CommandComponentDynamic(
+    fun buildDynamic(parent: CommandComponent, section: ConfigurationSection) {
+        val dynamic = CommandComponentDynamic(
+            parent.index + 1,
             section.getString("comment") ?: "...",
             section.getBoolean("optional", false),
             section.getString("permission") ?: ""
@@ -132,7 +137,7 @@ class CustomCommand(
         }
 
         section["execute"]?.let {
-            dynamic.executeScript(it, playerOnly)
+            dynamic.executeScript(it, playerOnly, true)
         }
 
         // 遍历下一层 Dynamic
@@ -146,14 +151,15 @@ class CustomCommand(
         }
     }
 
-    fun buildLiteral(parent: CommandBuilder.CommandComponent, config: ConfigurationSection) {
+    fun buildLiteral(parent: CommandComponent, config: ConfigurationSection) {
         val keys = config.getKeys(false)
         for (key in keys) {
             val section = config.getConfigurationSection(key) ?: continue
             val name = section.getString("name") ?: key
             val aliases = section.getStringOrList("aliases")
 
-            val literal = CommandBuilder.CommandComponentLiteral(
+            val literal = CommandComponentLiteral(
+                parent.index + 1,
                 *aliases.plus(name).toTypedArray(),
                 optional = section.getBoolean("optional", false),
                 permission = section.getString("permission") ?: ""
@@ -162,7 +168,7 @@ class CustomCommand(
             parent.children += literal
 
             section["execute"]?.let {
-                literal.executeScript(it, section.getBoolean("player-only", false), false)
+                literal.executeScript(it, section.getBoolean("player-only", false), true)
             }
 
             // 遍历下一层 Dynamic
@@ -177,7 +183,7 @@ class CustomCommand(
         }
     }
 
-    fun CommandBuilder.CommandComponentDynamic.suggestLiteral(literal: Collection<*>, playerOnly: Boolean, uncheck: Boolean) {
+    fun CommandComponentDynamic.suggestLiteral(literal: Collection<*>, playerOnly: Boolean, uncheck: Boolean) {
         if (playerOnly) {
             this.suggestion<Player>(uncheck) { _, _ -> literal.mapNotNull { it?.toString() } }
         } else {
@@ -188,7 +194,7 @@ class CustomCommand(
     /**
      * @param force 是否强制等待脚本返回结果
      * */
-    fun CommandBuilder.CommandComponentDynamic.suggestScript(source: Any, playerOnly: Boolean, uncheck: Boolean, force: Boolean) {
+    fun CommandComponentDynamic.suggestScript(source: Any, playerOnly: Boolean, uncheck: Boolean, force: Boolean) {
         val builder = StringBuilder()
         val content = buildSection(source, builder).extract()
         builder.append("def main = {\n")
@@ -225,7 +231,7 @@ class CustomCommand(
         }
     }
 
-    fun CommandBuilder.CommandComponent.executeScript(source: Any, playerOnly: Boolean, showArgs: Boolean = true) {
+    fun CommandComponent.executeScript(source: Any, playerOnly: Boolean, showArgs: Boolean) {
         val builder = StringBuilder()
         val content = buildSection(source, builder).extract()
         builder.append("def main = {\n")
@@ -240,7 +246,7 @@ class CustomCommand(
                     setVariable("@Sender", "@Player", "player", value = player)
                     setVariable("@Context", "context", value = context)
                     setVariable("@Arg", "arg", value = argument)
-                    if (showArgs) setVariable("@Args", "args", value = context.args())
+                    setVariable("@Args", "args", value = if (showArgs) context.args() else emptyArray())
                 }
             }
         } else {
@@ -249,7 +255,7 @@ class CustomCommand(
                     setVariable("@Sender", value = sender)
                     setVariable("@Context", "context", value = context)
                     setVariable("@Arg", "arg", value = argument)
-                    if (showArgs) setVariable("@Args", "args", value = context.args())
+                    setVariable("@Args", "args", value = if (showArgs) context.args() else emptyArray())
                 }
             }
         }

@@ -3,12 +3,11 @@ package top.lanscarlos.vulpecula.command
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import taboolib.common.platform.command.CommandBuilder
+import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.platform.util.sendLang
-import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.script.VulScript
 import top.lanscarlos.vulpecula.script.VulWorkspace
 
@@ -21,7 +20,7 @@ import top.lanscarlos.vulpecula.script.VulWorkspace
  */
 object CommandScript {
 
-    val main: CommandBuilder.CommandComponent.() -> Unit = {
+    val main: CommandComponent.() -> Unit = {
         literal("run", literal = run)
         literal("stop", literal = stop)
         literal("compile", "build", literal = compile)
@@ -30,7 +29,7 @@ object CommandScript {
         literal("debug", literal = debug)
     }
 
-    val run: CommandBuilder.CommandComponent.() -> Unit = {
+    val run: CommandComponent.() -> Unit = {
         dynamic("file") {
             suggestion<CommandSender> { _, _ ->
                 VulWorkspace.scripts.map { it.value.id }
@@ -46,9 +45,9 @@ object CommandScript {
             }
 
             dynamic("viewer", optional = true) {
-                suggestPlayers(false)
+                suggestPlayers(emptyList())
                 execute<CommandSender> { sender, context, viewer ->
-                    val file = context.argument(-1)
+                    val file = context["viewer"]
                     try {
                         VulWorkspace.runScript(file, Bukkit.getPlayerExact(viewer))
                         sender.sendLang("Script-Run-Succeeded", file)
@@ -60,8 +59,8 @@ object CommandScript {
 
                 dynamic("args", optional = true) {
                     execute<CommandSender> { sender, context, args ->
-                        val file = context.argument(-2)
-                        val viewer = Bukkit.getPlayerExact(context.argument(-1))
+                        val file = context["file"]
+                        val viewer = Bukkit.getPlayerExact(context["viewer"])
                         try {
                             VulWorkspace.runScript(file, viewer, args.split(' ').toTypedArray())
                             sender.sendLang("Script-Run-Succeeded", file)
@@ -75,7 +74,7 @@ object CommandScript {
         }
     }
 
-    val stop: CommandBuilder.CommandComponent.() -> Unit = {
+    val stop: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             try {
                 VulWorkspace.terminateAllScript()
@@ -102,7 +101,7 @@ object CommandScript {
         }
     }
 
-    val compile: CommandBuilder.CommandComponent.() -> Unit = {
+    val compile: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             try {
                 VulScript.getAll().forEach { it.compileScript() }
@@ -129,7 +128,7 @@ object CommandScript {
         }
     }
 
-    val list: CommandBuilder.CommandComponent.() -> Unit = {
+    val list: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             sender.sendLang(
                 "Script-List",
@@ -139,7 +138,7 @@ object CommandScript {
         }
     }
 
-    val reload: CommandBuilder.CommandComponent.() -> Unit = {
+    val reload: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             VulWorkspace.terminateAllScript()
             VulScript.load().let {
@@ -151,7 +150,7 @@ object CommandScript {
         }
     }
 
-    val debug: CommandBuilder.CommandComponent.() -> Unit = {
+    val debug: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             sender.sendMessage("&8[&3Vul&bpecula&8] &e调试 &8| &7RegisteredActions:".colored())
             Kether.scriptRegistry.registeredNamespace.forEach {
