@@ -22,7 +22,7 @@ import top.lanscarlos.vulpecula.utils.coerceInt
     id = "entity",
     bind = Entity::class
 )
-@SuppressWarnings("deprecation")
+@Suppress("deprecation")
 class EntityProperty : VulScriptProperty<Entity>("entity") {
 
     override fun readProperty(instance: Entity, key: String): OpenResult {
@@ -72,7 +72,7 @@ class EntityProperty : VulScriptProperty<Entity>("entity") {
             "isVisualFire", "visual-fire" -> instance.isVisualFire
 
             // Nameable
-            "customName", "custom-name" -> instance.customName
+            "custom-name" -> instance.customName
 
             // CommandSender
             "name" -> instance.name

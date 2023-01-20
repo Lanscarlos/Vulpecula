@@ -4,6 +4,8 @@ import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.kether.live.readInt
 import top.lanscarlos.vulpecula.kether.live.readItemStack
 import top.lanscarlos.vulpecula.utils.coerceInt
+import top.lanscarlos.vulpecula.utils.duraFix
+import top.lanscarlos.vulpecula.utils.maxDurability
 
 /**
  * Vulpecula
@@ -13,7 +15,6 @@ import top.lanscarlos.vulpecula.utils.coerceInt
  * @since 2022-11-13 20:35
  */
 
-@SuppressWarnings("deprecation")
 object ItemDurabilityHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("durability", "dura")
@@ -27,12 +28,12 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
 
                 return acceptTransferFuture(source) { item ->
                     amount.getOrNull(this).thenApply {
-                        item.durability = when (next) {
-                            "fix" -> item.durability - it.coerceInt(0)
-                            "damage", "dmg" -> item.durability + it.coerceInt(0)
-                            "set" -> it.coerceInt(item.durability.toInt())
-                            else -> item.durability
-                        }.toShort().coerceIn(0, item.type.maxDurability)
+                        item.duraFix = when (next) {
+                            "fix" -> item.duraFix - it.coerceInt(0)
+                            "damage", "dmg" -> item.duraFix + it.coerceInt(0)
+                            "set" -> it.coerceInt(item.duraFix)
+                            else -> item.duraFix
+                        }.coerceIn(0, item.maxDurability)
 
                         return@thenApply item
                     }
@@ -41,8 +42,8 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
             "current", "cur", "max" -> {
                 return acceptHandleNow(source) { item ->
                     when (next) {
-                        "current", "cur" -> item.durability
-                        "max" -> item.type.maxDurability
+                        "current", "cur" -> item.duraFix
+                        "max" -> item.maxDurability
                         else -> -1
                     }
                 }
@@ -50,7 +51,7 @@ object ItemDurabilityHandler : ActionItemStack.Reader {
             else -> {
                 // 显示耐久
                 reader.reset()
-                return acceptHandleNow(source) { item -> item.durability }
+                return acceptHandleNow(source) { item -> item.duraFix }
             }
         }
     }

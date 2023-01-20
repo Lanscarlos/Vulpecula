@@ -23,7 +23,6 @@ import top.lanscarlos.vulpecula.utils.coerceBoolean
     id = "event",
     bind = Event::class
 )
-@SuppressWarnings("deprecation")
 class EventProperty : VulScriptProperty<Event>("event") {
 
     override fun readProperty(instance: Event, key: String): OpenResult {

@@ -2,16 +2,11 @@ package top.lanscarlos.vulpecula.kether.property
 
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
-import org.bukkit.material.MaterialData
 import taboolib.common.OpenResult
-import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
-import top.lanscarlos.vulpecula.utils.coerceBoolean
-import top.lanscarlos.vulpecula.utils.coerceInt
-import top.lanscarlos.vulpecula.utils.coerceShort
+import top.lanscarlos.vulpecula.utils.*
 
 /**
  * Vulpecula
@@ -25,7 +20,6 @@ import top.lanscarlos.vulpecula.utils.coerceShort
     id = "itemstack",
     bind = ItemStack::class
 )
-@SuppressWarnings("deprecation")
 class ItemStackProperty : VulScriptProperty<ItemStack>("itemstack") {
     override fun readProperty(instance: ItemStack, key: String): OpenResult {
         val property: Any? = when (key) {
@@ -39,24 +33,9 @@ class ItemStackProperty : VulScriptProperty<ItemStack>("itemstack") {
             "amount", "amt" -> instance.amount
             "max-amount", "max-amt", "max-size" -> instance.maxStackSize
 
-            "durability", "dura" -> {
-                // 1.13+
-                if (MinecraftVersion.major >= 5) {
-                    val damage = (instance.itemMeta as? Damageable)?.damage ?: 0
-                    instance.type.maxDurability - damage
-                } else {
-                    instance.type.maxDurability - instance.durability
-                }
-            }
-            "damage", "dmg" -> {
-                // 1.13+
-                if (MinecraftVersion.major >= 5) {
-                    (instance.itemMeta as? Damageable)?.damage ?: 0
-                } else {
-                    instance.durability.toInt()
-                }
-            }
-            "max-durability", "max-dura" -> instance.type.maxDurability.toInt()
+            "durability", "dura" -> instance.duraFix
+            "damage", "dmg" -> instance.damage
+            "max-durability", "max-dura" -> instance.maxDurability
 
             "enchants" -> instance.itemMeta?.enchants
             "enchantments" -> instance.enchantments
@@ -135,12 +114,10 @@ class ItemStackProperty : VulScriptProperty<ItemStack>("itemstack") {
                 instance.amount = value.coerceInt(instance.amount)
             }
             "durability", "dura" -> {
-                // 1.13+
-                if (MinecraftVersion.major >= 5) {
-                    (instance.itemMeta as? Damageable)?.damage = value?.coerceInt() ?: return OpenResult.successful()
-                } else {
-                    instance.durability = value?.coerceShort() ?: return OpenResult.successful()
-                }
+                instance.duraFix = value?.coerceInt() ?: return OpenResult.successful()
+            }
+            "damage", "dmg" -> {
+                instance.damage = value?.coerceInt() ?: return OpenResult.successful()
             }
             "item-meta", "meta" -> {
                 instance.itemMeta = value as? ItemMeta

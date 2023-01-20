@@ -19,8 +19,7 @@ import top.lanscarlos.vulpecula.utils.coerceFloat
     id = "equipment",
     bind = EntityEquipment::class
 )
-@Suppress("UNCHECKED_CAST")
-@SuppressWarnings("deprecation")
+@Suppress("UNCHECKED_CAST", "deprecation")
 @Deprecated("See LivingEntityProperty")
 class EquipmentProperty : VulScriptProperty<EntityEquipment>("equipment") {
 
