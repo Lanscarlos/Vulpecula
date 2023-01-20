@@ -256,6 +256,9 @@ class CustomCommand(
                     setVariable("@Context", "context", value = context)
                     setVariable("@Arg", "arg", value = argument)
                     setVariable("@Args", "args", value = if (showArgs) context.args() else emptyArray())
+                    if (sender is Player) {
+                        setVariable("@Player", "player", value = sender)
+                    }
                 }
             }
         }
