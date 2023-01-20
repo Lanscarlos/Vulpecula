@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.command
+package top.lanscarlos.vulpecula.internal
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player

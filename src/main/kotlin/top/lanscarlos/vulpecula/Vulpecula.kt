@@ -6,7 +6,7 @@ import taboolib.common.platform.function.info
 import taboolib.module.metrics.Metrics
 import taboolib.module.metrics.charts.SingleLineChart
 import taboolib.platform.BukkitPlugin
-import top.lanscarlos.vulpecula.command.CustomCommand
+import top.lanscarlos.vulpecula.internal.CustomCommand
 import top.lanscarlos.vulpecula.internal.EventDispatcher
 import top.lanscarlos.vulpecula.internal.EventHandler
 import top.lanscarlos.vulpecula.internal.EventMapper
@@ -51,6 +51,5 @@ object Vulpecula : Plugin() {
         metrics.addCustomChart(SingleLineChart("schedules") {
             ScheduleTask.cache.size
         })
-
     }
 }

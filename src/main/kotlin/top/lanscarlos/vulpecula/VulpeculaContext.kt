@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
-import top.lanscarlos.vulpecula.command.CustomCommand
+import top.lanscarlos.vulpecula.internal.CustomCommand
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
