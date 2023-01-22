@@ -28,7 +28,8 @@ class BlockProperty : VulScriptProperty<Block>("block") {
             "location-y", "loc-y", "y" -> instance.y
             "location-z", "loc-z", "z" -> instance.z
 
-            "world" -> instance.world
+            "world*" -> instance.world
+            "world" -> instance.world.name
             "is-empty" -> instance.isEmpty
             "is-liquid" -> instance.isLiquid
             "passable" -> instance.isPassable
