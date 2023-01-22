@@ -10,6 +10,7 @@ import org.bukkit.event.entity.EntityEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
+import org.bukkit.event.player.PlayerMoveEvent
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
@@ -240,6 +241,16 @@ class EventDispatcher(
         if (!::script.isInitialized) {
             warning("Script of Dispatcher \"$id\" has built failed. Please check config!")
             return
+        }
+
+        /* 特殊事件处理 */
+        when (event) {
+            is PlayerMoveEvent -> {
+                val to = event.to ?: return
+                val from = event.from
+                /* 过滤视角转动 */
+                if (to.distance(from) < 1e-3) return
+            }
         }
 
         val player = when (event) {
