@@ -68,6 +68,7 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
                 }
             }
         } catch (e: Exception) {
+            e.printKetherErrorMessage()
             quests.remove(super.id)
             e.printStackTrace()
         }

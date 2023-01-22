@@ -190,7 +190,7 @@ class ScheduleTask(
             debug("ScheduleTask $id running...")
 
             quest?.let {
-                ScriptContext.create(it).runActions()
+                it.runActions()
             } ?: script?.let {
                 // 运行脚本
                 VulWorkspace.runScript(it)

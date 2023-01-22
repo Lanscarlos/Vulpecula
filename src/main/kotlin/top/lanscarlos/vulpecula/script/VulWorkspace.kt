@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.MultimapBuilder
 import taboolib.common.platform.function.*
 import taboolib.library.kether.ExitStatus
-import taboolib.module.kether.KetherScriptLoader
-import taboolib.module.kether.Script
-import taboolib.module.kether.ScriptContext
-import taboolib.module.kether.ScriptService
+import taboolib.module.kether.*
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.utils.*
@@ -51,7 +48,12 @@ object VulWorkspace {
     fun runScript(id: String, context: ScriptContext): CompletableFuture<Any> {
         context.id = id
         runningScripts.put(id, context)
-        return context.runActions().also { it.thenRun { runningScripts.remove(id, context) } }
+        return try {
+            context.runActions().also { it.thenRun { runningScripts.remove(id, context) } }
+        } catch (e: Exception) {
+            e.printKetherErrorMessage()
+            CompletableFuture.completedFuture(null)
+        }
     }
 
     fun terminateScript(id: String) {

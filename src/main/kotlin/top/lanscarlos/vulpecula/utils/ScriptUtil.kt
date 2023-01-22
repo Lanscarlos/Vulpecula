@@ -16,8 +16,25 @@ import java.util.concurrent.CompletableFuture
 /**
  * 运行脚本
  * */
+fun Script.runActions(): CompletableFuture<Any?> {
+    return try {
+        ScriptContext.create(this).runActions()
+    } catch (e: Exception) {
+        e.printKetherErrorMessage()
+        CompletableFuture.completedFuture(null)
+    }
+}
+
+/**
+ * 运行脚本
+ * */
 fun Script.runActions(func: ScriptContext.() -> Unit): CompletableFuture<Any?> {
-    return ScriptContext.create(this).apply(func).runActions()
+    return try {
+        ScriptContext.create(this).apply(func).runActions()
+    } catch (e: Exception) {
+        e.printKetherErrorMessage()
+        CompletableFuture.completedFuture(null)
+    }
 }
 
 /**

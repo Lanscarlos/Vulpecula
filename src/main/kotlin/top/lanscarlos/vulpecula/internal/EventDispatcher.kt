@@ -246,10 +246,10 @@ class EventDispatcher(
         /* 特殊事件处理 */
         when (event) {
             is PlayerMoveEvent -> {
-                val to = event.to ?: return
-                val from = event.from
                 /* 过滤视角转动 */
-                if (to.distance(from) < 1e-3) return
+                info("检测视角转动...")
+                if (event.from.distance(event.to ?: return) < 1e-1) return
+                info("检测视角转动... 通过")
             }
         }
 
