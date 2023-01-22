@@ -1,9 +1,5 @@
-package top.lanscarlos.vulpecula.utils
+package top.lanscarlos.vulpecula.utils.chemdah
 
-import ink.ptms.chemdah.api.event.InferItemHookEvent
-import ink.ptms.chemdah.core.quest.selector.Flags.Companion.matchType
-import ink.ptms.chemdah.util.startsWithAny
-import ink.ptms.chemdah.util.substringAfterAny
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -15,6 +11,8 @@ import taboolib.module.nms.getItemTag
 import taboolib.module.nms.getName
 import taboolib.platform.util.hasItem
 import taboolib.platform.util.takeItem
+import top.lanscarlos.vulpecula.api.event.InferItemHookEvent
+import top.lanscarlos.vulpecula.utils.chemdah.Flags.Companion.matchType
 
 /**
  * Chemdah
@@ -46,7 +44,7 @@ class InferItem(val items: List<Item>) {
 
         open fun matchType(type: String) = flags.any { it.match(type, material) }
 
-        @Suppress("SpellCheckingInspection")
+        @Suppress("SpellCheckingInspection", "deprecation")
         open fun matchMetaData(item: ItemStack): Boolean {
             val meta = item.itemMeta
             return data.all {

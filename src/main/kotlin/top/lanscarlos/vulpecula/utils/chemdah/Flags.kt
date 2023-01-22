@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils
+package top.lanscarlos.vulpecula.utils.chemdah
 
 import org.bukkit.Bukkit
 import org.bukkit.Material

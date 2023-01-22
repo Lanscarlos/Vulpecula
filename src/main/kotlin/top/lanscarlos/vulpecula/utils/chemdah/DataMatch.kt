@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils
+package top.lanscarlos.vulpecula.utils.chemdah
 
 import taboolib.module.kether.action.transform.CheckType
 import taboolib.module.kether.inferType
