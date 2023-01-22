@@ -247,9 +247,7 @@ class EventDispatcher(
         when (event) {
             is PlayerMoveEvent -> {
                 /* 过滤视角转动 */
-                info("检测视角转动...")
                 if (event.from.distance(event.to ?: return) < 1e-1) return
-                info("检测视角转动... 通过")
             }
         }
 

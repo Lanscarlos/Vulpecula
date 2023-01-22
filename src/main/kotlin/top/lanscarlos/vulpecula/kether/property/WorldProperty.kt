@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether.property
 
 import org.bukkit.World
-import org.bukkit.block.Block
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.kether.VulKetherProperty
 import top.lanscarlos.vulpecula.kether.VulScriptProperty
