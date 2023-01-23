@@ -39,7 +39,7 @@ object VulWorkspace {
                 this.sender = adaptCommandSender(sender)
             }
             for ((i, arg) in args.withIndex()) {
-                rootFrame().variables().set("arg${i}", arg)
+                rootFrame().variables().set("arg$i", arg)
             }
             rootFrame().variables().set("args", args)
         })

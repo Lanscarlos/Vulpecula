@@ -255,9 +255,17 @@ class CustomCommand(
                     setVariable("@Sender", value = sender)
                     setVariable("@Context", "context", value = context)
                     setVariable("@Arg", "arg", value = argument)
-                    setVariable("@Args", "args", value = if (showArgs) context.args() else emptyArray())
-                    if (sender is Player) {
-                        setVariable("@Player", "player", value = sender)
+
+                    if (sender is Player) setVariable("@Player", "player", value = sender)
+
+                    if (showArgs) {
+                        val args = context.args()
+                        setVariable("@Args", "args", value = args)
+                        for ((i, arg) in args.withIndex()) {
+                            set("arg$i", arg)
+                        }
+                    } else {
+                        setVariable("@Args", "args", value = emptyArray<String>())
                     }
                 }
             }

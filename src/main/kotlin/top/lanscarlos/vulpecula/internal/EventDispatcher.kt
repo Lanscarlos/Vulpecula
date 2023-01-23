@@ -285,14 +285,9 @@ class EventDispatcher(
 
         // 执行脚本
         script.runActions {
-            setVariable(
-                "@Event", "event",
-                value = event
-            )
-            setVariable(
-                "@Sender", "@Player", "player",
-                value = player
-            )
+            setVariable("@Event", "event", value = event)
+            setVariable("@Sender", "@Player", "player", value = player)
+            setVariable("playerName", value = player?.name)
         }
     }
 
