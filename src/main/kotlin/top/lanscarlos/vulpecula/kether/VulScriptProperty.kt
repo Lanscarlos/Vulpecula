@@ -48,17 +48,21 @@ abstract class VulScriptProperty<T : Any>(
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> readProperty(instance, path.first())
             path.size == 2 -> {
-                val cache = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
-                readGenericProperty(cache, path.last())
+                val cache = readProperty(instance, path.first())
+                if (cache.isFailed) return OpenResult.failed()
+                readGenericProperty(cache.get() ?: return OpenResult.successful(), path.last())
             }
             else -> {
-                var cache: Any = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
+                var cache = readProperty(instance, path.first())
+                if (cache.isFailed) return OpenResult.failed()
 
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
-                    cache = readGenericProperty(cache, path[i]).get() ?: return OpenResult.failed()
+                    cache = readGenericProperty(cache.get() ?: return OpenResult.successful(), path[i])
                 }
-                readGenericProperty(cache, path.last())
+
+                if (cache.isFailed) return OpenResult.failed()
+                readGenericProperty(cache.get() ?: return OpenResult.successful(), path.last())
             }
         }
     }
@@ -71,17 +75,21 @@ abstract class VulScriptProperty<T : Any>(
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> writeProperty(instance, path.first(), value)
             path.size == 2 -> {
-                val cache = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
-                writeGenericProperty(cache, path.last(), value)
+                val cache = readProperty(instance, path.first())
+                if (cache.isFailed) return OpenResult.failed()
+                writeGenericProperty(cache.get() ?: return OpenResult.successful(), path.last(), value)
             }
             else -> {
-                var cache: Any = readProperty(instance, path.first()).get() ?: return OpenResult.failed()
+                var cache = readProperty(instance, path.first())
+                if (cache.isFailed) return OpenResult.failed()
 
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
-                    cache = readGenericProperty(cache, path[i]).get() ?: return OpenResult.failed()
+                    cache = readGenericProperty(cache.get() ?: return OpenResult.successful(), path[i])
                 }
-                writeGenericProperty(cache, path.last(), value)
+
+                if (cache.isFailed) return OpenResult.failed()
+                writeGenericProperty(cache.get() ?: return OpenResult.successful(), path.last(), value)
             }
         }
     }
