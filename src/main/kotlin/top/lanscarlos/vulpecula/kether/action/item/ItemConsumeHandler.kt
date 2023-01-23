@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.kether.live.readItemStack
  */
 object ItemConsumeHandler : ActionItemStack.Reader {
 
-    override val name: Array<String> = arrayOf("consume", "take")
+    override val name: Array<String> = arrayOf("consume")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionItemStack.Handler {
         val source = if (isRoot) reader.readItemStack() else null

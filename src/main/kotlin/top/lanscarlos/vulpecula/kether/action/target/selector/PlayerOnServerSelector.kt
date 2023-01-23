@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.utils.playerOrNull
  */
 object PlayerOnServerSelector : ActionTarget.Reader {
 
-    override val name: Array<String> = arrayOf("player-on-server", "PlayerOnServer", "Server")
+    override val name: Array<String> = arrayOf("player-on-server", "players-on-server", "PlayerOnServer", "PlayersOnServer", "Server")
 
     override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionTarget.Handler {
         val includeSelf = reader.hasNextToken("-self")
