@@ -1,6 +1,6 @@
 example-handler-1:
   # 绑定的监听器 支持单行&多行模式
-  bind: 'on-player-interact'
+  bind: 'on-interact'
   # 处理模块的优先级，越低越先被执行
   # 默认为 8
   priority: 8
@@ -9,8 +9,6 @@ example-handler-1:
   # 条件不满足时
   deny: 'xxx'
   # 需要执行的代码
-  handle:
-    - type: 'ke'
-      content: |-
-        tell "Hello Vulpecula!"
+  handle: |-
+      tell "Hello Vulpecula!"
   exception:

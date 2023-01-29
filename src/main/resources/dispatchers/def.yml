@@ -1,7 +1,7 @@
 on-interact:
   disable: true
   # 监听器三要素
-  listen: 'on-player-interact'
+  listen: 'player-interact'
   priority: 'normal'
   ignore-cancelled: false
   # 预处理 & 尾处理
