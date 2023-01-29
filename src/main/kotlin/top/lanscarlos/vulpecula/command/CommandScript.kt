@@ -47,7 +47,7 @@ object CommandScript {
             dynamic("viewer", optional = true) {
                 suggestPlayers(emptyList())
                 execute<CommandSender> { sender, context, viewer ->
-                    val file = context["viewer"]
+                    val file = context["file"]
                     try {
                         VulWorkspace.runScript(file, Bukkit.getPlayerExact(viewer))
                         sender.sendLang("Script-Run-Succeeded", file)
