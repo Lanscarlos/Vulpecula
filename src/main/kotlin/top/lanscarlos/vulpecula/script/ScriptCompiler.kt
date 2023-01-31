@@ -187,10 +187,6 @@ interface ScriptCompiler {
         }
     }
 
-    fun String.compileKetherScript(namespace: List<String> = emptyList()): Script {
-        return this.parseKetherScript(namespace.plus(setOf("vulpecula")))
-    }
-
     /**
      * 抽取所有字符并清空容器
      * */

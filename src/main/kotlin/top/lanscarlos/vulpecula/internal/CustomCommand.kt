@@ -201,7 +201,12 @@ class CustomCommand(
         builder.appendWithIndent(content, suffix = "\n")
         builder.append("}")
 
-        val script = builder.toString().parseKetherScript()
+        val script = try {
+            builder.toString().parseKetherScript()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return
+        }
 
         fun handle(sender: Any, context: CommandContext<*>): List<String> {
             val future = script.runActions {
@@ -238,7 +243,12 @@ class CustomCommand(
         builder.appendWithIndent(content, suffix = "\n")
         builder.append("}")
 
-        val script = builder.toString().parseKetherScript()
+        val script = try {
+            builder.toString().parseKetherScript()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return
+        }
 
         if (playerOnly) {
             this.execute<Player> { player, context, argument ->

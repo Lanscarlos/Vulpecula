@@ -6,6 +6,8 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.Quest
+import taboolib.module.kether.parseKetherScript
+import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
@@ -114,7 +116,7 @@ class EventHandler(
         try {
             // 尝试构建脚本
             val source = buildSource()
-            val quest = source.toString().compileKetherScript(namespace)
+            val quest = source.toString().parseKetherScript(namespace.plus("vulpecula"))
 
             // 编译通过
             this.source = source
@@ -122,7 +124,7 @@ class EventHandler(
 
             debug(Debug.HIGHEST, "handler \"$id\" build source:\n$source")
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.printKetherErrorMessage()
         }
     }
 

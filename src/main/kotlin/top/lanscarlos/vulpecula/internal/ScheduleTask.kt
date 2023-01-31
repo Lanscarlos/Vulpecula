@@ -6,8 +6,8 @@ import taboolib.common.platform.function.*
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.kether.Script
-import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.parseKetherScript
+import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
@@ -96,8 +96,9 @@ class ScheduleTask(
 
     init {
         quest = try {
-            executable?.parseKetherScript(namespace)
+            executable?.parseKetherScript(namespace.plus("vulpecula"))
         } catch (e: Exception) {
+            e.printKetherErrorMessage()
             null
         }
     }
@@ -122,8 +123,9 @@ class ScheduleTask(
 
         if (refresh) {
             quest = try {
-                executable?.parseKetherScript(namespace)
+                executable?.parseKetherScript(namespace.plus("vulpecula"))
             } catch (e: Exception) {
+                e.printKetherErrorMessage()
                 null
             }
         }
@@ -189,9 +191,7 @@ class ScheduleTask(
 
             debug("ScheduleTask $id running...")
 
-            quest?.let {
-                it.runActions()
-            } ?: script?.let {
+            quest?.runActions() ?: script?.let {
                 // 运行脚本
                 VulWorkspace.runScript(it)
             } ?: console().sendLang("Schedule-Execution-Undefined", id)
