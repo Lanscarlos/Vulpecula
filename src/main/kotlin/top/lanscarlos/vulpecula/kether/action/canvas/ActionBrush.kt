@@ -6,6 +6,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
+import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
@@ -121,7 +122,9 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
             when (option) {
                 "type" -> {
                     val type = value?.toString()?.uppercase() ?: return
-                    brush.particle = ProxyParticle.values().firstOrNull { it.name.equals(type, true) } ?: return
+                    brush.particle = ProxyParticle.values().firstOrNull {
+                        it.name.equals(type, true)
+                    } ?: error("Unknown particle type: \"$type\"!")
                 }
                 "count" -> brush.count = value?.coerceInt() ?: return
                 "speed" -> brush.speed = value?.coerceDouble() ?: return
@@ -136,18 +139,26 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
                 "size" -> brush.size = value?.coerceFloat() ?: return
                 "color" -> {
                     val color = value as? Color ?: return
-                    when (brush.particle) {
-                        ProxyParticle.SPELL_MOB,
-                        ProxyParticle.SPELL_MOB_AMBIENT -> {
-                            brush.color = color
+                    brush.color = color
+
+                    when {
+                        brush.particle == ProxyParticle.SPELL_MOB
+                                || brush.particle == ProxyParticle.SPELL_MOB_AMBIENT -> {
+                            // 药水粒子
                             brush.count = 0
                             brush.speed = color.alpha.div(255.0)
                             brush.vector.x = color.red.div(255.0)
                             brush.vector.y = color.green.div(255.0)
                             brush.vector.z = color.blue.div(255.0)
                         }
-                        else -> {
-                            brush.color = color
+                        brush.particle == ProxyParticle.REDSTONE
+                                && MinecraftVersion.major <= 4 -> {
+                            // v1.12 及以下
+                            brush.count = 0
+                            brush.speed = color.alpha.div(255.0).coerceAtLeast(1e-3)
+                            brush.vector.x = color.red.div(255.0)
+                            brush.vector.y = color.green.div(255.0)
+                            brush.vector.z = color.blue.div(255.0)
                         }
                     }
                 }

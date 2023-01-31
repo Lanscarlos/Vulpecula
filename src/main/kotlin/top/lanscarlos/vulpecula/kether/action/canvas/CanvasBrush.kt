@@ -4,6 +4,7 @@ import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
+import taboolib.module.nms.MinecraftVersion
 import java.awt.Color
 
 /**
@@ -19,7 +20,7 @@ class CanvasBrush {
 
     var particle = ProxyParticle.FLAME
     var count = 1
-    var speed = 0.0
+    var speed = -1.0
     var offset = Vector(0, 0, 0)
     var vector = Vector(0, 0, 0)
 
@@ -41,19 +42,37 @@ class CanvasBrush {
 
         val meta = when (particle) {
             ProxyParticle.BLOCK_DUST -> ProxyParticle.BlockData(material, data)
-            ProxyParticle.REDSTONE -> ProxyParticle.DustData(color, size)
             ProxyParticle.DUST_COLOR_TRANSITION -> ProxyParticle.DustTransitionData(color, transition, size)
             ProxyParticle.ITEM_CRACK -> ProxyParticle.ItemData(material, data, name, lore, customModelData)
+            ProxyParticle.SPELL_MOB,
+            ProxyParticle.SPELL_MOB_AMBIENT -> {
+                // 默认调整为彩色粒子
+                if (speed < 0) speed = 1.0
+                null
+            }
+            ProxyParticle.REDSTONE -> {
+
+                // 默认调整为彩色粒子
+                if (speed < 0) speed = 1.0
+
+                if (MinecraftVersion.major >= 5) {
+                    // v1.13+
+                    ProxyParticle.DustData(color, size)
+                } else {
+                    // v1.12 及以下
+                    null
+                }
+            }
             else -> null
         }
 
         if ((offset.x == 0.0) && (offset.y == 0.0) && (offset.z == 0.0)) {
             viewers.forEach {
-                it.sendParticle(particle, location, vector, count, speed, meta)
+                it.sendParticle(particle, location, vector, count, speed.coerceAtLeast(0.0), meta)
             }
         } else {
             viewers.forEach {
-                it.sendParticle(particle, location.clone().add(offset), vector, count, speed, meta)
+                it.sendParticle(particle, location.clone().add(offset), vector, count, speed.coerceAtLeast(0.0), meta)
             }
         }
     }
