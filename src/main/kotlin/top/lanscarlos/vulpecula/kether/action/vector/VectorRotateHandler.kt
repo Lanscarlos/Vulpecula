@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.kether.action.vector
 
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestReader
-import taboolib.module.effect.VectorUtils
+import taboolib.module.effect.utils.VectorUtils
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
 import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.*
