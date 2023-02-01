@@ -25,12 +25,13 @@ object VulpeculaContext {
         private set
 
     /**
+     * @param init 是否为初始化操作
      * @return 返回相关加载信息
      * */
-    fun load(loadConfig: Boolean = true): List<String> {
+    fun load(init: Boolean = false): List<String> {
 
-        // 加载主配置
-        if (loadConfig) config.reload()
+        // 重载主配置
+        if (!init) config.reload()
 
         val messages = mutableListOf<String>()
 
@@ -65,7 +66,7 @@ object VulpeculaContext {
         EventDispatcher.postLoad()
 
         // 加载日程计划
-        messages += ScheduleTask.load()
+        messages += ScheduleTask.load(init)
 
         return messages
     }

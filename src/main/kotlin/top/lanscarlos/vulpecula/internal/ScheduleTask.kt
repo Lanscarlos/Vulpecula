@@ -38,7 +38,7 @@ class ScheduleTask(
     val async by wrapper.readBoolean("async", false)
 
     val startOf by wrapper.read("start") {
-        if (it == null) return@read -1L
+        if (it == null) return@read 0L
         try {
             dateFormat.parse(it.toString()).time
         } catch (ignored: Exception) {
@@ -47,7 +47,7 @@ class ScheduleTask(
     }
 
     val endOf by wrapper.read("end") {
-        if (it == null) return@read -1L
+        if (it == null) return@read 0L
         try {
             dateFormat.parse(it.toString()).time
         } catch (ignored: Exception) {
@@ -95,11 +95,10 @@ class ScheduleTask(
     private var task: PlatformExecutor.PlatformTask? = null
 
     init {
-        quest = try {
-            executable?.parseKetherScript(namespace.plus("vulpecula"))
+        try {
+            quest = executable?.parseKetherScript(namespace.plus("vulpecula"))
         } catch (e: Exception) {
             e.printKetherErrorMessage()
-            null
         }
     }
 
@@ -122,11 +121,10 @@ class ScheduleTask(
         }
 
         if (refresh) {
-            quest = try {
-                executable?.parseKetherScript(namespace.plus("vulpecula"))
+            try {
+                quest = executable?.parseKetherScript(namespace.plus("vulpecula"))
             } catch (e: Exception) {
                 e.printKetherErrorMessage()
-                null
             }
         }
 
@@ -194,7 +192,11 @@ class ScheduleTask(
             quest?.runActions() ?: script?.let {
                 // 运行脚本
                 VulWorkspace.runScript(it)
-            } ?: console().sendLang("Schedule-Execution-Undefined", id)
+            } ?: let {
+                // 脚本未定义
+                console().sendLang("Schedule-Execution-Undefined", id)
+                terminate()
+            }
         }
     }
 
@@ -274,7 +276,10 @@ class ScheduleTask(
                     config.getConfigurationSection(key)?.let { section ->
                         if (section.getBoolean("disable", false)) return@let
 
-                        cache[key] = ScheduleTask(key, path, section.wrapper())
+                        cache[key] = ScheduleTask(key, path, section.wrapper()).also {
+                            // 启动新任务
+                            it.run()
+                        }
                         counter += 1
                         debug(Debug.HIGH, "ScheduleTask loaded \"$key\"")
                     }
@@ -286,7 +291,10 @@ class ScheduleTask(
             }
         }
 
-        fun load(): String {
+        /**
+         * @param init 是否为初始化操作
+         * */
+        fun load(init: Boolean): String {
             val start = timing()
             return try {
 
@@ -323,6 +331,11 @@ class ScheduleTask(
                         cache[key] = ScheduleTask(key, path, section.wrapper())
                         debug(Debug.HIGH, "ScheduleTask loaded \"$key\"")
                     }
+                }
+
+                if (!init) {
+                    // 重新启动全部任务
+                    cache.values.forEach { it.run() }
                 }
 
                 console().asLangText("Schedule-Load-Succeeded", cache.size, timing(start)).also {

@@ -24,7 +24,7 @@ object Vulpecula : Plugin() {
         private set
 
     override fun onEnable() {
-        VulpeculaContext.load(false)
+        VulpeculaContext.load(true)
         info("Successfully running Vulpecula!")
     }
 
