@@ -17,6 +17,7 @@ import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
+import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.Script
 import taboolib.module.kether.parseKetherScript
 import taboolib.module.kether.printKetherErrorMessage
@@ -26,7 +27,6 @@ import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.script.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
-import top.maplex.abolethcore.taboolib.common.reflect.Reflex.Companion.getProperty
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
