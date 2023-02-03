@@ -49,7 +49,7 @@ object CommandScript {
                 execute<CommandSender> { sender, context, viewer ->
                     val file = context["file"]
                     try {
-                        VulWorkspace.runScript(file, Bukkit.getPlayerExact(viewer))
+                        VulWorkspace.runScript(file, Bukkit.getPlayerExact(viewer) ?: sender)
                         sender.sendLang("Script-Run-Succeeded", file)
                     } catch (e: Exception) {
                         sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
@@ -58,14 +58,31 @@ object CommandScript {
                 }
 
                 dynamic("args", optional = true) {
-                    execute<CommandSender> { sender, context, args ->
+                    execute<CommandSender> { sender, context, argument ->
                         val file = context["file"]
-                        val viewer = Bukkit.getPlayerExact(context["viewer"])
+                        val viewer = context["viewer"].let {
+                            if (it.equals("@Self", true)) {
+                                // 以自身为执行者
+                                sender
+                            } else {
+                                // 以指定玩家为执行者
+                                Bukkit.getPlayerExact(it) ?: sender
+                            }
+                        }
+                        val args = argument.split(' ')
+
                         try {
-                            VulWorkspace.runScript(file, viewer, args.split(' ').toTypedArray())
-                            sender.sendLang("Script-Run-Succeeded", file)
+                            VulWorkspace.runScript(file, viewer, args.toTypedArray())
+
+                            // 静默通知
+                            if (!args.contains("--silent")) {
+                                sender.sendLang("Script-Run-Succeeded", file)
+                            }
                         } catch (e: Exception) {
-                            sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
+                            // 静默通知
+                            if (!args.contains("--silent")) {
+                                sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
+                            }
                             e.printStackTrace()
                         }
                     }
