@@ -6,6 +6,7 @@ import taboolib.module.kether.switch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.readDouble
 import top.lanscarlos.vulpecula.utils.coerceDouble
+import top.lanscarlos.vulpecula.utils.hasNextToken
 
 /**
  * Vulpecula
@@ -33,6 +34,7 @@ object ActionCoerce {
         reader.switch {
             case("in") {
                 val min = reader.readDouble()
+                reader.hasNextToken("to", "between")
                 val max = reader.readDouble()
                 actionTake {
                     next.thenApplyOrNull(this, min.getOrNull(this), max.getOrNull(this)) {
