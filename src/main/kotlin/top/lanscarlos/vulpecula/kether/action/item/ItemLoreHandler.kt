@@ -23,6 +23,7 @@ object ItemLoreHandler : ActionItemStack.Reader {
             "insert", "add" -> insert(reader, source)
             "modify", "set" -> modify(reader, source)
             "remove", "rm" -> remove(reader, source)
+            "reset" -> reset(reader, source)
             "clear" -> clear(source)
             else -> {
                 reader.reset()
@@ -101,6 +102,19 @@ object ItemLoreHandler : ActionItemStack.Reader {
                     lore.removeLast()
                 }
 
+                meta.lore = lore
+                return@thenApply item.also { it.itemMeta = meta }
+            }
+        }
+    }
+
+    private fun reset(reader: QuestReader, source: LiveData<ItemStack>?): ActionItemStack.Handler {
+        reader.hasNextToken("to")
+        val live = reader.readStringList()
+
+        return acceptTransferFuture(source) { item ->
+            live.getOrNull(this).thenApply { lore ->
+                val meta = item.itemMeta ?: return@thenApply item
                 meta.lore = lore
                 return@thenApply item.also { it.itemMeta = meta }
             }
