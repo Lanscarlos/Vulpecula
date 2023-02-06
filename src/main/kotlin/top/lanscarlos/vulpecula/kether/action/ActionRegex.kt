@@ -3,10 +3,7 @@ package top.lanscarlos.vulpecula.kether.action
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.readInt
-import top.lanscarlos.vulpecula.kether.live.readString
-import top.lanscarlos.vulpecula.kether.live.readStringList
+import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Matcher
@@ -29,7 +26,7 @@ object ActionRegex {
             val future = CompletableFuture<Any?>()
 
             listOf(
-                source.getOrNull(frame),
+                source.get(frame, emptyList()),
                 pattern.getOrNull(frame)
             ).thenTake().thenAccept { args ->
                 val source = args[0] as List<*>
@@ -78,13 +75,13 @@ object ActionRegex {
     class ActionRegexReplace(
         val source: LiveData<List<String>>,
         val pattern: LiveData<String>,
-        val handle: ParsedAction<*>
+        val handle: Any
     ) : ScriptAction<Any?>() {
         override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
             val future = CompletableFuture<Any?>()
 
             listOf(
-                source.getOrNull(frame),
+                source.get(frame, emptyList()),
                 pattern.getOrNull(frame)
             ).thenTake().thenAccept { args ->
                 val source = args[0] as List<*>
@@ -92,30 +89,45 @@ object ActionRegex {
                 val matcher = pattern.matcher(if (source.size == 1) source[0].toString() else source.joinToString("\n"))
                 val buffer = StringBuffer()
 
-                // 递归函数
-                fun process() {
-                    if (!matcher.find()) return
-
-                    val found = matcher.group()
-                    frame.newFrame(handle).also {
-                        it.variables()["@Matcher"] = matcher
-                        it.variables()["matcher"] = matcher
-                        it.variables()["found"] = found
-                        it.variables()["count"] = matcher.groupCount()
-                    }.run<Any?>().thenAccept {
-                        if (frame.script().breakLoop) {
-                            // 跳出递归
-                            frame.script().breakLoop = false
-                        } else {
-                            // 替换内容
-                            matcher.appendReplacement(buffer, it?.toString() ?: "")
-                            // 继续递归
-                            process()
+                when (handle) {
+                    is LiveData<*> -> {
+                        // 简单替换
+                        handle.getOrNull(frame).thenAccept {
+                            while (matcher.find()) {
+                                matcher.appendReplacement(buffer, it?.toString() ?: "")
+                            }
                         }
+                    }
+                    is ParsedAction<*> -> {
+                        // 高级替换
+
+                        // 递归函数
+                        fun process() {
+                            if (!matcher.find()) return
+
+                            val found = matcher.group()
+                            frame.newFrame(handle).also {
+                                it.variables()["@Matcher"] = matcher
+                                it.variables()["matcher"] = matcher
+                                it.variables()["found"] = found
+                                it.variables()["count"] = matcher.groupCount()
+                            }.run<Any?>().thenAccept {
+                                if (frame.script().breakLoop) {
+                                    // 跳出递归
+                                    frame.script().breakLoop = false
+                                } else {
+                                    // 替换内容
+                                    matcher.appendReplacement(buffer, it?.toString() ?: "")
+                                    // 继续递归
+                                    process()
+                                }
+                            }
+                        }
+
+                        process()
                     }
                 }
 
-                process()
                 val result = matcher.appendTail(buffer).toString()
                 if (source.size > 1) {
                     // 原内容为 list
@@ -138,7 +150,7 @@ object ActionRegex {
         reader.switch {
             case("find") {
                 val source = reader.readStringList()
-                reader.hasNextToken("by", "with")
+                reader.hasNextToken("by", "with", "using")
                 val pattern = reader.readString()
                 val handle = reader.tryNextBlock("then")
 
@@ -146,12 +158,21 @@ object ActionRegex {
             }
             case("replace") {
                 val source = reader.readStringList()
-                reader.hasNextToken("by", "with")
-                val pattern = reader.readString()
-                reader.hasNextToken("then")
-                val handle = reader.nextBlock()
 
-                ActionRegexReplace(source, pattern, handle)
+                // 简单替换
+                val simple = reader.tryReadString("to")
+
+                reader.hasNextToken("by", "with", "using")
+                val pattern = reader.readString()
+
+                if (simple == null) {
+                    reader.hasNextToken("then")
+                    val handle = reader.nextBlock()
+                    ActionRegexReplace(source, pattern, handle)
+                } else {
+                    ActionRegexReplace(source, pattern, simple)
+                }
+
             }
             case("group") {
                 val index = reader.readInt()
