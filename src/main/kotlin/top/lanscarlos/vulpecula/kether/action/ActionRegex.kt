@@ -73,7 +73,7 @@ object ActionRegex {
     }
 
     class ActionRegexReplace(
-        val source: LiveData<List<String>>,
+        val source: ParsedAction<*>,
         val pattern: LiveData<String>,
         val handle: Any
     ) : ScriptAction<Any?>() {
@@ -81,12 +81,17 @@ object ActionRegex {
             val future = CompletableFuture<Any?>()
 
             listOf(
-                source.get(frame, emptyList()),
+                frame.run(source),
                 pattern.getOrNull(frame)
             ).thenTake().thenAccept { args ->
-                val source = args[0] as List<*>
+                val source = when (val it = args[0]) {
+                    is String -> it
+                    is Array<*> -> it.mapNotNull { el -> el?.toString() }.joinToString("\n")
+                    is Collection<*> -> it.mapNotNull { el -> el?.toString() }.joinToString("\n")
+                    else -> ""
+                }
                 val pattern = args[1]?.toString()?.toPattern() ?: error("No pattern selected.")
-                val matcher = pattern.matcher(if (source.size == 1) source[0].toString() else source.joinToString("\n"))
+                val matcher = pattern.matcher(source)
                 val buffer = StringBuffer()
 
                 when (handle) {
@@ -129,12 +134,12 @@ object ActionRegex {
                 }
 
                 val result = matcher.appendTail(buffer).toString()
-                if (source.size > 1) {
-                    // 原内容为 list
-                    future.complete(result.split('\n').toList())
-                } else {
+                if (args[0] is String) {
                     // 原内容为字符串
                     future.complete(result)
+                } else {
+                    // 原内容为 list
+                    future.complete(result.split('\n').toList())
                 }
             }
 
@@ -157,7 +162,7 @@ object ActionRegex {
                 ActionRegexFind(source, pattern, handle)
             }
             case("replace") {
-                val source = reader.readStringList()
+                val source = reader.nextBlock()
 
                 // 简单替换
                 val simple = reader.tryReadString("to")
