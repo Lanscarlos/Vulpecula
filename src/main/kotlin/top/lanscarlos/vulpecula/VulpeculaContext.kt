@@ -7,7 +7,7 @@ import top.lanscarlos.vulpecula.internal.CustomCommand
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
-import top.lanscarlos.vulpecula.kether.action.ActionUnicode
+import top.lanscarlos.vulpecula.kether.action.vulpecula.ActionUnicode
 import top.lanscarlos.vulpecula.script.VulScript
 import top.lanscarlos.vulpecula.script.ScriptWorkspace
 

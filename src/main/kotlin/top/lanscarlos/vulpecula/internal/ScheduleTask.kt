@@ -35,6 +35,8 @@ class ScheduleTask(
         SimpleDateFormat(it?.toString() ?: defDateFormat)
     }
 
+    val autoStart by wrapper.readBoolean("auto-start", true)
+
     val async by wrapper.readBoolean("async", false)
 
     val startOf by wrapper.read("start") {
@@ -97,6 +99,9 @@ class ScheduleTask(
 
     val isRunning get() = task != null
     val isStopped get() = task == null
+    val period get() = (duration.toMillis() / 50L)
+    val startDate get() = if (startOf > 0) dateFormat.format(startOf) else "Undefined"
+    val endDate get() = if (endOf > 0) dateFormat.format(endOf) else "Undefined"
 
     init {
         // 编译脚本
@@ -273,7 +278,9 @@ class ScheduleTask(
 
         @Awake(LifeCycle.ACTIVE)
         fun onActive() {
-            cache.values.forEach { it.runTask() }
+            cache.values.forEach {
+                if (it.autoStart) it.runTask()
+            }
         }
 
         private fun onFileChanged(file: File) {

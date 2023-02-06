@@ -139,11 +139,13 @@ Schedule-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
 Schedule-Execution-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 的执行脚本未定义！'
 Schedule-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 不存在！'
+Schedule-Run-Already: '&8[&3Vul&bpecula&8] &a良好 &8|&7 日程 &a{0}&7 已在运行队列中.'
 Schedule-Run-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功运行日程 &a{0}'
 Schedule-Run-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 运行日程 &a{0}&7 时出现问题'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
 Schedule-Stop-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止日程 &a{0}'
+Schedule-Stop-Already: '&8[&3Vul&bpecula&8] &a良好 &8|&7 日程 &a{0}&7 已在终止队列中.'
 Schedule-Stop-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止日程 &a{0}&7 时出现问题'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
@@ -151,6 +153,17 @@ Schedule-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所
 Schedule-Stop-All-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有日程时出现问题'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Schedule-List:
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 所有日程: &f{0}'
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 运行日程: &f{1}'
+Schedule-Detail:
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 日程 &a{0}&7 详细信息'
+  - '    &7状态：{1}'
+  - '    &7异步：{2}'
+  - '    &7延迟：{3}'
+  - '    &7周期：{4}'
+  - '    &7开始时间：{5}'
+  - '    &7结束时间：{6}'
 
 
 

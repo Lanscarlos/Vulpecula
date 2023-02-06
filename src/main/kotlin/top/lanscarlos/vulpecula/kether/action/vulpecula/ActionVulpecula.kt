@@ -20,6 +20,7 @@ object ActionVulpecula {
     fun parser() = scriptParser { reader ->
         reader.switch {
             case("script") { ActionScript.parse(reader) }
+            case("schedule", "task") { ActionSchedule.parse(reader) }
         }
     }
 
