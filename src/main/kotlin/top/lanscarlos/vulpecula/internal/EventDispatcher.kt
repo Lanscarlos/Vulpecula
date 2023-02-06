@@ -25,6 +25,7 @@ import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
 import top.lanscarlos.vulpecula.script.ScriptCompiler
+import top.lanscarlos.vulpecula.script.VulScript
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -217,6 +218,9 @@ class EventDispatcher(
         builder.append("def main = {\n")
         builder.appendWithIndent(content, suffix = "\n")
         builder.append("}")
+
+        /* 消除注释 */
+        eraseComment(builder)
 
         return builder
     }

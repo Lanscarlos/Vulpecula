@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.script
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.kether.Script
 import taboolib.module.kether.parseKetherScript
+import top.lanscarlos.vulpecula.utils.bindConfigNode
 import top.lanscarlos.vulpecula.utils.coerceListNotNull
 
 /**
@@ -17,6 +18,23 @@ interface ScriptCompiler {
     fun buildSource(): StringBuilder
 
     fun compileScript()
+
+    /**
+     * 消除注释
+     * */
+    fun eraseComment(builder: StringBuilder) {
+        if (singleCommentPattern != "[]" && multiCommentPattern != "[]") {
+            val pattern = "${singleCommentPattern}|${multiCommentPattern}".toPattern()
+            val matcher = pattern.matcher(builder.extract())
+            val buffer = StringBuffer()
+
+            while (matcher.find()) {
+                matcher.appendReplacement(buffer, "")
+            }
+            // 兼容 Github 构建系统
+            builder.append(matcher.appendTail(buffer))
+        }
+    }
 
     /*
     * 构建变量
@@ -180,9 +198,9 @@ interface ScriptCompiler {
         return when (type.lowercase()) {
             "ke", "kether" -> content
             "js", "javascript" -> "js '$content'"
-            "ks", "script" -> "vul script run *$content"
+            "ks", "script" -> "vul script run *\"$content\""
 //            "kf", "fragment" -> ScriptFragment.link(this, content)
-            "kf", "fragment" -> "fragment $content"
+//            "kf", "fragment" -> "fragment $content"
             else -> null
         }
     }
@@ -215,5 +233,17 @@ interface ScriptCompiler {
                 postfix = suffix
             )
         }
+    }
+
+    companion object {
+
+        val singleCommentPattern by bindConfigNode("script-setting.comment-pattern.single-line") {
+            it?.toString() ?: "[]"
+        }
+
+        val multiCommentPattern by bindConfigNode("script-setting.comment-pattern.multi-line") {
+            it?.toString() ?: "[]"
+        }
+
     }
 }

@@ -170,17 +170,7 @@ class VulScript(
         }
 
         /* 消除注释 */
-        if (singleCommentPattern != "[]" && multiCommentPattern != "[]") {
-            val pattern = "${singleCommentPattern}|${multiCommentPattern}".toPattern()
-            val matcher = pattern.matcher(builder.extract())
-            val buffer = StringBuffer()
-
-            while (matcher.find()) {
-                matcher.appendReplacement(buffer, "")
-            }
-            // 兼容 Github 构建系统
-            builder.append(matcher.appendTail(buffer))
-        }
+        eraseComment(builder)
 
         /* 转义 Unicode */
         if (escapeUnicode) {
@@ -260,14 +250,6 @@ class VulScript(
     }
 
     companion object {
-
-        val singleCommentPattern by bindConfigNode("script-setting.comment-pattern.single-line") {
-            it?.toString() ?: "[]"
-        }
-
-        val multiCommentPattern by bindConfigNode("script-setting.comment-pattern.multi-line") {
-            it?.toString() ?: "[]"
-        }
 
         val folder = File(getDataFolder(), "scripts")
 
