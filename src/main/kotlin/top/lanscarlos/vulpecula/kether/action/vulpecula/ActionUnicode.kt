@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action
+package top.lanscarlos.vulpecula.kether.action.vulpecula
 
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action
+package top.lanscarlos.vulpecula.kether.action.vulpecula
 
 import org.bukkit.entity.Entity
 import taboolib.library.kether.ParsedAction

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action
+package top.lanscarlos.vulpecula.kether.action.vulpecula
 
 import taboolib.module.kether.scriptParser
 import taboolib.module.kether.switch
