@@ -20,7 +20,7 @@ class StringLiveData(
 ) : LiveData<String> {
 
     override fun get(frame: ScriptFrame, def: String): CompletableFuture<String> {
-        return getOrNull(frame).thenApply { if (it != null) def else def }
+        return getOrNull(frame).thenApply { it ?: def }
     }
 
     override fun getOrNull(frame: ScriptFrame): CompletableFuture<String?> {

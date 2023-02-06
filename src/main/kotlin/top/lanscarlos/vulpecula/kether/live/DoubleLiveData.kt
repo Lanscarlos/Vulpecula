@@ -20,7 +20,7 @@ class DoubleLiveData(
 ) : LiveData<Double> {
 
     override fun get(frame: ScriptFrame, def: Double): CompletableFuture<Double> {
-        return getOrNull(frame).thenApply { if (it != null) def else def }
+        return getOrNull(frame).thenApply { it ?: def }
     }
 
     override fun getOrNull(frame: ScriptFrame): CompletableFuture<Double?> {

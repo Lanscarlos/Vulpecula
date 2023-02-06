@@ -23,7 +23,7 @@ class ItemLiveData(
 ) : LiveData<ItemStack> {
 
     override fun get(frame: ScriptFrame, def: ItemStack): CompletableFuture<ItemStack> {
-        return getOrNull(frame).thenApply { if (it != null) def else def }
+        return getOrNull(frame).thenApply { it ?: def }
     }
 
     override fun getOrNull(frame: ScriptFrame): CompletableFuture<ItemStack?> {

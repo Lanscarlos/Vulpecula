@@ -20,7 +20,7 @@ class BooleanLiveData(
 ) : LiveData<Boolean> {
 
     override fun get(frame: ScriptFrame, def: Boolean): CompletableFuture<Boolean> {
-        return getOrNull(frame).thenApply { if (it != null) def else def }
+        return getOrNull(frame).thenApply { it ?: def }
     }
 
     override fun getOrNull(frame: ScriptFrame): CompletableFuture<Boolean?> {

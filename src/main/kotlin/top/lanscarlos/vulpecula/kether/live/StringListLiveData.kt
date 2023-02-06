@@ -31,10 +31,10 @@ class StringListLiveData(
             when (it) {
                 is String -> listOf(it)
                 is Array<*> -> {
-                    it.mapNotNull { it?.toString() }
+                    it.mapNotNull { el -> el?.toString() }
                 }
                 is Collection<*> -> {
-                    it.mapNotNull { it?.toString() }
+                    it.mapNotNull { el -> el?.toString() }
                 }
                 else -> null
             }

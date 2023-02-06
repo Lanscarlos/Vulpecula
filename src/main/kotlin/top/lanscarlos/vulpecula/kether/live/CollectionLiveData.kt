@@ -17,7 +17,7 @@ class CollectionLiveData(
 ) : LiveData<Collection<*>> {
 
     override fun get(frame: ScriptFrame, def: Collection<*>): CompletableFuture<Collection<*>> {
-        return getOrNull(frame).thenApply { if (it != null) def else def }
+        return getOrNull(frame).thenApply { it ?: def }
     }
 
     override fun getOrNull(frame: ScriptFrame): CompletableFuture<Collection<*>?> {

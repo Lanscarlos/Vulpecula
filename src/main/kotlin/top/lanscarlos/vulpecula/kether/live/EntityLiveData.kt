@@ -23,7 +23,7 @@ class EntityLiveData(
 ) : LiveData<Entity> {
 
     override fun get(frame: ScriptFrame, def: Entity): CompletableFuture<Entity> {
-        return getOrNull(frame).thenApply { if (it != null) def else def }
+        return getOrNull(frame).thenApply { it ?: def }
     }
 
     override fun getOrNull(frame: ScriptFrame): CompletableFuture<Entity?> {
