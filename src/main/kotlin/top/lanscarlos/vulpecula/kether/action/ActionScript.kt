@@ -1,7 +1,11 @@
 package top.lanscarlos.vulpecula.kether.action
 
+import org.bukkit.entity.Entity
+import taboolib.library.kether.ParsedAction
+import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
+import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.kether.live.tryReadEntity
 import top.lanscarlos.vulpecula.script.VulScript
@@ -18,55 +22,60 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-12-24 13:08
  */
-object ActionVulScript {
+object ActionScript {
+
+    class ActionScriptRun(
+        val file: LiveData<String>,
+        val viewer: LiveData<Entity>?,
+        val async: Boolean,
+        val args: List<ParsedAction<*>>?
+    ) : ScriptAction<Any?>() {
+        override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
+            val future = CompletableFuture<Any?>()
+
+            listOf(
+                file.getOrNull(frame),
+                viewer?.getOrNull(frame),
+                *(args ?: emptyList()).map { frame.run(it) }.toTypedArray()
+            ).thenTake().thenAccept { args ->
+                val id = args[0]?.toString() ?: error("No script file found: \"${args[0]}\"")
+                val result = if (args.size > 2) {
+                    // 有参数
+                    VulWorkspace.runScript(id, args[1], *args.subList(2, args.size).toTypedArray())
+                } else {
+                    // 无参数
+                    VulWorkspace.runScript(id, args[1])
+                }
+
+                if (async) {
+                    future.complete(null)
+                } else {
+                    result?.thenAccept { future.complete(it) } ?: future.complete(null)
+                }
+            }
+
+            return future
+        }
+    }
 
     /**
-     * vul-script run $file by $viewer -async with [ args... ]
+     * vul script run $file by $viewer -async with [ args... ]
      *
-     * vul-script stop *
-     * vul-script stop $file
+     * vul script stop *
+     * vul script stop $file
      *
-     * vul-script compile/build *
-     * vul-script compile/build $file
+     * vul script compile/build *
+     * vul script compile/build $file
      * */
-    @VulKetherParser(
-        id = "vul-script",
-        name = ["vul-script", "vul-ks", "vulscript"]
-    )
-    fun parser() = scriptParser { reader ->
-        reader.switch {
+    fun parse(reader: QuestReader): ScriptAction<*> {
+        return reader.switch {
             case("run") {
                 val file = reader.readString()
                 val viewer = reader.tryReadEntity("by")
                 val async = reader.hasNextToken("-async")
                 val args = reader.tryNextActionList("with")
 
-                actionTake {
-                    val future = CompletableFuture<Any?>()
-
-                    listOf(
-                        file.getOrNull(this),
-                        viewer?.getOrNull(this),
-                        *(args ?: emptyList()).map { this.run(it) }.toTypedArray()
-                    ).thenTake().thenAccept { args ->
-                        val id = args[0]?.toString() ?: error("No script file found: \"${args[0]}\"")
-                        val result = if (args.size > 2) {
-                            // 有参数
-                            VulWorkspace.runScript(id, args[1], *args.subList(2, args.size).toTypedArray())
-                        } else {
-                            // 无参数
-                            VulWorkspace.runScript(id, args[1])
-                        }
-
-                        if (async) {
-                            future.complete(null)
-                        } else {
-                            result?.thenAccept { future.complete(it) } ?: future.complete(null)
-                        }
-                    }
-
-                    return@actionTake future
-                }
+                ActionScriptRun(file, viewer, async, args)
             }
 
             case("stop") {
@@ -114,5 +123,13 @@ object ActionVulScript {
                 }
             }
         }
+    }
+
+    @VulKetherParser(
+        id = "vulpecula-script",
+        name = ["vul-script", "vul-ks", "vulscript"]
+    )
+    fun parser() = scriptParser { reader ->
+        parse(reader)
     }
 }
