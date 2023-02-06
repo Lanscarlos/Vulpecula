@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.script
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.MultimapBuilder
+import org.bukkit.entity.Player
 import taboolib.common.platform.function.*
 import taboolib.library.kether.ExitStatus
 import taboolib.module.kether.*
@@ -37,6 +38,9 @@ object VulWorkspace {
         return runScript(id, ScriptContext.create(script) {
             if (sender != null) {
                 this.sender = adaptCommandSender(sender)
+                if (sender is Player) {
+                    rootFrame().variables().set("player", sender)
+                }
             }
             for ((i, arg) in args.withIndex()) {
                 rootFrame().variables().set("arg$i", arg)
