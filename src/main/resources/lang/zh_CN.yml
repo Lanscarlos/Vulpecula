@@ -74,6 +74,7 @@ Script-Load-Failed-Conflict:
 Script-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载脚本 &a{0}&7 内的 &a{1}&7 时出现问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Script-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 脚本 &a{0}&7 不存在！'
 Script-Run-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功运行脚本 &a{0}'
 Script-Run-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 运行脚本 &a{0}&7 时出现问题'
@@ -115,10 +116,8 @@ Event-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &
 Event-Mapping-Load-Failed:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-Event-Mapping-Failed-Undefined:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射 &a{1}&7 未被定义！'
-Event-Mapping-Failed-Class-Not-Found:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射 &a{0}&7 对应的事件类 &a{1}&7 不存在！'
+Event-Mapping-Failed-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射 &a{1}&7 未被定义！'
+Event-Mapping-Failed-Class-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件类 &a{0}&7 不存在！'
 
 
 
@@ -139,6 +138,19 @@ Schedule-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
 Schedule-Execution-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 的执行脚本未定义！'
+Schedule-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 不存在！'
+Schedule-Run-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功运行日程 &a{0}'
+Schedule-Run-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 运行日程 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Schedule-Stop-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止日程 &a{0}'
+Schedule-Stop-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止日程 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Schedule-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所有日程.'
+Schedule-Stop-All-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有日程时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
 
 
 

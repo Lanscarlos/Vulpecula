@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.internal.EventHandler
 import top.lanscarlos.vulpecula.internal.EventMapper
 import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.VulWorkspace
+import top.lanscarlos.vulpecula.script.ScriptWorkspace
 
 object Vulpecula : Plugin() {
 
@@ -37,7 +37,7 @@ object Vulpecula : Plugin() {
             VulScript.cache.size
         })
         metrics.addCustomChart(SingleLineChart("scripts-compiled") {
-            VulWorkspace.scripts.size
+            ScriptWorkspace.scripts.size
         })
         metrics.addCustomChart(SingleLineChart("custom-command") {
             CustomCommand.cache.size

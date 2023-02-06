@@ -11,7 +11,7 @@ import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
-import top.lanscarlos.vulpecula.script.VulWorkspace
+import top.lanscarlos.vulpecula.script.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -29,7 +29,7 @@ class ScheduleTask(
     val id: String,
     val path: String, // 所在文件路径
     val wrapper: VulConfig
-) {
+) : ScriptCompiler {
 
     val dateFormat by wrapper.read("date-format") {
         SimpleDateFormat(it?.toString() ?: defDateFormat)
@@ -55,6 +55,8 @@ class ScheduleTask(
         }
     }
 
+    val delay by wrapper.readInt("delay", 0)
+
     val duration by wrapper.read("period") {
         if (it == null) return@read Duration.ZERO
         val pattern = "\\d+[dhms]".toPattern()
@@ -75,74 +77,94 @@ class ScheduleTask(
 
     val namespace by wrapper.readStringList("namespace", listOf("vulpecula"))
 
-    val executable by wrapper.read("execute") { value ->
-        val body = when (value) {
-            is String -> listOf(value)
-            is Array<*> -> value.mapNotNull { it?.toString() }
-            is Collection<*> -> value.mapNotNull { it?.toString() }
-            else -> {
-                null
-//                listOf("print *\"${console().asLangText("Schedule-Execution-Undefined", id)}\"")
-            }
-        }?.joinToString(separator = "\n")
-
-        return@read if (body != null) "def main = { $body }" else null
+    val condition by wrapper.read("condition") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
+    val deny by wrapper.read("deny") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
+    val executable by wrapper.read("execute") {
+        if (it != null) buildSection(it) else StringBuilder()
+    }
+    val exception by wrapper.read("exception") {
+        if (it != null) buildException(it) else emptyList()
     }
 
-    val script by wrapper.readString("script")
+    lateinit var source: StringBuilder
+    lateinit var script: Script
 
-    var quest: Script? = null
     private var task: PlatformExecutor.PlatformTask? = null
 
+    val isRunning get() = task != null
+    val isStopped get() = task == null
+
     init {
+        // 编译脚本
+        compileScript()
+    }
+
+    override fun buildSource(): StringBuilder {
+        val builder = StringBuilder()
+
+        /* 构建核心语句 */
+        builder.append(executable)
+
+        /* 构建异常处理 */
+        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
+            // 提取先前所有内容
+            val content = builder.extract()
+            compileException(builder, content, exception)
+        }
+
+        /* 构建条件处理 */
+        if (condition.isNotEmpty()) {
+            // 提取先前所有内容
+            val content = builder.extract()
+            compileCondition(builder, content, condition, deny)
+        }
+
+        /*
+        * 收尾
+        * 构建方法体
+        * */
+
+        // 提取先前所有内容
+        val content = builder.extract()
+
+        // 构建方法体
+        builder.append("def main = {\n")
+        builder.appendWithIndent(content, suffix = "\n")
+        builder.append("}")
+
+        // 消除注释
+        eraseComment(builder)
+
+        return builder
+    }
+
+    override fun compileScript() {
         try {
-            quest = executable?.parseKetherScript(namespace.plus("vulpecula"))
+            // 尝试构建脚本
+            val source = buildSource()
+            this.script = source.toString().parseKetherScript(namespace.plus("vulpecula"))
+
+            // 编译通过
+            this.source = source
+
+            debug(Debug.HIGHEST, "schedule \"$id\" build source:\n$source")
         } catch (e: Exception) {
             e.printKetherErrorMessage()
         }
     }
 
     /**
-     * 对照并尝试更新
-     * */
-    fun contrast(section: ConfigurationSection) {
-        var refresh = false // 是否更新脚本
-        var restart = false // 是否重启任务
-
-        wrapper.updateSource(section).forEach {
-            when (it.first) {
-                "namespace", "execute" -> {
-                    refresh = true
-                }
-                "async", "period", "start", "end", "duration" -> {
-                    restart = true
-                }
-            }
-        }
-
-        if (refresh) {
-            try {
-                quest = executable?.parseKetherScript(namespace.plus("vulpecula"))
-            } catch (e: Exception) {
-                e.printKetherErrorMessage()
-            }
-        }
-
-        if (restart) run()
-
-        if (refresh || restart) {
-            debug(Debug.HIGH, "ScheduleTask updated \"$id\"")
-        }
-    }
-
-    /**
      * 开始任务
      * */
-    fun run() {
+    fun runTask(args: Array<Any?> = emptyArray()) {
         // 取消上一次未结束的任务
         terminate()
 
-        if (quest == null && script == null) {
+        if (!::script.isInitialized) {
             // 未指定运行内容
             console().sendLang("Schedule-Execution-Undefined", id)
             return
@@ -180,7 +202,12 @@ class ScheduleTask(
         debug("ScheduleTask $id ready to run. {async=$async, delay=${delay/50L}, period=${period/50L}, start-of=${dateFormat.format(startOf)}}")
 
         // 开始新的任务
-        task = submit(async = async, delay = delay / 50L + 10, period = period / 50L) {
+        task = submit(
+            async = async,
+            period = period / 50L,
+            /* 额外延迟 10 tick 是为了矫正时间的显示 */
+            delay = (delay / 50L + this.delay + 10).coerceAtLeast(0)
+        ) {
             if (endOf > 0 && System.currentTimeMillis() >= endOf) {
                 debug("ScheduleTask $id has completed. {end-of=${dateFormat.format(endOf)}}")
                 terminate()
@@ -189,13 +216,12 @@ class ScheduleTask(
 
             debug("ScheduleTask $id running...")
 
-            quest?.runActions() ?: script?.let {
-                // 运行脚本
-                VulWorkspace.runScript(it)
-            } ?: let {
-                // 脚本未定义
-                console().sendLang("Schedule-Execution-Undefined", id)
-                terminate()
+            script.runActions {
+                if (args.isEmpty()) return@runActions
+                for ((i, arg) in args.withIndex()) {
+                    rootFrame().variables().set("arg$i", arg)
+                }
+                rootFrame().variables().set("args", args)
             }
         }
     }
@@ -206,6 +232,32 @@ class ScheduleTask(
     fun terminate() {
         task?.cancel()
         task = null
+    }
+
+    /**
+     * 对照并尝试更新
+     * */
+    fun contrast(section: ConfigurationSection) {
+        var refresh = false // 是否更新脚本
+        var restart = false // 是否重启任务
+
+        wrapper.updateSource(section).forEach {
+            when (it.first) {
+                "namespace", "execute" -> {
+                    refresh = true
+                }
+                "async", "period", "start", "end", "duration" -> {
+                    restart = true
+                }
+            }
+        }
+
+        if (refresh) compileScript()
+        if (restart) runTask()
+
+        if (refresh || restart) {
+            debug(Debug.HIGH, "ScheduleTask updated \"$id\"")
+        }
     }
 
     companion object {
@@ -221,7 +273,7 @@ class ScheduleTask(
 
         @Awake(LifeCycle.ACTIVE)
         fun onActive() {
-            cache.values.forEach { it.run() }
+            cache.values.forEach { it.runTask() }
         }
 
         private fun onFileChanged(file: File) {
@@ -278,7 +330,7 @@ class ScheduleTask(
 
                         cache[key] = ScheduleTask(key, path, section.wrapper()).also {
                             // 启动新任务
-                            it.run()
+                            it.runTask()
                         }
                         counter += 1
                         debug(Debug.HIGH, "ScheduleTask loaded \"$key\"")
@@ -335,7 +387,7 @@ class ScheduleTask(
 
                 if (!init) {
                     // 重新启动全部任务
-                    cache.values.forEach { it.run() }
+                    cache.values.forEach { it.runTask() }
                 }
 
                 console().asLangText("Schedule-Load-Succeeded", cache.size, timing(start)).also {

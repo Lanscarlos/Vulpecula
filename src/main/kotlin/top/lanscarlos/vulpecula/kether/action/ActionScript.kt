@@ -9,7 +9,7 @@ import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.kether.live.tryReadEntity
 import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.VulWorkspace
+import top.lanscarlos.vulpecula.script.ScriptWorkspace
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.thenTake
 import top.lanscarlos.vulpecula.utils.tryNextActionList
@@ -41,10 +41,10 @@ object ActionScript {
                 val id = args[0]?.toString() ?: error("No script file found: \"${args[0]}\"")
                 val result = if (args.size > 2) {
                     // 有参数
-                    VulWorkspace.runScript(id, args[1], *args.subList(2, args.size).toTypedArray())
+                    ScriptWorkspace.runScript(id, args[1], *args.subList(2, args.size).toTypedArray())
                 } else {
                     // 无参数
-                    VulWorkspace.runScript(id, args[1])
+                    ScriptWorkspace.runScript(id, args[1])
                 }
 
                 if (async) {
@@ -82,7 +82,7 @@ object ActionScript {
                 if (reader.hasNextToken("*")) {
                     actionNow {
                         try {
-                            VulWorkspace.terminateAllScript()
+                            ScriptWorkspace.terminateAllScript()
                             return@actionNow true
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -94,7 +94,7 @@ object ActionScript {
                     actionTake {
                         file.getOrNull(this).thenApply {
                             try {
-                                VulWorkspace.terminateScript(it ?: return@thenApply false)
+                                ScriptWorkspace.terminateScript(it ?: return@thenApply false)
                                 return@thenApply true
                             } catch (e: Exception) {
                                 e.printStackTrace()

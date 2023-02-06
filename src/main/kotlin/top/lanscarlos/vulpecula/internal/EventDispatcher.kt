@@ -291,8 +291,13 @@ class EventDispatcher(
 
         // 执行脚本
         script.runActions {
+            this.sender = if (player != null) {
+                adaptPlayer(player)
+            } else {
+                console()
+            }
             setVariable("@Event", "event", value = event)
-            setVariable("@Sender", "@Player", "player", value = player)
+            setVariable("@Player", "player", value = player)
             setVariable("playerName", value = player?.name)
         }
     }

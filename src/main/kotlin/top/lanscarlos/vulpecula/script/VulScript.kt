@@ -31,7 +31,7 @@ class VulScript(
         if (path?.startsWith("/") == true) {
             File(".$path")
         } else {
-            File(VulWorkspace.folder, path ?: def)
+            File(ScriptWorkspace.folder, path ?: def)
         }
     }
 
@@ -153,7 +153,7 @@ class VulScript(
         * */
         if (fragments.isNotEmpty()) {
             val keys = fragments.keys.joinToString("|")
-            val pattern = "\\\$($keys)(?=\\b)|\\\$\\{($keys)\\}".toPattern()
+            val pattern = "\\\$($keys)(?=\\b)|\\\$\\{($keys)}".toPattern()
             val matcher = pattern.matcher(builder.extract())
             val buffer = StringBuffer()
 
@@ -279,7 +279,7 @@ class VulScript(
                 cache.clear()
 
                 val folder = folder.toPath()
-                val ignored = VulWorkspace.folder.toPath()
+                val ignored = ScriptWorkspace.folder.toPath()
 
                 if (java.nio.file.Files.notExists(folder)) {
                     // 路径不存在

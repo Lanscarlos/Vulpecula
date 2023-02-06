@@ -253,6 +253,7 @@ class CustomCommand(
         if (playerOnly) {
             this.execute<Player> { player, context, argument ->
                 script.runActions {
+                    this.sender = adaptPlayer(player)
                     setVariable("@Sender", "@Player", "player", value = player)
                     setVariable("@Context", "context", value = context)
                     setVariable("@Arg", "arg", value = argument)
@@ -262,6 +263,7 @@ class CustomCommand(
         } else {
             this.execute<CommandSender> { sender, context, argument ->
                 script.runActions {
+                    this.sender = adaptCommandSender(sender)
                     setVariable("@Sender", value = sender)
                     setVariable("@Context", "context", value = context)
                     setVariable("@Arg", "arg", value = argument)

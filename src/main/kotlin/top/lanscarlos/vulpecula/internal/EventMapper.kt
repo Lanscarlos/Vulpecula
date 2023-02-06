@@ -42,7 +42,7 @@ object EventMapper {
         return try {
             Class.forName(eventName)
         } catch (ignored: Exception) {
-            console().sendLang("Event-Mapping-Failed-Class-Not-Found", listener.mapper, eventName)
+            console().sendLang("Event-Mapping-Failed-Class-Not-Found", eventName)
             null
         }
     }

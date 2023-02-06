@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture
  * @since 2022-12-22 18:40
  */
 @Suppress("UnstableApiUsage")
-object VulWorkspace {
+object ScriptWorkspace {
 
     val namespace = listOf("vulpecula", "vulpecula-script")
     val folder = File(getDataFolder(), "scripts/.compiled")
@@ -41,6 +41,8 @@ object VulWorkspace {
                 if (sender is Player) {
                     rootFrame().variables().set("player", sender)
                 }
+            } else {
+                this.sender = console()
             }
             for ((i, arg) in args.withIndex()) {
                 rootFrame().variables().set("arg$i", arg)

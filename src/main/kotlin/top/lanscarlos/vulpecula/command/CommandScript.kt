@@ -7,9 +7,9 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
-import taboolib.platform.util.sendLang
 import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.VulWorkspace
+import top.lanscarlos.vulpecula.script.ScriptWorkspace
+import top.lanscarlos.vulpecula.utils.sendSyncLang
 
 /**
  * Vulpecula
@@ -32,14 +32,14 @@ object CommandScript {
     val run: CommandComponent.() -> Unit = {
         dynamic("file") {
             suggestion<CommandSender> { _, _ ->
-                VulWorkspace.scripts.map { it.value.id }
+                ScriptWorkspace.scripts.map { it.value.id }
             }
             execute<CommandSender> { sender, _, file ->
                 try {
-                    VulWorkspace.runScript(file)
-                    sender.sendLang("Script-Run-Succeeded", file)
+                    ScriptWorkspace.runScript(file)
+                    sender.sendSyncLang("Script-Run-Succeeded", file)
                 } catch (e: Exception) {
-                    sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
+                    sender.sendSyncLang("Script-Run-Failed", file, e.localizedMessage)
                     e.printStackTrace()
                 }
             }
@@ -49,10 +49,10 @@ object CommandScript {
                 execute<CommandSender> { sender, context, viewer ->
                     val file = context["file"]
                     try {
-                        VulWorkspace.runScript(file, Bukkit.getPlayerExact(viewer) ?: sender)
-                        sender.sendLang("Script-Run-Succeeded", file)
+                        ScriptWorkspace.runScript(file, Bukkit.getPlayerExact(viewer) ?: sender)
+                        sender.sendSyncLang("Script-Run-Succeeded", file)
                     } catch (e: Exception) {
-                        sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
+                        sender.sendSyncLang("Script-Run-Failed", file, e.localizedMessage)
                         e.printStackTrace()
                     }
                 }
@@ -70,19 +70,16 @@ object CommandScript {
                             }
                         }
                         val args = argument.split(' ')
+                        val silent = args.contains("--silent")
 
                         try {
-                            VulWorkspace.runScript(file, viewer, args.toTypedArray())
-
-                            // 静默通知
-                            if (!args.contains("--silent")) {
-                                sender.sendLang("Script-Run-Succeeded", file)
-                            }
+                            ScriptWorkspace.runScript(file, viewer, args.toTypedArray())?.let {
+                                // 静默通知
+                                sender.sendSyncLang(silent, "Script-Run-Succeeded", file)
+                            } ?: sender.sendSyncLang(silent, "Script-Not-Found", file)
                         } catch (e: Exception) {
                             // 静默通知
-                            if (!args.contains("--silent")) {
-                                sender.sendLang("Script-Run-Failed", file, e.localizedMessage)
-                            }
+                            sender.sendSyncLang(silent, "Script-Run-Failed", file, e.localizedMessage)
                             e.printStackTrace()
                         }
                     }
@@ -94,24 +91,24 @@ object CommandScript {
     val stop: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             try {
-                VulWorkspace.terminateAllScript()
-                sender.sendLang("Script-Stop-All-Succeeded")
+                ScriptWorkspace.terminateAllScript()
+                sender.sendSyncLang("Script-Stop-All-Succeeded")
             } catch (e: Exception) {
-                sender.sendLang("Script-Stop-All-Failed", e.localizedMessage)
+                sender.sendSyncLang("Script-Stop-All-Failed", e.localizedMessage)
                 e.printStackTrace()
             }
         }
 
         dynamic("file", optional = true) {
             suggestion<CommandSender> { _, _ ->
-                VulWorkspace.scripts.map { it.value.id }
+                ScriptWorkspace.scripts.map { it.value.id }
             }
             execute<CommandSender> { sender, _, file ->
                 try {
-                    VulWorkspace.terminateScript(file)
-                    sender.sendLang("Script-Stop-Succeeded", file)
+                    ScriptWorkspace.terminateScript(file)
+                    sender.sendSyncLang("Script-Stop-Succeeded", file)
                 } catch (e: Exception) {
-                    sender.sendLang("Script-Stop-Failed", file, e.localizedMessage)
+                    sender.sendSyncLang("Script-Stop-Failed", file, e.localizedMessage)
                     e.printStackTrace()
                 }
             }
@@ -122,9 +119,9 @@ object CommandScript {
         execute<CommandSender> { sender, _, _ ->
             try {
                 VulScript.getAll().forEach { it.compileScript() }
-                sender.sendLang("Script-Compile-Command-All-Succeeded")
+                sender.sendSyncLang("Script-Compile-Command-All-Succeeded")
             } catch (e: Exception) {
-                sender.sendLang("Script-Compile-Command-All-Failed", e.localizedMessage)
+                sender.sendSyncLang("Script-Compile-Command-All-Failed", e.localizedMessage)
                 e.printStackTrace()
             }
         }
@@ -136,9 +133,9 @@ object CommandScript {
             execute<CommandSender> { sender, _, file ->
                 try {
                     VulScript.get(file)?.compileScript()
-                    sender.sendLang("Script-Compile-Command-Succeeded", file)
+                    sender.sendSyncLang("Script-Compile-Command-Succeeded", file)
                 } catch (e: Exception) {
-                    sender.sendLang("Script-Compile-Command-Failed", file, e.localizedMessage)
+                    sender.sendSyncLang("Script-Compile-Command-Failed", file, e.localizedMessage)
                     e.printStackTrace()
                 }
             }
@@ -147,21 +144,21 @@ object CommandScript {
 
     val list: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
-            sender.sendLang(
+            sender.sendSyncLang(
                 "Script-List",
-                VulWorkspace.scripts.map { it.value.id }.joinToString(", "),
-                VulWorkspace.getRunningScript().joinToString(", ") { it.id }
+                ScriptWorkspace.scripts.map { it.value.id }.joinToString(", "),
+                ScriptWorkspace.getRunningScript().joinToString(", ") { it.id }
             )
         }
     }
 
     val reload: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
-            VulWorkspace.terminateAllScript()
+            ScriptWorkspace.terminateAllScript()
             VulScript.load().let {
                 if (sender is Player) sender.sendMessage(it)
             }
-            VulWorkspace.load().let {
+            ScriptWorkspace.load().let {
                 if (sender is Player) sender.sendMessage(it)
             }
         }

@@ -9,7 +9,7 @@ import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.ActionUnicode
 import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.VulWorkspace
+import top.lanscarlos.vulpecula.script.ScriptWorkspace
 
 /**
  * Vulpecula
@@ -51,7 +51,7 @@ object VulpeculaContext {
 
         // 加载脚本
         messages += VulScript.load()
-        messages += VulWorkspace.load()
+        messages += ScriptWorkspace.load()
 
         // 加载自定义命令
         messages += CustomCommand.load()

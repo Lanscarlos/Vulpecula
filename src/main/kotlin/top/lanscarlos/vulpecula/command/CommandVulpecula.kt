@@ -47,12 +47,14 @@ object CommandVulpecula {
     val reload = subCommand {
         execute<CommandSender> { sender, _, _ ->
             val info = VulpeculaContext.load()
-            val player = sender as? Player ?: return@execute
-            info.forEach { player.sendMessage(it) }
+            (sender as? Player)?.sendMessage(*info.toTypedArray())
         }
     }
 
     @CommandBody
     val script = subCommand(CommandScript.main)
+
+    @CommandBody
+    val schedule = subCommand(CommandSchedule.main)
 
 }
