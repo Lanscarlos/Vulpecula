@@ -25,7 +25,7 @@ object CommandSchedule {
      * vul schedule run taskId args?...
      * */
     val run: CommandComponent.() -> Unit = {
-        dynamic("taskId") {
+        dynamic("id") {
             suggestion<CommandSender>(uncheck = true) { _, _ ->
                 ScheduleTask.cache.values.mapNotNull {
                     if (it.isStopped) it.id else null
@@ -53,7 +53,7 @@ object CommandSchedule {
 
             dynamic("args", optional = true) {
                 execute<CommandSender> { sender, context, argument ->
-                    val taskId = context["taskId"]
+                    val taskId = context["id"]
                     val args = argument.split(' ')
                     val silent = args.contains("--silent")
 
@@ -86,39 +86,40 @@ object CommandSchedule {
      * vul schedule stop taskId?
      * */
     val stop: CommandComponent.() -> Unit = {
-        execute<CommandSender> { sender, _, _ ->
-            try {
-                ScheduleTask.cache.values.forEach { it.terminate() }
-                sender.sendSyncLang("Schedule-Stop-All-Succeeded")
-            } catch (e: Exception) {
-                sender.sendSyncLang("Schedule-Stop-All-Failed", e.localizedMessage)
-                e.printStackTrace()
-            }
-        }
-
-        dynamic("taskId", optional = true) {
+        dynamic("id", optional = true) {
             suggestion<CommandSender> { _, _ ->
                 ScheduleTask.cache.values.mapNotNull {
                     if (it.isRunning) it.id else null
-                }
+                }.plus("*")
             }
             execute<CommandSender> { sender, _, taskId ->
-                try {
-                    val task = ScheduleTask.get(taskId)
-                    if (task != null) {
-                        if (task.isStopped) {
-                            sender.sendSyncLang("Schedule-Run-Already", taskId)
-                            return@execute
-                        }
-
-                        task.terminate()
-                        sender.sendSyncLang("Schedule-Stop-Succeeded", taskId)
-                    } else {
-                        sender.sendSyncLang("Schedule-Not-Found", taskId)
+                if (taskId == "*") {
+                    // 终止所有日程模块
+                    try {
+                        ScheduleTask.cache.values.forEach { it.terminate() }
+                        sender.sendSyncLang("Schedule-Stop-All-Succeeded")
+                    } catch (e: Exception) {
+                        sender.sendSyncLang("Schedule-Stop-All-Failed", e.localizedMessage)
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    sender.sendSyncLang("Schedule-Stop-Failed", taskId, e.localizedMessage)
-                    e.printStackTrace()
+                } else {
+                    try {
+                        val task = ScheduleTask.get(taskId)
+                        if (task != null) {
+                            if (task.isStopped) {
+                                sender.sendSyncLang("Schedule-Run-Already", taskId)
+                                return@execute
+                            }
+
+                            task.terminate()
+                            sender.sendSyncLang("Schedule-Stop-Succeeded", taskId)
+                        } else {
+                            sender.sendSyncLang("Schedule-Not-Found", taskId)
+                        }
+                    } catch (e: Exception) {
+                        sender.sendSyncLang("Schedule-Stop-Failed", taskId, e.localizedMessage)
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -141,7 +142,7 @@ object CommandSchedule {
      * vul schedule detail taskId
      * */
     val detail: CommandComponent.() -> Unit = {
-        dynamic("taskId") {
+        dynamic("id") {
             suggestion<CommandSender> { _, _ ->
                 ScheduleTask.cache.keys.toList()
             }

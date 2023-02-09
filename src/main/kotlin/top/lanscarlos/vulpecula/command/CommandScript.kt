@@ -89,27 +89,27 @@ object CommandScript {
     }
 
     val stop: CommandComponent.() -> Unit = {
-        execute<CommandSender> { sender, _, _ ->
-            try {
-                ScriptWorkspace.terminateAllScript()
-                sender.sendSyncLang("Script-Stop-All-Succeeded")
-            } catch (e: Exception) {
-                sender.sendSyncLang("Script-Stop-All-Failed", e.localizedMessage)
-                e.printStackTrace()
-            }
-        }
-
         dynamic("file", optional = true) {
             suggestion<CommandSender> { _, _ ->
-                ScriptWorkspace.scripts.map { it.value.id }
+                ScriptWorkspace.scripts.map { it.value.id }.plus("*")
             }
             execute<CommandSender> { sender, _, file ->
-                try {
-                    ScriptWorkspace.terminateScript(file)
-                    sender.sendSyncLang("Script-Stop-Succeeded", file)
-                } catch (e: Exception) {
-                    sender.sendSyncLang("Script-Stop-Failed", file, e.localizedMessage)
-                    e.printStackTrace()
+                if (file == "*") {
+                    try {
+                        ScriptWorkspace.terminateAllScript()
+                        sender.sendSyncLang("Script-Stop-All-Succeeded")
+                    } catch (e: Exception) {
+                        sender.sendSyncLang("Script-Stop-All-Failed", e.localizedMessage)
+                        e.printStackTrace()
+                    }
+                } else {
+                    try {
+                        ScriptWorkspace.terminateScript(file)
+                        sender.sendSyncLang("Script-Stop-Succeeded", file)
+                    } catch (e: Exception) {
+                        sender.sendSyncLang("Script-Stop-Failed", file, e.localizedMessage)
+                        e.printStackTrace()
+                    }
                 }
             }
         }
