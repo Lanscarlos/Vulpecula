@@ -14,13 +14,14 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 object ActionVulpecula {
 
     @VulKetherParser(
-        id = "vul-script",
+        id = "vulpecula",
         name = ["vulpecula", "vul"]
     )
     fun parser() = scriptParser { reader ->
         reader.switch {
             case("script") { ActionScript.parse(reader) }
             case("schedule", "task") { ActionSchedule.parse(reader) }
+            case("dispatcher") { ActionDispatcher.parse(reader) }
         }
     }
 

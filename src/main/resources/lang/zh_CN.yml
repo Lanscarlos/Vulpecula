@@ -183,6 +183,33 @@ Dispatcher-Load-Conflict:
 Dispatcher-Load-Failed-Details:
   - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
   - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Dispatcher-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 调度模块 &a{0}&7 不存在！'
+Dispatcher-Enable-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功启动调度模块 &a{0}'
+Dispatcher-Enable-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 启动调度模块 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Dispatcher-Enable-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功启动所有调度模块.'
+Dispatcher-Enable-All-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 启动所有调度模块时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Dispatcher-Disable-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功关闭调度模块 &a{0}'
+Dispatcher-Disable-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 关闭调度模块 &a{0}&7 时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Dispatcher-Disable-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功关闭所有调度模块.'
+Dispatcher-Disable-All-Failed:
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 关闭所有调度模块时出现问题'
+  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Dispatcher-List:
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 所有调度模块: &f{0}'
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 工作调度模块: &f{1}'
+Dispatcher-Detail:
+  - '&8[&3Vul&bpecula&8] &a良好 &8|&7 调度模块 &a{0}&7 详细信息'
+  - '    &7状态：{1}'
+  - '    &7监听事件：{2}'
+  - '    &7监听等级：{3}'
+  - '    &7忽略取消事件：{4}'
+  - '    &7绑定的处理模块：{5}'
 
 
 

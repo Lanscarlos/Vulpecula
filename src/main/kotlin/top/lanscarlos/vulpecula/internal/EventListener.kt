@@ -112,6 +112,8 @@ class EventListener(
         val tasks = ConcurrentHashMap<String, EventTask>()
         private val cache = mutableMapOf<String, EventListener>()
 
+        fun get(id: String): EventTask? = tasks[id]
+
         /**
          * 注册任务
          *

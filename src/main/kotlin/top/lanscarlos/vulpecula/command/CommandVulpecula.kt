@@ -57,4 +57,7 @@ object CommandVulpecula {
     @CommandBody
     val schedule = subCommand(CommandSchedule.main)
 
+    @CommandBody
+    val dispatcher = subCommand(CommandDispatcher.main)
+
 }

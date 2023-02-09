@@ -118,6 +118,9 @@ class EventDispatcher(
     /* 包含主方法的可执行脚本 */
     lateinit var script: Script
 
+    val isRunning get() = EventListener.get("dispatcher-$id") != null
+    val isStopped get() = EventListener.get("dispatcher-$id") == null
+
     fun registerListener() {
         // 注销将先前的事件任务
         unregisterListener()
