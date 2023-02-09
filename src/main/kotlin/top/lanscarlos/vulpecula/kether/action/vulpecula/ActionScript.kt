@@ -127,7 +127,7 @@ object ActionScript {
 
     @VulKetherParser(
         id = "vulpecula-script",
-        name = ["vul-script", "vul-ks", "vulscript"]
+        name = ["vul-script"]
     )
     fun parser() = scriptParser { reader ->
         parse(reader)

@@ -30,7 +30,7 @@ object ActionSchedule {
                 taskId.getOrNull(frame),
                 *(args ?: emptyList()).map { frame.run(it) }.toTypedArray()
             ).thenTake().thenApply { args ->
-                val taskId = args[0]?.toString() ?: error("No schedule id found: \"${args[0]}\"")
+                val taskId = args[0]?.toString() ?: error("No schedule id selected.")
                 val task = ScheduleTask.get(taskId) ?: error("No schedule found: \"${args[0]}\"")
 
                 if (args.size > 1) {
