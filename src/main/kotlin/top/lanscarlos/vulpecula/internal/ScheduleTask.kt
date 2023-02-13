@@ -376,9 +376,7 @@ class ScheduleTask(
                 cache.clear()
 
                 folder.ifNotExists {
-                    listOf(
-                        "def.yml"
-                    ).forEach { releaseResourceFile("schedules/$it", true) }
+                    releaseResourceFile("schedules/#def.yml", true)
                 }.getFiles().forEach { file ->
 
                     val path = file.canonicalPath

@@ -7,6 +7,7 @@ import taboolib.module.kether.actionTake
 import taboolib.module.kether.scriptParser
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
@@ -20,6 +21,11 @@ import java.io.File
  * @since 2022-11-13 16:16
  */
 object ActionUnicode {
+
+    /**
+     * 判断该语句是否启用
+     * */
+    val enable get() = KetherRegistry.hasAction("unicode")
 
     private val folder by lazy { File(getDataFolder(), "actions/unicode") }
 
@@ -55,7 +61,7 @@ object ActionUnicode {
             fileCache.clear()
 
             folder.ifNotExists {
-                releaseResourceFile("actions/unicode/def-mapping.yml", true)
+                releaseResourceFile("actions/unicode/#def.yml", true)
             }.getFiles().forEach { file ->
 
                 file.toConfig().forEachLine { key, value ->

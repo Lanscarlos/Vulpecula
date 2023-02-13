@@ -1,0 +1,67 @@
+
+# 是否禁用该命令
+disable: false
+
+# [必填] 命令的名字
+name: 'example'
+
+# [选填] 命令的别名
+aliases: [ 'exam' ]
+
+# [选填] 命令的描述
+description: '示例命令的描述'
+
+# [选填] 使用示例
+usage: '示例用例'
+
+# [选填] 所需权限
+permission: 'vulpecula.command.example'
+
+# 默认权限类型
+# op - 默认仅 op 可用
+# not-op - 默认非 op 可用
+# true - 默认所有人可用
+# false - 默认所有人不可用
+permission-default: op
+
+# 缺少权限时的消息
+permission-message: '看你麻麻.'
+
+# 主命令
+# 仅执行 /example 时触发
+main:
+
+  # 是否仅玩家可用
+  player-only: false
+
+  # 命令执行时的处理
+  # 如果此处未定义，那么执行 /example 时会默认显示命令助手
+  execute: |-
+    tell "Happy New Year!"
+
+components:
+
+  # 定义一个节点
+  reload:
+    # 定义其父节点为 main
+    # 即 /example reload
+    parent: 'main'
+
+    execute: |-
+      tell "假装我在重载...all"
+
+  # 定义一个节点
+  script:
+    parent: 'main'
+    execute: |-
+      tell "假装我在运行脚本...all"
+
+  script-file:
+    # 定义其父节点为 script
+    # 即 /example script <script-file>
+    parent: 'script'
+    # 指定该节点为动态节点
+    dynamic: 'file'
+    suggest: [ 'def', 'hello' ]
+    execute: |-
+      tell join [ "假装我在运行脚本..." &arg ]

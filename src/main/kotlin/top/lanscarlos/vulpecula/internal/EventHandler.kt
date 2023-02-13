@@ -325,9 +325,7 @@ class EventHandler(
                 cache.clear()
 
                 folder.ifNotExists {
-                    listOf(
-                        "def.yml"
-                    ).forEach { releaseResourceFile("handlers/$it", true) }
+                    releaseResourceFile("handlers/#def.yml", true)
                 }.getFiles().forEach { file ->
 
                     val path = file.canonicalPath

@@ -237,7 +237,7 @@ class CustomCommand(
                 val folder = folder.toPath()
 
                 if (Files.notExists(folder)) {
-                    releaseResourceFile("commands/def.yml", true)
+                    releaseResourceFile("commands/#def.yml", true)
                 }
 
                 val iterator = Files.walk(folder).iterator()

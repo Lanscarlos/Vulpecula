@@ -485,9 +485,7 @@ class EventDispatcher(
                 cache.clear()
 
                 folder.ifNotExists {
-                    listOf(
-                        "def.yml"
-                    ).forEach { releaseResourceFile("dispatchers/$it", true) }
+                    releaseResourceFile("dispatchers/#def.yml", true)
                 }.getFiles().forEach { file ->
 
                     val path = file.canonicalPath

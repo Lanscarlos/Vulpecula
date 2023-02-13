@@ -293,7 +293,7 @@ class VulScript(
 
                 if (java.nio.file.Files.notExists(folder)) {
                     // 路径不存在
-                    releaseResourceFile("scripts/def.yml", true)
+                    releaseResourceFile("scripts/#def.yml", true)
                 }
 
                 // 遍历文件
