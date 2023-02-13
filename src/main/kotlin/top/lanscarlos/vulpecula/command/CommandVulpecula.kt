@@ -2,13 +2,15 @@ package top.lanscarlos.vulpecula.command
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import taboolib.common.platform.command.CommandBody
-import taboolib.common.platform.command.CommandHeader
-import taboolib.common.platform.command.mainCommand
-import taboolib.common.platform.command.subCommand
+import taboolib.common.platform.command.*
+import taboolib.common.platform.function.adaptCommandSender
 import taboolib.expansion.createHelper
+import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.VulpeculaContext
-import top.lanscarlos.vulpecula.utils.eval
+import top.lanscarlos.vulpecula.internal.*
+import top.lanscarlos.vulpecula.kether.action.vulpecula.ActionUnicode
+import top.lanscarlos.vulpecula.utils.runActions
+import top.lanscarlos.vulpecula.utils.toKetherScript
 
 /**
  * Vulpecula
@@ -28,16 +30,24 @@ object CommandVulpecula {
     @CommandBody
     val eval = subCommand {
         dynamic {
-            execute<CommandSender> { sender, _, argument ->
-                val args = if (sender is Player) {
-                    mapOf(
-                        "player" to sender,
-                        "hand" to sender.equipment?.itemInMainHand
-                    )
-                } else null
-
-                eval(argument, sender, args = args).thenAccept {
-                    sender.sendMessage("§7[§f§lResult§7]§r $it")
+            execute<CommandSender> { sender, _, content ->
+                try {
+                    val script = if (content.startsWith("def")) {
+                        content
+                    } else {
+                        "def main = { $content }"
+                    }
+                    script.toKetherScript().runActions {
+                        this.sender = adaptCommandSender(sender)
+                        if (sender is Player) {
+                            set("player", sender)
+                            set("hand", sender.equipment?.itemInMainHand)
+                        }
+                    }.thenAccept {
+                        sender.sendMessage("§7[§f§lResult§7]§r $it")
+                    }
+                } catch (e: Exception) {
+                    e.printKetherErrorMessage()
                 }
             }
         }
@@ -46,8 +56,59 @@ object CommandVulpecula {
     @CommandBody
     val reload = subCommand {
         execute<CommandSender> { sender, _, _ ->
-            val info = VulpeculaContext.load()
-            (sender as? Player)?.sendMessage(*info.toTypedArray())
+            val messages = VulpeculaContext.load()
+            (sender as? Player)?.sendMessage(*messages.toTypedArray())
+        }
+
+        dynamic("modules", true) {
+            suggestUncheck {
+                listOf(
+                    "config",
+                    "command", "schedule",
+                    "dispatcher", "handler", "listen-mapping",
+                    "script-source", "script-compiled"
+                )
+            }
+            execute<CommandSender> { sender, _, argument ->
+
+                // 排序，防止载入顺序导致报错
+                val modules = argument.split(' ').sortedBy {
+                    when (it) {
+                        "config" -> 0
+                        "listen-mapping" -> 1
+                        "unicode" -> 2
+                        "script-source" -> 3
+                        "script-compiled" -> 4
+                        "dispatcher" -> 5
+                        "handler" -> 6
+                        "command" -> 7
+                        "schedule" -> 8
+                        else -> 9
+                    }
+                }
+
+                val messages = mutableListOf<String>()
+                for (module in modules) {
+                    messages += when (module) {
+                        "config" -> VulpeculaContext.loadConfig()
+                        "listen-mapping" -> EventHandler.load()
+                        "unicode" -> if (ActionUnicode.enable) ActionUnicode.load() else continue
+                        "script-source" -> VulScript.load()
+                        "script-compiled" -> ScriptWorkspace.load()
+                        "dispatcher" -> EventDispatcher.load()
+                        "handler" -> EventHandler.load()
+                        "command" -> CustomCommand.load()
+                        "schedule" -> ScheduleTask.load(false)
+                        else -> continue
+                    }
+                }
+
+                if ("dispatcher" in modules) {
+                    EventDispatcher.postLoad()
+                }
+
+                (sender as? Player)?.sendMessage(*messages.toTypedArray())
+            }
         }
     }
 
