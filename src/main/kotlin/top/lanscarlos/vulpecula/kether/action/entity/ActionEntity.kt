@@ -2,18 +2,16 @@ package top.lanscarlos.vulpecula.kether.action.entity
 
 import org.bukkit.entity.Entity
 import taboolib.common.LifeCycle
-import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
+import taboolib.library.kether.Parser
+import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.internal.ClassInjector
+import top.lanscarlos.vulpecula.kether.ParserBuilder
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextPeek
-import top.lanscarlos.vulpecula.kether.live.readEntity
+import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -24,36 +22,69 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2022-11-17 23:01
  */
-class ActionEntity : ScriptAction<Any?>() {
+class ActionEntity : QuestAction<Any?>() {
 
-    private val handlers = mutableListOf<Handler>()
+    val handlers = mutableListOf<Handler<*>>()
 
     @Suppress("UNCHECKED_CAST")
-    override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        var previous: CompletableFuture<out Entity?> = CompletableFuture.completedFuture(null)
-        for (handler in handlers) {
-            if (handler is Transfer) {
-                previous = handler.handle(frame, previous)
-            } else {
-                return handler.handle(frame, previous) as CompletableFuture<Any?>
+    fun resolve(reader: QuestReader): QuestAction<Any?> {
+        do {
+            val next = reader.nextToken()
+            val isRoot = handlers.isEmpty()
+            handlers += registry[next]?.resolve(Reader(next, reader, isRoot)) ?: error("Unknown sub action \"$next\" at entity action.")
+
+            // 判断管道是否已关闭
+            if (handlers.lastOrNull() !is Transfer) {
+                if (reader.hasNextToken(">>")) {
+                    error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$next\" has closed the pipeline.")
+                }
+                break
             }
-        }
-        return previous as CompletableFuture<Any?>
+        } while (reader.hasNextToken(">>"))
+
+        return this
     }
 
+    override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
+        var previous: CompletableFuture<out Entity?> = CompletableFuture.completedFuture(null)
+
+        for ((index, handler) in handlers.withIndex()) {
+            // 除去最后一个 Handler 以及非 Transfer
+            if (handler !is Transfer || index == handlers.lastIndex) break
+            previous = previous.thenCompose { entity ->
+                frame.setVariable("@Entity", entity, false)
+                frame.setVariable("entity", entity, false)
+                handler.process(frame)
+            }
+        }
+
+        return previous.thenCompose { entity ->
+            frame.setVariable("@Entity", entity, false)
+            frame.setVariable("entity", entity, false)
+            handlers.last().process(frame).thenApply { it }
+        }
+    }
+
+    /*
+    * 自动注册包下所有解析器 Resolver
+    * */
     @Awake(LifeCycle.LOAD)
     companion object : ClassInjector() {
 
-        private val registry = mutableMapOf<String, Reader>()
+        private val registry = mutableMapOf<String, Resolver>()
 
-        fun registerReader(reader: Reader) {
-            reader.name.forEach { registry[it] = reader }
+        /**
+         * 向 Entity 语句注册子语句
+         * @param resolver 子语句解析器
+         * */
+        fun registerResolver(resolver: Resolver) {
+            resolver.name.forEach { registry[it] = resolver }
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
-            if (!Reader::class.java.isAssignableFrom(clazz)) return
+            if (!Resolver::class.java.isAssignableFrom(clazz)) return
 
-            val reader = let {
+            val resolver = let {
                 if (supplier?.get() != null) {
                     supplier.get()
                 } else try {
@@ -61,283 +92,85 @@ class ActionEntity : ScriptAction<Any?>() {
                 } catch (e: Exception) {
                     null
                 }
-            } as? Reader ?: return
+            } as? Resolver ?: return
 
-            registerReader(reader)
+            registerResolver(resolver)
         }
 
         @VulKetherParser(
             id = "entity",
             name = ["entity"]
         )
-        fun parser() = scriptParser { reader ->
-            val action = ActionEntity()
-            do {
-                val it = reader.nextToken()
-                val isRoot = action.handlers.isEmpty()
-
-                action.handlers += registry[it]?.read(reader, it, isRoot) ?: error("Unknown argument \"$it\" at entity action.")
-
-                // 判断管道是否已关闭
-                if (action.handlers.lastOrNull() !is Transfer) {
-                    if (reader.hasNextToken(">>")) {
-                        error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$it\" has closed the pipeline.")
-                    }
-                    break
-                }
-            } while (reader.hasNextToken(">>"))
-
-            return@scriptParser action
+        fun parser() = scriptParser {
+            ActionEntity().resolve(it)
         }
     }
 
     /**
-     * 处理后返回任意对象
+     * 语句解析器
      * */
-    interface Handler {
-        fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?>
-    }
-
-    /**
-     * 处理后返回 Entity 对象，供下一处理器使用
-     * */
-    interface Transfer : Handler {
-        override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity>
-    }
-
-    /**
-     * 读取语句
-     * */
-    interface Reader {
+    interface Resolver {
 
         val name: Array<String>
 
-        /**
-         * @param input 传入的 name
-         * @param isRoot 是否为队列最前端
-         * @return 处理器
-         * */
-        fun read(reader: QuestReader, input: String, isRoot: Boolean): Handler
+        fun resolve(reader: Reader): Handler<out Any?>
+    }
 
-        fun QuestReader.source(isRoot: Boolean): LiveData<Entity>? {
-            return if (isRoot) this.readEntity() else null
+    /**
+     * 语句读取器
+     * */
+    class Reader(val token: String, reader: QuestReader, val isRoot: Boolean) : QuestReader by reader, ParserBuilder {
+
+        fun <T> handle(func: Reader.() -> Parser<Parser.Action<T>>): Handler<T> {
+            return Handler(func(this)).resolve(this)
         }
 
-        /**
-         * 返回任意对象
-         * */
-        fun handleNow(func: ScriptFrame.(entity: Entity?) -> Any?): Handler {
-            return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
-                    return if (previous.isDone) {
-                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
-                    } else {
-                        previous.thenApply { func(frame, it) }
-                    }
+        fun transfer(func: Reader.() -> Parser<Parser.Action<Entity>>): Handler<Entity> {
+            return Transfer(func(this)).resolve(this)
+        }
+
+        fun source() : Parser<Entity> {
+            return if (isRoot) {
+                entity()
+            } else {
+                Parser.frame {
+                    now { this.getVariable<Entity>("@Entity", "entity") ?: error("No entity selected. [ERROR: entity@$token]") }
                 }
             }
         }
 
+    }
+
+    /**
+     * 语句处理器
+     * */
+    open class Handler<T: Any?>(val parser: Parser<Parser.Action<T>>) {
+
         /**
-         * 返回任意对象
+         * 待运行的解析结果
          * */
-        fun handleFuture(func: ScriptFrame.(entity: Entity?) -> CompletableFuture<Any?>): Handler {
-            return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
-                    return if (previous.isDone) {
-                        func(frame, previous.getNow(null))
-                    } else {
-                        val future = CompletableFuture<Any>()
-                        previous.thenAccept { entity ->
-                            func(frame, entity).thenAccept {
-                                future.complete(it)
-                            }
-                        }
-                        return future
-                    }
-                }
-            }
+        lateinit var action: Parser.Action<Parser.Action<T>>
+
+        /**
+         * 解析
+         * */
+        open fun resolve(reader: QuestReader): Handler<T> {
+            action = parser.reader.apply(reader)
+            return this
         }
 
         /**
-         * 接收 Entity 返回任意对象
+         * 运行
          * */
-        fun acceptHandleNow(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> Any?): Handler {
-            return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
-                    return if (source != null) {
-                        // root
-                        val wait = source.getOrNull(frame)
-                        if (wait.isDone) {
-                            CompletableFuture.completedFuture(
-                                func(frame, wait.getNow(null) ?: error("No entity select."))
-                            )
-                        } else {
-                            wait.thenApply {
-                                func(frame, it ?: error("No entity select."))
-                            }
-                        }
-                    } else {
-                        // not root
-                        if (previous.isDone) {
-                            CompletableFuture.completedFuture(
-                                func(frame, previous.getNow(null) ?: error("No entity select."))
-                            )
-                        } else {
-                            previous.thenApply {
-                                func(frame, it ?: error("No entity select."))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * 接收 Entity 返回任意对象
-         * */
-        fun acceptHandleFuture(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> CompletableFuture<Any?>): Handler {
-            return object : Handler {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Any?> {
-                    return if (source != null) {
-                        // root
-                        val wait = source.getOrNull(frame)
-                        if (wait.isDone) {
-                            func(frame, wait.getNow(null) ?: error("No entity select."))
-                        } else {
-                            val future = CompletableFuture<Any?>()
-                            wait.thenAccept { entity ->
-                                func(frame, entity ?: error("No entity select.")).thenAccept {
-                                    future.complete(it)
-                                }
-                            }
-                            future
-                        }
-                    } else {
-                        // not root
-                        if (previous.isDone) {
-                            func(frame, previous.getNow(null) ?: error("No entity select."))
-                        } else {
-                            val future = CompletableFuture<Any?>()
-                            previous.thenAccept { entity ->
-                                func(frame, entity ?: error("No entity select.")).thenAccept {
-                                    future.complete(it)
-                                }
-                            }
-                            future
-                        }
-                    }
-                }
-            }
-        }
-
-
-        /**
-         * 返回 Entity 对象
-         * */
-        fun transferNow(func: ScriptFrame.(entity: Entity?) -> Entity): Handler {
-            return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity> {
-                    return if (previous.isDone) {
-                        CompletableFuture.completedFuture(func(frame, previous.getNow(null)))
-                    } else {
-                        previous.thenApply { func(frame, it) }
-                    }
-                }
-            }
-        }
-
-        /**
-         * 返回 Entity 对象
-         * */
-        fun transferFuture(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity?) -> CompletableFuture<Entity>): Transfer {
-            return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity> {
-                    return if (previous.isDone) {
-                        func(frame, previous.getNow(null))
-                    } else {
-                        val future = CompletableFuture<Entity>()
-                        previous.thenAccept { entity ->
-                            func(frame, entity).thenAccept {
-                                future.complete(it)
-                            }
-                        }
-                        return future
-                    }
-                }
-            }
-        }
-
-        /**
-         * 接收 Entity 并返回 Entity 对象
-         * */
-        fun acceptTransferNow(source: LiveData<Entity>?, func: ScriptFrame.(vector: Entity) -> Entity): Transfer {
-            return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity> {
-                    return if (source != null) {
-                        // root
-                        val wait = source.getOrNull(frame)
-                        if (wait.isDone) {
-                            CompletableFuture.completedFuture(
-                                func(frame, wait.getNow(null) ?: error("No entity select."))
-                            )
-                        } else {
-                            wait.thenApply {
-                                func(frame, it ?: error("No entity select."))
-                            }
-                        }
-                    } else {
-                        // not root
-                        if (previous.isDone) {
-                            CompletableFuture.completedFuture(
-                                func(frame, previous.getNow(null) ?: error("No entity select."))
-                            )
-                        } else {
-                            previous.thenApply {
-                                func(frame, it ?: error("No entity select."))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * 接收 Entity 并返回 Entity 对象
-         * */
-        fun acceptTransferFuture(source: LiveData<Entity>?, func: ScriptFrame.(entity: Entity) -> CompletableFuture<Entity>): Handler {
-            return object : Transfer {
-                override fun handle(frame: ScriptFrame, previous: CompletableFuture<out Entity?>): CompletableFuture<out Entity?> {
-                    return if (source != null) {
-                        // root
-                        val wait = source.getOrNull(frame)
-                        if (wait.isDone) {
-                            func(frame, wait.getNow(null) ?: error("No entity select."))
-                        } else {
-                            val future = CompletableFuture<Entity>()
-                            wait.thenAccept { entity ->
-                                func(frame, entity ?: error("No entity select.")).thenAccept {
-                                    future.complete(it)
-                                }
-                            }
-                            future
-                        }
-                    } else {
-                        // not root
-                        if (previous.isDone) {
-                            func(frame, previous.getNow(null) ?: error("No entity select."))
-                        } else {
-                            val future = CompletableFuture<Entity>()
-                            previous.thenAccept { entity ->
-                                func(frame, entity ?: error("No entity select.")).thenAccept {
-                                    future.complete(it)
-                                }
-                            }
-                            future
-                        }
-                    }
-                }
+        open fun process(frame: ScriptFrame): CompletableFuture<T> {
+            return action.run(frame).thenCompose {
+                it.run(frame)
             }
         }
     }
+
+    /**
+     * 用于传递 Entity
+     * */
+    open class Transfer(parser: Parser<Parser.Action<Entity>>): Handler<Entity>(parser)
 }

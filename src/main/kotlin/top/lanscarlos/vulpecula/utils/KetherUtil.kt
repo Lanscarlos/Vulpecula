@@ -1,16 +1,14 @@
 package top.lanscarlos.vulpecula.utils
 
+import com.mojang.datafixers.kinds.App
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.severe
-import taboolib.common.platform.function.warning
 import taboolib.library.kether.*
-import taboolib.module.kether.ScriptContext
-import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.script
+import taboolib.module.kether.*
 import taboolib.platform.type.BukkitPlayer
+import top.lanscarlos.vulpecula.kether.ParserBuilder
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -19,6 +17,27 @@ import top.lanscarlos.vulpecula.kether.action.ActionBlock
  * @author Lanscarlos
  * @since 2022-02-27 10:48
  */
+
+/**
+ * @see taboolib.library.kether.Parser.build
+ * */
+@Suppress("UNCHECKED_CAST")
+fun <A> buildParser(builder: ParserBuilder.(QuestReader) -> App<Parser.Mu, Parser.Action<A>>): ScriptActionParser<A> {
+    val parser =  object : QuestActionParser {
+        override fun <A> resolve(resolve: QuestReader): QuestAction<A> {
+            val reader = (builder(object : ParserBuilder {}, resolve) as Parser<Parser.Action<A>>).reader
+            val action = reader.apply(resolve) as Parser.Action<Parser.Action<A>>
+            return object : QuestAction<A>() {
+                override fun process(frame: QuestContext.Frame): CompletableFuture<A> {
+                    return action.run(frame).thenCompose {
+                        it.run(frame)
+                    }
+                }
+            }
+        }
+    }
+    return ScriptActionParser { parser.resolve<A>(this) }
+}
 
 
 /**

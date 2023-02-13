@@ -15,33 +15,27 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-17 23:26
  */
-object EntityTeleportHandler : ActionEntity.Reader {
+object EntityTeleportHandler : ActionEntity.Resolver {
 
     override val name: Array<String> = arrayOf("teleport", "tp")
 
-    override fun read(reader: QuestReader, input: String, isRoot: Boolean): ActionEntity.Handler {
-        val source = reader.source(isRoot)
-        reader.hasNextToken("to")
-        val destination = reader.readLocation()
-        val reason = reader.tryReadString("by", "cause", "reason")
-
-        return acceptTransferFuture(source) { entity ->
-            listOf(
-                destination.getOrNull(this),
-                reason?.getOrNull(this)
-            ).thenTake().thenApply { args ->
-                val loc = (args[0] as? Location)?.toBukkitLocation() ?: error("No location selected.")
-                val cause = args[1]?.toString()?.let { reason ->
-                    PlayerTeleportEvent.TeleportCause.values().firstOrNull { it.name.equals(reason, true) }
-                }
-
+    override fun resolve(reader: ActionEntity.Reader): ActionEntity.Handler<out Any?> {
+        return reader.transfer {
+            group(
+                source(),
+                trim("to", "at", then = location()),
+                option("by", then = stringOrNull())
+            ) { entity, location, cause ->
                 if (cause != null) {
-                    entity.teleport(loc, cause)
-                } else {
-                    entity.teleport(loc)
+                    val reason = PlayerTeleportEvent.TeleportCause.values().firstOrNull { it.name.equals(cause, true) }
+                    if (reason != null) {
+                        entity.teleport(location.toBukkitLocation(), reason)
+                        return@group now { entity }
+                    }
                 }
 
-                return@thenApply entity
+                entity.teleport(location.toBukkitLocation())
+                return@group now { entity }
             }
         }
     }
