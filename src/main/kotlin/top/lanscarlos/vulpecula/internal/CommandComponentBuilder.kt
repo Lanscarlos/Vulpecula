@@ -14,11 +14,11 @@ import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common.platform.function.info
 import taboolib.expansion.createHelper
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.parseKetherScript
-import top.lanscarlos.vulpecula.script.ScriptCompiler
+import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.utils.getStringOrList
 import top.lanscarlos.vulpecula.utils.runActions
 import top.lanscarlos.vulpecula.utils.setVariable
+import top.lanscarlos.vulpecula.utils.toKetherScript
 
 /**
  * Vulpecula
@@ -148,9 +148,9 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection,
         builder.append("}")
 
         val script = try {
-            builder.toString().parseKetherScript()
+            builder.toString().toKetherScript()
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.printKetherErrorMessage()
             return
         }
 
@@ -186,9 +186,9 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection,
         builder.append("}")
 
         val script = try {
-            builder.toString().parseKetherScript()
+            builder.toString().toKetherScript()
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.printKetherErrorMessage()
             return
         }
 

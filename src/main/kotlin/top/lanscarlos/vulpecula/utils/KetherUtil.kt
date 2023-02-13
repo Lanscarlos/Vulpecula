@@ -18,6 +18,10 @@ import java.util.concurrent.CompletableFuture
  * @since 2022-02-27 10:48
  */
 
+fun String.toKetherScript(namespace: List<String> = emptyList()): Script {
+    return this.parseKetherScript(namespace.plus("vulpecula"))
+}
+
 /**
  * @see taboolib.library.kether.Parser.build
  * */

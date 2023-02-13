@@ -20,13 +20,10 @@ import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.Script
-import taboolib.module.kether.parseKetherScript
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
-import top.lanscarlos.vulpecula.script.ScriptCompiler
-import top.lanscarlos.vulpecula.script.VulScript
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -233,7 +230,7 @@ class EventDispatcher(
         try {
             // 尝试构建脚本
             val source = buildSource()
-            val quest = source.toString().parseKetherScript(namespace.plus("vulpecula"))
+            val quest = source.toString().toKetherScript(namespace)
 
 
             // 编译通过

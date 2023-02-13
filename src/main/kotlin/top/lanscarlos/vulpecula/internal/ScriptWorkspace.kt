@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.internal
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.MultimapBuilder
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.internal
  *
  * @author Lanscarlos
  * @since 2022-12-22 18:40
