@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether
 
 import taboolib.common.LifeCycle
-import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.taboolibPath
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.*
@@ -44,7 +43,7 @@ object KetherRegistry : ClassInjector() {
         file.toConfig()
     }
 
-    private val parserRegistry = HashMap<String, ParserMetadata>()
+    private val parserRegistry = HashMap<String, RegistryMetadata>()
     private val propertyRegistry = HashMap<Class<*>, VulScriptProperty<*>>()
     private var propertyCache: Collection<Pair<Class<*>, VulScriptProperty<*>>> = emptyList()
 
@@ -129,7 +128,7 @@ object KetherRegistry : ClassInjector() {
 
         // 获取解析器
         val parser = (if (supplier == null) method.invokeStatic() else method.invoke(supplier.get())) as ScriptActionParser<*>
-        parserRegistry[id] = ParserMetadata(id, parser, name, namespace, shared, override, injectDefaultNamespace, overrideDefaultAction)
+        parserRegistry[id] = RegistryMetadata(id, parser, name, namespace, shared, override, injectDefaultNamespace, overrideDefaultAction)
 
         // 注册语句
         name.forEach {

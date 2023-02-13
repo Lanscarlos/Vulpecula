@@ -9,7 +9,7 @@ import taboolib.library.kether.QuestActionParser
  * @author Lanscarlos
  * @since 2022-10-18 18:07
  */
-class ParserMetadata(
+class RegistryMetadata(
     val id: String,
     val parser: QuestActionParser,
     val name: Array<String>,
