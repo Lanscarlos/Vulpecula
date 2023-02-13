@@ -7,8 +7,8 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
-import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.ScriptWorkspace
+import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 import top.lanscarlos.vulpecula.utils.sendSyncLang
 
 /**

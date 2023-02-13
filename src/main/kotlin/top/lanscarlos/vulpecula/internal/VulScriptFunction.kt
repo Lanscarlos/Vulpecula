@@ -1,11 +1,11 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.internal
 
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.config.VulConfig
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.internal
  *
  * @author Lanscarlos
  * @since 2022-12-23 13:41

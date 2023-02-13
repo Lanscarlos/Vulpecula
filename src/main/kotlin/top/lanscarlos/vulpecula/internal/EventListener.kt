@@ -12,7 +12,7 @@ import java.util.function.Consumer
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.event
+ * top.lanscarlos.vulpecula.internal
  *
  * @author Lanscarlos
  * @since 2022-12-03 13:04

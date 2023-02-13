@@ -1,15 +1,17 @@
 package top.lanscarlos.vulpecula
 
+import taboolib.common.platform.function.console
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.KetherShell
+import taboolib.module.lang.asLangText
 import top.lanscarlos.vulpecula.internal.CustomCommand
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.internal.ScheduleTask
-import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.action.vulpecula.ActionUnicode
-import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.ScriptWorkspace
+import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ScriptWorkspace
+import top.lanscarlos.vulpecula.utils.timing
 
 /**
  * Vulpecula
@@ -24,16 +26,32 @@ object VulpeculaContext {
     lateinit var config: Configuration
         private set
 
+    fun loadConfig(): String {
+        val start = timing()
+        return try {
+            config.reload()
+            console().asLangText("Config-Load-Succeeded", timing(start)).also {
+                console().sendMessage(it)
+            }
+        } catch (e: Exception) {
+            console().asLangText("Config-Load-Failed", e.localizedMessage, timing(start)).also {
+                console().sendMessage(it)
+            }
+        }
+    }
+
     /**
      * @param init 是否为初始化操作
      * @return 返回相关加载信息
      * */
     fun load(init: Boolean = false): List<String> {
 
-        // 重载主配置
-        if (!init) config.reload()
-
         val messages = mutableListOf<String>()
+
+        // 重载主配置
+        if (!init) {
+            messages += loadConfig()
+        }
 
         // 清理脚本缓存
         KetherShell.mainCache.scriptMap.clear()
@@ -45,16 +63,13 @@ object VulpeculaContext {
         messages += EventMapper.load()
 
         // 加载 Unicode 映射文件
-        if (KetherRegistry.hasAction("unicode")) {
+        if (ActionUnicode.enable) {
             messages += ActionUnicode.load()
         }
 
         // 加载脚本
         messages += VulScript.load()
         messages += ScriptWorkspace.load()
-
-        // 加载自定义命令
-        messages += CustomCommand.load()
 
         // 初步加载调度模块
         messages += EventDispatcher.load()
@@ -64,6 +79,9 @@ object VulpeculaContext {
 
         // 调度器处理后续数据
         EventDispatcher.postLoad()
+
+        // 加载自定义命令
+        messages += CustomCommand.load()
 
         // 加载日程计划
         messages += ScheduleTask.load(init)

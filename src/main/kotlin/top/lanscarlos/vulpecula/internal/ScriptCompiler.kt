@@ -1,14 +1,12 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.internal
 
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.Script
-import taboolib.module.kether.parseKetherScript
 import top.lanscarlos.vulpecula.utils.bindConfigNode
 import top.lanscarlos.vulpecula.utils.coerceListNotNull
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.internal.compiler
+ * top.lanscarlos.vulpecula.internal
  *
  * @author Lanscarlos
  * @since 2022-12-16 13:23
@@ -24,7 +22,7 @@ interface ScriptCompiler {
      * */
     fun eraseComment(builder: StringBuilder) {
         if (singleCommentPattern != "[]" && multiCommentPattern != "[]") {
-            val pattern = "${singleCommentPattern}|${multiCommentPattern}".toPattern()
+            val pattern = "$singleCommentPattern|$multiCommentPattern".toPattern()
             val matcher = pattern.matcher(builder.extract())
             val buffer = StringBuffer()
 

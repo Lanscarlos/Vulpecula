@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.internal.script
  *
  * @author Lanscarlos
  * @since 2022-12-23 21:24

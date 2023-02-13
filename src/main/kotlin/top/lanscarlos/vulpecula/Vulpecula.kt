@@ -11,8 +11,8 @@ import top.lanscarlos.vulpecula.internal.EventDispatcher
 import top.lanscarlos.vulpecula.internal.EventHandler
 import top.lanscarlos.vulpecula.internal.EventMapper
 import top.lanscarlos.vulpecula.internal.ScheduleTask
-import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.ScriptWorkspace
+import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 
 object Vulpecula : Plugin() {
 
@@ -41,6 +41,9 @@ object Vulpecula : Plugin() {
         })
         metrics.addCustomChart(SingleLineChart("custom-command") {
             CustomCommand.cache.size
+        })
+        metrics.addCustomChart(SingleLineChart("custom-command-legacy") {
+            CustomCommand.cache.values.count { it.legacy }
         })
         metrics.addCustomChart(SingleLineChart("dispatchers") {
             EventDispatcher.cache.size

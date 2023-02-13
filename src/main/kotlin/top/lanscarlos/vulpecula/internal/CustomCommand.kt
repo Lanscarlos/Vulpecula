@@ -27,6 +27,8 @@ class CustomCommand(
     val wrapper: VulConfig
 ) {
 
+    var legacy = false
+
     val name by wrapper.readString("name")
     val aliases by wrapper.readStringList("aliases")
     val description by wrapper.readString("description", "")
@@ -44,6 +46,7 @@ class CustomCommand(
             it as ConfigurationSection
         } else {
             // 旧配置
+            legacy = true
             wrapper.root!!.getConfigurationSection("components.main")!!
         }
     }

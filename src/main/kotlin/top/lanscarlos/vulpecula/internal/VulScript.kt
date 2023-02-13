@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.internal
 
 import taboolib.common.io.newFile
 import taboolib.common.platform.function.console
@@ -16,7 +16,7 @@ import java.io.File
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.internal
  *
  * @author Lanscarlos
  * @since 2022-12-23 12:11

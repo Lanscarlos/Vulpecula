@@ -8,8 +8,8 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readString
 import top.lanscarlos.vulpecula.kether.live.tryReadEntity
-import top.lanscarlos.vulpecula.script.VulScript
-import top.lanscarlos.vulpecula.script.ScriptWorkspace
+import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.thenTake
 import top.lanscarlos.vulpecula.utils.tryNextActionList
