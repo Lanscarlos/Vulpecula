@@ -1,22 +1,15 @@
 package top.lanscarlos.vulpecula.internal
 
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
 import taboolib.common.platform.command.component.CommandBase
-import taboolib.common.platform.command.component.CommandComponent
-import taboolib.common.platform.command.component.CommandComponentDynamic
-import taboolib.common.platform.command.component.CommandComponentLiteral
 import taboolib.common.platform.function.*
-import taboolib.expansion.createHelper
+import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
-import taboolib.module.kether.parseKetherScript
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.config.VulConfig
-import top.lanscarlos.vulpecula.script.ScriptCompiler
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -32,7 +25,7 @@ import java.nio.file.Files
 class CustomCommand(
     val id: String,
     val wrapper: VulConfig
-) : ScriptCompiler {
+) {
 
     val name by wrapper.readString("name")
     val aliases by wrapper.readStringList("aliases")
@@ -45,33 +38,84 @@ class CustomCommand(
             it.name.equals(value?.toString(), true)
         } ?: PermissionDefault.OP
     }
-    val component by wrapper.read("components") { section ->
-        val root = CommandBase()
-        if (section !is ConfigurationSection) return@read root
-
-        // 处理执行语句
-        section.getString("main.execute")?.let {
-            root.executeScript(it, section.getBoolean("main.player-only", false), false)
+    val main by wrapper.read("main") {
+        if (it != null) {
+            // 新配置
+            it as ConfigurationSection
+        } else {
+            // 旧配置
+            wrapper.root!!.getConfigurationSection("components.main")!!
         }
-
-        // 遍历下一层 Dynamic
-        section.getConfigurationSection("dynamic")?.let { next ->
-            buildDynamic(root, next)
-        }
-
-        // 遍历下一层 Literal
-        section.getConfigurationSection("literal")?.let { next ->
-            buildLiteral(root, next)
-        }
-
-        // 创建语句帮手
-        if (section.getBoolean("main.helper", true)) root.createHelper()
-
-        return@read root
+    }
+    val components by wrapper.read("components") { section ->
+        section as ConfigurationSection
     }
 
+    lateinit var root: CommandBase
+
     init {
+        // 先加载 main 后加载 components
+        buildMain()
+        buildComponents()
         register()
+    }
+
+    fun buildMain() {
+        root = CommandComponentBuilder("main", main, false).build(-1) as CommandBase
+    }
+
+    fun buildComponents() {
+        val section = components
+
+        /*
+        * 判断是否为新配置
+        * 新配置会拥有 main 节点
+        * */
+        if (wrapper.root!!.contains("main")) {
+            val loaded = mutableMapOf<String, CommandComponentBuilder>()
+            val entry = mutableSetOf<CommandComponentBuilder>() // 与 root 直接相连的二级节点，构建时的入口
+
+            // 加载所有节点
+            for (key in section.getKeys(false)) {
+                info("load component $key")
+                val node = section.getConfigurationSection(key) ?: continue
+                info("load component $key x2")
+                loaded[key] = CommandComponentBuilder(key, node, false)
+            }
+
+            // 处理父子节点关系
+            for (builder in loaded.values) {
+                val parent = builder.section.getString("parent") ?: "main"
+                info("builder ${builder.id} parent $parent")
+
+                if (parent == "main") {
+                    info("builder ${builder.id} to entry")
+                    entry += builder
+                } else {
+                    info("builder ${builder.id} to other node")
+                    loaded[parent]?.children?.plusAssign(builder)
+                }
+            }
+
+            // 构建命令组件
+            for (builder in entry) {
+                root.children += builder.build(root.index + 1)
+            }
+        } else {
+            section.getConfigurationSection("dynamic")?.let {
+                root.children += CommandComponentBuilder("dynamic", it, true).build(root.index + 1)
+            }
+
+            section.getConfigurationSection("literal")?.let { next ->
+                info("has literal...")
+                for (literal in next.getKeys(false)) {
+                    info("load literal $literal")
+                    val node = next.getConfigurationSection(literal) ?: continue
+                    info("load literal $literal x2")
+                    root.children += CommandComponentBuilder(literal, node, true).build(root.index + 1)
+                }
+            }
+        }
     }
 
     fun register() {
@@ -90,13 +134,13 @@ class CustomCommand(
             // 创建执行器
             executor = object : CommandExecutor {
                 override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): Boolean {
-                    return component.execute(CommandContext(sender, command, name, component, args))
+                    return root.execute(CommandContext(sender, command, name, root, args))
                 }
             },
             // 创建补全器
             completer = object : CommandCompleter {
                 override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): List<String>? {
-                    return component.suggest(CommandContext(sender, command, name, component, args))
+                    return root.suggest(CommandContext(sender, command, name, root, args))
                 }
             },
             // 传入原始命令构建器
@@ -109,198 +153,24 @@ class CustomCommand(
         unregisterCommand(name ?: return)
     }
 
-    fun buildDynamic(parent: CommandComponent, section: ConfigurationSection) {
-        val dynamic = CommandComponentDynamic(
-            parent.index + 1,
-            section.getString("comment") ?: "...",
-            section.getBoolean("optional", false),
-            section.getString("permission") ?: ""
-        )
-
-        // 加入到父节点
-        parent.children += dynamic
-
-        val playerOnly = section.getBoolean("player-only", false)
-
-        section["suggest"]?.let { suggest ->
-            val uncheck = section.getBoolean("uncheck", false)
-            when (suggest) {
-                "*", "@Players", "@players" -> {
-                    dynamic.suggestion<ProxyCommandSender>(uncheck) { _, _ -> onlinePlayers().map { it.name }.toMutableList() }
-                }
-                is Collection<*> -> dynamic.suggestLiteral(suggest, playerOnly, uncheck)
-                else -> {
-                    val force = section.getBoolean("suggest-force", false)
-                    dynamic.suggestScript(suggest, playerOnly, uncheck, force)
-                }
-            }
-        }
-
-        section["execute"]?.let {
-            dynamic.executeScript(it, playerOnly, true)
-        }
-
-        // 遍历下一层 Dynamic
-        section.getConfigurationSection("dynamic")?.let { nextDynamic ->
-            buildDynamic(dynamic, nextDynamic)
-        }
-
-        // 遍历下一层 Literal
-        section.getConfigurationSection("literal")?.let { next ->
-            buildLiteral(dynamic, next)
-        }
-    }
-
-    fun buildLiteral(parent: CommandComponent, config: ConfigurationSection) {
-        val keys = config.getKeys(false)
-        for (key in keys) {
-            val section = config.getConfigurationSection(key) ?: continue
-            val name = section.getString("name") ?: key
-            val aliases = section.getStringOrList("aliases")
-
-            val literal = CommandComponentLiteral(
-                parent.index + 1,
-                *aliases.plus(name).toTypedArray(),
-                optional = section.getBoolean("optional", false),
-                permission = section.getString("permission") ?: ""
-            )
-
-            parent.children += literal
-
-            section["execute"]?.let {
-                literal.executeScript(it, section.getBoolean("player-only", false), true)
-            }
-
-            // 遍历下一层 Dynamic
-            section.getConfigurationSection("dynamic")?.let { next ->
-                buildDynamic(literal, next)
-            }
-
-            // 遍历下一层 Literal
-            section.getConfigurationSection("literal")?.let { next ->
-                buildLiteral(literal, next)
-            }
-        }
-    }
-
-    fun CommandComponentDynamic.suggestLiteral(literal: Collection<*>, playerOnly: Boolean, uncheck: Boolean) {
-        if (playerOnly) {
-            this.suggestion<Player>(uncheck) { _, _ -> literal.mapNotNull { it?.toString() } }
-        } else {
-            this.suggestion<CommandSender>(uncheck) { _, _ -> literal.mapNotNull { it?.toString() } }
-        }
-    }
-
-    /**
-     * @param force 是否强制等待脚本返回结果
-     * */
-    fun CommandComponentDynamic.suggestScript(source: Any, playerOnly: Boolean, uncheck: Boolean, force: Boolean) {
-        val builder = StringBuilder()
-        val content = buildSection(source, builder).extract()
-        builder.append("def main = {\n")
-        builder.appendWithIndent(content, suffix = "\n")
-        builder.append("}")
-
-        val script = try {
-            builder.toString().parseKetherScript()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return
-        }
-
-        fun handle(sender: Any, context: CommandContext<*>): List<String> {
-            val future = script.runActions {
-                setVariable("@Sender", value = sender)
-                if (sender is Player) setVariable("@Player", "player", value = sender)
-                setVariable("@Context", "context", value = context)
-                setVariable("@Args", "args", value = context.args())
-            }
-
-            val result = if (force) {
-                future.join()
-            } else {
-                future.getNow(null)
-            }
-
-            return when (result) {
-                is Array<*> -> result.mapNotNull { it?.toString() }
-                is Collection<*> -> result.mapNotNull { it?.toString() }
-                else -> if (result != null) listOf(result.toString()) else emptyList()
-            }
-        }
-
-        if (playerOnly) {
-            this.suggestion<Player>(uncheck) { player, context -> handle(player, context) }
-        } else {
-            this.suggestion<CommandSender>(uncheck) { sender, context -> handle(sender, context) }
-        }
-    }
-
-    fun CommandComponent.executeScript(source: Any, playerOnly: Boolean, showArgs: Boolean) {
-        val builder = StringBuilder()
-        val content = buildSection(source, builder).extract()
-        builder.append("def main = {\n")
-        builder.appendWithIndent(content, suffix = "\n")
-        builder.append("}")
-
-        val script = try {
-            builder.toString().parseKetherScript()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return
-        }
-
-        if (playerOnly) {
-            this.execute<Player> { player, context, argument ->
-                script.runActions {
-                    this.sender = adaptPlayer(player)
-                    setVariable("@Sender", "@Player", "player", value = player)
-                    setVariable("@Context", "context", value = context)
-                    setVariable("@Arg", "arg", value = argument)
-                    setVariable("@Args", "args", value = if (showArgs) context.args() else emptyArray())
-                }
-            }
-        } else {
-            this.execute<CommandSender> { sender, context, argument ->
-                script.runActions {
-                    this.sender = adaptCommandSender(sender)
-                    setVariable("@Sender", value = sender)
-                    setVariable("@Context", "context", value = context)
-                    setVariable("@Arg", "arg", value = argument)
-
-                    if (sender is Player) setVariable("@Player", "player", value = sender)
-
-                    if (showArgs) {
-                        val args = context.args()
-                        setVariable("@Args", "args", value = args)
-                        for ((i, arg) in args.withIndex()) {
-                            set("arg$i", arg)
-                        }
-                    } else {
-                        setVariable("@Args", "args", value = emptyArray<String>())
-                    }
-                }
-            }
-        }
-    }
-
-    override fun buildSource(): StringBuilder {
-        return StringBuilder()
-    }
-
-    override fun compileScript() {
-    }
-
     /**
      * 对照并尝试更新
      * */
     fun contrast(config: Configuration) {
         var register = false
+        var rebuild = false
         wrapper.updateSource(config).forEach {
             when (it.first) {
                 "name", "aliases", "description", "usage",
                 "permission", "permission-message", "permission-default" -> register = true
+                "main", "components" -> rebuild = true
             }
+        }
+
+        // 重构
+        if (rebuild) {
+            buildMain()
+            buildComponents()
         }
 
         // 重新注册
@@ -312,6 +182,10 @@ class CustomCommand(
 
     companion object {
 
+        val automaticReload by bindConfigNode("automatic-reload.custom-command") {
+            it?.cbool ?: false
+        }
+
         val folder = File(getDataFolder(), "commands")
 
         val cache = mutableMapOf<String, CustomCommand>()
@@ -319,6 +193,11 @@ class CustomCommand(
         fun get(id: String): CustomCommand? = cache[id]
 
         fun onFileChanged(file: File) {
+            if (!automaticReload) {
+                file.removeWatcher()
+                return
+            }
+
             val start = timing()
             try {
                 val id = folder.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '.')
@@ -371,7 +250,9 @@ class CustomCommand(
                     if (path.fileName.toString().startsWith("#")) continue
 
                     val id = folder.relativize(path).toString().replace(File.separatorChar, '.')
-                    val config = path.toFile().addWatcher(false) { onFileChanged(this) }.toConfig()
+                    val config = path.toFile().apply {
+                        if (automaticReload) addWatcher(false) { onFileChanged(this) }
+                    }.toConfig()
                     if (config.getBoolean("disable", false)) continue
                     cache[id] = CustomCommand(id, config.wrapper())
                 }
