@@ -1,4 +1,17 @@
 
+# 配置文件的自动重置设置
+# 部分模块的自动加载可能会存在小概率失灵情况
+# 用户可根据实际情况自行选择启用与否
+# 修改此节点可能需要重新启动服务器才能完全生效
+automatic-reload:
+  custom-command: false
+  dispatcher: false
+  handler: false
+  listen-mapping: false
+  schedule: false
+  script-source: false
+  script-compiled: false
+
 script-setting:
   # 注释匹配规则
   comment-pattern:

@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerMoveEvent
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
+import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
@@ -377,12 +378,21 @@ class EventDispatcher(
 
     companion object {
 
+        val automaticReload by bindConfigNode("automatic-reload.dispatcher") {
+            it?.cbool ?: false
+        }
+
         val folder = File(getDataFolder(), "dispatchers")
         val cache = mutableMapOf<String, EventDispatcher>()
 
         fun get(id: String): EventDispatcher? = cache[id]
 
         private fun onFileChanged(file: File) {
+            if (!automaticReload) {
+                file.removeWatcher()
+                return
+            }
+
             val start = timing()
             try {
 
@@ -483,7 +493,9 @@ class EventDispatcher(
                     val path = file.canonicalPath
 
                     // 添加文件监听器
-                    file.addWatcher(false) { onFileChanged(this) }
+                    if (automaticReload) {
+                        file.addWatcher(false) { onFileChanged(this) }
+                    }
 
                     // 加载文件
                     file.toConfig().forEachSection { key, section ->

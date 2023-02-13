@@ -4,6 +4,7 @@ import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common5.cbool
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.utils.*
@@ -17,6 +18,10 @@ import java.io.File
  * @since 2022-08-21 15:45
  */
 object EventMapper {
+
+    val automaticReload by bindConfigNode("automatic-reload.listen-mapping") {
+        it?.cbool ?: false
+    }
 
     private val folder by lazy {
         File(getDataFolder(), "listen-mapping.yml")
@@ -48,6 +53,11 @@ object EventMapper {
     }
 
     fun onFileChanged(file: File) {
+        if (!automaticReload) {
+            file.removeWatcher()
+            return
+        }
+
         val start = timing()
         try {
 
@@ -110,7 +120,9 @@ object EventMapper {
             }
 
             // 添加监听器
-            folder.addWatcher { onFileChanged(this) }
+            if (automaticReload) {
+                folder.addWatcher { onFileChanged(this) }
+            }
 
             console().asLangText("Event-Mapping-Load-Succeeded", cache.size, timing(start)).also {
                 console().sendMessage(it)

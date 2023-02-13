@@ -4,6 +4,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.*
 import taboolib.common.platform.service.PlatformExecutor
+import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.kether.Script
 import taboolib.module.kether.parseKetherScript
@@ -267,6 +268,10 @@ class ScheduleTask(
 
     companion object {
 
+        val automaticReload by bindConfigNode("automatic-reload.schedule") {
+            it?.cbool ?: false
+        }
+
         val defDateFormat by bindConfigNode("schedule-setting.date-format") {
             it?.toString() ?: "yyyy-MM-dd HH:mm:ss"
         }
@@ -284,6 +289,11 @@ class ScheduleTask(
         }
 
         private fun onFileChanged(file: File) {
+            if (!automaticReload) {
+                file.removeWatcher()
+                return
+            }
+
             val start = timing()
             try {
                 var counter = 0
@@ -374,7 +384,9 @@ class ScheduleTask(
                     val path = file.canonicalPath
 
                     // 添加文件监听器
-                    file.addWatcher(false) { onFileChanged(this) }
+                    if (automaticReload) {
+                        file.addWatcher(false) { onFileChanged(this) }
+                    }
 
                     // 加载文件
                     file.toConfig().forEachSection { key, section ->

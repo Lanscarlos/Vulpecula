@@ -4,6 +4,7 @@ import taboolib.common.io.newFile
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
@@ -251,6 +252,10 @@ class VulScript(
 
     companion object {
 
+        val automaticReload by bindConfigNode("automatic-reload.script-source") {
+            it?.cbool ?: false
+        }
+
         val folder = File(getDataFolder(), "scripts")
 
         val cache = mutableMapOf<String, VulScript>()
@@ -260,6 +265,11 @@ class VulScript(
         fun getAll(): Collection<VulScript> = cache.values
 
         fun onFileChanged(file: File) {
+            if (!automaticReload) {
+                file.removeWatcher()
+                return
+            }
+
             val start = timing()
             try {
                 val name = folder.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '.')
@@ -298,7 +308,9 @@ class VulScript(
                     if (path.fileName.toString().startsWith("#")) continue
 
                     val name = folder.relativize(path).toString().replace(File.separatorChar, '.')
-                    val file = path.toFile().addWatcher(false) { onFileChanged(this) }
+                    val file = path.toFile().apply {
+                        if (automaticReload) addWatcher(false) { onFileChanged(this) }
+                    }
                     cache[name] = VulScript(name, file.toConfig().wrapper())
                 }
 

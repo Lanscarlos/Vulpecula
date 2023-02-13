@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.MultimapBuilder
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.*
+import taboolib.common5.cbool
 import taboolib.library.kether.ExitStatus
 import taboolib.module.kether.*
 import taboolib.module.lang.asLangText
@@ -22,6 +23,10 @@ import java.util.concurrent.CompletableFuture
  */
 @Suppress("UnstableApiUsage")
 object ScriptWorkspace {
+
+    val automaticReload by bindConfigNode("automatic-reload.script-compiled") {
+        it?.cbool ?: false
+    }
 
     val namespace = listOf("vulpecula", "vulpecula-script")
     val folder = File(getDataFolder(), "scripts/.compiled")
@@ -84,6 +89,11 @@ object ScriptWorkspace {
     }
 
     fun onFileChanged(file: File) {
+        if (!automaticReload) {
+            file.removeWatcher()
+            return
+        }
+
         val start = timing()
         try {
             val name = folder.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '.').substringBeforeLast('.')
@@ -119,7 +129,10 @@ object ScriptWorkspace {
                 if (path.fileName.toString().startsWith("#")) continue
 
                 val name = folder.relativize(path).toString().replace(File.separatorChar, '.').substringBeforeLast('.')
-                val file = path.toFile().addWatcher(false) { onFileChanged(this) }
+                val file = path.toFile().apply {
+                    if (automaticReload) addWatcher(false) { onFileChanged(this) }
+                }
+
                 // 读取文件
                 try {
                     loadScript(file, name)

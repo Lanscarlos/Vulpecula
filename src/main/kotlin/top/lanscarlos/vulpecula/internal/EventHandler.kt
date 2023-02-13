@@ -4,6 +4,7 @@ import taboolib.common.io.digest
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.Quest
 import taboolib.module.kether.parseKetherScript
@@ -232,6 +233,10 @@ class EventHandler(
 
     companion object {
 
+        val automaticReload by bindConfigNode("automatic-reload.handler") {
+            it?.cbool ?: false
+        }
+
         val folder = File(getDataFolder(), "handlers")
         val cache = mutableMapOf<String, EventHandler>()
 
@@ -240,6 +245,11 @@ class EventHandler(
         fun getAll(): Collection<EventHandler> = cache.values
 
         private fun onFileChanged(file: File) {
+            if (!automaticReload) {
+                file.removeWatcher()
+                return
+            }
+
             val start = timing()
             try {
 
@@ -323,7 +333,9 @@ class EventHandler(
                     val path = file.canonicalPath
 
                     // 添加文件监听器
-                    file.addWatcher(false) { onFileChanged(this) }
+                    if (automaticReload) {
+                        file.addWatcher(false) { onFileChanged(this) }
+                    }
 
                     // 加载文件
                     file.toConfig().forEachSection { key, section ->
