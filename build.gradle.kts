@@ -1,3 +1,6 @@
+
+val taboolib_version: String by project
+
 plugins {
     `java-library`
     `maven-publish`
@@ -21,7 +24,7 @@ taboolib {
     install("expansion-javascript")
     install("platform-bukkit")
     classifier = null
-    version = "6.0.10-86"
+    version = taboolib_version
 }
 
 repositories {
@@ -31,14 +34,20 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.google.guava:guava:31.1-jre")
 
-    compileOnly("net.luckperms:api:5.4")
+    compileOnly(kotlin("stdlib"))
 
+    // server
     compileOnly("ink.ptms:nms-all:1.0.0")
     compileOnly("ink.ptms.core:v11900:11900-minimize:mapped")
     compileOnly("ink.ptms.core:v11900:11900-minimize:universal")
-    compileOnly(kotlin("stdlib"))
+    compileOnly("com.google.guava:guava:31.1-jre")
+
+    // for kether
+    compileOnly("com.mojang:datafixerupper:4.0.26")
+    compileOnly("net.luckperms:api:5.4")
+
+    // other
     compileOnly(fileTree("libs"))
 }
 
