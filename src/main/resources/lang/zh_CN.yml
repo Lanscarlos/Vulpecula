@@ -14,10 +14,10 @@ Plugin-Debug-Detail: '&8[&3Vul&bpecula&8] &e调试 &8| &7{0} &8(class: {1})'
 
 # 主配置
 
-Config-Reload-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 重载 Config.yml 完毕！ &8({0} ms)'
-Config-Reload-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 Config.yml 加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Config-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 加载 Config.yml 完毕！ &8({0} ms)'
+Config-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 Config.yml 加载失败！
+  &e[ERROR: Config@Load]: {0}
 
 
 
@@ -25,68 +25,62 @@ Config-Reload-Failed:
 
 Kether-Override-Action-Local-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 本地覆盖语句 &a{0}&7 完毕！ &8({1} ms)'
 Kether-Override-Action-Remote-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 同步覆盖语句 &a{0}&7 完毕！ &8({1} ms)'
-Kether-Action-Register-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 注册语句时遇到了问题！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Kether-Action-Register-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 注册语句时遇到了问题！
+  &e[ERROR: Config@Load]: {0}
 
 
 
 # 脚本编译模块
 
 Script-Compile-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动编译 &a{0}&7 源脚本 &8({1} ms)'
-Script-Compile-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动编译 &a{0}&7 源脚本时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Compile-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动编译 &a{0}&7 源脚本时出错！
+  &e[ERROR: Script-Compile@Automatic]: {1}
 Script-Compile-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功编译 &a{0}&7 个源脚本！ &8({1} ms)'
-Script-Compile-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 源脚本编译失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-Script-Compile-Load-Failed-Conflict:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本时发生 id 冲突：&a{0}'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
-Script-Compile-Load-Failed-Details:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本 &a{0}&7 内的 &a{1}&7 时出现问题！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Script-Compile-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 源脚本编译失败！
+  &e[ERROR: Script-Compile@Load]: {0}
+Script-Compile-Load-Failed-Conflict: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本时发生 id 冲突：&a{0}
+  &e[ERROR: Script-Compile@Load]: 冲突位置：文件 {1}、{2}
+Script-Compile-Load-Failed-Details: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 编译源脚本 &a{0}&7 内的 &a{1}&7 时出现问题！
+  &e[ERROR: Script-Compile@Load]: {2}
 Script-Compile-Command-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功编译脚本 &a{0}'
-Script-Compile-Command-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译脚本 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Compile-Command-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 编译脚本 &a{0}&7 时出现问题
+  &e[ERROR: Script-Command@Compile]: {1}
 Script-Compile-Command-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功编译所有脚本.'
-Script-Compile-Command-All-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 编译所有脚本时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Script-Compile-Command-All-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 编译所有脚本时出现问题
+  &e[ERROR: Script-Command@Compile]: {0}
 
 
 
 # 脚本运行模块
 
 Script-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 脚本 &8({1} ms)'
-Script-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 脚本时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 脚本时出错！
+  &e[ERROR: Script@Automatic]: {1}
 Script-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个脚本！ &8({1} ms)'
-Script-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-Script-Load-Failed-Conflict:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载脚本时发生 id 冲突：&a{0}'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}'
-Script-Load-Failed-Details:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载脚本 &a{0}&7 内的 &a{1}&7 时出现问题！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Script-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 脚本加载失败！
+  &e[ERROR: Script@Load]: {0}
 Script-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 脚本 &a{0}&7 不存在！'
 Script-Run-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功运行脚本 &a{0}'
-Script-Run-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 运行脚本 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Run-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 运行脚本 &a{0}&7 时出现问题
+  &e[ERROR: Script@Run]: {1}
 Script-Stop-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止脚本 &a{0}'
-Script-Stop-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止脚本 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Script-Stop-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 终止脚本 &a{0}&7 时出现问题
+  &e[ERROR: Script@Stop]: {1}
 Script-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所有脚本.'
-Script-Stop-All-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有脚本时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Script-Stop-All-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有脚本时出现问题
+  &e[ERROR: Script@Stop]: {0}
 Script-List:
   - '&8[&3Vul&bpecula&8] &a良好 &8|&7 所有脚本: &f{0}'
   - '&8[&3Vul&bpecula&8] &a良好 &8|&7 运行脚本: &f{1}'
@@ -96,26 +90,26 @@ Script-List:
 # 自定义命令模块
 
 Custom-Command-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件！ &8({1} ms)'
-Custom-Command-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Custom-Command-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！
+  &e[ERROR: Command@Automatic]: {1}
 Custom-Command-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个自定义命令！ &8({1} ms)'
-Custom-Command-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自定义命令加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Custom-Command-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自定义命令加载失败！
+  &e[ERROR: Command@Load]: {0}
 
 
 
 # 映射模块
 
 Event-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个事件映射！ &8({2} ms)'
-Event-Mapping-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Event-Mapping-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！
+  &e[ERROR: EventMapping@Automatic]: {1}
 Event-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个事件映射！ &8({1} ms)'
-Event-Mapping-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Event-Mapping-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射加载失败！
+  &e[ERROR: EventMapping@Load]: {0}
 Event-Mapping-Failed-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件映射 &a{1}&7 未被定义！'
 Event-Mapping-Failed-Class-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件类 &a{0}&7 不存在！'
 
@@ -124,35 +118,35 @@ Event-Mapping-Failed-Class-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&7 事件
 # 日程模块
 
 Schedule-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个日程模块！ &8({2} ms)'
-Schedule-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Schedule-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！
+  &e[ERROR: Schedule@Automatic]: {1}
 Schedule-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个日程模块！ &8({1} ms)'
-Schedule-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 日程模块加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-Schedule-Load-Conflict:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块时发生 id 冲突：&a{0}'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
-Schedule-Load-Failed-Details:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Schedule-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 日程模块加载失败！
+  &e[ERROR: Schedule@Load]: {0}
+Schedule-Load-Conflict: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块时发生 id 冲突：&a{0}
+  &e[ERROR: Schedule@Conflict]: 冲突位置：文件 {1}、{2}
+Schedule-Load-Failed-Details: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 加载日程模块 &a{0}&7 内的 &a{1}&7 时出现问题！
+  &e[ERROR: Schedule@Load]: {2}
 Schedule-Execution-Undefined: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 的执行脚本未定义！'
 Schedule-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 日程模块 &a{0}&7 不存在！'
 Schedule-Run-Already: '&8[&3Vul&bpecula&8] &a良好 &8|&7 日程 &a{0}&7 已在运行队列中.'
 Schedule-Run-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功运行日程 &a{0}'
-Schedule-Run-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 运行日程 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Schedule-Run-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 运行日程 &a{0}&7 时出现问题
+  &e[ERROR: Schedule@Run]: {1}
 Schedule-Stop-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止日程 &a{0}'
 Schedule-Stop-Already: '&8[&3Vul&bpecula&8] &a良好 &8|&7 日程 &a{0}&7 已在终止队列中.'
-Schedule-Stop-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止日程 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Schedule-Stop-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 终止日程 &a{0}&7 时出现问题
+  &e[ERROR: Schedule@Stop]: {1}
 Schedule-Stop-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功终止所有日程.'
-Schedule-Stop-All-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有日程时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Schedule-Stop-All-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 终止所有日程时出现问题
+  &e[ERROR: Schedule@Stop]: {0}
 Schedule-List:
   - '&8[&3Vul&bpecula&8] &a良好 &8|&7 所有日程: &f{0}'
   - '&8[&3Vul&bpecula&8] &a良好 &8|&7 运行日程: &f{1}'
@@ -170,36 +164,36 @@ Schedule-Detail:
 # 调度模块
 
 Dispatcher-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个调度模块！ &8({2} ms)'
-Dispatcher-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Dispatcher-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！
+  &e[ERROR: Dispatcher@Automatic]: {1}
 Dispatcher-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个调度模块！ &8({1} ms)'
-Dispatcher-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 调度模块加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-Dispatcher-Load-Conflict:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块时发生 id 冲突：&a{0}'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
-Dispatcher-Load-Failed-Details:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Dispatcher-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 调度模块加载失败！
+  &e[ERROR: Dispatcher@Load]: {0}
+Dispatcher-Load-Conflict: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块时发生 id 冲突：&a{0}
+  &e[ERROR: Dispatcher@Conflict]: 冲突位置：文件 {1}、{2}
+Dispatcher-Load-Failed-Details: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 加载调度模块 &a{0}&7 内的 &a{1}&7 时出现问题！
+  &e[ERROR: Dispatcher@Load]: {2}
 Dispatcher-Not-Found: '&8[&3Vul&bpecula&8] &c错误 &8|&e 调度模块 &a{0}&7 不存在！'
 Dispatcher-Enable-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功启动调度模块 &a{0}'
-Dispatcher-Enable-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 启动调度模块 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Dispatcher-Enable-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 启动调度模块 &a{0}&7 时出现问题
+  &e[ERROR: Dispatcher@Enable]: {1}
 Dispatcher-Enable-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功启动所有调度模块.'
-Dispatcher-Enable-All-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 启动所有调度模块时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Dispatcher-Enable-All-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 启动所有调度模块时出现问题
+  &e[ERROR: Dispatcher@Enable]: {0}
 Dispatcher-Disable-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功关闭调度模块 &a{0}'
-Dispatcher-Disable-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 关闭调度模块 &a{0}&7 时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Dispatcher-Disable-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 关闭调度模块 &a{0}&7 时出现问题
+  &e[ERROR: Dispatcher@Disable]: {1}
 Dispatcher-Disable-All-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功关闭所有调度模块.'
-Dispatcher-Disable-All-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 关闭所有调度模块时出现问题'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Dispatcher-Disable-All-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 关闭所有调度模块时出现问题
+  &e[ERROR: Dispatcher@Disable]: {0}
 Dispatcher-List:
   - '&8[&3Vul&bpecula&8] &a良好 &8|&7 所有调度模块: &f{0}'
   - '&8[&3Vul&bpecula&8] &a良好 &8|&7 工作调度模块: &f{1}'
@@ -216,19 +210,19 @@ Dispatcher-Detail:
 # 处理模块
 
 Handler-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个处理模块！ &8({2} ms)'
-Handler-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Handler-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！
+  &e[ERROR: Handler@Automatic]: {1}
 Handler-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个处理模块！ &8({1} ms)'
-Handler-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 处理模块加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
-Handler-Load-Failed-Conflict:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载处理模块时发生 id 冲突：&a{0}'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 冲突位置：文件 &a{1}&7、&a{2}&7'
-Handler-Load-Failed-Details:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 加载处理模块 &a{0}&7 内的 &a{1}&7 时出现问题！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {2}'
+Handler-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 处理模块加载失败！
+  &e[ERROR: Handler@Load]: {0}
+Handler-Load-Failed-Conflict: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 加载处理模块时发生 id 冲突：&a{0}
+  &e[ERROR: Handler@Conflict]: 冲突位置：文件 {1}、{2}
+Handler-Load-Failed-Details: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 加载处理模块 &a{0}&7 内的 &a{1}&7 时出现问题！
+  &e[ERROR: Handler@Load]: {2}
 Handler-Load-Dispatcher-Not-Found: '&8[&3Vul&bpecula&8] &e警告 &8|&7 处理模块 &a{0}&7 加载时未能找到 &a{1}&7 调度模块！'
 Handler-Load-Dispatcher-Unbind: '&8[&3Vul&bpecula&8] &e警告 &8|&7 处理模块 &a{0}&7 正在与调度模块 &a{1}&7 解绑！'
 
@@ -236,19 +230,19 @@ Handler-Load-Dispatcher-Unbind: '&8[&3Vul&bpecula&8] &e警告 &8|&7 处理模块
 
 # 动作模块
 
-Action-TryCatch-Warning:
-  - '&8[&3Vul&bpecula&8] &e提示 &8|&7 捕捉到 Kether 执行时的异常 &a{0}'
-  - '&8[&3Vul&bpecula&8] &e提示 &8|&e {1}'
+Action-TryCatch-Warning: |-
+  &8[&3Vul&bpecula&8] &e提示 &8|&7 捕捉到 Kether 执行时的异常 &a{0}
+  &e[ERROR: Action@TryCatch]: {1}
 
 
 
 # Unicode 映射模块
 
 Action-Unicode-Mapping-Load-Automatic-Succeeded: '&8[&3Vul&bpecula&8] &a信息 &8|&7 自动加载 &a{0}&7 文件，共 &a{1}&7 个 Unicode 映射！ &8({2} ms)'
-Action-Unicode-Mapping-Load-Automatic-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {1}'
+Action-Unicode-Mapping-Load-Automatic-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 自动加载 &a{0}&7 文件时出错！
+  &e[ERROR: Unicode@Load]: {1}
 Action-Unicode-Mapping-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个 Unicode 映射！ &8({1} ms)'
-Action-Unicode-Mapping-Load-Failed:
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&7 Unicode 映射加载失败！'
-  - '&8[&3Vul&bpecula&8] &c错误 &8|&e {0}'
+Action-Unicode-Mapping-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 Unicode 映射加载失败！
+  &e[ERROR: Unicode@Load]: {0}
