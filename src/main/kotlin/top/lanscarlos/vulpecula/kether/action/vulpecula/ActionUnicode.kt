@@ -4,6 +4,7 @@ import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.cbool
+import taboolib.module.chat.component
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.kether.KetherRegistry
@@ -100,9 +101,14 @@ object ActionUnicode {
         id = "unicode",
         name = ["unicode"]
     )
-    fun parser() = buildParser { _ ->
+    fun parser() = buildParser { reader ->
+        val raw = reader.hasNextToken("raw")
         group(stringOrNull()) {
-            now { it?.mapping()?.replaceUnicode() }
+            now {
+                it?.mapping()?.replaceUnicode()?.run {
+                    if (raw) this.component() else this
+                }
+            }
         }
     }
 
