@@ -12,12 +12,14 @@ automatic-reload:
   script-source: false
   script-compiled: false
 
+  action-unicode: false
+
 script-setting:
   # 注释匹配规则
   comment-pattern:
     # 单行注释
     # 匹配 // 及其后所有字符直至换行
-    single-line: '(?<!\\)//[^\n]*(?=\n)'
+    single-line: '(?<!\\)//[^\n]*(?=\n|\r)'
     # 多行注释
     # 匹配 /* 直到 */
     multi-line: '(?<!\\)/\*[^(\*/)]*\*/'
@@ -32,6 +34,10 @@ schedule-setting:
   # mm - 分钟
   # ss - 秒
   date-format: 'yyyy-MM-dd HH:mm:ss'
+
+action-setting:
+  unicode:
+    special-digit: [ 1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128 ]
 
 # 调试等级
 # off - 关闭

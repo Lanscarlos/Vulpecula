@@ -3,13 +3,11 @@ package top.lanscarlos.vulpecula.kether.action.vulpecula
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
-import taboolib.module.kether.actionTake
-import taboolib.module.kether.scriptParser
+import taboolib.common5.cbool
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.live.StringLiveData
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 
@@ -22,17 +20,110 @@ import java.io.File
  */
 object ActionUnicode {
 
+    val specialDigit by bindConfigNode("action-setting.unicode.special-digit") { value ->
+        (value as? List<*>)?.mapNotNull { it?.toString()?.toIntOrNull() }?.sortedDescending() ?: listOf(1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128).sortedDescending()
+    }
+
+    private val unicodePattern = "\\\\u[A-Za-z0-9]{4}".toPattern()
+    private val mappingPattern = "@([A-Za-z0-9_\\-+~!@\$%*\\u4e00-\\u9fa5]+)(?=\\b|\\n|\\r)|@\\{([A-Za-z0-9_\\-+~!@\$%*\\u4e00-\\u9fa5]+)}".toPattern()
+
+    private fun String.replaceUnicode(): String {
+        if (!this.contains("\\u")) return this
+
+        val matcher = unicodePattern.matcher(this)
+        val buffer = StringBuffer()
+
+        try {
+            while (matcher.find()) {
+                val found = matcher.group()
+                val transfer = Integer.parseInt(found.substring(2), 16).toChar()
+                matcher.appendReplacement(buffer, transfer.toString())
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return matcher.appendTail(buffer).toString()
+    }
+
+    private fun String.mapping(): String {
+        /*
+        * @xxx
+        * @{xxx}
+        * */
+        val matcher = mappingPattern.matcher(this)
+        val buffer = StringBuffer()
+
+        while (matcher.find()) {
+            val found = matcher.group(1) ?: matcher.group(2) ?: continue
+            val mapping = if (found.startsWith('+')) {
+                // @{+\d} 正空格
+                val target = found.substring(1).toInt()
+                splitNumber(target).joinToString("") { mapping["+$it"] ?: "@{+$it}" }
+            } else if (found.startsWith('-')) {
+                // @{-\d} 负空格
+                val target = found.substring(1).toInt()
+                splitNumber(target).joinToString("") { mapping["-$it"] ?: "@{-$it}" }
+            } else {
+                // 其他
+                mapping[found] ?: matcher.group()
+            }
+            matcher.appendReplacement(buffer, mapping)
+        }
+
+        return matcher.appendTail(buffer).toString()
+    }
+
+    /**
+     * 将给定数字分割成一组特定数字之和
+     * */
+    private fun splitNumber(target: Int): List<Int> {
+        val result = mutableListOf<Int>()
+        var remaining = target
+        var index = 0
+
+        while (remaining > 0) {
+            if (index >= specialDigit.size) break
+            val part = specialDigit[index]
+
+            if (remaining >= part) {
+                result += part
+                remaining -= part
+            } else {
+                index += 1
+            }
+        }
+        return result
+    }
+
+    @VulKetherParser(
+        id = "unicode",
+        name = ["unicode"]
+    )
+    fun parser() = buildParser { _ ->
+        group(stringOrNull()) {
+            now { it?.mapping()?.replaceUnicode() }
+        }
+    }
+
     /**
      * 判断该语句是否启用
      * */
     val enable get() = KetherRegistry.hasAction("unicode")
 
+    val automaticReload by bindConfigNode("automatic-reload.action-unicode") {
+        it?.cbool ?: false
+    }
+
     private val folder by lazy { File(getDataFolder(), "actions/unicode") }
 
-    private val fileCache by lazy { mutableSetOf<File>() }
     private val mapping by lazy { mutableMapOf<String, String>() }
 
     private fun onFileChange(file: File) {
+        if (!automaticReload) {
+            file.removeWatcher()
+            return
+        }
         try {
             val start = timing()
 
@@ -53,15 +144,12 @@ object ActionUnicode {
         return try {
             val start = timing()
 
-            // 移除文件监听器
-            fileCache.forEach { it.removeWatcher() }
-
             // 清除缓存
             mapping.clear()
-            fileCache.clear()
 
             folder.ifNotExists {
                 releaseResourceFile("actions/unicode/#def.yml", true)
+                releaseResourceFile("actions/unicode/#blank.yml", true)
             }.getFiles().forEach { file ->
 
                 file.toConfig().forEachLine { key, value ->
@@ -69,8 +157,7 @@ object ActionUnicode {
                     mapping[key] = value
                 }
 
-                fileCache += file
-                file.addWatcher { onFileChange(this) }
+                if (automaticReload) file.addWatcher { onFileChange(this) }
             }
 
             console().asLangText("Action-Unicode-Mapping-Load-Succeeded", mapping.size, timing(start)).also {
@@ -80,101 +167,6 @@ object ActionUnicode {
             e.printStackTrace()
             console().asLangText("Action-Unicode-Mapping-Load-Failed", e.localizedMessage).also {
                 console().sendMessage(it)
-            }
-        }
-    }
-
-    private fun String.mappingUnicode(keyword: Char = '@', prefix: Char = '{', suffix: Char = '}'): String {
-        val content = this.toCharArray()
-        var index = 0
-        val builder = StringBuilder()
-        while (index < content.size) {
-
-            if (content[index] == keyword) {
-                // 检测到起始符
-                val key = StringBuilder()
-                index++ // 跳过起始符 "$"
-                if (index >= content.size) continue // 已检索到字符串末尾
-                if (content[index] == prefix) {
-                    // 含有拓展符 "{"
-                    index++ // 跳过拓展符 "{"
-                    while (index < content.size && content[index] != suffix) {
-                        // 依次加入变量名缓存
-                        key.append(content[index])
-                        index++
-                    }
-                    index++ // 跳过最后的终止符 "}"
-                } else {
-                    if (Character.isDigit(content[index])) {
-                        // 变量名以数字开头，不合法，跳过处理
-                        builder.append('$')
-                        builder.append(content[index])
-                        continue
-                    }
-                    // 依次将字母或数字加入变量名缓存
-                    while (index < content.size && isLetterOrDigit(content[index])) {
-                        key.append(content[index])
-                        index++
-                    }
-                }
-
-                // 查询 unicode 映射
-                val unicode = mapping[key.toString()]
-                if (unicode != null) {
-                    // 查询成功
-                    builder.append(unicode)
-                } else {
-                    // 查询失败
-                    builder.append('@')
-                    builder.append('{')
-                    builder.append(key.toString())
-                    builder.append('}')
-                }
-            } else {
-                // 非起始符
-                builder.append(content[index++])
-            }
-        }
-        return builder.toString()
-    }
-
-    private fun isLetterOrDigit(char: Char): Boolean {
-        if (char == '_' || char == '-') return true
-        val uppercase = 1 shl Character.UPPERCASE_LETTER.toInt()
-        val lowercase = 1 shl Character.LOWERCASE_LETTER.toInt()
-        val digit = 1 shl Character.DECIMAL_DIGIT_NUMBER.toInt()
-        return ((( (uppercase or lowercase) or digit ) shr Character.getType(char.code)) and 1) != 0
-    }
-
-    private fun String.replaceUnicode(): String {
-        if (!this.contains("\\u")) return this
-
-        val pattern = "\\\\u[A-Za-z0-9]{4}".toPattern()
-        val matcher = pattern.matcher(this)
-        val buffer = StringBuffer()
-
-        try {
-            while (matcher.find()) {
-                val found = matcher.group()
-                val transfer = Integer.parseInt(found.substring(2), 16).toChar()
-                matcher.appendReplacement(buffer, transfer.toString())
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        return matcher.appendTail(buffer).toString()
-    }
-
-    @VulKetherParser(
-        id = "unicode",
-        name = ["unicode"]
-    )
-    fun parser() = scriptParser { reader ->
-        val source = StringLiveData(reader.nextBlock())
-        actionTake {
-            source.getOrNull(this).thenApply {
-                it?.mappingUnicode()?.replaceUnicode()
             }
         }
     }
