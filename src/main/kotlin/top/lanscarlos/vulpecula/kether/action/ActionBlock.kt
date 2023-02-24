@@ -53,7 +53,7 @@ class ActionBlock(
     companion object {
         @VulKetherParser(
             id = "block",
-            name = ["block"]
+            name = ["blockof"]
         )
         fun parser() = scriptParser { reader ->
             reader.expect("{")

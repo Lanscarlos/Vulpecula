@@ -101,11 +101,13 @@ object ActionUnicode {
         id = "unicode",
         name = ["unicode"]
     )
-    fun parser() = buildParser { reader ->
-        val raw = reader.hasNextToken("raw")
-        group(stringOrNull()) {
+    fun parser() = buildParser {
+        group(
+            option("raw"),
+            stringOrNull()
+        ) { raw, source ->
             now {
-                it?.mapping()?.replaceUnicode()?.run {
+                source?.mapping()?.replaceUnicode()?.run {
                     if (raw) this.component() else this
                 }
             }

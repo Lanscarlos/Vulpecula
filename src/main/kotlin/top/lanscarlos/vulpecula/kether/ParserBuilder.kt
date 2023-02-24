@@ -267,6 +267,12 @@ interface ParserBuilder {
         }
     }
 
+    fun option(vararg expected: String): Parser<Boolean> {
+        return Parser.of {
+            it.hasNextToken(*expected)
+        }
+    }
+
     fun <T> option(vararg expected: String, then: Parser<T>): Parser<T?> {
         return Parser.frame { reader ->
             if (reader.hasNextToken(*expected)) {
