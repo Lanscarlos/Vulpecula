@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.config
+package top.lanscarlos.vulpecula.utils.config
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
@@ -7,7 +7,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.config
+ * top.lanscarlos.vulpecula.utils.config
  *
  * @author Lanscarlos
  * @since 2022-12-15 19:16

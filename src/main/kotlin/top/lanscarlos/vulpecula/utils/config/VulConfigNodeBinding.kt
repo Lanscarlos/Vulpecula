@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.config
+package top.lanscarlos.vulpecula.utils.config
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.ConfigLoader
@@ -6,7 +6,7 @@ import kotlin.reflect.KProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.config
+ * top.lanscarlos.vulpecula.utils.config
  *
  * @author Lanscarlos
  * @since 2022-12-15 22:05

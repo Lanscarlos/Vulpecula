@@ -9,7 +9,7 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.config.VulConfig
+import top.lanscarlos.vulpecula.utils.config.VulConfig
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File

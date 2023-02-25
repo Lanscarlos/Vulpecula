@@ -2,9 +2,9 @@ package top.lanscarlos.vulpecula.utils
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.config.VulConfig
-import top.lanscarlos.vulpecula.config.VulConfigNode
-import top.lanscarlos.vulpecula.config.VulConfigNodeBinding
+import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.utils.config.VulConfigNode
+import top.lanscarlos.vulpecula.utils.config.VulConfigNodeBinding
 
 /**
  * Vulpecula

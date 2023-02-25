@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.internal
 
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.config.VulConfig
+import top.lanscarlos.vulpecula.utils.config.VulConfig
 
 /**
  * Vulpecula

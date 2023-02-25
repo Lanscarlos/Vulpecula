@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.kether.action
 
-import taboolib.common.platform.function.info
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Parser
 import taboolib.module.kether.*
