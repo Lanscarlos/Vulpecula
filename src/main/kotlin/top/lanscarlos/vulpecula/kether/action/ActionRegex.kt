@@ -4,7 +4,9 @@ import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Parser
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.kether.VulKetherParser
+import top.lanscarlos.vulpecula.kether.action.ActionRegex.runHandle
 import top.lanscarlos.vulpecula.utils.*
+import java.util.concurrent.CompletableFuture
 import java.util.regex.Matcher
 
 /**
@@ -41,14 +43,7 @@ object ActionRegex {
                 expect("by", "with", "using", option = true, then = string())
             ) { source, pattern ->
 
-                val text = when (source) {
-                    is String -> source
-                    is Array<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    is Collection<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    else -> ""
-                }
-
-                val matcher = pattern.toPattern().matcher(text)
+                val matcher = pattern.toPattern().matcher(source.format())
 
                 now {
                     this.variables()["@Matcher"] = matcher
@@ -65,16 +60,8 @@ object ActionRegex {
                 stringOrList(),
                 expect("by", "with", "using", option = true, then = string())
             ) { source, pattern ->
-
-                val text = when (source) {
-                    is String -> source
-                    is Array<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    is Collection<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    else -> ""
-                }
-
                 now {
-                    text.matches(pattern.toRegex())
+                    source.format().matches(pattern.toRegex())
                 }
             }
         }
@@ -92,27 +79,14 @@ object ActionRegex {
                     }
                 },
             ) { source, pattern, handle ->
-                val text = when (source) {
-                    is String -> source
-                    is Array<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    is Collection<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    else -> ""
-                }
-
-                val matcher = pattern.toPattern().matcher(text)
+                val matcher = pattern.toPattern().matcher(source.format())
                 val buffer = StringBuffer()
+                val result = mutableListOf<Any?>()
 
                 now {
-                    val result = mutableListOf<Any?>()
                     while (matcher.find()) {
                         if (handle is ParsedAction<*>) {
-                            val found = matcher.group()
-                            result += this.newFrame(handle).also {
-                                it.variables()["@Matcher"] = matcher
-                                it.variables()["matcher"] = matcher
-                                it.variables()["found"] = found
-                                it.variables()["count"] = matcher.groupCount()
-                            }.run<Any?>().getNow(null)
+                            result += this.runHandle(matcher, handle).getNow(null)
 
                             if (this.script().breakLoop) {
                                 // 跳出循环
@@ -145,26 +119,13 @@ object ActionRegex {
                 },
             ) { source, pattern, handle ->
 
-                val text = when (source) {
-                    is String -> source
-                    is Array<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    is Collection<*> -> source.mapNotNull { el -> el?.toString() }.joinToString("\n")
-                    else -> ""
-                }
-
-                val matcher = pattern.toPattern().matcher(text)
+                val matcher = pattern.toPattern().matcher(source.format())
                 val buffer = StringBuffer()
 
                 now {
                     while (matcher.find()) {
                         if (handle is ParsedAction<*>) {
-                            val found = matcher.group()
-                            val replacement = this.newFrame(handle).also {
-                                it.variables()["@Matcher"] = matcher
-                                it.variables()["matcher"] = matcher
-                                it.variables()["found"] = found
-                                it.variables()["count"] = matcher.groupCount()
-                            }.run<Any?>().getNow(null)
+                            val replacement = this.runHandle(matcher, handle).getNow(null)
                             matcher.appendReplacement(buffer, replacement?.toString() ?: "")
 
                             if (this.script().breakLoop) {
@@ -187,6 +148,24 @@ object ActionRegex {
                     }
                 }
             }
+        }
+    }
+
+    private fun ScriptFrame.runHandle(matcher: Matcher, handle: ParsedAction<*>): CompletableFuture<Any?> {
+        return this.newFrame(handle).also {
+            it.variables()["@Matcher"] = matcher
+            it.variables()["matcher"] = matcher
+            it.variables()["found"] = matcher.group()
+            it.variables()["count"] = matcher.groupCount()
+        }.run<Any?>()
+    }
+
+    private fun Any?.format(): String {
+        return when (this) {
+            is String -> this
+            is Array<*> -> this.mapNotNull { el -> el?.toString() }.joinToString("\n")
+            is Collection<*> -> this.mapNotNull { el -> el?.toString() }.joinToString("\n")
+            else -> ""
         }
     }
 

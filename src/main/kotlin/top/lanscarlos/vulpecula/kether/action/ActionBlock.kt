@@ -23,28 +23,24 @@ class ActionBlock(
 ) : ScriptAction<Any?>() {
 
     override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        if (block.isEmpty()) {
-            return CompletableFuture.completedFuture(null)
+        return if (block.isEmpty()) {
+            CompletableFuture.completedFuture(null)
         } else if (block.size == 1) {
-            return frame.run(block[0])
+            frame.run(block[0])
         } else {
             var previous: CompletableFuture<Any?> = frame.run(block.first())
             for (i in 1 until block.size) {
                 previous = handle(previous, frame, block[i])
             }
-            return previous
+            previous
         }
     }
 
     fun handle(previous: CompletableFuture<Any?>, frame: ScriptFrame, action: ParsedAction<*>): CompletableFuture<Any?> {
-        if (previous.isDone) {
-            return frame.run(action)
+        return if (previous.isDone) {
+            frame.run(action)
         } else {
-            val future = CompletableFuture<Any?>()
-            previous.thenRun {
-                frame.run(action).thenAccept { future.complete(it) }
-            }
-            return future
+            previous.thenCompose { frame.run(action) }
         }
     }
 
