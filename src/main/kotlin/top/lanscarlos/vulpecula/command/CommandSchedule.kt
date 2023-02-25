@@ -2,6 +2,8 @@ package top.lanscarlos.vulpecula.command
 
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.suggest
+import taboolib.common.platform.command.suggestUncheck
 import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.utils.sendSyncLang
 
@@ -14,7 +16,7 @@ import top.lanscarlos.vulpecula.utils.sendSyncLang
  */
 object CommandSchedule {
 
-    val main: CommandComponent.() -> Unit = {
+    internal val main: CommandComponent.() -> Unit = {
         literal("run", literal = run)
         literal("stop", literal = stop)
         literal("list", literal = list)
@@ -24,9 +26,9 @@ object CommandSchedule {
     /**
      * vul schedule run taskId args?...
      * */
-    val run: CommandComponent.() -> Unit = {
+    private val run: CommandComponent.() -> Unit = {
         dynamic("id") {
-            suggestion<CommandSender>(uncheck = true) { _, _ ->
+            suggestUncheck {
                 ScheduleTask.cache.values.mapNotNull {
                     if (it.isStopped) it.id else null
                 }
@@ -85,9 +87,9 @@ object CommandSchedule {
     /**
      * vul schedule stop taskId?
      * */
-    val stop: CommandComponent.() -> Unit = {
+    private val stop: CommandComponent.() -> Unit = {
         dynamic("id", optional = true) {
-            suggestion<CommandSender> { _, _ ->
+            suggest {
                 ScheduleTask.cache.values.mapNotNull {
                     if (it.isRunning) it.id else null
                 }.plus("*")
@@ -128,7 +130,7 @@ object CommandSchedule {
     /**
      * vul schedule list
      * */
-    val list: CommandComponent.() -> Unit = {
+    private val list: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             sender.sendSyncLang(
                 "Schedule-List",
@@ -141,7 +143,7 @@ object CommandSchedule {
     /**
      * vul schedule detail taskId
      * */
-    val detail: CommandComponent.() -> Unit = {
+    private val detail: CommandComponent.() -> Unit = {
         dynamic("id") {
             suggestion<CommandSender> { _, _ ->
                 ScheduleTask.cache.keys.toList()

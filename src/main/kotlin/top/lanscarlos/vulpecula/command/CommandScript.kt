@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
@@ -20,7 +21,7 @@ import top.lanscarlos.vulpecula.utils.sendSyncLang
  */
 object CommandScript {
 
-    val main: CommandComponent.() -> Unit = {
+    internal val main: CommandComponent.() -> Unit = {
         literal("run", literal = run)
         literal("stop", literal = stop)
         literal("compile", "build", literal = compile)
@@ -29,11 +30,9 @@ object CommandScript {
         literal("debug", literal = debug)
     }
 
-    val run: CommandComponent.() -> Unit = {
+    private val run: CommandComponent.() -> Unit = {
         dynamic("file") {
-            suggestion<CommandSender> { _, _ ->
-                ScriptWorkspace.scripts.map { it.value.id }
-            }
+            suggest { ScriptWorkspace.scripts.map { it.value.id } }
             execute<CommandSender> { sender, _, file ->
                 try {
                     ScriptWorkspace.runScript(file)
@@ -45,7 +44,7 @@ object CommandScript {
             }
 
             dynamic("viewer", optional = true) {
-                suggestPlayers(emptyList())
+                suggestPlayers(listOf("@self"))
                 execute<CommandSender> { sender, context, viewer ->
                     val file = context["file"]
                     try {
@@ -61,7 +60,7 @@ object CommandScript {
                     execute<CommandSender> { sender, context, argument ->
                         val file = context["file"]
                         val viewer = context["viewer"].let {
-                            if (it.equals("@Self", true)) {
+                            if (it.equals("@self", true)) {
                                 // 以自身为执行者
                                 sender
                             } else {
@@ -88,11 +87,9 @@ object CommandScript {
         }
     }
 
-    val stop: CommandComponent.() -> Unit = {
+    private val stop: CommandComponent.() -> Unit = {
         dynamic("file", optional = true) {
-            suggestion<CommandSender> { _, _ ->
-                ScriptWorkspace.scripts.map { it.value.id }.plus("*")
-            }
+            suggest { ScriptWorkspace.scripts.map { it.value.id }.plus("*") }
             execute<CommandSender> { sender, _, file ->
                 if (file == "*") {
                     try {
@@ -115,7 +112,7 @@ object CommandScript {
         }
     }
 
-    val compile: CommandComponent.() -> Unit = {
+    private val compile: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             try {
                 VulScript.getAll().forEach { it.compileScript() }
@@ -127,9 +124,7 @@ object CommandScript {
         }
 
         dynamic("file", optional = true) {
-            suggestion<CommandSender> { _, _ ->
-                VulScript.getAll().map { it.id }
-            }
+            suggest { VulScript.getAll().map { it.id } }
             execute<CommandSender> { sender, _, file ->
                 try {
                     VulScript.get(file)?.compileScript()
@@ -142,7 +137,7 @@ object CommandScript {
         }
     }
 
-    val list: CommandComponent.() -> Unit = {
+    private val list: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             sender.sendSyncLang(
                 "Script-List",
@@ -152,7 +147,7 @@ object CommandScript {
         }
     }
 
-    val reload: CommandComponent.() -> Unit = {
+    private val reload: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             ScriptWorkspace.terminateAllScript()
             VulScript.load().let {
@@ -164,7 +159,7 @@ object CommandScript {
         }
     }
 
-    val debug: CommandComponent.() -> Unit = {
+    private val debug: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             sender.sendMessage("&8[&3Vul&bpecula&8] &e调试 &8| &7RegisteredActions:".colored())
             Kether.scriptRegistry.registeredNamespace.forEach {

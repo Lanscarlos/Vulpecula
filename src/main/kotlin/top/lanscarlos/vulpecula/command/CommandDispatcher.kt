@@ -2,6 +2,8 @@ package top.lanscarlos.vulpecula.command
 
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.suggest
+import taboolib.common.platform.command.suggestUncheck
 import top.lanscarlos.vulpecula.internal.EventDispatcher
 import top.lanscarlos.vulpecula.utils.sendSyncLang
 
@@ -14,16 +16,16 @@ import top.lanscarlos.vulpecula.utils.sendSyncLang
  */
 object CommandDispatcher {
 
-    val main: CommandComponent.() -> Unit = {
+    internal val main: CommandComponent.() -> Unit = {
         literal("enable", literal = enable)
         literal("disable", literal = disable)
         literal("list", literal = list)
         literal("detail", literal = detail)
     }
 
-    val enable: CommandComponent.() -> Unit = {
+    private val enable: CommandComponent.() -> Unit = {
         dynamic("id") {
-            suggestion<CommandSender>(uncheck = true) { _, _ ->
+            suggestUncheck {
                 EventDispatcher.cache.values.mapNotNull {
                     if (it.isStopped) it.id else null
                 }.plus("*")
@@ -42,9 +44,9 @@ object CommandDispatcher {
         }
     }
 
-    val disable: CommandComponent.() -> Unit = {
+    private val disable: CommandComponent.() -> Unit = {
         dynamic("id") {
-            suggestion<CommandSender>(uncheck = true) { _, _ ->
+            suggestUncheck {
                 EventDispatcher.cache.values.mapNotNull {
                     if (it.isRunning) it.id else null
                 }.plus("*")
@@ -63,7 +65,7 @@ object CommandDispatcher {
         }
     }
 
-    val list: CommandComponent.() -> Unit = {
+    private val list: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             sender.sendSyncLang(
                 "Dispatcher-List",
@@ -73,11 +75,9 @@ object CommandDispatcher {
         }
     }
 
-    val detail: CommandComponent.() -> Unit = {
+    private val detail: CommandComponent.() -> Unit = {
         dynamic("id") {
-            suggestion<CommandSender>(uncheck = true) { _, _ ->
-                EventDispatcher.cache.keys.toList()
-            }
+            suggest { EventDispatcher.cache.keys.toList() }
             execute<CommandSender> { sender, _, id ->
                 EventDispatcher.get(id)?.let { dispatcher ->
                     sender.sendSyncLang(
