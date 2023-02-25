@@ -80,22 +80,17 @@ class CustomCommand(
 
             // 加载所有节点
             for (key in section.getKeys(false)) {
-                info("load component $key")
                 val node = section.getConfigurationSection(key) ?: continue
-                info("load component $key x2")
                 loaded[key] = CommandComponentBuilder(key, node, false)
             }
 
             // 处理父子节点关系
             for (builder in loaded.values) {
                 val parent = builder.section.getString("parent") ?: "main"
-                info("builder ${builder.id} parent $parent")
 
                 if (parent == "main") {
-                    info("builder ${builder.id} to entry")
                     entry += builder
                 } else {
-                    info("builder ${builder.id} to other node")
                     loaded[parent]?.children?.plusAssign(builder)
                 }
             }
@@ -110,11 +105,8 @@ class CustomCommand(
             }
 
             section.getConfigurationSection("literal")?.let { next ->
-                info("has literal...")
                 for (literal in next.getKeys(false)) {
-                    info("load literal $literal")
                     val node = next.getConfigurationSection(literal) ?: continue
-                    info("load literal $literal x2")
                     root.children += CommandComponentBuilder(literal, node, true).build(root.index + 1)
                 }
             }

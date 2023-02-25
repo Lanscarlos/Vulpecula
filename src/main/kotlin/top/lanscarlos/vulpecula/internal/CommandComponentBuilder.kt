@@ -11,7 +11,6 @@ import taboolib.common.platform.command.component.CommandComponentLiteral
 import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.adaptCommandSender
-import taboolib.common.platform.function.info
 import taboolib.expansion.createHelper
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.kether.printKetherErrorMessage
@@ -38,11 +37,8 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection,
             }
 
             section.getConfigurationSection("literal")?.let { next ->
-                info("inner has literal...")
                 for (literal in next.getKeys(false)) {
-                    info("inner load literal $literal")
                     val node = next.getConfigurationSection(literal) ?: continue
-                    info("inner load literal $literal x2")
                     children += CommandComponentBuilder(literal, node, legacy)
                 }
             }
