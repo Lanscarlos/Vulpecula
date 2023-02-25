@@ -119,7 +119,7 @@ class ActionEntity : QuestAction<Any?>() {
     /**
      * 语句读取器
      * */
-    class Reader(val token: String, reader: QuestReader, val isRoot: Boolean) : QuestReader by reader, ParserBuilder {
+    class Reader(val token: String, reader: QuestReader, val isRoot: Boolean) : ParserBuilder(), QuestReader by reader {
 
         fun <T> handle(func: Reader.() -> Parser<Parser.Action<T>>): Handler<T> {
             return Handler(func(this)).resolve(this)

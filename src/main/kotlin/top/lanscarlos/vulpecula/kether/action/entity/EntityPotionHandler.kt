@@ -103,7 +103,8 @@ object EntityPotionHandler : ActionEntity.Resolver {
                 arguments(
                     arrayOf("ambient", "amb") to boolean(false),
                     arrayOf("particles", "particle", "p") to boolean(true),
-                    arrayOf("icon", "i") to boolean(true)
+                    arrayOf("icon", "i") to boolean(true),
+                    prefix = "-"
                 )
             ) { entity, type, duration, level, options ->
                 if (entity !is LivingEntity) {

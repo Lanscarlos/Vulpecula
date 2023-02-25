@@ -1,29 +1,23 @@
 package top.lanscarlos.vulpecula.kether
 
-import com.mojang.datafixers.kinds.App
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
 import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.warning
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.common5.*
+import taboolib.library.kether.LoadError
+import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Parser
-import taboolib.library.kether.QuestReader
 import taboolib.library.xseries.XMaterial
 import taboolib.module.kether.ParserHolder
 import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.expects
 import taboolib.module.kether.run
 import taboolib.platform.type.BukkitPlayer
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.toProxyLocation
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.readBoolean
-import top.lanscarlos.vulpecula.kether.live.readInt
 import top.lanscarlos.vulpecula.utils.*
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
@@ -35,11 +29,86 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-02-12 11:10
  */
-interface ParserBuilder {
+open class ParserBuilder {
 
     fun <T> now(action: ScriptFrame.() -> T): Parser.Action<T> = ParserHolder.now(action)
 
     fun <T> future(action: ScriptFrame.() -> CompletableFuture<T>): Parser.Action<T> = ParserHolder.future(action)
+
+    fun <T> expect(vararg expected: String, option: Boolean = false, then: Parser<T>): Parser<T> {
+        return Parser.frame { reader ->
+            reader.mark()
+            val next = reader.nextToken()
+            if (next !in expected) {
+                if (option) {
+                    reader.reset()
+                } else {
+                    throw LoadError.NOT_MATCH.create("[${expected.joinToString(", ")}]", next)
+                }
+            }
+            then.reader.apply(reader)
+        }
+    }
+
+    fun option(vararg expected: String): Parser<Boolean> {
+        return Parser.of {
+            it.hasNextToken(*expected)
+        }
+    }
+
+    fun <T> option(vararg expected: String, then: Parser<T>): Parser<T?> {
+        return Parser.frame { reader ->
+            if (reader.hasNextToken(*expected)) {
+                then.reader.apply(reader)
+            } else {
+                Parser.Action.point(null)
+            }
+        }
+    }
+
+    fun <T> option(vararg expected: String, then: Parser<T>, def: T): Parser<T> {
+        return Parser.frame { reader ->
+            if (reader.hasNextToken(*expected)) {
+                then.reader.apply(reader)
+            } else {
+                Parser.Action.point(def)
+            }
+        }
+    }
+
+    fun <T> trim(vararg expected: String, then: Parser<T>): Parser<T> {
+        return Parser.frame { reader ->
+            reader.hasNextToken(*expected)
+            then.reader.apply(reader)
+        }
+    }
+
+    fun arguments(
+        vararg mapper: Pair<Array<String>, Parser<*>>,
+        prefix: String = "--"
+    ): Parser<Map<String, Any>> {
+        return Parser.frame { reader ->
+            val cache = mutableMapOf<String, Parser.Action<*>>()
+            while (reader.nextPeek().startsWith(prefix)) {
+                val key = reader.nextToken().substring(prefix.length)
+                val parser = mapper.firstOrNull { key in it.first } ?: continue
+                cache[parser.first.first()] = parser.second.reader.apply(reader)
+            }
+            future {
+                val futures = cache.mapValues { it.value.run(this) }
+                CompletableFuture.allOf(*futures.values.toTypedArray()).thenApply {
+                    futures.mapValues { it.value.getNow(null) }
+                }
+            }
+        }
+    }
+
+    fun action(): Parser<ParsedAction<*>> = Parser.of { it.nextBlock() }
+
+    fun block(): Parser<Any?> = Parser.frame { reader ->
+        val action = reader.nextBlock()
+        Parser.Action { it.run(action) }
+    }
 
     fun boolean(def: Boolean? = null): Parser<Boolean> = booleanOrNull().map { it ?: def ?: error("No boolean selected.") }
 
@@ -164,6 +233,34 @@ interface ParserBuilder {
         it?.toString()
     }
 
+    fun stringList(def: List<String>? = null): Parser<List<String>> = stringListOrNull().map { it ?: def ?: error("No text list selected.") }
+
+    fun stringListOrNull(): Parser<List<String>?> = frame {
+        when (it) {
+            is String -> listOf(it)
+            is Array<*> -> {
+                it.mapNotNull { el -> el?.toString() }
+            }
+            is Collection<*> -> {
+                it.mapNotNull { el -> el?.toString() }
+            }
+            else -> null
+        }
+    }
+
+    fun stringOrList(): Parser<Any?> = frame {
+        when (it) {
+            is String -> it
+            is Array<*> -> {
+                it.mapNotNull { el -> el?.toString() }
+            }
+            is Collection<*> -> {
+                it.mapNotNull { el -> el?.toString() }
+            }
+            else -> error("No text or list selected.")
+        }
+    }
+
     fun location(def: Location? = null): Parser<Location> = frame {
         when (it) {
             is Location -> it
@@ -267,49 +364,6 @@ interface ParserBuilder {
         }
     }
 
-    fun option(vararg expected: String): Parser<Boolean> {
-        return Parser.of {
-            it.hasNextToken(*expected)
-        }
-    }
-
-    fun <T> option(vararg expected: String, then: Parser<T>): Parser<T?> {
-        return Parser.frame { reader ->
-            if (reader.hasNextToken(*expected)) {
-                then.reader.apply(reader)
-            } else {
-                Parser.Action.point(null)
-            }
-        }
-    }
-
-    fun <T> trim(vararg expected: String, then: Parser<T>): Parser<T> {
-        return Parser.frame { reader ->
-            reader.hasNextToken(*expected)
-            then.reader.apply(reader)
-        }
-    }
-
-    fun arguments(
-        vararg mapper: Pair<Array<String>, Parser<*>>,
-        prefix: String = "-"
-    ): Parser<Map<String, Any>> {
-        return Parser.frame { reader ->
-            val cache = mutableMapOf<String, Parser.Action<*>>()
-            while (reader.nextPeek().startsWith(prefix)) {
-                val key = reader.nextToken().substring(prefix.length)
-                val parser = mapper.firstOrNull { key in it.first } ?: continue
-                cache[parser.first.first()] = parser.second.reader.apply(reader)
-            }
-            future {
-                val futures = cache.mapValues { it.value.run(this) }
-                CompletableFuture.allOf(*futures.values.toTypedArray()).thenApply {
-                    futures.mapValues { it.value.getNow(null) }
-                }
-            }
-        }
-    }
-
     fun <T> frame(func: (Any?) -> T): Parser<T> {
         return Parser.frame { reader ->
             val action = reader.nextBlock()
@@ -348,8 +402,7 @@ interface ParserBuilder {
         func: (P1, P2, P3) -> Parser.Action<R>
     ): Parser<Parser.Action<R>> {
         val instance = Parser.instance()
-        info("group...")
-        return instance.group(p1, p2, p3).apply(instance, func).also { info("done...") } as Parser<Parser.Action<R>>
+        return instance.group(p1, p2, p3).apply(instance, func) as Parser<Parser.Action<R>>
     }
 
     @Suppress("UNCHECKED_CAST")
