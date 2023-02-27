@@ -5,6 +5,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
+import taboolib.common5.cbool
 import taboolib.common5.cdouble
 import taboolib.common5.cint
 import taboolib.library.kether.ParsedAction
@@ -139,6 +140,27 @@ class BacikalReader(private val source: QuestReader) {
     }
 
     fun any(): LiveData<Any?> = frame { it }
+
+    fun boolOrNull(): LiveData<Boolean?> {
+        return LiveData {
+            source.mark()
+            source.nextToken()
+            when (source.nextToken()) {
+                "true", "yes" -> Bacikal.Action { CompletableFuture.completedFuture(true) }
+                "false", "no" -> Bacikal.Action { CompletableFuture.completedFuture(true) }
+                else -> {
+                    source.reset()
+                    val action = source.nextBlock()
+                    Bacikal.Action { frame ->
+                        frame.run(action).thenApply { it?.cbool }
+                    }
+                }
+            }
+        }
+    }
+    fun bool(def: Boolean? = null, display: String = "boolean"): LiveData<Boolean> {
+        return boolOrNull().map { it ?: def ?: error("No $display selected.") }
+    }
 
     fun intOrNull(): LiveData<Int?> {
         return LiveData {
