@@ -1,12 +1,7 @@
 package top.lanscarlos.vulpecula.kether.action.math
 
-import taboolib.module.kether.actionTake
-import taboolib.module.kether.scriptParser
-import taboolib.module.kether.switch
+import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.live.readDouble
-import top.lanscarlos.vulpecula.utils.coerceDouble
-import top.lanscarlos.vulpecula.utils.hasNextToken
 
 /**
  * Vulpecula
@@ -29,33 +24,70 @@ object ActionCoerce {
      *
      * */
     @VulKetherParser(id = "coerce", name = ["coerce"])
-    fun parser() = scriptParser { reader ->
-        val next = reader.readDouble()
-        reader.switch {
-            case("in") {
-                val min = reader.readDouble()
-                reader.hasNextToken("to", "between")
-                val max = reader.readDouble()
-                actionTake {
-                    next.thenApplyOrNull(this, min.getOrNull(this), max.getOrNull(this)) {
-                        this?.coerceIn(it.first().coerceDouble(0.0), it.last().coerceDouble(0.0)) ?: 0.0
-                    }
+    fun parser() = bacikalSwitch {
+        val any = any().accept(this)
+
+        /*
+        * coerce &source in &min between &max
+        * coerce &source in &min to &max
+        * coerce &source in &min &max
+        * */
+        case("in") {
+            combine(
+                any,
+                double(),
+                trim("between", "to", then = double())
+            ) { source, min, max ->
+                when(source) {
+                    is Short -> source.coerceIn(min.toInt().toShort(), max.toInt().toShort())
+                    is Int -> source.coerceIn(min.toInt(), max.toInt())
+                    is Long -> source.coerceIn(min.toLong(), max.toLong())
+                    is Float -> source.coerceIn(min.toFloat(), max.toFloat())
+                    is Double -> source.coerceIn(min, max)
+                    is String -> source.toDoubleOrNull()?.coerceIn(min, max)
+                    else -> source
                 }
             }
-            case("min", "least") {
-                val min = reader.readDouble()
-                actionTake {
-                    next.thenApplyOrNull(this, min.getOrNull(this)) {
-                        this?.coerceAtLeast(it.first().coerceDouble(0.0)) ?: 0.0
-                    }
+        }
+
+        /*
+        * coerce &source least &limit
+        * coerce &source min &limit
+        * */
+        case("least", "min") {
+            combine(
+                any,
+                double()
+            ) { source, limit ->
+                when(source) {
+                    is Short -> source.coerceAtLeast(limit.toInt().toShort())
+                    is Int -> source.coerceAtLeast(limit.toInt())
+                    is Long -> source.coerceAtLeast(limit.toLong())
+                    is Float -> source.coerceAtLeast(limit.toFloat())
+                    is Double -> source.coerceAtLeast(limit)
+                    is String -> source.toDoubleOrNull()?.coerceAtLeast(limit)
+                    else -> source
                 }
             }
-            case("max", "most") {
-                val max = reader.readDouble()
-                actionTake {
-                    next.thenApplyOrNull(this, max.getOrNull(this)) {
-                        this?.coerceAtMost(it.first().coerceDouble(0.0)) ?: 0.0
-                    }
+        }
+
+        /*
+        * coerce &source most &limit
+        * coerce &source max &limit
+        * */
+        case("most", "max") {
+            combine(
+                any,
+                double()
+            ) { source, limit ->
+                when(source) {
+                    is Short -> source.coerceAtMost(limit.toInt().toShort())
+                    is Int -> source.coerceAtMost(limit.toInt())
+                    is Long -> source.coerceAtMost(limit.toLong())
+                    is Float -> source.coerceAtMost(limit.toFloat())
+                    is Double -> source.coerceAtMost(limit)
+                    is String -> source.toDoubleOrNull()?.coerceAtMost(limit)
+                    else -> source
                 }
             }
         }

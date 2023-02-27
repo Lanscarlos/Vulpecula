@@ -4,10 +4,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submit
-import taboolib.common5.clong
-import taboolib.module.kether.run
+import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.utils.buildParser
 import top.lanscarlos.vulpecula.utils.playerOrNull
 import top.lanscarlos.vulpecula.utils.toBukkit
 import java.util.concurrent.CompletableFuture
@@ -40,13 +38,11 @@ object ActionInput {
         id = "input",
         name = ["input"]
     )
-    fun parser() = buildParser {
-        group(
-            option("from", "by", then = string("chat"), def = "chat"),
-            arguments(
-                arrayOf("timeout", "time") to long(1200)
-            )
-        ) { type, options ->
+    fun parser() = bacikal {
+        combineOf(
+            optional("from", "by", then = text("chat"), def = "chat"),
+            argument("timeout", "time", then = int(1200), def = 1200)
+        ) { type, timeout ->
             future {
                 val player = this.playerOrNull()?.toBukkit() ?: error("No player selected.")
                 val future = when (type.lowercase()) {
@@ -57,21 +53,8 @@ object ActionInput {
                     else -> error("Input type \"$type\" is not supported yet.")
                 }
 
-                // 额外参数
-                for ((key, value) in options) {
-                    when (key) {
-                        "timeout" -> {
-                            // 设置超时
-                            val timeout = value.clong
-                            if (timeout <= 0) continue
-                        }
-                    }
-                }
-
-                // 设置超时
-                val timeout = options["timeout"]?.clong ?: 1200
                 if (timeout > 0) {
-                    submit(delay = timeout) { future.complete(null) }
+                    submit(delay = timeout.toLong()) { future.complete(null) }
                 }
 
                 return@future future

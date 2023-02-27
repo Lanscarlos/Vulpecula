@@ -1,10 +1,11 @@
 package top.lanscarlos.vulpecula.kether.action
 
 import taboolib.library.kether.ParsedAction
-import taboolib.library.kether.Parser
 import taboolib.module.kether.*
+import top.lanscarlos.vulpecula.bacikal.Bacikal
+import top.lanscarlos.vulpecula.bacikal.LiveData
+import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.action.ActionRegex.runHandle
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Matcher
@@ -22,130 +23,124 @@ object ActionRegex {
         id = "regex",
         name = ["regex"]
     )
-    fun parser() = buildParserLiteral { reader ->
+    fun parser() = bacikalSwitch {
         case("group") {
-            group(
+            combine(
                 int(0)
             ) { index ->
-                now {
-                    val matcher = this.getVariable<Matcher>("@Matcher") ?: error("No matcher selected.")
-                    if (index in 0..matcher.groupCount()) {
-                        matcher.group(index)
-                    } else {
-                        null
-                    }
+                val matcher = this.getVariable<Matcher>("@Matcher") ?: error("No matcher selected.")
+                if (index in 0..matcher.groupCount()) {
+                    matcher.group(index)
+                } else {
+                    null
                 }
             }
         }
+
         case("match") {
-            group(
+            combine(
                 stringOrList(),
-                expect("by", "with", "using", option = true, then = string())
+                trim("using", "with", "by", then = text())
             ) { source, pattern ->
-
                 val matcher = pattern.toPattern().matcher(source.format())
+                this.variables()["@Matcher"] = matcher
+                this.variables()["matcher"] = matcher
+                matcher.find().also {
+                    this.variables()["found"] = matcher.group()
+                    this.variables()["count"] = matcher.groupCount()
+                }
+            }
+        }
 
-                now {
-                    this.variables()["@Matcher"] = matcher
-                    this.variables()["matcher"] = matcher
-                    matcher.find().also {
-                        this.variables()["found"] = matcher.group()
-                        this.variables()["count"] = matcher.groupCount()
-                    }
-                }
-            }
-        }
         case("matches") {
-            group(
+            combine(
                 stringOrList(),
-                expect("by", "with", "using", option = true, then = string())
+                trim("using", "with", "by", then = text())
             ) { source, pattern ->
-                now {
-                    source.format().matches(pattern.toRegex())
-                }
+                source.format().matches(pattern.toRegex())
             }
         }
+
         case("find") {
-            group(
+            combine(
                 stringOrList(),
-                expect("by", "with", "using", option = true, then = string()),
-                Parser.frame { r ->
-                    val action = r.nextBlock()
-                    if (reader.hasNextToken("to")) {
-                        Parser.Action { frame -> frame.run(action) }
+                trim("using", "with", "by", then = text()),
+                LiveData {
+                    if (tokenExpect("to")) {
+                        val action = readAction()
+                        Bacikal.Action { frame -> frame.run(action) }
                     } else {
-                        reader.hasNextToken("then")
-                        Parser.Action.point(action)
+                        tokenExpect("then")
+                        val action = readAction()
+                        Bacikal.Action { CompletableFuture.completedFuture(action) }
                     }
-                },
+                }
             ) { source, pattern, handle ->
+
                 val matcher = pattern.toPattern().matcher(source.format())
                 val buffer = StringBuffer()
                 val result = mutableListOf<Any?>()
 
-                now {
-                    while (matcher.find()) {
-                        if (handle is ParsedAction<*>) {
-                            result += this.runHandle(matcher, handle).getNow(null)
+                while (matcher.find()) {
+                    if (handle is ParsedAction<*>) {
+                        result += this.runHandle(matcher, handle).getNow(null)
 
-                            if (this.script().breakLoop) {
-                                // 跳出循环
-                                this.script().breakLoop = false
-                                break
-                            }
-                            matcher.appendReplacement(buffer, "")
-                            continue
-                        } else {
-                            result += matcher.group()
+                        if (this.script().breakLoop) {
+                            // 跳出循环
+                            this.script().breakLoop = false
+                            break
                         }
+                        matcher.appendReplacement(buffer, "")
+                        continue
+                    } else {
+                        result += matcher.group()
                     }
-
-                    return@now result
                 }
+
+                return@combine result
             }
         }
-        case("replace", "rep") {
-            group(
-                stringOrList(),
-                expect("by", "with", "using", option = true, then = string()),
-                Parser.frame { r ->
-                    if (reader.hasNextToken("to")) {
-                        val action = r.nextBlock()
-                        Parser.Action { frame -> frame.run(action) }
-                    } else {
-                        reader.hasNextToken("then")
-                        Parser.Action.point(r.nextBlock())
-                    }
-                },
-            ) { source, pattern, handle ->
 
+        case("replace", "rep") {
+            combine(
+                stringOrList(),
+                trim("using", "with", "by", then = text()),
+                LiveData {
+                    if (tokenExpect("to")) {
+                        val action = readAction()
+                        Bacikal.Action { frame -> frame.run(action) }
+                    } else {
+                        tokenExpect("then")
+                        val action = readAction()
+                        Bacikal.Action { CompletableFuture.completedFuture(action) }
+                    }
+                }
+            ) { source, pattern, handle ->
                 val matcher = pattern.toPattern().matcher(source.format())
                 val buffer = StringBuffer()
 
-                now {
-                    while (matcher.find()) {
-                        if (handle is ParsedAction<*>) {
-                            val replacement = this.runHandle(matcher, handle).getNow(null)
-                            matcher.appendReplacement(buffer, replacement?.toString() ?: "")
+                while (matcher.find()) {
+                    if (handle is ParsedAction<*>) {
+                        val replacement = this.runHandle(matcher, handle).getNow(null)
+                        matcher.appendReplacement(buffer, replacement?.toString() ?: "")
 
-                            if (this.script().breakLoop) {
-                                // 跳出循环
-                                this.script().breakLoop = false
-                                break
-                            }
-                        } else {
-                            matcher.appendReplacement(buffer, handle?.toString() ?: "")
+                        if (this.script().breakLoop) {
+                            // 跳出循环
+                            this.script().breakLoop = false
+                            break
                         }
-                    }
-
-                    val result = matcher.appendTail(buffer).toString()
-                    return@now if (source is String) {
-                        // 原内容为字符串
-                        result
                     } else {
-                        // 原内容为 list
-                        result.split('\n').toList()
+                        matcher.appendReplacement(buffer, handle?.toString() ?: "")
                     }
+                }
+
+                val result = matcher.appendTail(buffer).toString()
+                return@combine if (source is String) {
+                    // 原内容为字符串
+                    result
+                } else {
+                    // 原内容为 list
+                    result.split('\n').toList()
                 }
             }
         }
