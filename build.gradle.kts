@@ -44,6 +44,7 @@ dependencies {
     compileOnly("com.google.guava:guava:31.1-jre")
 
     // for kether
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4") // 协程
     compileOnly("com.mojang:datafixerupper:4.0.26")
     compileOnly("net.luckperms:api:5.4")
 
