@@ -21,21 +21,20 @@ object EntityTeleportHandler : ActionEntity.Resolver {
 
     override fun resolve(reader: ActionEntity.Reader): ActionEntity.Handler<out Any?> {
         return reader.transfer {
-            group(
+            combine(
                 source(),
                 trim("to", "at", then = location()),
-                option("by", then = stringOrNull())
+                optional("by", then = textOrNull())
             ) { entity, location, cause ->
                 if (cause != null) {
                     val reason = PlayerTeleportEvent.TeleportCause.values().firstOrNull { it.name.equals(cause, true) }
                     if (reason != null) {
                         entity.teleport(location.toBukkitLocation(), reason)
-                        return@group now { entity }
+                        return@combine entity
                     }
                 }
 
-                entity.teleport(location.toBukkitLocation())
-                return@group now { entity }
+                entity.also { it.teleport(location.toBukkitLocation()) }
             }
         }
     }

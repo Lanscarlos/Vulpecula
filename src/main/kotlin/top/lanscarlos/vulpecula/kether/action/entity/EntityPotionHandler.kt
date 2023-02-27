@@ -4,16 +4,8 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
-import taboolib.common5.cbool
-import taboolib.library.kether.Parser
-import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.readBoolean
-import top.lanscarlos.vulpecula.kether.live.readInt
-import top.lanscarlos.vulpecula.kether.live.readString
-import top.lanscarlos.vulpecula.utils.*
+import top.lanscarlos.vulpecula.bacikal.LiveData
 
 /**
  * Vulpecula
@@ -27,62 +19,57 @@ object EntityPotionHandler : ActionEntity.Resolver {
     override val name: Array<String> = arrayOf("potion")
 
     override fun resolve(reader: ActionEntity.Reader): ActionEntity.Handler<out Any?> {
-        val source = reader.source()
+        val source = reader.source().accept(reader)
 
         reader.mark()
-        return when (reader.nextToken()) {
+        return when (reader.token()) {
             "add", "set" -> {
                 addPotion(reader, source)
             }
             "remove", "rm" -> {
                 reader.transfer {
-                    group(
+                    combine(
                         source,
-                        string()
+                        text(display = "potion type")
                     ) { entity, type ->
                         if (entity !is LivingEntity) {
-                            warning("Cannot remove potion from this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
-                            return@group now { entity }
+                            warning("Cannot check potion from this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
+                            return@combine entity
                         }
 
                         type.asPotionEffectType()?.let {
                             entity.removePotionEffect(it)
                         } ?: warning("Unknown potion type: $type [ERROR: entity@${reader.token}]")
-                        return@group now { entity }
+
+                        return@combine entity
                     }
                 }
             }
             "clear" -> {
                 reader.transfer {
-                    group(
+                    combine(
                         source
                     ) { entity ->
                         if (entity !is LivingEntity) {
-                            warning("Cannot clear potion from this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
-                            return@group now { entity }
+                            warning("Cannot check potion from this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
+                            return@combine entity
                         }
-
                         entity.activePotionEffects.forEach { entity.removePotionEffect(it.type) }
-                        return@group now { entity }
+                        return@combine entity
                     }
                 }
             }
             "contains", "contain", "has" -> {
                 reader.handle {
-                    group(
+                    combine(
                         source,
-                        string()
+                        text(display = "potion type")
                     ) { entity, type ->
                         if (entity !is LivingEntity) {
                             warning("Cannot check potion from this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
-                            return@group now { entity }
+                            return@combine entity
                         }
-
-                        return@group now {
-                            type.asPotionEffectType()?.let {
-                                entity.hasPotionEffect(it)
-                            } ?: false
-                        }
+                        return@combine type.asPotionEffectType()?.let { entity.hasPotionEffect(it) } ?: false
                     }
                 }
             }
@@ -93,37 +80,33 @@ object EntityPotionHandler : ActionEntity.Resolver {
         }
     }
 
-    private fun addPotion(reader: ActionEntity.Reader, source: Parser<Entity>): ActionEntity.Handler<out Any?> {
+    private fun addPotion(reader: ActionEntity.Reader, source: LiveData<Entity>): ActionEntity.Handler<out Any?> {
         return reader.transfer {
-            group(
+
+            combine(
                 source,
-                string("SLOW"),
-                int(200),
-                int(1),
-                arguments(
-                    arrayOf("ambient", "amb") to boolean(false),
-                    arrayOf("particles", "particle", "p") to boolean(true),
-                    arrayOf("icon", "i") to boolean(true),
-                    prefix = "-"
-                )
-            ) { entity, type, duration, level, options ->
+                text(display = "potion type"),
+                int(200, display = "duration"),
+                int(1, display = "level"),
+                argument("ambient", "amb", then = bool(false), def = false),
+                argument("particles", "particle", "p", then = bool(true), def = true),
+                argument("icon", "i", then = bool(true), def = true)
+            ) { entity, type, duration, level, ambient, particles, icon ->
                 if (entity !is LivingEntity) {
                     warning("Cannot remove potion from this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
-                    return@group now { entity }
+                    return@combine entity
                 }
 
-                info("option -> $options")
                 val potion = PotionEffect(
-                    type.asPotionEffectType() ?: PotionEffectType.SLOW,
+                    type.asPotionEffectType() ?: error("No potion type \"$type\" found."),
                     duration,
                     level - 1,
-                    options["ambient"]?.cbool ?: false,
-                    options["particles"]?.cbool ?: true,
-                    options["icon"]?.cbool ?: true,
+                    ambient,
+                    particles,
+                    icon
                 )
 
-                entity.addPotionEffect(potion)
-                return@group now { entity }
+                entity.also { it.addPotionEffect(potion) }
             }
         }
     }

@@ -8,6 +8,9 @@ import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
+import top.lanscarlos.vulpecula.bacikal.Bacikal
+import top.lanscarlos.vulpecula.bacikal.BacikalReader
+import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.ParserBuilder
 import top.lanscarlos.vulpecula.kether.VulKetherParser
@@ -119,22 +122,26 @@ class ActionEntity : QuestAction<Any?>() {
     /**
      * 语句读取器
      * */
-    class Reader(val token: String, reader: QuestReader, val isRoot: Boolean) : ParserBuilder(), QuestReader by reader {
+    class Reader(val token: String, source: QuestReader, val isRoot: Boolean) : BacikalReader(source) {
 
-        fun <T> handle(func: Reader.() -> Parser<Parser.Action<T>>): Handler<T> {
-            return Handler(func(this)).resolve(this)
+        fun <T> handle(func: Reader.() -> Bacikal.Parser<T>): Handler<T> {
+            return Handler(func(this))
         }
 
-        fun transfer(func: Reader.() -> Parser<Parser.Action<Entity>>): Handler<Entity> {
-            return Transfer(func(this)).resolve(this)
+        fun transfer(func: Reader.() -> Bacikal.Parser<Entity>): Handler<Entity> {
+            return Transfer(func(this))
         }
 
-        fun source() : Parser<Entity> {
+        fun source() : LiveData<Entity> {
             return if (isRoot) {
                 entity()
             } else {
-                Parser.frame {
-                    now { this.getVariable<Entity>("@Entity", "entity") ?: error("No entity selected. [ERROR: entity@$token]") }
+                LiveData {
+                    Bacikal.Action { frame ->
+                        CompletableFuture.completedFuture(
+                            frame.getVariable<Entity>("@Entity", "entity") ?: error("No entity selected. [ERROR: entity@$token]")
+                        )
+                    }
                 }
             }
         }
@@ -144,33 +151,18 @@ class ActionEntity : QuestAction<Any?>() {
     /**
      * 语句处理器
      * */
-    open class Handler<T: Any?>(val parser: Parser<Parser.Action<T>>) {
-
-        /**
-         * 待运行的解析结果
-         * */
-        lateinit var action: Parser.Action<Parser.Action<T>>
-
-        /**
-         * 解析
-         * */
-        open fun resolve(reader: QuestReader): Handler<T> {
-            action = parser.reader.apply(reader)
-            return this
-        }
+    open class Handler<T: Any?>(val parser: Bacikal.Parser<T>) {
 
         /**
          * 运行
          * */
         open fun process(frame: ScriptFrame): CompletableFuture<T> {
-            return action.run(frame).thenCompose {
-                it.run(frame)
-            }
+            return parser.action.run(frame)
         }
     }
 
     /**
      * 用于传递 Entity
      * */
-    open class Transfer(parser: Parser<Parser.Action<Entity>>): Handler<Entity>(parser)
+    open class Transfer(parser: Bacikal.Parser<Entity>): Handler<Entity>(parser)
 }

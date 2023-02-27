@@ -20,17 +20,16 @@ object EntityDamageHandler : ActionEntity.Resolver {
     * */
     override fun resolve(reader: ActionEntity.Reader): ActionEntity.Handler<out Any?> {
         return reader.transfer {
-            group(
-                source(), // entity
-                double(), // damage
-                option("by", then = entity()) // damager
+            combine(
+                source(),
+                double(0.0),
+                optional("by", then = entity(display = "damager"))
             ) { entity, damage, damager ->
                 if (entity !is LivingEntity) {
                     warning("Cannot damage this type of entity: ${entity.type.name} [ERROR: entity@${reader.token}]")
-                    return@group now { entity }
+                    return@combine entity
                 }
-                entity.damage(damage, damager)
-                return@group now { entity }
+                entity.also { it.damage(damage, damager) }
             }
         }
     }

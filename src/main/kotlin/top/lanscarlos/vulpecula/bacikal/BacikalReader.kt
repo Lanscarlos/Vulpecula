@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-02-26 16:39
  */
-class BacikalReader(private val source: QuestReader) {
+open class BacikalReader(private val source: QuestReader) {
 
     val argumentPrefixPattern = "-\\D+".toRegex()
     val methods = HashMap<String, () -> Bacikal.Parser<Any?>>()
@@ -50,6 +50,15 @@ class BacikalReader(private val source: QuestReader) {
     /*
     * QuestReader 操作
     * */
+
+    fun mark(): Int {
+        source.mark()
+        return source.mark
+    }
+
+    fun reset() {
+        source.reset()
+    }
 
     fun token(): String {
         return source.nextToken()
@@ -249,14 +258,23 @@ class BacikalReader(private val source: QuestReader) {
         return frame { it?.liveItemStack ?: def ?: error("No $display selected.") }
     }
 
-    /**
-     * 检查是否含有参数化的 live data
-     * */
-    fun argumentExists(vararg liveData: LiveData<*>): Boolean {
-        for (it in liveData) {
-            if (it is LiveDataProxy<*>) return true
+    fun applyLiveData(vararg liveData: LiveData<*>) {
+        var parametric = -1
+        for ((index, it) in liveData.withIndex()) {
+            if (it is LiveDataProxy<*>) {
+                parametric = index
+                break
+            }
+            it.accept(reader = this)
         }
-        return false
+
+        if (parametric < 0) return
+        while (tokenPeek().matches(argumentPrefixPattern)) {
+            val prefix = token().substring(1)
+            for (index in parametric until liveData.size) {
+                (liveData[index] as LiveDataProxy<*>).accept(prefix, this)
+            }
+        }
     }
 
     /*
@@ -360,6 +378,23 @@ class BacikalReader(private val source: QuestReader) {
         }
     }
 
+    fun <P1, P2, P3, P4, P5, P6, P7, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7) -> R
+    ) : Bacikal.Parser<R> {
+        return combineOf(p1, p2, p3, p4, p5, p6, p7) { t1, t2, t3, t4, t5, t6, t7 ->
+            Bacikal.Action { frame ->
+                CompletableFuture.completedFuture(func(frame, t1, t2, t3, t4, t5, t6, t7))
+            }
+        }
+    }
+
     /*
     * combineOf(...)
     * func 返回 Action<R>
@@ -369,14 +404,7 @@ class BacikalReader(private val source: QuestReader) {
         p1: LiveData<P1>,
         crossinline func: (P1) -> Bacikal.Action<R>
     ) : Bacikal.Parser<R> {
-        p1.accept(this)
-        if (argumentExists(p1)) {
-            // 处理参数
-            while (tokenPeek().matches(argumentPrefixPattern)) {
-                val prefix = token().substring(1)
-                (p1 as? LiveDataProxy<*>)?.accept(prefix, this)
-            }
-        }
+        applyLiveData(p1)
         return Bacikal.Parser { frame ->
             p1.accept(frame).thenCompose { t1 ->
                 func(t1).run(frame)
@@ -389,15 +417,7 @@ class BacikalReader(private val source: QuestReader) {
         p2: LiveData<P2>,
         crossinline func: (P1, P2) -> Bacikal.Action<R>
     ) : Bacikal.Parser<R> {
-        p1.accept(this)
-        p2.accept(this)
-        if (argumentExists(p1, p2)) {
-            while (tokenPeek().matches(argumentPrefixPattern)) {
-                val prefix = token().substring(1)
-                (p1 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p2 as? LiveDataProxy<*>)?.accept(prefix, this)
-            }
-        }
+        applyLiveData(p1, p2)
         return Bacikal.Parser { frame ->
             p1.accept(frame).thenCompose { t1 ->
                 p2.accept(frame).thenCompose { t2 ->
@@ -413,17 +433,7 @@ class BacikalReader(private val source: QuestReader) {
         p3: LiveData<P3>,
         func: (P1, P2, P3) -> Bacikal.Action<R>
     ) : Bacikal.Parser<R> {
-        p1.accept(this)
-        p2.accept(this)
-        p3.accept(this)
-        if (argumentExists(p1, p2, p3)) {
-            while (tokenPeek().matches(argumentPrefixPattern)) {
-                val prefix = token().substring(1)
-                (p1 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p2 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p3 as? LiveDataProxy<*>)?.accept(prefix, this)
-            }
-        }
+        applyLiveData(p1, p2, p3)
         return Bacikal.Parser { frame ->
             p1.accept(frame).thenCompose { t1 ->
                 p2.accept(frame).thenCompose { t2 ->
@@ -442,19 +452,7 @@ class BacikalReader(private val source: QuestReader) {
         p4: LiveData<P4>,
         func: (P1, P2, P3, P4) -> Bacikal.Action<R>
     ) : Bacikal.Parser<R> {
-        p1.accept(this)
-        p2.accept(this)
-        p3.accept(this)
-        p4.accept(this)
-        if (argumentExists(p1, p2, p3, p4)) {
-            while (tokenPeek().matches(argumentPrefixPattern)) {
-                val prefix = token().substring(1)
-                (p1 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p2 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p3 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p4 as? LiveDataProxy<*>)?.accept(prefix, this)
-            }
-        }
+        applyLiveData(p1, p2, p3, p4)
         return Bacikal.Parser { frame ->
             p1.accept(frame).thenCompose { t1 ->
                 p2.accept(frame).thenCompose { t2 ->
@@ -476,21 +474,7 @@ class BacikalReader(private val source: QuestReader) {
         p5: LiveData<P5>,
         func: (P1, P2, P3, P4, P5) -> Bacikal.Action<R>
     ) : Bacikal.Parser<R> {
-        p1.accept(this)
-        p2.accept(this)
-        p3.accept(this)
-        p4.accept(this)
-        p5.accept(this)
-        if (argumentExists(p1, p2, p3, p4, p5)) {
-            while (tokenPeek().matches(argumentPrefixPattern)) {
-                val prefix = token().substring(1)
-                (p1 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p2 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p3 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p4 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p5 as? LiveDataProxy<*>)?.accept(prefix, this)
-            }
-        }
+        applyLiveData(p1, p2, p3, p4, p5)
         return Bacikal.Parser { frame ->
             p1.accept(frame).thenCompose { t1 ->
                 p2.accept(frame).thenCompose { t2 ->
@@ -515,23 +499,7 @@ class BacikalReader(private val source: QuestReader) {
         p6: LiveData<P6>,
         func: (P1, P2, P3, P4, P5, P6) -> Bacikal.Action<R>
     ) : Bacikal.Parser<R> {
-        p1.accept(this)
-        p2.accept(this)
-        p3.accept(this)
-        p4.accept(this)
-        p5.accept(this)
-        p6.accept(this)
-        if (argumentExists(p1, p2, p3, p4, p5, p6)) {
-            while (tokenPeek().matches(argumentPrefixPattern)) {
-                val prefix = token().substring(1)
-                (p1 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p2 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p3 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p4 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p5 as? LiveDataProxy<*>)?.accept(prefix, this)
-                (p6 as? LiveDataProxy<*>)?.accept(prefix, this)
-            }
-        }
+        applyLiveData(p1, p2, p3, p4, p5, p6)
         return Bacikal.Parser { frame ->
             p1.accept(frame).thenCompose { t1 ->
                 p2.accept(frame).thenCompose { t2 ->
@@ -540,6 +508,36 @@ class BacikalReader(private val source: QuestReader) {
                             p5.accept(frame).thenCompose { t5 ->
                                 p6.accept(frame).thenCompose { t6 ->
                                     func(t1, t2, t3, t4, t5, t6).run(frame)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, R> combineOf(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        func: (P1, P2, P3, P4, P5, P6, P7) -> Bacikal.Action<R>
+    ) : Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7)
+        return Bacikal.Parser { frame ->
+            p1.accept(frame).thenCompose { t1 ->
+                p2.accept(frame).thenCompose { t2 ->
+                    p3.accept(frame).thenCompose { t3 ->
+                        p4.accept(frame).thenCompose { t4 ->
+                            p5.accept(frame).thenCompose { t5 ->
+                                p6.accept(frame).thenCompose { t6 ->
+                                    p7.accept(frame).thenCompose { t7 ->
+                                        func(t1, t2, t3, t4, t5, t6, t7).run(frame)
+                                    }
                                 }
                             }
                         }

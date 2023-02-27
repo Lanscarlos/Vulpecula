@@ -170,7 +170,7 @@ open class LiveData<T>(
                         * world,x,y,z
                         * world,x,y,z,yaw.pitch
                         * */
-                        if (!this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) return null
+                        if (!this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) return null
                         val demand = this.split(",")
                         Location(
                             demand[0], demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
