@@ -129,13 +129,13 @@ class CustomCommand(
             // 创建执行器
             executor = object : CommandExecutor {
                 override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): Boolean {
-                    return root.execute(CommandContext(sender, command, name, root, args))
+                    return root.execute(CommandContext(sender, command, name, root, true, args))
                 }
             },
             // 创建补全器
             completer = object : CommandCompleter {
                 override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): List<String>? {
-                    return root.suggest(CommandContext(sender, command, name, root, args))
+                    return root.suggest(CommandContext(sender, command, name, root, true, args))
                 }
             },
             // 传入原始命令构建器
