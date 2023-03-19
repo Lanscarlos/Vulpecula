@@ -64,12 +64,12 @@ open class BacikalReader(private val source: QuestReader) {
         return source.nextToken()
     }
 
-    fun tokenPeek(): String {
+    fun peekToken(): String {
         source.mark()
         return source.nextToken().also { source.reset() }
     }
 
-    fun tokenExpect(vararg expect: String): Boolean {
+    fun expectToken(vararg expect: String): Boolean {
         if (expect.isEmpty()) return false
         source.mark()
         return if (source.nextToken() in expect) {
@@ -81,7 +81,7 @@ open class BacikalReader(private val source: QuestReader) {
     }
 
     fun readAction(): ParsedAction<*> {
-        return if (this.tokenExpect("{")) {
+        return if (this.expectToken("{")) {
             ParsedAction(ActionBlock(ActionBlock.readBlock(reader = source)))
         } else {
             source.nextParsedAction()
@@ -122,7 +122,7 @@ open class BacikalReader(private val source: QuestReader) {
 
     /**
      * 额外参数 <br>
-     * 适用于 --prefix {xxx} 的情况
+     * 适用于 -prefix {xxx} 的情况
      * @param prefix 参数识别前缀
      * @param then 参数处理
      * */
@@ -132,7 +132,7 @@ open class BacikalReader(private val source: QuestReader) {
 
     /**
      * 额外参数 <br>
-     * 适用于 --prefix {xxx} 的情况
+     * 适用于 -prefix {xxx} 的情况
      * @param prefix 参数识别前缀
      * @param then 参数处理
      * @param def 默认值
@@ -269,7 +269,7 @@ open class BacikalReader(private val source: QuestReader) {
         }
 
         if (parametric < 0) return
-        while (tokenPeek().matches(argumentPrefixPattern)) {
+        while (peekToken().matches(argumentPrefixPattern)) {
             val prefix = token().substring(1)
             for (index in parametric until liveData.size) {
                 (liveData[index] as LiveDataProxy<*>).accept(prefix, this)

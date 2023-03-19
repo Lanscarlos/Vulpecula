@@ -15,8 +15,6 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.platform.type.BukkitPlayer
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.toProxyLocation
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveEntity
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -41,9 +39,9 @@ open class LiveData<T>(
 
     open fun accept(reader: BacikalReader): LiveData<T> {
         if (isAccepted()) return this
-        if (trim.isNotEmpty()) reader.tokenExpect(*trim)
-        if (expect.isNotEmpty() && !reader.tokenExpect(*expect)) {
-            throw LoadError.NOT_MATCH.create("[${expect.joinToString(", ")}]", reader.tokenPeek())
+        if (trim.isNotEmpty()) reader.expectToken(*trim)
+        if (expect.isNotEmpty() && !reader.expectToken(*expect)) {
+            throw LoadError.NOT_MATCH.create("[${expect.joinToString(", ")}]", reader.peekToken())
         }
         action = func(reader)
         return this
@@ -72,7 +70,7 @@ open class LiveData<T>(
             }
         } else {
             LiveData {
-                if (this.tokenExpect(*expect)) {
+                if (this.expectToken(*expect)) {
                     this@LiveData.accept(reader = this)
                     Bacikal.Action { frame ->
                         this@LiveData.accept(frame).thenApply { it }
@@ -87,7 +85,7 @@ open class LiveData<T>(
     fun optional(vararg expect: String, def: T): LiveData<T> {
         return if (expect.isNotEmpty()) {
             LiveData {
-                if (this.tokenExpect(*expect)) {
+                if (this.expectToken(*expect)) {
                     this@LiveData.accept(reader = this)
                     Bacikal.Action { frame ->
                         this@LiveData.accept(frame).thenApply { it }
