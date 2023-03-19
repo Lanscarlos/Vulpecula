@@ -108,9 +108,15 @@ open class LiveData<T>(
 
     companion object {
 
-        fun <T> of(value: T): LiveData<T> {
+        fun <T> point(value: T): LiveData<T> {
             return LiveData {
                 Bacikal.Action { CompletableFuture.completedFuture(value) }
+            }
+        }
+
+        fun <T> of(func: BacikalReader.() -> T): LiveData<T> {
+            return LiveData {
+                Bacikal.Action { CompletableFuture.completedFuture(func(this)) }
             }
         }
 

@@ -43,22 +43,20 @@ object ActionInput {
             optional("from", "by", then = text("chat"), def = "chat"),
             argument("timeout", "time", then = int(1200), def = 1200)
         ) { type, timeout ->
-            future {
-                val player = this.playerOrNull()?.toBukkit() ?: error("No player selected.")
-                val future = when (type.lowercase()) {
-                    "chat" -> chat.computeIfAbsent(player) { CompletableFuture() }
-                    "sign" -> sign.computeIfAbsent(player) { CompletableFuture() }
-                    "anvil" -> anvil.computeIfAbsent(player) { CompletableFuture() }
-                    "book" -> book.computeIfAbsent(player) { CompletableFuture() }
-                    else -> error("Input type \"$type\" is not supported yet.")
-                }
-
-                if (timeout > 0) {
-                    submit(delay = timeout.toLong()) { future.complete(null) }
-                }
-
-                return@future future
+            val player = this.playerOrNull()?.toBukkit() ?: error("No player selected.")
+            val future = when (type.lowercase()) {
+                "chat" -> chat.computeIfAbsent(player) { CompletableFuture() }
+                "sign" -> sign.computeIfAbsent(player) { CompletableFuture() }
+                "anvil" -> anvil.computeIfAbsent(player) { CompletableFuture() }
+                "book" -> book.computeIfAbsent(player) { CompletableFuture() }
+                else -> error("Input type \"$type\" is not supported yet.")
             }
+
+            if (timeout > 0) {
+                submit(delay = timeout.toLong()) { future.complete(null) }
+            }
+
+            return@combineOf future
         }
     }
 
