@@ -8,6 +8,7 @@ import taboolib.common.util.Vector
 import taboolib.common5.cbool
 import taboolib.common5.cdouble
 import taboolib.common5.cint
+import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
@@ -22,6 +23,7 @@ import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveStringList
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.utils.nextBlock
+import top.lanscarlos.vulpecula.utils.union
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -86,6 +88,10 @@ open class BacikalReader(private val source: QuestReader) {
         } else {
             source.nextParsedAction()
         }
+    }
+
+    fun readActionList(): List<ParsedAction<*>> {
+        return source.next(ArgTypes.listOf(ArgTypes.ACTION))
     }
 
     /*
@@ -210,8 +216,8 @@ open class BacikalReader(private val source: QuestReader) {
         return frame { it?.toString() ?: def ?: error("No $display selected.") }
     }
 
-    fun multilineOrNull(): LiveData<List<String>?> = frame { it?.liveStringList }
-    fun multiline(def: List<String>? = null, display: String = "multiline text"): LiveData<List<String>> {
+    fun mtextOrNull(): LiveData<List<String>?> = frame { it?.liveStringList }
+    fun mtext(def: List<String>? = null, display: String = "multiline text"): LiveData<List<String>> {
         return frame { it?.liveStringList ?: def ?: error("No $display selected.") }
     }
 
@@ -225,6 +231,13 @@ open class BacikalReader(private val source: QuestReader) {
                 it.mapNotNull { el -> el?.toString() }
             }
             else -> error("No text or list selected.")
+        }
+    }
+
+    fun list(): LiveData<List<*>> = LiveData {
+        val list = this.readActionList()
+        Bacikal.Action { frame ->
+            list.map { frame.run(it) }.union()
         }
     }
 

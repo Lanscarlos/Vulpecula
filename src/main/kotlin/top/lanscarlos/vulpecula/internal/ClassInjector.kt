@@ -6,6 +6,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ClassMethod
+import top.lanscarlos.vulpecula.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.kether.KetherRegistry
 import java.util.function.Supplier
 
@@ -27,9 +28,9 @@ abstract class ClassInjector {
     open fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {}
 
     @Awake(LifeCycle.LOAD)
-    object KetherClassInjector : ClassVisitor(0) {
+    object BacikalBoot : ClassVisitor(0) {
 
-        private val ketherRegistry = KetherRegistry
+        private val ketherRegistry = BacikalRegistry
 
         override fun getLifeCycle() = LifeCycle.LOAD
 

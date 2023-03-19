@@ -1,12 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal
 
-import kotlinx.coroutines.*
-import taboolib.common.platform.function.info
-import taboolib.module.kether.*
-import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.utils.buildParser
-import java.util.concurrent.CompletableFuture
-
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.bacikal
@@ -16,15 +9,15 @@ import java.util.concurrent.CompletableFuture
  */
 object BacikalWorkspace {
 
-    private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
+//    private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
+//
+//    fun launch(block: suspend CoroutineScope.() -> Unit) {
+//        coroutineScope.launch(block = block)
+//    }
 
-    fun launch(block: suspend CoroutineScope.() -> Unit) {
-        coroutineScope.launch(block = block)
-    }
-
-    fun shutdown() {
+//    fun shutdown() {
 //        coroutineScope.cancel()
-    }
+//    }
 
 //    fun runActions() {
 //

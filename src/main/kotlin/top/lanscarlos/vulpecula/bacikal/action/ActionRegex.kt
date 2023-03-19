@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.action
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.Bacikal
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
 import top.lanscarlos.vulpecula.kether.VulKetherParser
@@ -12,14 +13,14 @@ import java.util.regex.Matcher
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action
+ * top.lanscarlos.vulpecula.bacikal.action
  *
  * @author Lanscarlos
  * @since 2023-02-06 11:39
  */
 object ActionRegex {
 
-    @VulKetherParser(
+    @BacikalParser(
         id = "regex",
         name = ["regex"]
     )

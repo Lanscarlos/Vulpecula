@@ -5,6 +5,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submit
 import taboolib.module.nms.inputSign
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.playerOrNull
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action
+ * top.lanscarlos.vulpecula.bacikal.action
  *
  * @author Lanscarlos
  * @since 2023-02-25 14:23
@@ -34,7 +35,7 @@ object ActionInput {
         e.isCancelled = true
     }
 
-    @VulKetherParser(
+    @BacikalParser(
         id = "input",
         name = ["input"]
     )
