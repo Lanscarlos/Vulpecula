@@ -66,11 +66,11 @@ object ActionRegex {
                 stringOrList(),
                 trim("using", "with", "by", then = text()),
                 LiveData {
-                    if (tokenExpect("to")) {
+                    if (expectToken("to")) {
                         val action = readAction()
                         Bacikal.Action { frame -> frame.run(action) }
                     } else {
-                        tokenExpect("then")
+                        expectToken("then")
                         val action = readAction()
                         Bacikal.Action { CompletableFuture.completedFuture(action) }
                     }
@@ -106,11 +106,11 @@ object ActionRegex {
                 stringOrList(),
                 trim("using", "with", "by", then = text()),
                 LiveData {
-                    if (tokenExpect("to")) {
+                    if (expectToken("to")) {
                         val action = readAction()
                         Bacikal.Action { frame -> frame.run(action) }
                     } else {
-                        tokenExpect("then")
+                        expectToken("then")
                         val action = readAction()
                         Bacikal.Action { CompletableFuture.completedFuture(action) }
                     }

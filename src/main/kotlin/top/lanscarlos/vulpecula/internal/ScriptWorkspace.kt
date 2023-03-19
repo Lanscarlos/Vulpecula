@@ -63,6 +63,7 @@ object ScriptWorkspace {
             context.runActions().also { it.thenRun { runningScripts.remove(id, context) } }
         } catch (e: Exception) {
             e.printKetherErrorMessage()
+            runningScripts.remove(id, context)
             CompletableFuture.completedFuture(null)
         }
     }
