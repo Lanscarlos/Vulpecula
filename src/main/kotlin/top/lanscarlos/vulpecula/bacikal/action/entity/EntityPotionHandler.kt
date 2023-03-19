@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.entity
+package top.lanscarlos.vulpecula.bacikal.action.entity
 
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
@@ -9,7 +9,7 @@ import top.lanscarlos.vulpecula.bacikal.LiveData
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.entity
+ * top.lanscarlos.vulpecula.bacikal.action.entity
  *
  * @author Lanscarlos
  * @since 2022-11-17 23:51

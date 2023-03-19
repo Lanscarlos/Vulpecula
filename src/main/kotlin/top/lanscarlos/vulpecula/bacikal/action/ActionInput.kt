@@ -1,9 +1,10 @@
-package top.lanscarlos.vulpecula.kether.action
+package top.lanscarlos.vulpecula.bacikal.action
 
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submit
+import taboolib.module.nms.inputSign
 import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.playerOrNull
@@ -21,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap
 object ActionInput {
 
     val chat = ConcurrentHashMap<Player, CompletableFuture<String>>()
-    val sign = mutableMapOf<Player, CompletableFuture<String>>()
     val anvil = mutableMapOf<Player, CompletableFuture<String>>()
     val book = mutableMapOf<Player, CompletableFuture<String>>()
 
@@ -46,7 +46,11 @@ object ActionInput {
             val player = this.playerOrNull()?.toBukkit() ?: error("No player selected.")
             val future = when (type.lowercase()) {
                 "chat" -> chat.computeIfAbsent(player) { CompletableFuture() }
-                "sign" -> sign.computeIfAbsent(player) { CompletableFuture() }
+                "sign" -> {
+                    val future = CompletableFuture<Array<String>>()
+                    player.inputSign { future.complete(it) }
+                    future
+                }
                 "anvil" -> anvil.computeIfAbsent(player) { CompletableFuture() }
                 "book" -> book.computeIfAbsent(player) { CompletableFuture() }
                 else -> error("Input type \"$type\" is not supported yet.")

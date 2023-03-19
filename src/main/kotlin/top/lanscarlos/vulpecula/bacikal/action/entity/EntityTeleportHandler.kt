@@ -1,16 +1,11 @@
-package top.lanscarlos.vulpecula.kether.action.entity
+package top.lanscarlos.vulpecula.bacikal.action.entity
 
 import org.bukkit.event.player.PlayerTeleportEvent
-import taboolib.common.util.Location
-import taboolib.library.kether.QuestReader
 import taboolib.platform.util.toBukkitLocation
-import top.lanscarlos.vulpecula.kether.live.readLocation
-import top.lanscarlos.vulpecula.kether.live.tryReadString
-import top.lanscarlos.vulpecula.utils.*
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.entity
+ * top.lanscarlos.vulpecula.bacikal.action.entity
  *
  * @author Lanscarlos
  * @since 2022-11-17 23:26

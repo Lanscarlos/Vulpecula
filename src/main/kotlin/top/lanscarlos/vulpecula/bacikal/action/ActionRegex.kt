@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action
+package top.lanscarlos.vulpecula.bacikal.action
 
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*

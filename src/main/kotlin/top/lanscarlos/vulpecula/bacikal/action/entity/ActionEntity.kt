@@ -1,9 +1,8 @@
-package top.lanscarlos.vulpecula.kether.action.entity
+package top.lanscarlos.vulpecula.bacikal.action.entity
 
 import org.bukkit.entity.Entity
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.library.kether.Parser
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
@@ -12,7 +11,6 @@ import top.lanscarlos.vulpecula.bacikal.Bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.ClassInjector
-import top.lanscarlos.vulpecula.kether.ParserBuilder
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
@@ -20,7 +18,7 @@ import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.entity
+ * top.lanscarlos.vulpecula.bacikal.action.entity
  *
  * @author Lanscarlos
  * @since 2022-11-17 23:01
