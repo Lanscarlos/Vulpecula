@@ -7,6 +7,7 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.common5.cbool
 import taboolib.common5.cdouble
+import taboolib.common5.cfloat
 import taboolib.common5.cint
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
@@ -21,9 +22,8 @@ import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveStringList
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
-import top.lanscarlos.vulpecula.kether.action.ActionBlock
+import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
 import top.lanscarlos.vulpecula.utils.nextBlock
-import top.lanscarlos.vulpecula.utils.union
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -62,7 +62,7 @@ open class BacikalReader(private val source: QuestReader) {
         source.reset()
     }
 
-    fun token(): String {
+    fun nextToken(): String {
         return source.nextToken()
     }
 
@@ -84,7 +84,11 @@ open class BacikalReader(private val source: QuestReader) {
 
     fun readAction(): ParsedAction<*> {
         return if (this.expectToken("{")) {
-            ParsedAction(ActionBlock(ActionBlock.readBlock(reader = source)))
+            val actions = mutableListOf<ParsedAction<*>>()
+            while (!expectToken("}")) {
+                actions += source.nextParsedAction()
+            }
+            ParsedAction(ActionBlock(actions))
         } else {
             source.nextParsedAction()
         }
@@ -110,11 +114,11 @@ open class BacikalReader(private val source: QuestReader) {
     * LiveData 操作
     * */
 
-    fun <T> trim(vararg expect: String, then: LiveData<T>) : LiveData<T> {
+    fun <T> trim(vararg expect: String, then: LiveData<T>): LiveData<T> {
         return then.trim(*expect)
     }
 
-    fun <T> expect(vararg expect: String, then: LiveData<T>) : LiveData<T> {
+    fun <T> expect(vararg expect: String, then: LiveData<T>): LiveData<T> {
         return then.expect(*expect)
     }
 
@@ -156,6 +160,13 @@ open class BacikalReader(private val source: QuestReader) {
 
     fun any(): LiveData<Any?> = frame { it }
 
+    fun list(): LiveData<List<*>> = LiveData {
+        val list = this.readActionList()
+        Bacikal.Action { frame ->
+            list.map { frame.run(it) }.union()
+        }
+    }
+
     fun boolOrNull(): LiveData<Boolean?> {
         return LiveData {
             source.mark()
@@ -173,6 +184,7 @@ open class BacikalReader(private val source: QuestReader) {
             }
         }
     }
+
     fun bool(def: Boolean? = null, display: String = "boolean"): LiveData<Boolean> {
         return boolOrNull().map { it ?: def ?: error("No $display selected.") }
     }
@@ -181,7 +193,9 @@ open class BacikalReader(private val source: QuestReader) {
         return LiveData {
             source.mark()
             source.nextToken().toIntOrNull()?.let { int ->
-                Bacikal.Action { CompletableFuture.completedFuture(int) }
+                Bacikal.Action {
+                    CompletableFuture.completedFuture(int)
+                }
             } ?: source.reset().let {
                 val action = source.nextBlock()
                 Bacikal.Action { frame ->
@@ -190,15 +204,38 @@ open class BacikalReader(private val source: QuestReader) {
             }
         }
     }
+
     fun int(def: Int? = null, display: String = "int"): LiveData<Int> {
         return intOrNull().map { it ?: def ?: error("No $display selected.") }
+    }
+
+    fun floatOrNull(): LiveData<Float?> {
+        return LiveData {
+            source.mark()
+            source.nextToken().toFloatOrNull()?.let { float ->
+                Bacikal.Action {
+                    CompletableFuture.completedFuture(float)
+                }
+            } ?: source.reset().let {
+                val action = source.nextBlock()
+                Bacikal.Action { frame ->
+                    frame.run(action).thenApply { it?.cfloat }
+                }
+            }
+        }
+    }
+
+    fun float(def: Float? = null, display: String = "float"): LiveData<Float> {
+        return floatOrNull().map { it ?: def ?: error("No $display selected.") }
     }
 
     fun doubleOrNull(): LiveData<Double?> {
         return LiveData {
             source.mark()
             source.nextToken().toDoubleOrNull()?.let { double ->
-                Bacikal.Action { CompletableFuture.completedFuture(double) }
+                Bacikal.Action {
+                    CompletableFuture.completedFuture(double)
+                }
             } ?: source.reset().let {
                 val action = source.nextBlock()
                 Bacikal.Action { frame ->
@@ -207,6 +244,7 @@ open class BacikalReader(private val source: QuestReader) {
             }
         }
     }
+
     fun double(def: Double? = null, display: String = "double"): LiveData<Double> {
         return doubleOrNull().map { it ?: def ?: error("No $display selected.") }
     }
@@ -231,13 +269,6 @@ open class BacikalReader(private val source: QuestReader) {
                 it.mapNotNull { el -> el?.toString() }
             }
             else -> error("No text or list selected.")
-        }
-    }
-
-    fun list(): LiveData<List<*>> = LiveData {
-        val list = this.readActionList()
-        Bacikal.Action { frame ->
-            list.map { frame.run(it) }.union()
         }
     }
 
@@ -283,7 +314,7 @@ open class BacikalReader(private val source: QuestReader) {
 
         if (parametric < 0) return
         while (peekToken().matches(argumentPrefixPattern)) {
-            val prefix = token().substring(1)
+            val prefix = nextToken().substring(1)
             for (index in parametric until liveData.size) {
                 (liveData[index] as LiveDataProxy<*>).accept(prefix, this)
             }
@@ -313,9 +344,20 @@ open class BacikalReader(private val source: QuestReader) {
     inline fun <P1, R> combine(
         p1: LiveData<P1>,
         crossinline func: ScriptFrame.(P1) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1) { t1 ->
-            CompletableFuture.completedFuture(func(this, t1))
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1)
+        return Bacikal.Parser { frame ->
+            p1.accept(frame).thenApply { t1 -> func(frame, t1) }
+        }
+    }
+
+    inline fun <P1, R> combineOf(
+        p1: LiveData<P1>,
+        crossinline func: ScriptFrame.(P1) -> CompletableFuture<R>
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1)
+        return Bacikal.Parser { frame ->
+            p1.accept(frame).thenCompose { t1 -> func(frame, t1) }
         }
     }
 
@@ -323,90 +365,14 @@ open class BacikalReader(private val source: QuestReader) {
         p1: LiveData<P1>,
         p2: LiveData<P2>,
         crossinline func: ScriptFrame.(P1, P2) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1, p2) { t1, t2 ->
-            CompletableFuture.completedFuture(func(this, t1, t2))
-        }
-    }
-
-    fun <P1, P2, P3, R> combine(
-        p1: LiveData<P1>,
-        p2: LiveData<P2>,
-        p3: LiveData<P3>,
-        func: ScriptFrame.(P1, P2, P3) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1, p2, p3) { t1, t2, t3 ->
-            CompletableFuture.completedFuture(func(this, t1, t2, t3))
-        }
-    }
-
-    fun <P1, P2, P3, P4, R> combine(
-        p1: LiveData<P1>,
-        p2: LiveData<P2>,
-        p3: LiveData<P3>,
-        p4: LiveData<P4>,
-        func: ScriptFrame.(P1, P2, P3, P4) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1, p2, p3, p4) { t1, t2, t3, t4 ->
-            CompletableFuture.completedFuture(func(this, t1, t2, t3, t4))
-        }
-    }
-
-    fun <P1, P2, P3, P4, P5, R> combine(
-        p1: LiveData<P1>,
-        p2: LiveData<P2>,
-        p3: LiveData<P3>,
-        p4: LiveData<P4>,
-        p5: LiveData<P5>,
-        func: ScriptFrame.(P1, P2, P3, P4, P5) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1, p2, p3, p4, p5) { t1, t2, t3, t4, t5 ->
-            CompletableFuture.completedFuture(func(this, t1, t2, t3, t4, t5))
-        }
-    }
-
-    fun <P1, P2, P3, P4, P5, P6, R> combine(
-        p1: LiveData<P1>,
-        p2: LiveData<P2>,
-        p3: LiveData<P3>,
-        p4: LiveData<P4>,
-        p5: LiveData<P5>,
-        p6: LiveData<P6>,
-        func: ScriptFrame.(P1, P2, P3, P4, P5, P6) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1, p2, p3, p4, p5, p6) { t1, t2, t3, t4, t5, t6 ->
-            CompletableFuture.completedFuture(func(this, t1, t2, t3, t4, t5, t6))
-        }
-    }
-
-    fun <P1, P2, P3, P4, P5, P6, P7, R> combine(
-        p1: LiveData<P1>,
-        p2: LiveData<P2>,
-        p3: LiveData<P3>,
-        p4: LiveData<P4>,
-        p5: LiveData<P5>,
-        p6: LiveData<P6>,
-        p7: LiveData<P7>,
-        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7) -> R
-    ) : Bacikal.Parser<R> {
-        return combineOf(p1, p2, p3, p4, p5, p6, p7) { t1, t2, t3, t4, t5, t6, t7 ->
-            CompletableFuture.completedFuture(func(this, t1, t2, t3, t4, t5, t6, t7))
-        }
-    }
-
-    /*
-    * combineOf(...)
-    * func 返回 Action<R>
-    * */
-
-    inline fun <P1, R> combineOf(
-        p1: LiveData<P1>,
-        crossinline func: ScriptFrame.(P1) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
-        applyLiveData(p1)
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                func(frame, t1)
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2)
             }
         }
     }
@@ -415,13 +381,32 @@ open class BacikalReader(private val source: QuestReader) {
         p1: LiveData<P1>,
         p2: LiveData<P2>,
         crossinline func: ScriptFrame.(P1, P2) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
+    ): Bacikal.Parser<R> {
         applyLiveData(p1, p2)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                p2.accept(frame).thenCompose { t2 ->
-                    func(frame, t1, t2)
-                }
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        func: ScriptFrame.(P1, P2, P3) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3)
             }
         }
     }
@@ -431,15 +416,35 @@ open class BacikalReader(private val source: QuestReader) {
         p2: LiveData<P2>,
         p3: LiveData<P3>,
         func: ScriptFrame.(P1, P2, P3) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
+    ): Bacikal.Parser<R> {
         applyLiveData(p1, p2, p3)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                p2.accept(frame).thenCompose { t2 ->
-                    p3.accept(frame).thenCompose { t3 ->
-                        func(frame, t1, t2, t3)
-                    }
-                }
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        func: ScriptFrame.(P1, P2, P3, P4) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3, it.t4)
             }
         }
     }
@@ -450,17 +455,38 @@ open class BacikalReader(private val source: QuestReader) {
         p3: LiveData<P3>,
         p4: LiveData<P4>,
         func: ScriptFrame.(P1, P2, P3, P4) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
+    ): Bacikal.Parser<R> {
         applyLiveData(p1, p2, p3, p4)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                p2.accept(frame).thenCompose { t2 ->
-                    p3.accept(frame).thenCompose { t3 ->
-                        p4.accept(frame).thenCompose { t4 ->
-                            func(frame, t1, t2, t3, t4)
-                        }
-                    }
-                }
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3, it.t4)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5)
             }
         }
     }
@@ -472,19 +498,41 @@ open class BacikalReader(private val source: QuestReader) {
         p4: LiveData<P4>,
         p5: LiveData<P5>,
         func: ScriptFrame.(P1, P2, P3, P4, P5) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
+    ): Bacikal.Parser<R> {
         applyLiveData(p1, p2, p3, p4, p5)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                p2.accept(frame).thenCompose { t2 ->
-                    p3.accept(frame).thenCompose { t3 ->
-                        p4.accept(frame).thenCompose { t4 ->
-                            p5.accept(frame).thenCompose { t5 ->
-                                func(frame, t1, t2, t3, t4, t5)
-                            }
-                        }
-                    }
-                }
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6)
             }
         }
     }
@@ -497,21 +545,44 @@ open class BacikalReader(private val source: QuestReader) {
         p5: LiveData<P5>,
         p6: LiveData<P6>,
         func: ScriptFrame.(P1, P2, P3, P4, P5, P6) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
+    ): Bacikal.Parser<R> {
         applyLiveData(p1, p2, p3, p4, p5, p6)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                p2.accept(frame).thenCompose { t2 ->
-                    p3.accept(frame).thenCompose { t3 ->
-                        p4.accept(frame).thenCompose { t4 ->
-                            p5.accept(frame).thenCompose { t5 ->
-                                p6.accept(frame).thenCompose { t6 ->
-                                    func(frame, t1, t2, t3, t4, t5, t6)
-                                }
-                            }
-                        }
-                    }
-                }
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7)
             }
         }
     }
@@ -525,23 +596,19 @@ open class BacikalReader(private val source: QuestReader) {
         p6: LiveData<P6>,
         p7: LiveData<P7>,
         func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7) -> CompletableFuture<R>
-    ) : Bacikal.Parser<R> {
+    ): Bacikal.Parser<R> {
         applyLiveData(p1, p2, p3, p4, p5, p6, p7)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenCompose { t1 ->
-                p2.accept(frame).thenCompose { t2 ->
-                    p3.accept(frame).thenCompose { t3 ->
-                        p4.accept(frame).thenCompose { t4 ->
-                            p5.accept(frame).thenCompose { t5 ->
-                                p6.accept(frame).thenCompose { t6 ->
-                                    p7.accept(frame).thenCompose { t7 ->
-                                        func(frame, t1, t2, t3, t4, t5, t6, t7)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7)
             }
         }
     }

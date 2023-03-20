@@ -106,6 +106,21 @@ open class LiveData<T>(
         }
     }
 
+    fun <R> union(other: LiveData<R>): LiveData<Pair<T, R>> {
+        return LiveData {
+            this@LiveData.accept(reader = this)
+            other.accept(reader = this)
+            Bacikal.Action { frame ->
+                applicative(
+                    this@LiveData.accept(frame),
+                    other.accept(frame)
+                ).thenApply {
+                    it.t1 to it.t2
+                }
+            }
+        }
+    }
+
     companion object {
 
         fun <T> point(value: T): LiveData<T> {
@@ -172,7 +187,7 @@ open class LiveData<T>(
                     is String -> {
                         /*
                         * world,x,y,z
-                        * world,x,y,z,yaw.pitch
+                        * world,x,y,z,yaw,pitch
                         * */
                         if (!this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) return null
                         val demand = this.split(",")

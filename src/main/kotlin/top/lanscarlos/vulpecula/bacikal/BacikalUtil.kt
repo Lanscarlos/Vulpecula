@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.library.kether.LoadError
 import taboolib.module.kether.ScriptActionParser
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -21,8 +22,41 @@ fun bacikalSwitch(func: BacikalReader.() -> Unit): ScriptActionParser<Any?> {
         this.mark()
         val next = this.nextToken()
         val method = dsl.methods[next] ?: this.reset().let { dsl.other }
-            ?: throw LoadError.NOT_MATCH.create("[${dsl.methods.keys.joinToString(", ")}]", next)
+        ?: throw LoadError.NOT_MATCH.create("[${dsl.methods.keys.joinToString(", ")}]", next)
 
         method().resolve()
+    }
+}
+
+/**
+ * 联合
+ * */
+fun List<CompletableFuture<*>>.union(): CompletableFuture<List<Any?>> {
+    if (this.isEmpty()) {
+        // 队列为空
+        return CompletableFuture.completedFuture(emptyList())
+    } else if (this.size == 1) {
+        // 队列仅有一个
+        return this[0].thenApply { listOf(it) }
+    }
+
+    var previous = this[0]
+    for (index in 1 until this.size) {
+        val current = this[index]
+        previous = if (previous.isDone) {
+            current
+        } else {
+            previous.thenCompose { current }
+        }
+    }
+
+    return if (previous.isDone) {
+        CompletableFuture.completedFuture(
+            this.map { it.getNow(null) }
+        )
+    } else {
+        previous.thenApply {
+            this.map { it.getNow(null) }
+        }
     }
 }
