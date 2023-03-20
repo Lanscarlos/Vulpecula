@@ -7,7 +7,6 @@ import taboolib.common.platform.function.submit
 import taboolib.module.nms.inputSign
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.playerOrNull
 import top.lanscarlos.vulpecula.utils.toBukkit
 import java.util.concurrent.CompletableFuture

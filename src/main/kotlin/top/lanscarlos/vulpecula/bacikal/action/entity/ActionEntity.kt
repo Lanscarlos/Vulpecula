@@ -32,7 +32,8 @@ class ActionEntity : QuestAction<Any?>() {
         do {
             val next = reader.nextToken()
             val isRoot = handlers.isEmpty()
-            handlers += registry[next]?.resolve(Reader(next, reader, isRoot)) ?: error("Unknown sub action \"$next\" at entity action.")
+            handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
+                ?: error("Unknown sub action \"$next\" at entity action.")
 
             // 判断管道是否已关闭
             if (handlers.lastOrNull() !is Transfer) {
@@ -130,14 +131,15 @@ class ActionEntity : QuestAction<Any?>() {
             return Transfer(func(this))
         }
 
-        fun source() : LiveData<Entity> {
+        fun source(): LiveData<Entity> {
             return if (isRoot) {
                 entity()
             } else {
                 LiveData {
                     Bacikal.Action { frame ->
                         CompletableFuture.completedFuture(
-                            frame.getVariable<Entity>("@Entity", "entity") ?: error("No entity selected. [ERROR: entity@$token]")
+                            frame.getVariable<Entity>("@Entity", "entity")
+                                ?: error("No entity selected. [ERROR: entity@$token]")
                         )
                     }
                 }
@@ -149,7 +151,7 @@ class ActionEntity : QuestAction<Any?>() {
     /**
      * 语句处理器
      * */
-    open class Handler<T: Any?>(val parser: Bacikal.Parser<T>) {
+    open class Handler<T : Any?>(val parser: Bacikal.Parser<T>) {
 
         /**
          * 运行
@@ -162,5 +164,5 @@ class ActionEntity : QuestAction<Any?>() {
     /**
      * 用于传递 Entity
      * */
-    open class Transfer(parser: Bacikal.Parser<Entity>): Handler<Entity>(parser)
+    open class Transfer(parser: Bacikal.Parser<Entity>) : Handler<Entity>(parser)
 }

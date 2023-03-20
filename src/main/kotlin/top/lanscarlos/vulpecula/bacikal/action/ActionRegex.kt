@@ -6,7 +6,6 @@ import top.lanscarlos.vulpecula.bacikal.Bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Matcher

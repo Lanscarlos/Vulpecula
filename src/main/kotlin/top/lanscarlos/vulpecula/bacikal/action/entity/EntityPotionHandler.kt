@@ -22,7 +22,7 @@ object EntityPotionHandler : ActionEntity.Resolver {
         val source = reader.source().accept(reader)
 
         reader.mark()
-        return when (reader.token()) {
+        return when (reader.nextToken()) {
             "add", "set" -> {
                 addPotion(reader, source)
             }

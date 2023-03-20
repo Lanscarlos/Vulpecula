@@ -1,9 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.action.internal
 
-import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.utils.union
 
 /**
  * Vulpecula
