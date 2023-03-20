@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * 将一系列 CompletableFuture 转成参数
  * */
-fun List<CompletableFuture<*>?>.union(): CompletableFuture<List<Any?>> {
+fun List<CompletableFuture<*>?>.thenTake(): CompletableFuture<List<Any?>> {
     val parameters = CompletableFuture<List<Any?>>()
     if (this.isEmpty()) {
         // 队列为空
@@ -54,7 +54,7 @@ fun List<CompletableFuture<*>?>.union(): CompletableFuture<List<Any?>> {
     return parameters
 }
 
-fun Map<String, CompletableFuture<*>>.union(): CompletableFuture<Map<String, Any?>> {
+fun Map<String, CompletableFuture<*>>.thenTake(): CompletableFuture<Map<String, Any?>> {
     val parameters = CompletableFuture<Map<String, Any?>>()
     if (this.isEmpty()) {
         parameters.complete(mapOf())

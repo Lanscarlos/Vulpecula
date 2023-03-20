@@ -174,6 +174,15 @@ fun ScriptFrame.setVariable(key: String, value: Any?, deep: Boolean = true) {
 /**
  * 设置变量
  * */
+fun ScriptFrame.setVariables(vararg key: String, value: Any?, deep: Boolean = true) {
+    key.forEach {
+        setVariable(it, value, deep)
+    }
+}
+
+/**
+ * 设置变量
+ * */
 fun ScriptContext.setVariable(vararg keys: String, value: Any?) {
     keys.forEach { key ->
         set(key, value)
