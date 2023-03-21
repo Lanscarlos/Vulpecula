@@ -30,6 +30,7 @@ class ActionLocation : QuestAction<Any?>() {
 
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
+            reader.mark()
             val next = reader.nextToken()
             val isRoot = handlers.isEmpty()
             handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
