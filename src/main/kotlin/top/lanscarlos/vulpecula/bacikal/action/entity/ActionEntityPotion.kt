@@ -14,10 +14,17 @@ import top.lanscarlos.vulpecula.bacikal.LiveData
  * @author Lanscarlos
  * @since 2022-11-17 23:51
  */
-object EntityPotionHandler : ActionEntity.Resolver {
+object ActionEntityPotion : ActionEntity.Resolver {
 
     override val name: Array<String> = arrayOf("potion")
 
+    /**
+     * entity potion &entity add &type &time &level
+     * entity potion &entity remove &type
+     * entity potion &entity clear
+     * entity potion &entity has &type
+     * entity potion &entity &type &time &level
+     * */
     override fun resolve(reader: ActionEntity.Reader): ActionEntity.Handler<out Any?> {
         val source = reader.source().accept(reader)
 

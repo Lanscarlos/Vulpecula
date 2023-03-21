@@ -10,11 +10,11 @@ import taboolib.common.platform.function.warning
  * @author Lanscarlos
  * @since 2022-11-17 23:09
  */
-object EntityDamageHandler : ActionEntity.Resolver {
+object ActionEntityDamage : ActionEntity.Resolver {
 
     override val name: Array<String> = arrayOf("damage", "dmg")
 
-    /*
+    /**
     * entity damage &entity &damage
     * entity damage &entity &damage by &damager
     * */

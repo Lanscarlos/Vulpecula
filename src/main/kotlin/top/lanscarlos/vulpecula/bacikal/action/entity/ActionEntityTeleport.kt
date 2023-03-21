@@ -10,7 +10,7 @@ import taboolib.platform.util.toBukkitLocation
  * @author Lanscarlos
  * @since 2022-11-17 23:26
  */
-object EntityTeleportHandler : ActionEntity.Resolver {
+object ActionEntityTeleport : ActionEntity.Resolver {
 
     override val name: Array<String> = arrayOf("teleport", "tp")
 
