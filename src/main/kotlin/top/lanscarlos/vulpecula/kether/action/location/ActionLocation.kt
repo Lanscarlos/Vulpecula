@@ -23,6 +23,7 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2022-11-25 23:05
  */
+@Deprecated("迁移完毕")
 class ActionLocation : ScriptAction<Any?>() {
 
     private val handlers = mutableListOf<Handler>()

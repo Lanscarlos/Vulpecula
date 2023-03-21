@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.kether.live
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.utils.thenTake
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula

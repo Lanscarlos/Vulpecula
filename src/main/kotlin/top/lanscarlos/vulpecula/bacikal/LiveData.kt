@@ -185,17 +185,30 @@ open class LiveData<T>(
                     is Vector -> Location(null, this.x, this.y, this.z)
                     is org.bukkit.util.Vector -> Location(null, this.x, this.y, this.z)
                     is String -> {
-                        /*
-                        * world,x,y,z
-                        * world,x,y,z,yaw,pitch
-                        * */
-                        if (!this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) return null
-                        val demand = this.split(",")
-                        Location(
-                            demand[0], demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
-                            demand.getOrNull(4)?.toFloatOrNull() ?: 0f,
-                            demand.getOrNull(5)?.toFloatOrNull() ?: 0f
-                        )
+                        if (this.matches("-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?".toRegex())) {
+                            /*
+                            * x,y,z
+                            * x,y,z,yaw,pitch
+                            * */
+                            val demand = this.split(",")
+                            Location(
+                                null,
+                                demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
+                                demand.getOrNull(4)?.toFloatOrNull() ?: 0f,
+                                demand.getOrNull(5)?.toFloatOrNull() ?: 0f
+                            )
+                        } else if (this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) {
+                            /*
+                            * world,x,y,z
+                            * world,x,y,z,yaw,pitch
+                            * */
+                            val demand = this.split(",")
+                            Location(
+                                demand[0], demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
+                                demand.getOrNull(4)?.toFloatOrNull() ?: 0f,
+                                demand.getOrNull(5)?.toFloatOrNull() ?: 0f
+                            )
+                        } else null
                     }
                     else -> null
                 }

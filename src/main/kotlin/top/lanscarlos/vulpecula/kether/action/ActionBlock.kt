@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Lanscarlos
  * @since 2022-11-06 20:21
  */
+@Deprecated("迁移完毕")
 class ActionBlock(
     val block: List<ParsedAction<*>>
 ) : ScriptAction<Any?>() {
@@ -36,7 +37,11 @@ class ActionBlock(
         }
     }
 
-    fun handle(previous: CompletableFuture<Any?>, frame: ScriptFrame, action: ParsedAction<*>): CompletableFuture<Any?> {
+    fun handle(
+        previous: CompletableFuture<Any?>,
+        frame: ScriptFrame,
+        action: ParsedAction<*>
+    ): CompletableFuture<Any?> {
         return if (previous.isDone) {
             frame.run(action)
         } else {
@@ -44,9 +49,8 @@ class ActionBlock(
         }
     }
 
-
-
     companion object {
+
         @VulKetherParser(
             id = "block",
             name = ["blockof"]

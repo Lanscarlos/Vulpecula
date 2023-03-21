@@ -82,7 +82,6 @@ object EntityPotionHandler : ActionEntity.Resolver {
 
     private fun addPotion(reader: ActionEntity.Reader, source: LiveData<Entity>): ActionEntity.Handler<out Any?> {
         return reader.transfer {
-
             combine(
                 source,
                 text(display = "potion type"),

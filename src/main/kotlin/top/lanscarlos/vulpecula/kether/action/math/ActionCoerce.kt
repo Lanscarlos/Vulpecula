@@ -10,6 +10,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
  * @author Lanscarlos
  * @since 2022-11-10 21:32
  */
+@Deprecated("迁移完毕")
 object ActionCoerce {
 
     /**

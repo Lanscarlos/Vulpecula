@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-12-23 21:24
  */
+@Deprecated("迁移完毕")
 object ActionFunction {
 
     /**
