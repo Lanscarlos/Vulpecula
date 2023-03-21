@@ -7,10 +7,7 @@ import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
-import top.lanscarlos.vulpecula.bacikal.Bacikal
-import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.bacikal.BacikalReader
-import top.lanscarlos.vulpecula.bacikal.LiveData
+import top.lanscarlos.vulpecula.bacikal.*
 import top.lanscarlos.vulpecula.internal.ClassInjector
 import top.lanscarlos.vulpecula.kether.action.location.LocationBuildHandler
 import top.lanscarlos.vulpecula.utils.getVariable
@@ -58,25 +55,13 @@ class ActionLocation : QuestAction<Any?>() {
             return handlers[0].accept(frame).thenApply { it }
         }
 
-        var previous: CompletableFuture<out Location> = (handlers.first() as Transfer).accept(frame)
+        var previous: CompletableFuture<out Location> = (handlers[0] as Transfer).accept(frame)
 
-        for (index in 1 until handlers.size) {
+        for (index in 1 until handlers.size - 1) {
             val current = handlers[index]
 
-            if (current !is Transfer) {
-                return if (previous.isDone) {
-                    val location = previous.getNow(null)
-                    frame.setVariable("@Location", location, false)
-                    frame.setVariable("location", location, false)
-                    current.accept(frame).thenApply { it }
-                } else {
-                    previous.thenCompose { location ->
-                        frame.setVariable("@Location", location, false)
-                        frame.setVariable("location", location, false)
-                        current.accept(frame).thenApply { it }
-                    }
-                }
-            }
+            // 除去最后一个 Handler 以及非 Transfer
+            if (current !is Transfer) break
 
             // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
@@ -93,7 +78,19 @@ class ActionLocation : QuestAction<Any?>() {
             }
         }
 
-        return previous.thenApply { it }
+        // 判断 future 是否已完成，减少嵌套
+        return if (previous.isDone) {
+            val location = previous.getNow(null)
+            frame.setVariable("@Location", location, false)
+            frame.setVariable("location", location, false)
+            handlers.last().accept(frame).thenApply { it }
+        } else {
+            previous.thenCompose { location ->
+                frame.setVariable("@Location", location, false)
+                frame.setVariable("location", location, false)
+                handlers.last().accept(frame).thenApply { it }
+            }
+        }
     }
 
     /*

@@ -48,22 +48,45 @@ class ActionEntity : QuestAction<Any?>() {
     }
 
     override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
-        var previous: CompletableFuture<out Entity?> = CompletableFuture.completedFuture(null)
+        if (handlers.size == 1 && handlers[0] !is Transfer) {
+            return handlers[0].accept(frame).thenApply { it }
+        }
 
-        for ((index, handler) in handlers.withIndex()) {
+        var previous: CompletableFuture<out Entity> = (handlers[0] as Transfer).accept(frame)
+
+        for (index in 1 until handlers.size - 1) {
+            val current = handlers[index]
+
             // 除去最后一个 Handler 以及非 Transfer
-            if (handler !is Transfer || index == handlers.lastIndex) break
-            previous = previous.thenCompose { entity ->
+            if (current !is Transfer) break
+
+            // 判断 future 是否已完成，减少嵌套
+            previous = if (previous.isDone) {
+                val entity = previous.getNow(null)
                 frame.setVariable("@Entity", entity, false)
                 frame.setVariable("entity", entity, false)
-                handler.process(frame)
+                current.accept(frame)
+            } else {
+                previous.thenCompose { entity ->
+                    frame.setVariable("@Entity", entity, false)
+                    frame.setVariable("entity", entity, false)
+                    current.accept(frame)
+                }
             }
         }
 
-        return previous.thenCompose { entity ->
+        // 判断 future 是否已完成，减少嵌套
+        return if (previous.isDone) {
+            val entity = previous.getNow(null)
             frame.setVariable("@Entity", entity, false)
             frame.setVariable("entity", entity, false)
-            handlers.last().process(frame).thenApply { it }
+            handlers.last().accept(frame).thenApply { it }
+        } else {
+            previous.thenCompose { entity ->
+                frame.setVariable("@Entity", entity, false)
+                frame.setVariable("entity", entity, false)
+                handlers.last().accept(frame).thenApply { it }
+            }
         }
     }
 
@@ -156,7 +179,7 @@ class ActionEntity : QuestAction<Any?>() {
         /**
          * 运行
          * */
-        open fun process(frame: ScriptFrame): CompletableFuture<T> {
+        open fun accept(frame: ScriptFrame): CompletableFuture<T> {
             return parser.action.run(frame)
         }
     }
