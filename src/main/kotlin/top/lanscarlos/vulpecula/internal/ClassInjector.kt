@@ -3,11 +3,8 @@ package top.lanscarlos.vulpecula.internal
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ClassMethod
 import top.lanscarlos.vulpecula.bacikal.BacikalRegistry
-import top.lanscarlos.vulpecula.kether.KetherRegistry
 import java.util.function.Supplier
 
 /**
@@ -45,7 +42,8 @@ abstract class ClassInjector {
 
             // 加载注册类
             if (!ClassInjector::class.java.isAssignableFrom(clazz)) return
-            if (KetherRegistry::class.java.isAssignableFrom(clazz)) return
+            if (ketherRegistry::class.java.isAssignableFrom(clazz)) return
+
             injectors += let {
                 if (supplier?.get() != null) {
                     supplier.get()

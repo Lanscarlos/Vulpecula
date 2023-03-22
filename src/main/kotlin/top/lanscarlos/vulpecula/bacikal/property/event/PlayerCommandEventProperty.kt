@@ -1,24 +1,23 @@
-package top.lanscarlos.vulpecula.kether.property.event
+package top.lanscarlos.vulpecula.bacikal.property.event
 
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import taboolib.common.OpenResult
-import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.event
+ * top.lanscarlos.vulpecula.bacikal.property.event
  *
  * @author Lanscarlos
- * @since 2022-10-22 21:43
+ * @since 2023-03-22 14:25
  */
-
-@VulKetherProperty(
+@BacikalProperty(
     id = "player-command-event",
     bind = PlayerCommandPreprocessEvent::class
 )
-class PlayerCommandEventProperty : VulScriptProperty<PlayerCommandPreprocessEvent>("player-command-event") {
+class PlayerCommandEventProperty : BacikalScriptProperty<PlayerCommandPreprocessEvent>("player-command-event") {
 
     override fun readProperty(instance: PlayerCommandPreprocessEvent, key: String): OpenResult {
         val property: Any = when (key) {

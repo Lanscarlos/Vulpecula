@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.property.event
+package top.lanscarlos.vulpecula.bacikal.property.event
 
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
@@ -7,23 +7,22 @@ import org.bukkit.event.entity.EntityEvent
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
 import taboolib.common.OpenResult
-import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.event
+ * top.lanscarlos.vulpecula.bacikal.property.event
  *
  * @author Lanscarlos
- * @since 2022-10-21 10:59
+ * @since 2023-03-22 14:24
  */
-
-@VulKetherProperty(
+@BacikalProperty(
     id = "event",
     bind = Event::class
 )
-class EventProperty : VulScriptProperty<Event>("event") {
+class EventProperty : BacikalScriptProperty<Event>("event") {
 
     override fun readProperty(instance: Event, key: String): OpenResult {
         val property: Any? = when (key) {

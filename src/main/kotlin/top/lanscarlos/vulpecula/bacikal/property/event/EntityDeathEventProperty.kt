@@ -1,28 +1,26 @@
-package top.lanscarlos.vulpecula.kether.property.event
+package top.lanscarlos.vulpecula.bacikal.property.event
 
 import org.bukkit.entity.Projectile
 import org.bukkit.event.entity.EntityDamageByBlockEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import taboolib.common.OpenResult
-import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
 import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.event
+ * top.lanscarlos.vulpecula.bacikal.property.event
  *
  * @author Lanscarlos
- * @since 2022-10-21 11:45
+ * @since 2023-03-22 14:23
  */
-
-@VulKetherProperty(
+@BacikalProperty(
     id = "entity-death-event",
     bind = EntityDeathEvent::class
 )
-class EntityDeathEventProperty : VulScriptProperty<EntityDeathEvent>("entity-death-event") {
+class EntityDeathEventProperty : BacikalScriptProperty<EntityDeathEvent>("entity-death-event") {
 
     override fun readProperty(instance: EntityDeathEvent, key: String): OpenResult {
         val property: Any? = when (key) {

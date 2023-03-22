@@ -1,22 +1,22 @@
-package top.lanscarlos.vulpecula.kether.property.event
+package top.lanscarlos.vulpecula.bacikal.property.event
 
 import org.bukkit.event.player.PlayerKickEvent
 import taboolib.common.OpenResult
-import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.event
+ * top.lanscarlos.vulpecula.bacikal.property.event
  *
  * @author Lanscarlos
- * @since 2023-01-19 00:33
+ * @since 2023-03-22 14:27
  */
-@VulKetherProperty(
+@BacikalProperty(
     id = "player-kick-event",
     bind = PlayerKickEvent::class
 )
-class PlayerKickEventProperty : VulScriptProperty<PlayerKickEvent>("player-kick-event") {
+class PlayerKickEventProperty : BacikalScriptProperty<PlayerKickEvent>("player-kick-event") {
     override fun readProperty(instance: PlayerKickEvent, key: String): OpenResult {
         val property: Any = when (key) {
             "message", "msg", "leave-message", "leave-msg" -> instance.leaveMessage

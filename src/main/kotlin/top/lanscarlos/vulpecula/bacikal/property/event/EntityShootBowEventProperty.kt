@@ -1,25 +1,24 @@
-package top.lanscarlos.vulpecula.kether.property.event
+package top.lanscarlos.vulpecula.bacikal.property.event
 
 import org.bukkit.entity.Entity
 import org.bukkit.event.entity.EntityShootBowEvent
 import taboolib.common.OpenResult
-import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.event
+ * top.lanscarlos.vulpecula.bacikal.property.event
  *
  * @author Lanscarlos
- * @since 2022-11-08 15:12
+ * @since 2023-03-22 14:24
  */
-
-@VulKetherProperty(
+@BacikalProperty(
     id = "entity-shoot-event",
     bind = EntityShootBowEvent::class
 )
-class EntityShootBowEventProperty : VulScriptProperty<EntityShootBowEvent>("entity-shoot-event") {
+class EntityShootBowEventProperty : BacikalScriptProperty<EntityShootBowEvent>("entity-shoot-event") {
 
     override fun readProperty(instance: EntityShootBowEvent, key: String): OpenResult {
         val property: Any? = when (key) {

@@ -1,22 +1,22 @@
-package top.lanscarlos.vulpecula.kether.property.event
+package top.lanscarlos.vulpecula.bacikal.property.event
 
 import org.bukkit.event.player.PlayerJoinEvent
 import taboolib.common.OpenResult
-import top.lanscarlos.vulpecula.kether.VulKetherProperty
-import top.lanscarlos.vulpecula.kether.VulScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.property.event
+ * top.lanscarlos.vulpecula.bacikal.property.event
  *
  * @author Lanscarlos
- * @since 2023-01-19 00:30
+ * @since 2023-03-22 14:28
  */
-@VulKetherProperty(
+@BacikalProperty(
     id = "player-join-event",
     bind = PlayerJoinEvent::class
 )
-class PlayerJoinEventProperty : VulScriptProperty<PlayerJoinEvent>("player-join-event") {
+class PlayerJoinEventProperty : BacikalScriptProperty<PlayerJoinEvent>("player-join-event") {
     override fun readProperty(instance: PlayerJoinEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "message", "msg", "join-message", "join-msg" -> instance.joinMessage
