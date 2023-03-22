@@ -19,7 +19,7 @@ object ActionLocationDistanceSquared : ActionLocation.Resolver {
         return reader.handle {
             combine(
                 reader.source(),
-                trim("with", "to", then = location())
+                trim("with", "to", then = location(display = "location target"))
             ) { location, target ->
                 location.distanceSquared(target)
             }

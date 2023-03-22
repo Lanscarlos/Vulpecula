@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.utils.nextBlock
  * @author Lanscarlos
  * @since 2022-11-14 19:06
  */
+@Deprecated("")
 object VectorNormalizeHandler : ActionVector.Reader {
     override val name: Array<String> = arrayOf("normalize", "normal")
 

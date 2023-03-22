@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.kether.live.readVector
  * @author Lanscarlos
  * @since 2022-11-14 16:57
  */
+@Deprecated("")
 object VectorBuildHandler : ActionVector.Reader {
 
     override val name: Array<String> = arrayOf("build")

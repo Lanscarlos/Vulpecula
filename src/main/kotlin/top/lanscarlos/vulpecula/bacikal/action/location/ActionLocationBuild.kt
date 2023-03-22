@@ -13,6 +13,10 @@ object ActionLocationBuild : ActionLocation.Resolver {
 
     override val name: Array<String> = arrayOf("build", "create")
 
+    /**
+     * loc build &world &x &y &z
+     * loc build &world &x &y &z and &yaw &pitch
+     * */
     override fun resolve(reader: ActionLocation.Reader): ActionLocation.Handler<out Any?> {
         return reader.transfer {
             combine(

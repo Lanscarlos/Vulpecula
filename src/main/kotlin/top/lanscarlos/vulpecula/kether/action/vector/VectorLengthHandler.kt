@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.utils.nextBlock
  * @author Lanscarlos
  * @since 2022-11-14 19:02
  */
+@Deprecated("")
 object VectorLengthHandler : ActionVector.Reader {
 
     override val name: Array<String> = arrayOf(

@@ -21,7 +21,7 @@ object ActionLocationMultiply : ActionLocation.Resolver {
         val source = reader.source().accept(reader)
 
         return reader.transfer {
-            if (expectToken("with")) {
+            if (expectToken("with", "by")) {
                 /*
                 * 坐标对象
                 * loc mul &loc with &target
@@ -29,7 +29,7 @@ object ActionLocationMultiply : ActionLocation.Resolver {
                 * */
                 combine(
                     source,
-                    location()
+                    location(display = "location target")
                 ) { location, target ->
                     location.x *= target.x
                     location.y *= target.y
@@ -45,17 +45,17 @@ object ActionLocationMultiply : ActionLocation.Resolver {
                 * */
                 combine(
                     source,
-                    double(), // x
-                    double(), // y
-                    double(), // z
-                    argument("yaw", then = float()),
-                    argument("pitch", "p", then = float())
+                    double(1.0), // x
+                    double(1.0), // y
+                    double(1.0), // z
+                    argument("yaw", then = float(), def = 1f),
+                    argument("pitch", "p", then = float(), def = 1f)
                 ) { location, x, y, z, yaw, pitch ->
                     location.x *= x
                     location.x *= y
                     location.x *= z
-                    location.yaw *= yaw ?: 1f
-                    location.pitch *= pitch ?: 1f
+                    location.yaw *= yaw
+                    location.pitch *= pitch
                     location
                 }
             } else {
@@ -65,17 +65,17 @@ object ActionLocationMultiply : ActionLocation.Resolver {
                 * */
                 combine(
                     source,
-                    argument("x", then = double()),
-                    argument("y", then = double()),
-                    argument("z", then = double()),
-                    argument("yaw", then = float()),
-                    argument("pitch", "p", then = float())
+                    argument("x", then = double(), def = 1.0),
+                    argument("y", then = double(), def = 1.0),
+                    argument("z", then = double(), def = 1.0),
+                    argument("yaw", then = float(), def = 1f),
+                    argument("pitch", "p", then = float(), def = 1f)
                 ) { location, x, y, z, yaw, pitch ->
-                    location.x *= x ?: 1.0
-                    location.x *= y ?: 1.0
-                    location.x *= z ?: 1.0
-                    location.yaw *= yaw ?: 1f
-                    location.pitch *= pitch ?: 1f
+                    location.x *= x
+                    location.x *= y
+                    location.x *= z
+                    location.yaw *= yaw
+                    location.pitch *= pitch
                     location
                 }
             }

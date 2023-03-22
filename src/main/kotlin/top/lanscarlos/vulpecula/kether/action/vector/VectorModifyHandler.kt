@@ -16,6 +16,7 @@ import top.lanscarlos.vulpecula.kether.live.readVector
  * @author Lanscarlos
  * @since 2022-11-14 17:46
  */
+@Deprecated("")
 object VectorModifyHandler : ActionVector.Reader {
 
     override val name: Array<String> = arrayOf(

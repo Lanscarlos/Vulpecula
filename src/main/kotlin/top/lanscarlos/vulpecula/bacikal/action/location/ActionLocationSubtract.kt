@@ -21,7 +21,7 @@ object ActionLocationSubtract : ActionLocation.Resolver {
         val source = reader.source().accept(reader)
 
         return reader.transfer {
-            if (expectToken("with")) {
+            if (expectToken("with", "by")) {
                 /*
                 * 坐标对象
                 * loc sub &loc with &target
@@ -29,7 +29,7 @@ object ActionLocationSubtract : ActionLocation.Resolver {
                 * */
                 combine(
                     source,
-                    location()
+                    location(display = "location target")
                 ) { location, target ->
                     location.x -= target.x
                     location.y -= target.y
@@ -45,11 +45,11 @@ object ActionLocationSubtract : ActionLocation.Resolver {
                 * */
                 combine(
                     source,
-                    double(), // x
-                    double(), // y
-                    double(), // z
-                    argument("yaw", then = float()),
-                    argument("pitch", "p", then = float())
+                    double(0.0), // x
+                    double(0.0), // y
+                    double(0.0), // z
+                    argument("yaw", then = float(), def = 0f),
+                    argument("pitch", "p", then = float(), def = 0f)
                 ) { location, x, y, z, yaw, pitch ->
                     location.x -= x
                     location.x -= y
@@ -65,17 +65,17 @@ object ActionLocationSubtract : ActionLocation.Resolver {
                 * */
                 combine(
                     source,
-                    argument("x", then = double()),
-                    argument("y", then = double()),
-                    argument("z", then = double()),
-                    argument("yaw", then = float()),
-                    argument("pitch", "p", then = float())
+                    argument("x", then = double(), def = 0.0),
+                    argument("y", then = double(), def = 0.0),
+                    argument("z", then = double(), def = 0.0),
+                    argument("yaw", then = float(), def = 0f),
+                    argument("pitch", "p", then = float(), def = 0f)
                 ) { location, x, y, z, yaw, pitch ->
-                    location.x -= x ?: 0.0
-                    location.x -= y ?: 0.0
-                    location.x -= z ?: 0.0
-                    location.yaw -= yaw ?: 0f
-                    location.pitch -= pitch ?: 0f
+                    location.x -= x
+                    location.x -= y
+                    location.x -= z
+                    location.yaw -= yaw
+                    location.pitch -= pitch
                     location
                 }
             }

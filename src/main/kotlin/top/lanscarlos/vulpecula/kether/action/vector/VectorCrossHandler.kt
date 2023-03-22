@@ -12,6 +12,7 @@ import top.lanscarlos.vulpecula.utils.nextBlock
  * @author Lanscarlos
  * @since 2022-11-14 17:50
  */
+@Deprecated("")
 object VectorCrossHandler : ActionVector.Reader {
 
     override val name: Array<String> = arrayOf("cross")

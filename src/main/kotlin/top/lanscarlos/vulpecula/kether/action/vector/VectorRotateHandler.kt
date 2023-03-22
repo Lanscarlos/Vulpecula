@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-14 19:07
  */
+@Deprecated("")
 object VectorRotateHandler : ActionVector.Reader {
 
     override val name: Array<String> = arrayOf(

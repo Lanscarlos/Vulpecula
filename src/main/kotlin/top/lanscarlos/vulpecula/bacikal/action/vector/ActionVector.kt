@@ -1,15 +1,17 @@
-package top.lanscarlos.vulpecula.bacikal.action.location
+package top.lanscarlos.vulpecula.bacikal.action.vector
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.util.Location
+import taboolib.common.util.Vector
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
-import top.lanscarlos.vulpecula.bacikal.*
+import top.lanscarlos.vulpecula.bacikal.Bacikal
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
+import top.lanscarlos.vulpecula.bacikal.BacikalReader
+import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.ClassInjector
-import top.lanscarlos.vulpecula.kether.action.location.LocationBuildHandler
 import top.lanscarlos.vulpecula.utils.getVariable
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextPeek
@@ -19,12 +21,12 @@ import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.action.location
+ * top.lanscarlos.vulpecula.bacikal.action.vector
  *
  * @author Lanscarlos
- * @since 2023-03-20 16:38
+ * @since 2023-03-22 14:48
  */
-class ActionLocation : QuestAction<Any?>() {
+class ActionVector : QuestAction<Any?>() {
 
     val handlers = mutableListOf<Handler<*>>()
 
@@ -35,9 +37,9 @@ class ActionLocation : QuestAction<Any?>() {
             val isRoot = handlers.isEmpty()
             handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
                 ?: let {
-                    // 兼容 TabooLib 原生 location 语句的构建坐标功能
+                    // 默认使用 vector 构建坐标功能
                     reader.reset()
-                    ActionLocationBuild.resolve(Reader(next, reader, isRoot))
+                    ActionVectorBuild.resolve(Reader(next, reader, isRoot))
                 }
 
             // 判断管道是否已经关闭
@@ -56,7 +58,7 @@ class ActionLocation : QuestAction<Any?>() {
             return handlers[0].accept(frame).thenApply { it }
         }
 
-        var previous: CompletableFuture<out Location> = (handlers[0] as Transfer).accept(frame)
+        var previous: CompletableFuture<out Vector> = (handlers[0] as Transfer).accept(frame)
 
         for (index in 1 until handlers.size - 1) {
             val current = handlers[index]
@@ -66,14 +68,14 @@ class ActionLocation : QuestAction<Any?>() {
 
             // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
-                val location = previous.getNow(null)
-                frame.setVariable("@Location", location, false)
-                frame.setVariable("location", location, false)
+                val vector = previous.getNow(null)
+                frame.setVariable("@Vector", vector, false)
+                frame.setVariable("vector", vector, false)
                 current.accept(frame)
             } else {
-                previous.thenCompose { location ->
-                    frame.setVariable("@Location", location, false)
-                    frame.setVariable("location", location, false)
+                previous.thenCompose { vector ->
+                    frame.setVariable("@Vector", vector, false)
+                    frame.setVariable("vector", vector, false)
                     current.accept(frame)
                 }
             }
@@ -81,14 +83,14 @@ class ActionLocation : QuestAction<Any?>() {
 
         // 判断 future 是否已完成，减少嵌套
         return if (previous.isDone) {
-            val location = previous.getNow(null)
-            frame.setVariable("@Location", location, false)
-            frame.setVariable("location", location, false)
+            val vector = previous.getNow(null)
+            frame.setVariable("@Vector", vector, false)
+            frame.setVariable("vector", vector, false)
             handlers.last().accept(frame).thenApply { it }
         } else {
-            previous.thenCompose { location ->
-                frame.setVariable("@Location", location, false)
-                frame.setVariable("location", location, false)
+            previous.thenCompose { vector ->
+                frame.setVariable("@Vector", vector, false)
+                frame.setVariable("vector", vector, false)
                 handlers.last().accept(frame).thenApply { it }
             }
         }
@@ -103,7 +105,7 @@ class ActionLocation : QuestAction<Any?>() {
         private val registry = mutableMapOf<String, Resolver>()
 
         /**
-         * 向 Location 语句注册子语句
+         * 向 Vector 语句注册子语句
          * @param resolver 子语句解析器
          * */
         fun registerResolver(resolver: Resolver) {
@@ -127,12 +129,11 @@ class ActionLocation : QuestAction<Any?>() {
         }
 
         @BacikalParser(
-            id = "location",
-            name = ["location*", "loc*"],
-            override = ["location", "loc"]
+            id = "vector",
+            name = ["vector", "vec"]
         )
         fun parser() = scriptParser {
-            ActionLocation().resolve(it)
+            ActionVector().resolve(it)
         }
     }
 
@@ -155,19 +156,19 @@ class ActionLocation : QuestAction<Any?>() {
             return Handler(func(this))
         }
 
-        fun transfer(func: Reader.() -> Bacikal.Parser<Location>): Handler<Location> {
+        fun transfer(func: Reader.() -> Bacikal.Parser<Vector>): Handler<Vector> {
             return Transfer(func(this))
         }
 
-        fun source(): LiveData<Location> {
+        fun source(): LiveData<Vector> {
             return if (isRoot) {
-                location(display = "location source")
+                vector(display = "vector source")
             } else {
                 LiveData {
                     Bacikal.Action { frame ->
                         CompletableFuture.completedFuture(
-                            frame.getVariable<Location>("@Location", "location")
-                                ?: error("No location selected. [ERROR: location@$token]")
+                            frame.getVariable<Vector>("@Vector", "vector")
+                                ?: error("No vector selected. [ERROR: vector@$token]")
                         )
                     }
                 }
@@ -190,7 +191,7 @@ class ActionLocation : QuestAction<Any?>() {
     }
 
     /**
-     * 用于传递 Location
+     * 用于传递 Vector
      * */
-    open class Transfer(parser: Bacikal.Parser<Location>) : Handler<Location>(parser)
+    open class Transfer(parser: Bacikal.Parser<Vector>) : Handler<Vector>(parser)
 }

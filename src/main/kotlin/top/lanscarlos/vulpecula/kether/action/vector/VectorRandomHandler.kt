@@ -10,6 +10,7 @@ import taboolib.library.kether.QuestReader
  * @author Lanscarlos
  * @since 2022-11-14 18:57
  */
+@Deprecated("")
 object VectorRandomHandler : ActionVector.Reader {
 
     override val name: Array<String> = arrayOf("random")
