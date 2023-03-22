@@ -34,9 +34,9 @@ object Vulpecula : Plugin() {
         info("Successfully running Vulpecula!")
     }
 
-    override fun onDisable() {
-        BacikalWorkspace.shutdown()
-    }
+//    override fun onDisable() {
+//        BacikalWorkspace.shutdown()
+//    }
 
     override fun onActive() {
         metrics = Metrics(17183, plugin.description.version, Platform.BUKKIT)
