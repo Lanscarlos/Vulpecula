@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal.action.location
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.platformLocation
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
@@ -84,13 +85,21 @@ class ActionLocation : QuestAction<Any?>() {
             val location = previous.getNow(null)
             frame.setVariable("@Location", location, false)
             frame.setVariable("location", location, false)
-            handlers.last().accept(frame).thenApply { it }
+            handlers.last().accept(frame).thenApply { adaptLocation(it) }
         } else {
             previous.thenCompose { location ->
                 frame.setVariable("@Location", location, false)
                 frame.setVariable("location", location, false)
-                handlers.last().accept(frame).thenApply { it }
+                handlers.last().accept(frame).thenApply { adaptLocation(it) }
             }
+        }
+    }
+
+    fun adaptLocation(any: Any?): Any? {
+        return if (any is Location) {
+            platformLocation(any)
+        } else {
+            any
         }
     }
 

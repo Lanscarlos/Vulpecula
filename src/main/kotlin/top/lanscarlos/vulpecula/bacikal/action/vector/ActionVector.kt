@@ -2,6 +2,8 @@ package top.lanscarlos.vulpecula.bacikal.action.vector
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.platformLocation
+import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
@@ -86,13 +88,21 @@ class ActionVector : QuestAction<Any?>() {
             val vector = previous.getNow(null)
             frame.setVariable("@Vector", vector, false)
             frame.setVariable("vector", vector, false)
-            handlers.last().accept(frame).thenApply { it }
+            handlers.last().accept(frame).thenApply { adaptVector(it) }
         } else {
             previous.thenCompose { vector ->
                 frame.setVariable("@Vector", vector, false)
                 frame.setVariable("vector", vector, false)
-                handlers.last().accept(frame).thenApply { it }
+                handlers.last().accept(frame).thenApply { adaptVector(it) }
             }
+        }
+    }
+
+    fun adaptVector(any: Any?): Any? {
+        return if (any is Vector) {
+            org.bukkit.util.Vector(any.x, any.y, any.z)
+        } else {
+            any
         }
     }
 
