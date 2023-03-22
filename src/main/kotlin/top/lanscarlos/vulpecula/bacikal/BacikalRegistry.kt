@@ -27,8 +27,6 @@ import java.util.function.Supplier
 object BacikalRegistry : ClassInjector() {
 
     private val parserRegistry = HashMap<String, RegistryMetadata>()
-    private val propertyRegistry = HashMap<Class<*>, BacikalScriptProperty<*>>()
-    private var propertyCache: Collection<Pair<Class<*>, BacikalScriptProperty<*>>> = emptyList()
 
     // 配置文件，仅加载一次
     private val actionConfig by lazy {
@@ -64,6 +62,12 @@ object BacikalRegistry : ClassInjector() {
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
         if (!clazz.isAnnotationPresent(BacikalProperty::class.java) || !BacikalScriptProperty::class.java.isAssignableFrom(clazz)) return
 
+        // 加载注解
+        val annotation = clazz.getAnnotation(BacikalProperty::class.java)
+
+        // 是否禁用属性
+        if (propertyConfig.getBoolean("${annotation.id}.disable", false)) return
+
         // 加载属性对象
         val property = let {
             if (supplier?.get() != null) {
@@ -75,14 +79,8 @@ object BacikalRegistry : ClassInjector() {
             }
         } as? BacikalScriptProperty<*> ?: return
 
-        // 加载注解
-        val annotation = clazz.getAnnotation(BacikalProperty::class.java)
-
-        // 是否禁用属性
-        if (propertyConfig.getBoolean("${annotation.id}.disable", false)) return
-
-        // 是否分享泛型属性
-        if (annotation.generic && annotation.shared) {
+        if (annotation.shared) {
+            // 是否分享属性
             if (propertyConfig.getBoolean("${annotation.id}.shared", true)) {
                 var name = annotation.bind.java.name
                 name = if (name.startsWith(taboolibPath)) "@${name.substring(taboolibPath.length)}" else name
@@ -92,12 +90,8 @@ object BacikalRegistry : ClassInjector() {
             }
         }
 
-        if (annotation.generic) {
-            // 仅分享泛型属性
-            Kether.registeredScriptProperty.computeIfAbsent(annotation.bind.java) { HashMap() }[property.id] = property
-        } else {
-            registerScriptProperty(annotation.bind.java, property)
-        }
+        // 向 Kether 注入属性
+        Kether.registeredScriptProperty.computeIfAbsent(annotation.bind.java) { HashMap() }[property.id] = property
     }
 
     // 加载 Vulpecula 语句
@@ -138,29 +132,6 @@ object BacikalRegistry : ClassInjector() {
                 Kether.scriptRegistry.registerAction(namespace, it, parser)
             }
         }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Any> getScriptProperties(instance: T): Collection<BacikalScriptProperty<in T>> {
-        return propertyCache.filter {
-            it.first.isInstance(instance)
-        }.sortedWith { c1, c2 ->
-            if (c1.first.isAssignableFrom(c2.first)) 1 else -1
-        }.mapNotNull {
-            it.second as? BacikalScriptProperty<in T>
-        }
-    }
-
-    fun registerScriptProperty(key: Class<*>, property: BacikalScriptProperty<*>) {
-        propertyRegistry[key] = property
-        // 提前解析为列表方便后续过滤
-        propertyCache = propertyRegistry.map { it.key to it.value }
-    }
-
-    fun unregisterScriptProperty(key: Class<*>) {
-        propertyRegistry.remove(key)
-        // 提前解析为列表方便后续过滤
-        propertyCache = propertyRegistry.map { it.key to it.value }
     }
 
     /**

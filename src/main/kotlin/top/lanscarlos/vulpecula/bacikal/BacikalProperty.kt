@@ -12,6 +12,5 @@ import kotlin.reflect.KClass
 annotation class BacikalProperty(
     val id: String,
     val bind: KClass<*>,
-    val shared: Boolean = true,
-    val generic: Boolean = false
+    val shared: Boolean = true
 )

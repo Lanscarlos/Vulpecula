@@ -42,14 +42,14 @@ abstract class BacikalScriptProperty<T : Any>(
     /**
      * 连续读取
      * */
-    protected fun readPropertyDeep(instance: T, path: List<String>): OpenResult {
+    protected open fun readPropertyDeep(instance: T, path: List<String>): OpenResult {
         return when {
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> readProperty(instance, path.first())
             path.size == 2 -> {
                 val cache = readProperty(instance, path.first())
                 if (cache.isFailed) return OpenResult.failed()
-                readGenericProperty(cache.get() ?: return OpenResult.successful(), path.last())
+                readGenericProperty(cache.get() ?: return OpenResult.successful(null), path.last())
             }
             else -> {
                 var cache = readProperty(instance, path.first())
@@ -57,11 +57,11 @@ abstract class BacikalScriptProperty<T : Any>(
 
                 for (i in 1 until path.lastIndex) {
                     // 遍历除最后一个外所有节点
-                    cache = readGenericProperty(cache.get() ?: return OpenResult.successful(), path[i])
+                    cache = readGenericProperty(cache.get() ?: return OpenResult.successful(null), path[i])
                 }
 
                 if (cache.isFailed) return OpenResult.failed()
-                readGenericProperty(cache.get() ?: return OpenResult.successful(), path.last())
+                readGenericProperty(cache.get() ?: return OpenResult.successful(null), path.last())
             }
         }
     }
@@ -69,7 +69,7 @@ abstract class BacikalScriptProperty<T : Any>(
     /**
      * 连续读取写入
      * */
-    protected fun writePropertyDeep(instance: T, path: List<String>, value: Any?): OpenResult {
+    protected open fun writePropertyDeep(instance: T, path: List<String>, value: Any?): OpenResult {
         return when {
             path.isEmpty() -> OpenResult.failed()
             path.size == 1 -> writeProperty(instance, path.first(), value)
@@ -96,20 +96,20 @@ abstract class BacikalScriptProperty<T : Any>(
     /**
      * 读取泛型属性
      * */
-    protected fun <R: Any> readGenericProperty(instance: R, key: String): OpenResult {
-        BacikalRegistry.getScriptProperties(instance).forEach {
-            // 这里不再使用泛型读取，防止套娃
-            val result = it.readProperty(instance, key)
-            if (result.isSuccessful) return result
-        }
+    protected open fun <R: Any> readGenericProperty(instance: R, key: String): OpenResult {
 
-        // 使用原版读取
+        // 查询所有相关属性
         ActionProperty.getScriptProperty(instance).filterIsInstance<ScriptProperty<Any?>>().forEach {
+
             // 排除自己，防止无限调用
             if (this.id == it.id) return@forEach
 
-            // 这里不再使用泛型写入，防止套娃
-            val result = it.read(instance, key)
+            val result = if (it is BacikalScriptProperty) {
+                // 这里不再使用泛型写入，防止套娃
+                it.readProperty(instance, key)
+            } else {
+                it.read(instance, key)
+            }
             if (result.isSuccessful) return result
         }
         return OpenResult.failed()
@@ -118,20 +118,20 @@ abstract class BacikalScriptProperty<T : Any>(
     /**
      * 写入泛型属性
      * */
-    protected fun <R: Any> writeGenericProperty(instance: R, key: String, value: Any?): OpenResult {
-        BacikalRegistry.getScriptProperties(instance).forEach {
-            // 这里不再使用泛型写入，防止套娃
-            val result = it.writeProperty(instance, key, value)
-            if (result.isSuccessful) return result
-        }
+    protected open fun <R: Any> writeGenericProperty(instance: R, key: String, value: Any?): OpenResult {
 
-        // 使用原版写入
+        // 查询所有相关属性
         ActionProperty.getScriptProperty(instance).filterIsInstance<ScriptProperty<Any?>>().forEach {
+
             // 排除自己，防止无限调用
             if (this.id == it.id) return@forEach
 
-            // 这里不再使用泛型写入，防止套娃
-            val result = it.write(instance, key, value)
+            val result = if (it is BacikalScriptProperty) {
+                // 这里不再使用泛型写入，防止套娃
+                it.writeProperty(instance, key, value)
+            } else {
+                it.write(instance, key, value)
+            }
             if (result.isSuccessful) return result
         }
         return OpenResult.failed()
