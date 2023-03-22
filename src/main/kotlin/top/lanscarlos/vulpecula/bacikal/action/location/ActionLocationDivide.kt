@@ -54,8 +54,8 @@ object ActionLocationDivide : ActionLocation.Resolver {
                     location.x /= x
                     location.x /= y
                     location.x /= z
-                    location.yaw /= yaw ?: 1f
-                    location.pitch /= pitch ?: 1f
+                    location.yaw /= yaw
+                    location.pitch /= pitch
                     location
                 }
             } else {

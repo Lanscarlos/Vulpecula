@@ -24,6 +24,7 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2022-11-11 13:33
  */
+@Deprecated("迁移完成")
 class ActionVector : ScriptAction<Any?>() {
 
     private val handlers = mutableListOf<Handler>()
