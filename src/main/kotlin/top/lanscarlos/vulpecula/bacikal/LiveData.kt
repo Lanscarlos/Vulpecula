@@ -129,17 +129,19 @@ open class LiveData<T>(
             }
         }
 
-        fun <T> of(func: BacikalReader.() -> T): LiveData<T> {
+        fun <T> of(func: BacikalReader.(ScriptFrame) -> T): LiveData<T> {
             return LiveData {
-                Bacikal.Action { CompletableFuture.completedFuture(func(this)) }
+                Bacikal.Action { frame ->
+                    CompletableFuture.completedFuture(func(this, frame))
+                }
             }
         }
 
-        fun <T> frame(func: ((Any?) -> T)): LiveData<T> {
+        fun <T> frame(func: ScriptFrame.(Any?) -> T): LiveData<T> {
             return LiveData {
                 val action = this.readAction()
                 Bacikal.Action { frame ->
-                    frame.newFrame(action).run<Any?>().thenApply { func(it) }
+                    frame.newFrame(action).run<Any?>().thenApply { func(frame, it) }
                 }
             }
         }

@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.kether.action.target
 
 import taboolib.common.LifeCycle
-import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptAction
@@ -22,6 +21,7 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2022-11-16 21:37
  */
+@Deprecated("")
 class ActionTarget : ScriptAction<Any>() {
 
     private val handlers = mutableListOf<Handler>()

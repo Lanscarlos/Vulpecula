@@ -21,6 +21,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-17 21:26
  */
+@Deprecated("")
 object InWorldSelector : ActionTarget.Reader {
 
     enum class Type(vararg namespace: String) {

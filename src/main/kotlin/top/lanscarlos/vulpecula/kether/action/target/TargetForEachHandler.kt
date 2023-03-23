@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Lanscarlos
  * @since 2022-11-17 00:30
  */
+@Deprecated("")
 object TargetForEachHandler : ActionTarget.Reader {
 
     override val name: Array<String> = arrayOf("foreach")

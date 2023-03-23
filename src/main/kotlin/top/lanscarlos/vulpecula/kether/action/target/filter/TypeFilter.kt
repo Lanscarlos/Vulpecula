@@ -15,6 +15,7 @@ import top.lanscarlos.vulpecula.utils.thenTake
  * @author Lanscarlos
  * @since 2022-11-18 10:58
  */
+@Deprecated("")
 object TypeFilter : ActionTarget.Reader {
 
     override val name: Array<String> = arrayOf("type")

@@ -55,6 +55,56 @@ data class Applicative7<T1, T2, T3, T4, T5, T6, T7>(
     val t7: T7
 )
 
+data class Applicative8<T1, T2, T3, T4, T5, T6, T7, T8>(
+    val t1: T1,
+    val t2: T2,
+    val t3: T3,
+    val t4: T4,
+    val t5: T5,
+    val t6: T6,
+    val t7: T7,
+    val t8: T8
+)
+
+data class Applicative9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+    val t1: T1,
+    val t2: T2,
+    val t3: T3,
+    val t4: T4,
+    val t5: T5,
+    val t6: T6,
+    val t7: T7,
+    val t8: T8,
+    val t9: T9
+)
+
+data class Applicative10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+    val t1: T1,
+    val t2: T2,
+    val t3: T3,
+    val t4: T4,
+    val t5: T5,
+    val t6: T6,
+    val t7: T7,
+    val t8: T8,
+    val t9: T9,
+    val t10: T10
+)
+
+data class Applicative11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+    val t1: T1,
+    val t2: T2,
+    val t3: T3,
+    val t4: T4,
+    val t5: T5,
+    val t6: T6,
+    val t7: T7,
+    val t8: T8,
+    val t9: T9,
+    val t10: T10,
+    val t11: T11
+)
+
 fun <P1, P2> applicative(
     p1: CompletableFuture<P1>,
     p2: CompletableFuture<P2>
@@ -142,7 +192,7 @@ fun <P1, P2, P3, P4, P5> applicative(
     p2: CompletableFuture<P2>,
     p3: CompletableFuture<P3>,
     p4: CompletableFuture<P4>,
-    p5: CompletableFuture<P5>,
+    p5: CompletableFuture<P5>
 ): CompletableFuture<Applicative5<P1, P2, P3, P4, P5>> {
     val ap = applicative(
         applicative(p1, p2, p3),
@@ -178,7 +228,7 @@ fun <P1, P2, P3, P4, P5, P6> applicative(
     p3: CompletableFuture<P3>,
     p4: CompletableFuture<P4>,
     p5: CompletableFuture<P5>,
-    p6: CompletableFuture<P6>,
+    p6: CompletableFuture<P6>
 ): CompletableFuture<Applicative6<P1, P2, P3, P4, P5, P6>> {
     val ap = applicative(
         applicative(p1, p2, p3),
@@ -217,7 +267,7 @@ fun <P1, P2, P3, P4, P5, P6, P7> applicative(
     p4: CompletableFuture<P4>,
     p5: CompletableFuture<P5>,
     p6: CompletableFuture<P6>,
-    p7: CompletableFuture<P7>,
+    p7: CompletableFuture<P7>
 ): CompletableFuture<Applicative7<P1, P2, P3, P4, P5, P6, P7>> {
     val ap = applicative(
         applicative(p1, p2, p3, p4),
@@ -246,6 +296,200 @@ fun <P1, P2, P3, P4, P5, P6, P7> applicative(
                 app.t2.t1,
                 app.t2.t2,
                 app.t2.t3
+            )
+        }
+    }
+}
+
+fun <P1, P2, P3, P4, P5, P6, P7, P8> applicative(
+    p1: CompletableFuture<P1>,
+    p2: CompletableFuture<P2>,
+    p3: CompletableFuture<P3>,
+    p4: CompletableFuture<P4>,
+    p5: CompletableFuture<P5>,
+    p6: CompletableFuture<P6>,
+    p7: CompletableFuture<P7>,
+    p8: CompletableFuture<P8>
+): CompletableFuture<Applicative8<P1, P2, P3, P4, P5, P6, P7, P8>> {
+    val ap = applicative(
+        applicative(p1, p2, p3, p4),
+        applicative(p5, p6, p7, p8)
+    )
+    return if (ap.isDone) {
+        val app = ap.getNow(null)
+        CompletableFuture.completedFuture(
+            Applicative8(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4
+            )
+        )
+    } else {
+        ap.thenApply { app ->
+            Applicative8(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4
+            )
+        }
+    }
+}
+
+fun <P1, P2, P3, P4, P5, P6, P7, P8, P9> applicative(
+    p1: CompletableFuture<P1>,
+    p2: CompletableFuture<P2>,
+    p3: CompletableFuture<P3>,
+    p4: CompletableFuture<P4>,
+    p5: CompletableFuture<P5>,
+    p6: CompletableFuture<P6>,
+    p7: CompletableFuture<P7>,
+    p8: CompletableFuture<P8>,
+    p9: CompletableFuture<P9>
+): CompletableFuture<Applicative9<P1, P2, P3, P4, P5, P6, P7, P8, P9>> {
+    val ap = applicative(
+        applicative(p1, p2, p3, p4, p5),
+        applicative(p6, p7, p8, p9)
+    )
+    return if (ap.isDone) {
+        val app = ap.getNow(null)
+        CompletableFuture.completedFuture(
+            Applicative9(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t1.t5,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4
+            )
+        )
+    } else {
+        ap.thenApply { app ->
+            Applicative9(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t1.t5,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4
+            )
+        }
+    }
+}
+
+fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> applicative(
+    p1: CompletableFuture<P1>,
+    p2: CompletableFuture<P2>,
+    p3: CompletableFuture<P3>,
+    p4: CompletableFuture<P4>,
+    p5: CompletableFuture<P5>,
+    p6: CompletableFuture<P6>,
+    p7: CompletableFuture<P7>,
+    p8: CompletableFuture<P8>,
+    p9: CompletableFuture<P9>,
+    p10: CompletableFuture<P10>
+): CompletableFuture<Applicative10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>> {
+    val ap = applicative(
+        applicative(p1, p2, p3, p4, p5),
+        applicative(p6, p7, p8, p9, p10)
+    )
+    return if (ap.isDone) {
+        val app = ap.getNow(null)
+        CompletableFuture.completedFuture(
+            Applicative10(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t1.t5,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4,
+                app.t2.t5
+            )
+        )
+    } else {
+        ap.thenApply { app ->
+            Applicative10(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t1.t5,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4,
+                app.t2.t5
+            )
+        }
+    }
+}
+
+fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11> applicative(
+    p1: CompletableFuture<P1>,
+    p2: CompletableFuture<P2>,
+    p3: CompletableFuture<P3>,
+    p4: CompletableFuture<P4>,
+    p5: CompletableFuture<P5>,
+    p6: CompletableFuture<P6>,
+    p7: CompletableFuture<P7>,
+    p8: CompletableFuture<P8>,
+    p9: CompletableFuture<P9>,
+    p10: CompletableFuture<P10>,
+    p11: CompletableFuture<P11>,
+): CompletableFuture<Applicative11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>> {
+    val ap = applicative(
+        applicative(p1, p2, p3, p4, p5, p6),
+        applicative(p7, p8, p9, p10, p11)
+    )
+    return if (ap.isDone) {
+        val app = ap.getNow(null)
+        CompletableFuture.completedFuture(
+            Applicative11(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t1.t5,
+                app.t1.t6,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4,
+                app.t2.t5
+            )
+        )
+    } else {
+        ap.thenApply { app ->
+            Applicative11(
+                app.t1.t1,
+                app.t1.t2,
+                app.t1.t3,
+                app.t1.t4,
+                app.t1.t5,
+                app.t1.t6,
+                app.t2.t1,
+                app.t2.t2,
+                app.t2.t3,
+                app.t2.t4,
+                app.t2.t5
             )
         }
     }

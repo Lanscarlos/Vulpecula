@@ -17,6 +17,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-17 20:23
  */
+@Deprecated("")
 object NearestSelector : ActionTarget.Reader {
 
     enum class Type(vararg namespace: String) {

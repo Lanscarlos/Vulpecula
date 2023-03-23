@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.utils.playerOrNull
  * @author Lanscarlos
  * @since 2022-11-17 22:27
  */
+@Deprecated("")
 object PlayerOnServerSelector : ActionTarget.Reader {
 
     override val name: Array<String> = arrayOf("player-on-server", "players-on-server", "PlayerOnServer", "PlayersOnServer", "Server")

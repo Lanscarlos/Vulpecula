@@ -17,6 +17,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-17 20:58
  */
+@Deprecated("")
 object InRingSelector : ActionTarget.Reader {
 
     enum class Type(vararg namespace: String) {

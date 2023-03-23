@@ -12,6 +12,7 @@ import top.lanscarlos.vulpecula.kether.live.readString
  * @author Lanscarlos
  * @since 2022-11-17 17:21
  */
+@Deprecated("")
 object PlayerSelector : ActionTarget.Reader {
 
     override val name: Array<String> = arrayOf("player")

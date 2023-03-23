@@ -5,6 +5,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
+import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.bacikal.Bacikal
@@ -27,7 +28,6 @@ class ActionEntity : QuestAction<Any?>() {
 
     val handlers = mutableListOf<Handler<*>>()
 
-    @Suppress("UNCHECKED_CAST")
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
             val next = reader.nextToken()
@@ -52,7 +52,7 @@ class ActionEntity : QuestAction<Any?>() {
             return handlers[0].accept(frame).thenApply { it }
         }
 
-        var previous: CompletableFuture<out Entity> = (handlers[0] as Transfer).accept(frame)
+        var previous: CompletableFuture<Entity> = (handlers[0] as Transfer).accept(frame)
 
         for (index in 1 until handlers.size - 1) {
             val current = handlers[index]
@@ -63,13 +63,11 @@ class ActionEntity : QuestAction<Any?>() {
             // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
                 val entity = previous.getNow(null)
-                frame.setVariable("@Entity", entity, false)
-                frame.setVariable("entity", entity, false)
+                frame.setVariable("@Transfer", entity, false)
                 current.accept(frame)
             } else {
                 previous.thenCompose { entity ->
-                    frame.setVariable("@Entity", entity, false)
-                    frame.setVariable("entity", entity, false)
+                    frame.setVariable("@Transfer", entity, false)
                     current.accept(frame)
                 }
             }
@@ -78,13 +76,11 @@ class ActionEntity : QuestAction<Any?>() {
         // 判断 future 是否已完成，减少嵌套
         return if (previous.isDone) {
             val entity = previous.getNow(null)
-            frame.setVariable("@Entity", entity, false)
-            frame.setVariable("entity", entity, false)
+            frame.setVariable("@Transfer", entity, false)
             handlers.last().accept(frame).thenApply { it }
         } else {
             previous.thenCompose { entity ->
-                frame.setVariable("@Entity", entity, false)
-                frame.setVariable("entity", entity, false)
+                frame.setVariable("@Transfer", entity, false)
                 handlers.last().accept(frame).thenApply { it }
             }
         }
@@ -126,8 +122,8 @@ class ActionEntity : QuestAction<Any?>() {
             id = "entity",
             name = ["entity"]
         )
-        fun parser() = scriptParser {
-            ActionEntity().resolve(it)
+        fun parser() = ScriptActionParser<Any?> {
+            ActionEntity().resolve(this)
         }
     }
 
@@ -161,8 +157,8 @@ class ActionEntity : QuestAction<Any?>() {
                 LiveData {
                     Bacikal.Action { frame ->
                         CompletableFuture.completedFuture(
-                            frame.getVariable<Entity>("@Entity", "entity")
-                                ?: error("No entity selected. [ERROR: entity@$token]")
+                            frame.getVariable<Entity>("@Transfer")
+                                ?: error("No entity source selected. [ERROR: entity@$token]")
                         )
                     }
                 }

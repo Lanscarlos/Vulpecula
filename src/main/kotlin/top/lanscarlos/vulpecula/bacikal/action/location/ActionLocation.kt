@@ -1,11 +1,13 @@
 package top.lanscarlos.vulpecula.bacikal.action.location
 
+import org.bukkit.entity.Entity
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.platformLocation
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
+import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.bacikal.*
@@ -54,10 +56,10 @@ class ActionLocation : QuestAction<Any?>() {
 
     override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
         if (handlers.size == 1 && handlers[0] !is Transfer) {
-            return handlers[0].accept(frame).thenApply { it }
+            return handlers[0].accept(frame).thenApply { adaptLocation(it) }
         }
 
-        var previous: CompletableFuture<out Location> = (handlers[0] as Transfer).accept(frame)
+        var previous: CompletableFuture<Location> = (handlers[0] as Transfer).accept(frame)
 
         for (index in 1 until handlers.size - 1) {
             val current = handlers[index]
@@ -68,13 +70,11 @@ class ActionLocation : QuestAction<Any?>() {
             // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
                 val location = previous.getNow(null)
-                frame.setVariable("@Location", location, false)
-                frame.setVariable("location", location, false)
+                frame.setVariable("@Transfer", location, false)
                 current.accept(frame)
             } else {
                 previous.thenCompose { location ->
-                    frame.setVariable("@Location", location, false)
-                    frame.setVariable("location", location, false)
+                    frame.setVariable("@Transfer", location, false)
                     current.accept(frame)
                 }
             }
@@ -83,13 +83,11 @@ class ActionLocation : QuestAction<Any?>() {
         // 判断 future 是否已完成，减少嵌套
         return if (previous.isDone) {
             val location = previous.getNow(null)
-            frame.setVariable("@Location", location, false)
-            frame.setVariable("location", location, false)
+            frame.setVariable("@Transfer", location, false)
             handlers.last().accept(frame).thenApply { adaptLocation(it) }
         } else {
             previous.thenCompose { location ->
-                frame.setVariable("@Location", location, false)
-                frame.setVariable("location", location, false)
+                frame.setVariable("@Transfer", location, false)
                 handlers.last().accept(frame).thenApply { adaptLocation(it) }
             }
         }
@@ -140,8 +138,8 @@ class ActionLocation : QuestAction<Any?>() {
             name = ["location*", "loc*"],
             override = ["location", "loc"]
         )
-        fun parser() = scriptParser {
-            ActionLocation().resolve(it)
+        fun parser() = ScriptActionParser<Any?> {
+            ActionLocation().resolve(this)
         }
     }
 
@@ -175,8 +173,8 @@ class ActionLocation : QuestAction<Any?>() {
                 LiveData {
                     Bacikal.Action { frame ->
                         CompletableFuture.completedFuture(
-                            frame.getVariable<Location>("@Location", "location")
-                                ?: error("No location selected. [ERROR: location@$token]")
+                            frame.getVariable<Location>("@Transfer")
+                                ?: error("No location source selected. [ERROR: location@$token]")
                         )
                     }
                 }

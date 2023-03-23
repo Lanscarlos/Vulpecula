@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.kether.action.target.selector
 
-import org.bukkit.entity.Player
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.script
 import taboolib.platform.type.BukkitPlayer
@@ -13,6 +12,7 @@ import top.lanscarlos.vulpecula.kether.action.target.ActionTarget
  * @author Lanscarlos
  * @since 2022-11-17 00:01
  */
+@Deprecated("")
 object SelfSelector : ActionTarget.Reader {
 
     override val name: Array<String> = arrayOf("self")

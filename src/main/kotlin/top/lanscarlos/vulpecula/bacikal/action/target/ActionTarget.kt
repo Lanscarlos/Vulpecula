@@ -1,15 +1,11 @@
-package top.lanscarlos.vulpecula.bacikal.action.vector
+package top.lanscarlos.vulpecula.bacikal.action.target
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.platformLocation
-import taboolib.common.util.Location
-import taboolib.common.util.Vector
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.bacikal.Bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.BacikalReader
@@ -24,28 +20,42 @@ import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.action.vector
+ * top.lanscarlos.vulpecula.bacikal.action.target
  *
  * @author Lanscarlos
- * @since 2023-03-22 14:48
+ * @since 2023-03-22 20:02
  */
-class ActionVector : QuestAction<Any?>() {
+class ActionTarget : QuestAction<Any?>() {
 
     val handlers = mutableListOf<Handler<*>>()
 
+    @Suppress("UNCHECKED_CAST")
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
-            reader.mark()
-            val next = reader.nextToken()
+            val next = reader.nextToken().lowercase()
             val isRoot = handlers.isEmpty()
-            handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
-                ?: let {
-                    // 默认使用 vector 构建坐标功能
-                    reader.reset()
-                    ActionVectorBuild.resolve(Reader(next, reader, isRoot))
-                }
 
-            // 判断管道是否已经关闭
+            // 获取解析器
+            val resolver = if (next[0] == '@') {
+                selectors[next.substring(1)]
+            } else {
+                reader.mark()
+                val input = reader.nextToken().lowercase()
+                when (next) {
+                    "selector", "select", "sel" -> selectors[input]
+                    "filter" -> filters[input]
+                    "foreach" -> ActionTargetForeach
+                    else -> {
+                        reader.reset()
+                        ActionTargetForeach
+                    }
+                }
+            }
+
+            handlers += resolver?.resolve(Reader(next, reader, isRoot))
+                ?: error("Unknown sub action \"$next\" at target action.")
+
+            // 判断管道是否已关闭
             if (handlers.lastOrNull() !is Transfer) {
                 if (reader.hasNextToken(">>")) {
                     error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$next\" has closed the pipeline.")
@@ -53,15 +63,16 @@ class ActionVector : QuestAction<Any?>() {
                 break
             }
         } while (reader.hasNextToken(">>"))
+
         return this
     }
 
     override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
         if (handlers.size == 1 && handlers[0] !is Transfer) {
-            return handlers[0].accept(frame).thenApply { adaptVector(it) }
+            return handlers[0].accept(frame).thenApply { adaptTarget(it) }
         }
 
-        var previous: CompletableFuture<Vector> = (handlers[0] as Transfer).accept(frame)
+        var previous: CompletableFuture<MutableCollection<Any>> = (handlers[0] as Transfer).accept(frame)
 
         for (index in 1 until handlers.size - 1) {
             val current = handlers[index]
@@ -71,12 +82,12 @@ class ActionVector : QuestAction<Any?>() {
 
             // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
-                val vector = previous.getNow(null)
-                frame.setVariable("@Transfer", vector, false)
+                val target = previous.getNow(null)
+                frame.setVariable("@Transfer", target, false)
                 current.accept(frame)
             } else {
-                previous.thenCompose { vector ->
-                    frame.setVariable("@Transfer", vector, false)
+                previous.thenCompose { target ->
+                    frame.setVariable("@Transfer", target, false)
                     current.accept(frame)
                 }
             }
@@ -84,20 +95,20 @@ class ActionVector : QuestAction<Any?>() {
 
         // 判断 future 是否已完成，减少嵌套
         return if (previous.isDone) {
-            val vector = previous.getNow(null)
-            frame.setVariable("@Transfer", vector, false)
-            handlers.last().accept(frame).thenApply { adaptVector(it) }
+            val target = previous.getNow(null)
+            frame.setVariable("@Transfer", target, false)
+            handlers.last().accept(frame).thenApply { adaptTarget(it) }
         } else {
-            previous.thenCompose { vector ->
-                frame.setVariable("@Transfer", vector, false)
-                handlers.last().accept(frame).thenApply { adaptVector(it) }
+            previous.thenCompose { target ->
+                frame.setVariable("@Transfer", target, false)
+                handlers.last().accept(frame).thenApply { adaptTarget(it) }
             }
         }
     }
 
-    fun adaptVector(any: Any?): Any? {
-        return if (any is Vector) {
-            org.bukkit.util.Vector(any.x, any.y, any.z)
+    fun adaptTarget(any: Any?): Any? {
+        return if (any is Collection<*> && any.size == 1) {
+            any.single()
         } else {
             any
         }
@@ -109,14 +120,23 @@ class ActionVector : QuestAction<Any?>() {
     @Awake(LifeCycle.LOAD)
     companion object : ClassInjector() {
 
-        private val registry = mutableMapOf<String, Resolver>()
+        private val selectors = mutableMapOf<String, Resolver>()
+        private val filters = mutableMapOf<String, Resolver>()
 
         /**
-         * 向 Vector 语句注册子语句
+         * 向 Target 语句注册子语句
          * @param resolver 子语句解析器
          * */
-        fun registerResolver(resolver: Resolver) {
-            resolver.name.forEach { registry[it] = resolver }
+        fun registerSelector(resolver: Resolver) {
+            resolver.name.forEach { selectors[it.lowercase()] = resolver }
+        }
+
+        /**
+         * 向 Target 语句注册子语句
+         * @param resolver 子语句解析器
+         * */
+        fun registerFilter(resolver: Resolver) {
+            resolver.name.forEach { filters[it.lowercase()] = resolver }
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
@@ -132,15 +152,19 @@ class ActionVector : QuestAction<Any?>() {
                 }
             } as? Resolver ?: return
 
-            registerResolver(resolver)
+            // 判断解析器类型
+            when (resolver::class.java.`package`.name.substringAfterLast('.')) {
+                "selector" -> registerSelector(resolver)
+                "filter" -> registerFilter(resolver)
+            }
         }
 
         @BacikalParser(
-            id = "vector",
-            name = ["vector", "vec"]
+            id = "target",
+            name = ["target"]
         )
         fun parser() = ScriptActionParser<Any?> {
-            ActionVector().resolve(this)
+            ActionTarget().resolve(this)
         }
     }
 
@@ -163,19 +187,31 @@ class ActionVector : QuestAction<Any?>() {
             return Handler(func(this))
         }
 
-        fun transfer(func: Reader.() -> Bacikal.Parser<Vector>): Handler<Vector> {
+        fun transfer(func: Reader.() -> Bacikal.Parser<MutableCollection<Any>>): Handler<MutableCollection<Any>> {
             return Transfer(func(this))
         }
 
-        fun source(): LiveData<Vector> {
+        fun source(): LiveData<MutableCollection<Any>> {
             return if (isRoot) {
-                vector(display = "vector source")
+                if (token == "filter" || token == "foreach") {
+                    // 以 filter 和 foreach 开头
+                    LiveData.frame {
+                        when (it) {
+                            is Array<*> -> it.filterNotNull().toMutableSet()
+                            is Collection<*> -> it.filterNotNull().toMutableSet()
+                            else -> if (it != null) mutableSetOf(it) else mutableSetOf()
+                        }
+                    }
+                } else {
+                    // 以 selector 开头
+                    LiveData.point(mutableSetOf())
+                }
             } else {
                 LiveData {
                     Bacikal.Action { frame ->
                         CompletableFuture.completedFuture(
-                            frame.getVariable<Vector>("@Transfer")
-                                ?: error("No vector source selected. [ERROR: vector@$token]")
+                            frame.getVariable<MutableCollection<Any>>("@Transfer")
+                                ?: error("No target source selected. [ERROR: target@$token]")
                         )
                     }
                 }
@@ -198,7 +234,8 @@ class ActionVector : QuestAction<Any?>() {
     }
 
     /**
-     * 用于传递 Vector
+     * 用于传递 Target
      * */
-    open class Transfer(parser: Bacikal.Parser<Vector>) : Handler<Vector>(parser)
+    open class Transfer(parser: Bacikal.Parser<MutableCollection<Any>>) : Handler<MutableCollection<Any>>(parser)
+
 }
