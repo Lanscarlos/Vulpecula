@@ -7,7 +7,6 @@ import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.scriptParser
 import top.lanscarlos.vulpecula.bacikal.Bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.BacikalReader

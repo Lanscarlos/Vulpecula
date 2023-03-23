@@ -14,6 +14,10 @@ object ActionTargetForeach : ActionTarget.Resolver {
 
     override val name: Array<String> = arrayOf("foreach")
 
+    /**
+     * target foreach &target then {...}
+     * target foreach &target by it then {...}
+     * */
     override fun resolve(reader: ActionTarget.Reader): ActionTarget.Handler<out Any?> {
         return reader.transfer {
             combineOf(

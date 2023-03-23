@@ -17,6 +17,10 @@ object ActionTargetFilterForeach : ActionTarget.Resolver {
 
     override val name: Array<String> = arrayOf("foreach", "each")
 
+    /**
+     * target filter &target foreach then {...}
+     * target filter &target foreach by it then {...}
+     * */
     override fun resolve(reader: ActionTarget.Reader): ActionTarget.Handler<out Any?> {
         return reader.transfer {
             combineOf(

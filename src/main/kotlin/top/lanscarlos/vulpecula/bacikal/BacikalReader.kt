@@ -5,10 +5,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
-import taboolib.common5.cbool
-import taboolib.common5.cdouble
-import taboolib.common5.cfloat
-import taboolib.common5.cint
+import taboolib.common5.*
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
@@ -210,6 +207,26 @@ open class BacikalReader(private val source: QuestReader) {
         return intOrNull().map { it ?: def ?: error("No $display selected.") }
     }
 
+    fun longOrNull(): LiveData<Long?> {
+        return LiveData {
+            source.mark()
+            source.nextToken().toLongOrNull()?.let { long ->
+                Bacikal.Action {
+                    CompletableFuture.completedFuture(long)
+                }
+            } ?: source.reset().let {
+                val action = source.nextBlock()
+                Bacikal.Action { frame ->
+                    frame.run(action).thenApply { it?.clong }
+                }
+            }
+        }
+    }
+
+    fun long(def: Long? = null, display: String = "long"): LiveData<Long> {
+        return longOrNull().map { it ?: def ?: error("No $display selected.") }
+    }
+
     fun floatOrNull(): LiveData<Float?> {
         return LiveData {
             source.mark()
@@ -306,21 +323,34 @@ open class BacikalReader(private val source: QuestReader) {
     }
 
     fun applyLiveData(vararg liveData: LiveData<*>) {
-        var parametric = -1
+
+        var startIndex = -1
+        var endIndex = liveData.lastIndex
+
         for ((index, it) in liveData.withIndex()) {
             if (it is LiveDataProxy<*>) {
-                parametric = index
+                startIndex = index
                 break
             }
             it.accept(reader = this)
         }
 
-        if (parametric < 0) return
+        if (startIndex < 0) return
+
+        if (liveData.last() !is LiveDataProxy<*>) {
+            // 处理特殊情况
+            endIndex -= 1
+        }
+
         while (peekToken().matches(argumentPrefixPattern)) {
             val prefix = nextToken().substring(1)
-            for (index in parametric until liveData.size) {
+            for (index in startIndex..endIndex) {
                 (liveData[index] as LiveDataProxy<*>).accept(prefix, this)
             }
+        }
+
+        if (endIndex < liveData.lastIndex) {
+            liveData.last().accept(reader = this)
         }
     }
 

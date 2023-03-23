@@ -43,8 +43,8 @@ object ActionLocationModify : ActionLocation.Resolver {
                         )
                     } else {
                         location.x = x
-                        location.x = y
-                        location.x = z
+                        location.y = y
+                        location.z = z
                         location.yaw = yaw ?: location.yaw
                         location.pitch = pitch ?: location.pitch
                         location

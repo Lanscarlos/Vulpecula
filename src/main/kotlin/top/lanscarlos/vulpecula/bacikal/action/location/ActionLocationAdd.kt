@@ -52,8 +52,8 @@ object ActionLocationAdd : ActionLocation.Resolver {
                     argument("pitch", "p", then = float(), def = 0f)
                 ) { location, x, y, z, yaw, pitch ->
                     location.x += x
-                    location.x += y
-                    location.x += z
+                    location.y += y
+                    location.z += z
                     location.yaw += yaw
                     location.pitch += pitch
                     location
@@ -72,8 +72,8 @@ object ActionLocationAdd : ActionLocation.Resolver {
                     argument("pitch", "p", then = float(), def = 0f)
                 ) { location, x, y, z, yaw, pitch ->
                     location.x += x
-                    location.x += y
-                    location.x += z
+                    location.y += y
+                    location.z += z
                     location.yaw += yaw
                     location.pitch += pitch
                     location
