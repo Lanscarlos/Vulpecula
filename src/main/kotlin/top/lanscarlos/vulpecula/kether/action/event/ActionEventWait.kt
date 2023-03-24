@@ -9,7 +9,6 @@ import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.internal.EventListener
-import top.lanscarlos.vulpecula.internal.EventMapper
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readBoolean
@@ -26,6 +25,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-12-03 12:27
  */
+@Deprecated("")
 class ActionEventWait(
     val eventName: LiveData<String>
 ) : ScriptAction<Any?>() {

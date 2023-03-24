@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.kether.live.readItemStack
  * @author Lanscarlos
  * @since 2022-11-13 20:40
  */
+@Deprecated("")
 object ItemUnbreakableHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("unbreakable", "unbreak")

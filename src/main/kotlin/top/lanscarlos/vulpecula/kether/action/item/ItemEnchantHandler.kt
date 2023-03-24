@@ -16,6 +16,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-13 20:03
  */
+@Deprecated("")
 object ItemEnchantHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("enchantments", "enchantment", "enchants", "enchant")

@@ -16,6 +16,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-13 20:28
  */
+@Deprecated("")
 object ItemBuildHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("build")

@@ -18,6 +18,7 @@ import java.awt.Color
  * @author Lanscarlos
  * @since 2022-11-13 20:45
  */
+@Deprecated("")
 object ItemPotionHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("potion")

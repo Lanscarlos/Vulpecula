@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.utils.coerceInt
  * @author Lanscarlos
  * @since 2022-11-13 20:37
  */
+@Deprecated("")
 object ItemAmountHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("amount", "amt")

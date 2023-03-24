@@ -10,6 +10,7 @@ import top.lanscarlos.vulpecula.kether.live.readItemStack
  * @author Lanscarlos
  * @since 2022-11-13 20:42
  */
+@Deprecated("")
 object ItemDestroyHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("destroy")

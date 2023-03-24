@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.kether.live.readItemStack
  * @author Lanscarlos
  * @since 2022-11-13 20:39
  */
+@Deprecated("")
 object ItemConsumeHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("consume")

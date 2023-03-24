@@ -15,6 +15,7 @@ import top.lanscarlos.vulpecula.utils.thenTake
  * @author Lanscarlos
  * @since 2022-11-13 20:15
  */
+@Deprecated("")
 object ItemFlagHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("flags", "flag")

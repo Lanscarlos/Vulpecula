@@ -23,6 +23,7 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2022-11-12 13:01
  */
+@Deprecated("")
 class ActionItemStack : ScriptAction<Any?>() {
 
     private val handlers = mutableListOf<Handler>()

@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-10-21 10:13
  */
+@Deprecated("")
 object ActionEvent {
 
     /**

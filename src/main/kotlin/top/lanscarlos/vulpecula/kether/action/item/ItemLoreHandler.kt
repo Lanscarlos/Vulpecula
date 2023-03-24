@@ -12,6 +12,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-13 19:42
  */
+@Deprecated("")
 object ItemLoreHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("lore")

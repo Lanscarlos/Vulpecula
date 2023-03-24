@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-13 20:32
  */
-
+@Deprecated("")
 object ItemModifyHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("modify", "set")
@@ -48,7 +48,7 @@ object ItemModifyHandler : ActionItemStack.Reader {
                             } ?: item.type
                         }
                         "amount" -> item.amount = option.value.coerceInt(item.amount)
-                        "durability" -> item.duraFix = option.value.coerceInt(item.duraFix)
+                        "durability" -> item.dura = option.value.coerceInt(item.dura)
                         "name" -> {
                             val name = option.value?.toString()
                             meta?.setDisplayName(name?.colored())

@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2023-01-23 23:48
  */
+@Deprecated("")
 object ItemDropHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("drop")

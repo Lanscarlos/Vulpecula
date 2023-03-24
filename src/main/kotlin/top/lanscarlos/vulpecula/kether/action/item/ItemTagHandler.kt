@@ -15,6 +15,7 @@ import top.lanscarlos.vulpecula.utils.*
  * @author Lanscarlos
  * @since 2022-11-13 15:01
  */
+@Deprecated("")
 object ItemTagHandler : ActionItemStack.Reader {
 
     override val name: Array<String> = arrayOf("nbt", "tag")
