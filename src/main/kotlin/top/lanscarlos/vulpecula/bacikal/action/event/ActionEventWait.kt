@@ -28,7 +28,7 @@ object ActionEventWait : ActionEvent.Resolver {
                 text(display = "event name"),
                 argument("priority", "p", then = text("NORMAL"), def = "NORMAL"),
                 argument("ignored-cancelled", "ignored", "ic", then = bool(true), def = true),
-                argument("unique", "id", then = text("unique"), def = UUID.randomUUID().toString()),
+                argument("unique", "id", then = text(display = "unique"), def = UUID.randomUUID().toString()),
                 argument("filter", "condition", then = action()),
                 argument("async", "a", then = bool(false), def = false),
                 argument("timeout", "time", "t", then = long(-1L), def = -1L),

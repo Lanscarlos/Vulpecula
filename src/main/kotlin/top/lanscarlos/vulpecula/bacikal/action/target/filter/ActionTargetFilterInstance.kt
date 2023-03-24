@@ -18,7 +18,7 @@ object ActionTargetFilterInstance : ActionTarget.Resolver {
         return reader.transfer {
             combine(
                 source(),
-                trim("with", then = text("instance type"))
+                trim("with", then = text(display = "instance type"))
             ) { target, instance ->
 
                 // 获取类类型

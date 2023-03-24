@@ -33,7 +33,7 @@ class ItemStackProperty : BacikalScriptProperty<ItemStack>("itemstack") {
             "amount", "amt" -> instance.amount
             "max-amount", "max-amt", "max-size" -> instance.maxStackSize
 
-            "durability", "dura" -> instance.duraFix
+            "durability", "dura" -> instance.dura
             "damage", "dmg" -> instance.damage
             "max-durability", "max-dura" -> instance.maxDurability
 
@@ -114,7 +114,7 @@ class ItemStackProperty : BacikalScriptProperty<ItemStack>("itemstack") {
                 instance.amount = value.coerceInt(instance.amount)
             }
             "durability", "dura" -> {
-                instance.duraFix = value?.coerceInt() ?: return OpenResult.successful()
+                instance.dura = value?.coerceInt() ?: return OpenResult.successful()
             }
             "damage", "dmg" -> {
                 instance.damage = value?.coerceInt() ?: return OpenResult.successful()

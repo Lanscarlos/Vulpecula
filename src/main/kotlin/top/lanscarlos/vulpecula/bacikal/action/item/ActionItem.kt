@@ -1,8 +1,8 @@
-package top.lanscarlos.vulpecula.bacikal.action.vector
+package top.lanscarlos.vulpecula.bacikal.action.item
 
+import org.bukkit.inventory.ItemStack
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.util.Vector
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptActionParser
@@ -21,28 +21,23 @@ import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.action.vector
+ * top.lanscarlos.vulpecula.bacikal.action.item
  *
  * @author Lanscarlos
- * @since 2023-03-22 14:48
+ * @since 2023-03-23 19:08
  */
-class ActionVector : QuestAction<Any?>() {
+class ActionItem : QuestAction<Any?>() {
 
     val handlers = mutableListOf<Handler<*>>()
 
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
-            reader.mark()
             val next = reader.nextToken()
             val isRoot = handlers.isEmpty()
             handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
-                ?: let {
-                    // 默认使用 vector 构建坐标功能
-                    reader.reset()
-                    ActionVectorBuild.resolve(Reader(next, reader, isRoot))
-                }
+                ?: error("Unknown sub action \"$next\" at item action.")
 
-            // 判断管道是否已经关闭
+            // 判断管道是否已关闭
             if (handlers.lastOrNull() !is Transfer) {
                 if (reader.hasNextToken(">>")) {
                     error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$next\" has closed the pipeline.")
@@ -50,15 +45,16 @@ class ActionVector : QuestAction<Any?>() {
                 break
             }
         } while (reader.hasNextToken(">>"))
+
         return this
     }
 
     override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
         if (handlers.size == 1 && handlers[0] !is Transfer) {
-            return handlers[0].accept(frame).thenApply { adaptVector(it) }
+            return handlers[0].accept(frame).thenApply { it }
         }
 
-        var previous: CompletableFuture<Vector> = (handlers[0] as Transfer).accept(frame)
+        var previous: CompletableFuture<ItemStack> = (handlers[0] as Transfer).accept(frame)
 
         for (index in 1 until handlers.size - 1) {
             val current = handlers[index]
@@ -68,12 +64,12 @@ class ActionVector : QuestAction<Any?>() {
 
             // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
-                val vector = previous.getNow(null)
-                frame.setVariable("@Transfer", vector, false)
+                val item = previous.getNow(null)
+                frame.setVariable("@Transfer", item, false)
                 current.accept(frame)
             } else {
-                previous.thenCompose { vector ->
-                    frame.setVariable("@Transfer", vector, false)
+                previous.thenCompose { item ->
+                    frame.setVariable("@Transfer", item, false)
                     current.accept(frame)
                 }
             }
@@ -81,22 +77,14 @@ class ActionVector : QuestAction<Any?>() {
 
         // 判断 future 是否已完成，减少嵌套
         return if (previous.isDone) {
-            val vector = previous.getNow(null)
-            frame.setVariable("@Transfer", vector, false)
-            handlers.last().accept(frame).thenApply { adaptVector(it) }
+            val item = previous.getNow(null)
+            frame.setVariable("@Transfer", item, false)
+            handlers.last().accept(frame).thenApply { it }
         } else {
-            previous.thenCompose { vector ->
-                frame.setVariable("@Transfer", vector, false)
-                handlers.last().accept(frame).thenApply { adaptVector(it) }
+            previous.thenCompose { item ->
+                frame.setVariable("@Transfer", item, false)
+                handlers.last().accept(frame).thenApply { it }
             }
-        }
-    }
-
-    fun adaptVector(any: Any?): Any? {
-        return if (any is Vector) {
-            org.bukkit.util.Vector(any.x, any.y, any.z)
-        } else {
-            any
         }
     }
 
@@ -109,7 +97,7 @@ class ActionVector : QuestAction<Any?>() {
         private val registry = mutableMapOf<String, Resolver>()
 
         /**
-         * 向 Vector 语句注册子语句
+         * 向 Item 语句注册子语句
          * @param resolver 子语句解析器
          * */
         fun registerResolver(resolver: Resolver) {
@@ -133,11 +121,11 @@ class ActionVector : QuestAction<Any?>() {
         }
 
         @BacikalParser(
-            id = "vector",
-            name = ["vector", "vec"]
+            id = "item",
+            name = ["item"]
         )
         fun parser() = ScriptActionParser<Any?> {
-            ActionVector().resolve(this)
+            ActionItem().resolve(this)
         }
     }
 
@@ -160,19 +148,19 @@ class ActionVector : QuestAction<Any?>() {
             return Handler(func(this))
         }
 
-        fun transfer(func: Reader.() -> Bacikal.Parser<Vector>): Handler<Vector> {
+        fun transfer(func: Reader.() -> Bacikal.Parser<ItemStack>): Handler<ItemStack> {
             return Transfer(func(this))
         }
 
-        fun source(): LiveData<Vector> {
+        fun source(): LiveData<ItemStack> {
             return if (isRoot) {
-                vector(display = "vector source")
+                item()
             } else {
                 LiveData {
                     Bacikal.Action { frame ->
                         CompletableFuture.completedFuture(
-                            frame.getVariable<Vector>("@Transfer")
-                                ?: error("No vector source selected. [ERROR: vector@$token]")
+                            frame.getVariable<ItemStack>("@Transfer")
+                                ?: error("No item source selected. [ERROR: item@$token]")
                         )
                     }
                 }
@@ -195,7 +183,7 @@ class ActionVector : QuestAction<Any?>() {
     }
 
     /**
-     * 用于传递 Vector
+     * 用于传递 Item
      * */
-    open class Transfer(parser: Bacikal.Parser<Vector>) : Handler<Vector>(parser)
+    open class Transfer(parser: Bacikal.Parser<ItemStack>) : Handler<ItemStack>(parser)
 }

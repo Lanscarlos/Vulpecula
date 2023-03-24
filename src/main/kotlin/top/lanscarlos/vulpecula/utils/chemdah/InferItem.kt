@@ -9,6 +9,7 @@ import taboolib.library.reflex.Reflex.Companion.invokeConstructor
 import taboolib.module.kether.action.transform.CheckType
 import taboolib.module.nms.getItemTag
 import taboolib.module.nms.getName
+import taboolib.platform.util.countItem
 import taboolib.platform.util.hasItem
 import taboolib.platform.util.takeItem
 import top.lanscarlos.vulpecula.api.event.InferItemHookEvent
@@ -29,6 +30,10 @@ import top.lanscarlos.vulpecula.utils.chemdah.Flags.Companion.matchType
 class InferItem(val items: List<Item>) {
 
     fun isItem(item: ItemStack) = items.any { it.match(item) }
+
+    fun count(inventory: Inventory): Int {
+        return inventory.countItem { items.any { item -> item.match(it) } }
+    }
 
     fun check(inventory: Inventory, amount: Int): Boolean {
         return inventory.hasItem(amount) { items.any { item -> item.match(it) } }
@@ -88,6 +93,10 @@ class InferItem(val items: List<Item>) {
         open fun matchMetaData(item: ItemStack, itemMeta: ItemMeta?, dataMatch: DataMatch): Boolean {
             warning("$material[${dataMatch.key} ${dataMatch.type} ${dataMatch.value}] not supported.")
             return false
+        }
+
+        open fun count(inventory: Inventory): Int {
+            return inventory.countItem { match(it) }
         }
 
         open fun check(inventory: Inventory, amount: Int): Boolean {

@@ -43,7 +43,7 @@ var ItemStack.damage: Int
 /**
  * 物品耐久度
  * */
-var ItemStack.duraFix: Int
+var ItemStack.dura: Int
     get() = this.maxDurability - damage
     set(value) {
         this.damage = this.maxDurability - value
