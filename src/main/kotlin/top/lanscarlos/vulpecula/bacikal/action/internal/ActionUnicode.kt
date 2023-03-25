@@ -1,26 +1,42 @@
-package top.lanscarlos.vulpecula.kether.action.vulpecula
+package top.lanscarlos.vulpecula.bacikal.action.internal
 
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.cbool
-import taboolib.module.chat.component
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
+import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.kether.KetherRegistry
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action
+ * top.lanscarlos.vulpecula.bacikal.action.internal
  *
  * @author Lanscarlos
- * @since 2022-11-13 16:16
+ * @since 2023-03-25 23:35
  */
-@Deprecated("")
 object ActionUnicode {
+
+    @BacikalParser(
+        id = "unicode",
+        name = ["unicode"]
+    )
+    fun parser() = bacikal {
+        combine(
+            text(display = "source text")
+        ) { source ->
+            source.mapping().replaceUnicode()
+        }
+    }
+
+    /**
+     * 判断该语句是否启用
+     * */
+    val enable get() = KetherRegistry.hasAction("unicode")
 
     val specialDigit by bindConfigNode("action-setting.unicode.special-digit") { value ->
         (value as? List<*>)?.mapNotNull { it?.toString()?.toIntOrNull() }?.sortedDescending() ?: listOf(1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128).sortedDescending()
@@ -61,14 +77,14 @@ object ActionUnicode {
             val mapping = if (found.startsWith('+')) {
                 // @{+\d} 正空格
                 val target = found.substring(1).toInt()
-                splitNumber(target).joinToString("") { mapping["+$it"] ?: "@{+$it}" }
+                splitNumber(target).joinToString("") { ActionUnicode.mapping["+$it"] ?: "@{+$it}" }
             } else if (found.startsWith('-')) {
                 // @{-\d} 负空格
                 val target = found.substring(1).toInt()
-                splitNumber(target).joinToString("") { mapping["-$it"] ?: "@{-$it}" }
+                splitNumber(target).joinToString("") { ActionUnicode.mapping["-$it"] ?: "@{-$it}" }
             } else {
                 // 其他
-                mapping[found] ?: matcher.group()
+                ActionUnicode.mapping[found] ?: matcher.group()
             }
             matcher.appendReplacement(buffer, mapping)
         }
@@ -76,6 +92,9 @@ object ActionUnicode {
         return matcher.appendTail(buffer).toString()
     }
 
+    /**
+     * 将给定数字分割成一组特定数字之和
+     * */
     /**
      * 将给定数字分割成一组特定数字之和
      * */
@@ -97,28 +116,6 @@ object ActionUnicode {
         }
         return result
     }
-
-    @VulKetherParser(
-        id = "unicode",
-        name = ["unicode"]
-    )
-    fun parser() = buildParser {
-        group(
-            option("raw"),
-            stringOrNull()
-        ) { raw, source ->
-            now {
-                source?.mapping()?.replaceUnicode()?.run {
-                    if (raw) this.component() else this
-                }
-            }
-        }
-    }
-
-    /**
-     * 判断该语句是否启用
-     * */
-    val enable get() = KetherRegistry.hasAction("unicode")
 
     val automaticReload by bindConfigNode("automatic-reload.action-unicode") {
         it?.cbool ?: false
@@ -179,5 +176,4 @@ object ActionUnicode {
             }
         }
     }
-
 }

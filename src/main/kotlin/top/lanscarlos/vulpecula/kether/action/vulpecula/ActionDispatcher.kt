@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.utils.hasNextToken
  * @author Lanscarlos
  * @since 2023-02-09 18:49
  */
+@Deprecated("")
 object ActionDispatcher {
 
     fun parse(reader: QuestReader): ScriptAction<*> {

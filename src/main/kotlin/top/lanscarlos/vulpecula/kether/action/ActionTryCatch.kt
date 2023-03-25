@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-09-02 19:28
  */
+@Deprecated("")
 class ActionTryCatch(
     val tryBlock: ParsedAction<*>,
     val catchBlock: ParsedAction<*>?,

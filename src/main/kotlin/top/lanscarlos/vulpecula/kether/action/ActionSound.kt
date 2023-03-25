@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-10-22 09:24
  */
+@Deprecated("")
 class ActionSound(
     val resource: LiveData<String>,
     val meta: Pair<LiveData<Double>, LiveData<Double>>,

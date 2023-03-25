@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.kether.VulKetherParser
  * @author Lanscarlos
  * @since 2023-02-06 15:16
  */
+@Deprecated("")
 object ActionVulpecula {
 
     @VulKetherParser(

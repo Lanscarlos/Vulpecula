@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @author Lanscarlos
  * @since 2022-11-12 00:23
  */
+@Deprecated("")
 class ActionMemory(
     val key: LiveData<String>,
     val value: ParsedAction<*>?,

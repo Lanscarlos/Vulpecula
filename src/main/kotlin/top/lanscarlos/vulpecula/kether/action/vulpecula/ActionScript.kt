@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-12-24 13:08
  */
+@Deprecated("")
 object ActionScript {
 
     class ActionScriptRun(

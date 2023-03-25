@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-02-06 20:15
  */
+@Deprecated("")
 object ActionSchedule {
 
     class ActionScheduleRun(
