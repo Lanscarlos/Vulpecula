@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal
 
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
@@ -14,6 +15,7 @@ import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.frameBy
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveColor
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveEntity
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveInventory
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveItemStack
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
@@ -317,6 +319,11 @@ open class BacikalReader(private val source: QuestReader) {
     fun itemOrNull(): LiveData<ItemStack?> = frameBy { it?.liveItemStack }
     fun item(def: ItemStack? = null, display: String = "itemStack"): LiveData<ItemStack> {
         return frameBy { it?.liveItemStack ?: def ?: error("No $display selected.") }
+    }
+
+    fun inventoryOrNull(): LiveData<Inventory?> = frameBy { it?.liveInventory }
+    fun inventory(def: Inventory? = null, display: String = "itemStack"): LiveData<Inventory> {
+        return frameBy { it?.liveInventory ?: def ?: error("No $display selected.") }
     }
 
     fun applyLiveData(vararg liveData: LiveData<*>) {

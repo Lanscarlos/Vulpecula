@@ -15,6 +15,7 @@ description: '示例命令的描述'
 usage: '示例用例'
 
 # [选填] 所需权限
+# 不填则默认为 vulpecula.command.use
 permission: 'vulpecula.command.example'
 
 # 默认权限类型

@@ -3,8 +3,10 @@ package top.lanscarlos.vulpecula.bacikal
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Entity
+import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
@@ -15,6 +17,7 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.platform.type.BukkitPlayer
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.toProxyLocation
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -282,6 +285,19 @@ open class LiveData<T>(
                             if (mat.isPresent) mat.get() else return null
                         }
                         buildItem(material)
+                    }
+                    else -> null
+                }
+            }
+
+        val Any.liveInventory: Inventory?
+            get() {
+                return when (this) {
+                    is Inventory -> this
+                    is HumanEntity -> this.inventory
+                    is BukkitPlayer -> this.player.inventory
+                    is String -> {
+                        Bukkit.getPlayerExact(this)?.inventory
                     }
                     else -> null
                 }
