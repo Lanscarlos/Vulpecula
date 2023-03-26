@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.getVariable
 import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.concurrent.CompletableFuture

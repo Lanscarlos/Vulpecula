@@ -9,7 +9,6 @@ import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.setVariable

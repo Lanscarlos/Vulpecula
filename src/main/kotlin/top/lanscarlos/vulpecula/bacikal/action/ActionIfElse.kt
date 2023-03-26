@@ -5,7 +5,6 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import taboolib.module.kether.action.transform.CheckType
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.*
 import java.util.*
 import java.util.concurrent.CompletableFuture

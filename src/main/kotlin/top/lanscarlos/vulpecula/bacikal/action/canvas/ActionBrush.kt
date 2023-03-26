@@ -8,7 +8,6 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
 import java.awt.Color

@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.action.math
 
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 
 /**
  * Vulpecula
@@ -23,7 +23,7 @@ object ActionCoerce {
      * coerce &n most &max
      *
      * */
-    @VulKetherParser(id = "coerce", name = ["coerce"])
+    @BacikalParser(id = "coerce", name = ["coerce"])
     fun parser() = bacikalSwitch {
         val any = any().accept(this)
 

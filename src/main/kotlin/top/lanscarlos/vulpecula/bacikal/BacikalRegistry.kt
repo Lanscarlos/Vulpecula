@@ -11,7 +11,6 @@ import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.StandardChannel
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.internal.ClassInjector
-import top.lanscarlos.vulpecula.kether.RegistryMetadata
 import top.lanscarlos.vulpecula.utils.timing
 import top.lanscarlos.vulpecula.utils.toConfig
 import java.io.File

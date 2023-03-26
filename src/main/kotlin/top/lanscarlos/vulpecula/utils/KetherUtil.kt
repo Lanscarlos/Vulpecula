@@ -6,9 +6,9 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.*
 import taboolib.module.kether.*
 import taboolib.platform.type.BukkitPlayer
+import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.LiteralParserBuilder
 import top.lanscarlos.vulpecula.kether.ParserBuilder
-import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -122,7 +122,11 @@ fun QuestReader.tryNextActionList(vararg expected: String): List<ParsedAction<*>
  * */
 fun QuestReader.nextBlock(): ParsedAction<*> {
     return if (this.hasNextToken("{")) {
-        ParsedAction(ActionBlock(ActionBlock.readBlock(reader = this)))
+        val actions = mutableListOf<ParsedAction<*>>()
+        while (!this.hasNextToken("}")) {
+            actions += this.nextParsedAction()
+        }
+        ParsedAction(ActionBlock(actions))
     } else {
         this.nextParsedAction()
     }

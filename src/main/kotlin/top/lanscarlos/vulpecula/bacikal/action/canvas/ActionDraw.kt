@@ -10,7 +10,6 @@ import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LocationLiveData
 import top.lanscarlos.vulpecula.kether.live.VectorLiveData
 import top.lanscarlos.vulpecula.kether.live.readLocation

@@ -7,8 +7,8 @@ import taboolib.common5.cbool
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
+import top.lanscarlos.vulpecula.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.bacikal.bacikal
-import top.lanscarlos.vulpecula.kether.KetherRegistry
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 
@@ -36,7 +36,7 @@ object ActionUnicode {
     /**
      * 判断该语句是否启用
      * */
-    val enable get() = KetherRegistry.hasAction("unicode")
+    val enable get() = BacikalRegistry.hasAction("unicode")
 
     val specialDigit by bindConfigNode("action-setting.unicode.special-digit") { value ->
         (value as? List<*>)?.mapNotNull { it?.toString()?.toIntOrNull() }?.sortedDescending() ?: listOf(1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128).sortedDescending()
