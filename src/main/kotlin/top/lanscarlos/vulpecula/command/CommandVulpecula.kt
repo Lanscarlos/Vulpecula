@@ -7,8 +7,8 @@ import taboolib.common.platform.function.adaptCommandSender
 import taboolib.expansion.createHelper
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.VulpeculaContext
+import top.lanscarlos.vulpecula.bacikal.action.internal.ActionUnicode
 import top.lanscarlos.vulpecula.internal.*
-import top.lanscarlos.vulpecula.kether.action.vulpecula.ActionUnicode
 import top.lanscarlos.vulpecula.utils.runActions
 import top.lanscarlos.vulpecula.utils.toKetherScript
 
