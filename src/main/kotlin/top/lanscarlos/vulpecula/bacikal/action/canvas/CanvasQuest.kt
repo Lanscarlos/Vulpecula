@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
@@ -6,7 +6,7 @@ import java.util.*
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-08 00:32

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas.pattern
+package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
@@ -10,7 +10,7 @@ import kotlin.math.sin
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas.pattern
+ * top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
  *
  * @author Lanscarlos
  * @since 2022-11-10 10:33

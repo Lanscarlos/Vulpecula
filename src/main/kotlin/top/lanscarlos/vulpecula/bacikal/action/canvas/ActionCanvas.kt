@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
@@ -6,6 +6,7 @@ import taboolib.common.platform.function.submit
 import taboolib.library.kether.ParsedAction
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.*
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.action.ActionBlock
 import top.lanscarlos.vulpecula.kether.live.*
@@ -14,7 +15,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-08 10:05
@@ -84,7 +85,7 @@ class ActionCanvas : ScriptAction<Any?>() {
         const val VARIABLE_VIEWERS = "@CanvasViewers"
         const val VARIABLE_PATTERN = "@CanvasPattern"
 
-        @VulKetherParser(
+        @BacikalParser(
             id = "canvas",
             name = ["canvas"]
         )

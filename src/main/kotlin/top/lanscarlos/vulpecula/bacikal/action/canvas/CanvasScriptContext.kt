@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
@@ -12,7 +12,7 @@ import kotlin.collections.HashMap
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-08 13:43

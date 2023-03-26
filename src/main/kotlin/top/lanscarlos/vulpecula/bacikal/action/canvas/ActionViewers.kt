@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -8,17 +8,17 @@ import taboolib.common.platform.function.onlinePlayers
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.hasNextToken
 import top.lanscarlos.vulpecula.utils.nextBlock
 import top.lanscarlos.vulpecula.utils.setVariable
-import top.lanscarlos.vulpecula.utils.thenTake
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-09 00:23
@@ -140,7 +140,7 @@ class ActionViewers(val raw: Collection<Any>) : ScriptAction<Collection<ProxyPla
          * viewers to [ player name literal Lanscarlos ]
          *
          * */
-        @VulKetherParser(
+        @BacikalParser(
             id = "viewers",
             name = ["viewers", "viewer"],
             namespace = "vulpecula-canvas"

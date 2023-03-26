@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.platform.ProxyParticle
 import taboolib.common.util.Vector
@@ -7,6 +7,7 @@ import taboolib.module.kether.ScriptAction
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.scriptParser
 import taboolib.module.nms.MinecraftVersion
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.*
 import top.lanscarlos.vulpecula.utils.*
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-08 23:25
@@ -38,7 +39,7 @@ class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBr
 
     companion object {
 
-        @VulKetherParser(
+        @BacikalParser(
             id = "brush",
             name = ["brush", "pen"],
             namespace = "vulpecula-canvas"

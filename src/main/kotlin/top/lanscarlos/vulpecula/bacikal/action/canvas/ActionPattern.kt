@@ -1,16 +1,17 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.util.Location
 import taboolib.module.kether.*
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
-import top.lanscarlos.vulpecula.kether.action.canvas.pattern.CanvasPattern
+import top.lanscarlos.vulpecula.bacikal.action.canvas.pattern.CanvasPattern
 import top.lanscarlos.vulpecula.kether.live.readLocation
 import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-10 11:14
@@ -39,7 +40,7 @@ class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
          * pattern
          *
          * */
-        @VulKetherParser(
+        @BacikalParser(
             id = "pattern",
             name = ["pattern"],
             namespace = "vulpecula-canvas"

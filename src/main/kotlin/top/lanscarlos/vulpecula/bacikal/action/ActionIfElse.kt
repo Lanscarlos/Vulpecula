@@ -1,9 +1,10 @@
-package top.lanscarlos.vulpecula.kether.action
+package top.lanscarlos.vulpecula.bacikal.action
 
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import taboolib.module.kether.action.transform.CheckType
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.utils.*
 import java.util.*
@@ -74,7 +75,7 @@ class ActionIfElse(
          * if* {...} {symbol} {...} then {...}
          * if* {...} and/or {...} then {...}
          * */
-        @VulKetherParser(
+        @BacikalParser(
             id = "if-else",
             name = ["if*"],
             override = ["if"]

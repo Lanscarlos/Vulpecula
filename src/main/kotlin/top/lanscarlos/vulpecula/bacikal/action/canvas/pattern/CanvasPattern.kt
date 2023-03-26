@@ -1,7 +1,6 @@
-package top.lanscarlos.vulpecula.kether.action.canvas.pattern
+package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.LifeCycle
-import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.util.Location
 import taboolib.library.kether.QuestReader
@@ -12,7 +11,7 @@ import java.util.function.Supplier
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas.pattern
+ * top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
  *
  * @author Lanscarlos
  * @since 2022-11-10 10:32

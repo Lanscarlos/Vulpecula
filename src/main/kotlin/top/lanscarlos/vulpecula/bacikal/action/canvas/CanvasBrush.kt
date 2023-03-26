@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.ProxyPlayer
@@ -9,7 +9,7 @@ import java.awt.Color
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * 笔刷
  *

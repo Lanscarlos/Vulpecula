@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.kether.action.canvas
+package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
@@ -6,6 +6,7 @@ import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.util.Location
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
+import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.kether.VulKetherParser
 import top.lanscarlos.vulpecula.kether.live.LiveData
 import top.lanscarlos.vulpecula.kether.live.readLocation
@@ -14,7 +15,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.kether.action.canvas
+ * top.lanscarlos.vulpecula.bacikal.action.canvas
  *
  * @author Lanscarlos
  * @since 2022-11-10 19:29
@@ -61,7 +62,7 @@ class ActionParticles(
          * particles play at &loc -x -xx
          *
          * */
-        @VulKetherParser(
+        @BacikalParser(
             id = "particles",
             name = ["particles"]
         )
