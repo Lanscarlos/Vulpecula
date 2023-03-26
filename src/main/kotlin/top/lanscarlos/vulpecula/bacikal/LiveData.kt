@@ -195,9 +195,9 @@ open class LiveData<T>(
                             val demand = this.split(",")
                             Location(
                                 null,
-                                demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
-                                demand.getOrNull(4)?.toFloatOrNull() ?: 0f,
-                                demand.getOrNull(5)?.toFloatOrNull() ?: 0f
+                                demand[0].toDouble(), demand[1].toDouble(), demand[2].toDouble(),
+                                demand.getOrNull(3)?.toFloatOrNull() ?: 0f,
+                                demand.getOrNull(4)?.toFloatOrNull() ?: 0f
                             )
                         } else if (this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) {
                             /*

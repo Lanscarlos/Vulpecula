@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.entity
 
+import org.bukkit.Location
 import org.bukkit.event.player.PlayerTeleportEvent
 import taboolib.platform.util.toBukkitLocation
 
@@ -21,15 +22,21 @@ object ActionEntityTeleport : ActionEntity.Resolver {
                 trim("to", "at", then = location()),
                 optional("by", then = textOrNull())
             ) { entity, location, cause ->
+                val loc = if (location.world == null) {
+                    Location(entity.world, location.x, location.y, location.z)
+                } else {
+                    location.toBukkitLocation()
+                }
+
                 if (cause != null) {
                     val reason = PlayerTeleportEvent.TeleportCause.values().firstOrNull { it.name.equals(cause, true) }
                     if (reason != null) {
-                        entity.teleport(location.toBukkitLocation(), reason)
+                        entity.teleport(loc, reason)
                         return@combine entity
                     }
                 }
 
-                entity.also { it.teleport(location.toBukkitLocation()) }
+                entity.also { it.teleport(loc) }
             }
         }
     }
