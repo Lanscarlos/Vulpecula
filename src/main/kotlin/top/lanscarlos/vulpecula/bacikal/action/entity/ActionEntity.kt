@@ -47,7 +47,7 @@ class ActionEntity : QuestAction<Any?>() {
     }
 
     override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
-        if (handlers.size == 1 && handlers[0] !is Transfer) {
+        if (handlers.size == 1 || handlers[0] !is Transfer) {
             return handlers[0].accept(frame).thenApply { it }
         }
 
