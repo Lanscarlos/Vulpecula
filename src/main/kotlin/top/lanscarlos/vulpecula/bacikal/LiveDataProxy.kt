@@ -21,7 +21,7 @@ class LiveDataProxy<T>(
         source.accept(reader)
     }
 
-    override fun accept(reader: BacikalReader): LiveData<T> = this
+    override fun accept(reader: BacikalReader): LiveData<T> = source
 
     override fun accept(frame: ScriptFrame): CompletableFuture<T> {
         return if (source.isAccepted()) {

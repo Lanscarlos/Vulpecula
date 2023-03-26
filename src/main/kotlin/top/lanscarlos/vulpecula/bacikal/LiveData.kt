@@ -64,6 +64,7 @@ open class LiveData<T>(
     fun optional(vararg expect: String): LiveData<T?> {
         return if (expect.isEmpty()) {
             LiveData {
+                this@LiveData.accept(reader = this)
                 Bacikal.Action { frame ->
                     this@LiveData.accept(frame).thenApply { it }
                 }
@@ -125,19 +126,30 @@ open class LiveData<T>(
 
         fun <T> point(value: T): LiveData<T> {
             return LiveData {
-                Bacikal.Action { CompletableFuture.completedFuture(value) }
-            }
-        }
-
-        fun <T> of(func: BacikalReader.(ScriptFrame) -> T): LiveData<T> {
-            return LiveData {
-                Bacikal.Action { frame ->
-                    CompletableFuture.completedFuture(func(this, frame))
+                Bacikal.Action {
+                    CompletableFuture.completedFuture(value)
                 }
             }
         }
 
-        fun <T> frame(func: ScriptFrame.(Any?) -> T): LiveData<T> {
+        fun <T> readerOf(func: (BacikalReader) -> T): LiveData<T> {
+            return LiveData {
+                val value = func(this)
+                Bacikal.Action {
+                    CompletableFuture.completedFuture(value)
+                }
+            }
+        }
+
+        fun <T> frameOf(func: (ScriptFrame) -> T): LiveData<T> {
+            return LiveData {
+                Bacikal.Action { frame ->
+                    CompletableFuture.completedFuture(func(frame))
+                }
+            }
+        }
+
+        fun <T> frameBy(func: ScriptFrame.(Any?) -> T): LiveData<T> {
             return LiveData {
                 val action = this.readAction()
                 Bacikal.Action { frame ->

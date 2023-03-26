@@ -195,7 +195,7 @@ class ActionTarget : QuestAction<Any?>() {
             return if (isRoot) {
                 if (token == "filter" || token == "foreach") {
                     // 以 filter 和 foreach 开头
-                    LiveData.frame {
+                    LiveData.frameBy {
                         when (it) {
                             is Array<*> -> it.filterNotNull().toMutableSet()
                             is Collection<*> -> it.filterNotNull().toMutableSet()

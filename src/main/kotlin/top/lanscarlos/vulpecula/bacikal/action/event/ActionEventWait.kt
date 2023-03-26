@@ -1,8 +1,11 @@
 package top.lanscarlos.vulpecula.bacikal.action.event
 
 import taboolib.common.platform.event.EventPriority
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common5.cbool
+import taboolib.module.kether.run
+import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.EventListener
 import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.UUID
@@ -30,10 +33,10 @@ object ActionEventWait : ActionEvent.Resolver {
                 argument("ignored-cancelled", "ignored", "ic", then = bool(true), def = true),
                 argument("unique", "id", then = text(display = "unique"), def = UUID.randomUUID().toString()),
                 argument("filter", "condition", then = action()),
-                argument("async", "a", then = bool(false), def = false),
+                argument("async", "a", then = LiveData.point(true), def = false),
                 argument("timeout", "time", "t", then = long(-1L), def = -1L),
-                argument("on-timeout", then = action()),
-                trim("then", then = action())
+                argument("onTimeout", then = action()),
+                optional("then", then = action())
             ) { eventName, priority, ignoredCancelled, taskId, filter, async, timeout, onTimeout, body ->
                 val future = CompletableFuture<Any?>()
 
@@ -46,8 +49,17 @@ object ActionEventWait : ActionEvent.Resolver {
                 if (timeout > 0) {
                     submit(delay = timeout) {
 
+                        val completed = this@combineOf.variables().get<Boolean>("@Completed").let {
+                            if (it.isPresent) it.get() else false
+                        }
+
+                        // 已完成
+                        if (completed) {
+                            return@submit
+                        }
+
                         // 设置变量通信
-                        this@combineOf.setVariable("@Timeout", true)
+                        this@combineOf.variables().set("@Timeout", true)
 
                         // 注销事件监听任务
                         EventListener.unregisterTask(taskId)
@@ -60,12 +72,28 @@ object ActionEventWait : ActionEvent.Resolver {
                                     future.complete(it)
                                 }
                             }
+                        } else {
+                            if (!future.isDone) {
+                                // future 可能被 async 提前完成
+                                future.complete(null)
+                            }
                         }
                     }
                 }
 
                 // 注册事件监听器
                 EventListener.registerTask(eventName, priority.asEventPriority(), ignoredCancelled, taskId) { event ->
+
+                    val timedOut = this@combineOf.variables().get<Boolean>("@Timeout").let {
+                        if (it.isPresent) it.get() else false
+                    }
+
+                    // 已超时
+                    if (timedOut) {
+                        // 关闭事件监听器
+                        this.close()
+                        return@registerTask
+                    }
 
                     if (filter != null) {
                         val newFrame = this@combineOf.newFrame(filter)
@@ -79,13 +107,23 @@ object ActionEventWait : ActionEvent.Resolver {
                     // 关闭事件监听器
                     this.close()
 
-                    val newFrame = this@combineOf.newFrame(body)
-                    newFrame.variables().set("@Event", event)
-                    newFrame.variables().set("event", event)
-                    newFrame.run<Any?>().thenAccept {
+                    // 设置变量通信
+                    this@combineOf.variables().set("@Completed", true)
+
+                    if (body != null) {
+                        val newFrame = this@combineOf.newFrame(body)
+                        newFrame.variables().set("@Event", event)
+                        newFrame.variables().set("event", event)
+                        newFrame.run<Any?>().thenAccept {
+                            if (!future.isDone) {
+                                // future 可能被 async 提前完成
+                                future.complete(it)
+                            }
+                        }
+                    } else {
                         if (!future.isDone) {
                             // future 可能被 async 提前完成
-                            future.complete(it)
+                            future.complete(null)
                         }
                     }
                 }

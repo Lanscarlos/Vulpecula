@@ -155,7 +155,7 @@ class ActionEvent : QuestAction<Any?>() {
 
         fun source(): LiveData<Event> {
             return if (isRoot) {
-                LiveData.of { frame ->
+                LiveData.frameOf { frame ->
                     frame.getVariable<Event>("@Event")
                         ?: error("No event source selected. [ERROR: event@$token]")
                 }

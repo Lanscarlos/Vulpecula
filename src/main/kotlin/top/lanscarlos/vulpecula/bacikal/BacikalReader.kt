@@ -11,7 +11,7 @@ import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.frame
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.frameBy
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveColor
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveEntity
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveItemStack
@@ -19,7 +19,7 @@ import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveStringList
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.of
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
 import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
 import top.lanscarlos.vulpecula.utils.nextBlock
 import java.awt.Color
@@ -150,13 +150,10 @@ open class BacikalReader(private val source: QuestReader) {
     }
 
     fun action(): LiveData<ParsedAction<*>> {
-        return LiveData {
-            val action = readAction()
-            Bacikal.Action { CompletableFuture.completedFuture(action) }
-        }
+        return readerOf { it.readAction() }
     }
 
-    fun any(): LiveData<Any?> = frame { it }
+    fun any(): LiveData<Any?> = frameBy { it }
 
     fun list(): LiveData<List<*>> = LiveData {
         val list = this.readActionList()
@@ -267,19 +264,19 @@ open class BacikalReader(private val source: QuestReader) {
         return doubleOrNull().map { it ?: def ?: error("No $display selected.") }
     }
 
-    fun literal(): LiveData<String> = of { this.nextToken() }
+    fun literal(): LiveData<String> = readerOf { it.nextToken() }
 
-    fun textOrNull(): LiveData<String?> = frame { it?.toString() }
+    fun textOrNull(): LiveData<String?> = frameBy { it?.toString() }
     fun text(def: String? = null, display: String = "text"): LiveData<String> {
-        return frame { it?.toString() ?: def ?: error("No $display selected.") }
+        return frameBy { it?.toString() ?: def ?: error("No $display selected.") }
     }
 
-    fun multilineOrNull(): LiveData<List<String>?> = frame { it?.liveStringList }
+    fun multilineOrNull(): LiveData<List<String>?> = frameBy { it?.liveStringList }
     fun multiline(def: List<String>? = null, display: String = "multiline text"): LiveData<List<String>> {
-        return frame { it?.liveStringList ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveStringList ?: def ?: error("No $display selected.") }
     }
 
-    fun stringOrList(): LiveData<Any> = frame {
+    fun stringOrList(): LiveData<Any> = frameBy {
         when (it) {
             is String -> it
             is Array<*> -> {
@@ -292,34 +289,34 @@ open class BacikalReader(private val source: QuestReader) {
         }
     }
 
-    fun vectorOrNull(): LiveData<Vector?> = frame { it?.liveVector }
+    fun vectorOrNull(): LiveData<Vector?> = frameBy { it?.liveVector }
     fun vector(def: Vector? = null, display: String = "vector"): LiveData<Vector> {
-        return frame { it?.liveVector ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveVector ?: def ?: error("No $display selected.") }
     }
 
-    fun locationOrNull(): LiveData<Location?> = frame { it?.liveLocation }
+    fun locationOrNull(): LiveData<Location?> = frameBy { it?.liveLocation }
     fun location(def: Location? = null, display: String = "location"): LiveData<Location> {
-        return frame { it?.liveLocation ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveLocation ?: def ?: error("No $display selected.") }
     }
 
-    fun colorOrNull(): LiveData<Color?> = frame { it?.liveColor }
+    fun colorOrNull(): LiveData<Color?> = frameBy { it?.liveColor }
     fun color(def: Color? = null, display: String = "color"): LiveData<Color> {
-        return frame { it?.liveColor ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveColor ?: def ?: error("No $display selected.") }
     }
 
-    fun entityOrNull(): LiveData<Entity?> = frame { it?.liveEntity }
+    fun entityOrNull(): LiveData<Entity?> = frameBy { it?.liveEntity }
     fun entity(def: Entity? = null, display: String = "entity"): LiveData<Entity> {
-        return frame { it?.liveEntity ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveEntity ?: def ?: error("No $display selected.") }
     }
 
-    fun playerOrNull(): LiveData<Player?> = frame { it?.livePlayer }
+    fun playerOrNull(): LiveData<Player?> = frameBy { it?.livePlayer }
     fun player(def: Player? = null, display: String = "player"): LiveData<Player> {
-        return frame { it?.livePlayer ?: def ?: error("No $display selected.") }
+        return frameBy { it?.livePlayer ?: def ?: error("No $display selected.") }
     }
 
-    fun itemOrNull(): LiveData<ItemStack?> = frame { it?.liveItemStack }
+    fun itemOrNull(): LiveData<ItemStack?> = frameBy { it?.liveItemStack }
     fun item(def: ItemStack? = null, display: String = "itemStack"): LiveData<ItemStack> {
-        return frame { it?.liveItemStack ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveItemStack ?: def ?: error("No $display selected.") }
     }
 
     fun applyLiveData(vararg liveData: LiveData<*>) {
@@ -345,11 +342,11 @@ open class BacikalReader(private val source: QuestReader) {
         while (peekToken().matches(argumentPrefixPattern)) {
             val prefix = nextToken().substring(1)
             for (index in startIndex..endIndex) {
-                (liveData[index] as LiveDataProxy<*>).accept(prefix, this)
+                (liveData[index] as LiveDataProxy<*>).accept(prefix, reader = this)
             }
         }
 
-        if (endIndex < liveData.lastIndex) {
+        if (liveData.last() !is LiveDataProxy<*>) {
             liveData.last().accept(reader = this)
         }
     }
