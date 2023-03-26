@@ -34,7 +34,9 @@ var ItemStack.damage: Int
     set(value) {
         // 1.13+
         if (MinecraftVersion.major >= 5) {
-            (this.itemMeta as? Damageable)?.damage = value
+            val meta = this.itemMeta as? Damageable ?: return
+            meta.damage = value
+            this.itemMeta = meta
         } else {
             this.durability = value.toShort()
         }

@@ -68,6 +68,10 @@ object ActionItemLore : ActionItem.Resolver {
                                 }
                                 lore.add(cursor + 1, line)
                             }
+                            else -> {
+                                // 索引未定义，直接添加元素
+                                lore += line
+                            }
                         }
 
                         // 存入数据

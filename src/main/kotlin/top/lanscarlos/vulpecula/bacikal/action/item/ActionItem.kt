@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.bacikal.action.item
 import org.bukkit.inventory.ItemStack
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptActionParser
@@ -179,7 +178,6 @@ class ActionItem : QuestAction<Any?>() {
          * 运行
          * */
         open fun accept(frame: ScriptFrame): CompletableFuture<T> {
-            info("Handler accept... x1")
             return parser.action.run(frame)
         }
     }

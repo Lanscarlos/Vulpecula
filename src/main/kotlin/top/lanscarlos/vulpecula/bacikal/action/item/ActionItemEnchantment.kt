@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.action.item
 
 import org.bukkit.enchantments.Enchantment
+import taboolib.common.platform.function.info
 
 /**
  * Vulpecula
@@ -139,7 +140,8 @@ object ActionItemEnchantment : ActionItem.Resolver {
         }
     }
 
+    @Suppress("deprecation")
     private fun String.asEnchantment(): Enchantment? {
-        return Enchantment.values().firstOrNull { it.key.key.equals(this, true) }
+        return Enchantment.values().firstOrNull { it.name.equals(this, true) }
     }
 }

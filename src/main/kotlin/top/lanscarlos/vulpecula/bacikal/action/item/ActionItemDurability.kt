@@ -29,7 +29,7 @@ object ActionItemDurability : ActionItem.Resolver {
                     }
                 }
             }
-            "sub", "take" -> {
+            "sub", "take", "damage", "dmg" -> {
                 reader.transfer {
                     combine(
                         source,
