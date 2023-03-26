@@ -14,6 +14,7 @@ import kotlin.math.*
  * @author Lanscarlos
  * @since 2022-11-10 21:04
  */
+@Deprecated("")
 object ActionMaths {
 
     @VulKetherParser(id = "pow", name = ["pow"])
