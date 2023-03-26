@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
+import taboolib.common.platform.function.info
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
@@ -31,19 +32,23 @@ object ActionMemory {
     fun parser() = bacikal {
         combine(
             text("key"),
-            optional("to", then = any(), def = "@REMOVE"),
+            optional("to", then = any(), def = "@GET"),
             optional("by", "with", then = any()),
             optional("using", then = text("default"), def = "default")
         ) { key, value, unique, storage ->
-            if (value == "@REMOVE") {
-                // 删除变量
-                setMemory(this, key, null, unique, storage)
-            } else if (value != null) {
-                // 设置变量
-                setMemory(this, key, value, unique, storage)
-            } else {
-                // 获取变量
-                getMemory(this, key, unique, storage)
+            when (value) {
+                "@GET" -> {
+                    // 获取变量
+                    getMemory(this, key, unique, storage)
+                }
+                "@REMOVE", "@DELETE" -> {
+                    // 删除变量
+                    setMemory(this, key, null, unique, storage)
+                }
+                else -> {
+                    // 设置变量
+                    setMemory(this, key, value, unique, storage)
+                }
             }
         }
     }
