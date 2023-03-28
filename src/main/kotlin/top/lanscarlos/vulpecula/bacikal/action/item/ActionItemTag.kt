@@ -33,7 +33,28 @@ object ActionItemTag : ActionItem.Resolver {
                         trim("to", then = any())
                     ) { item, path, value ->
                         val tag = item.getItemTag()
-                        tag.putDeep(path, value)
+                        if (value == "@REMOVE") {
+                            // 删除数据
+                            tag.removeDeep(path)
+                        } else {
+                            // 设置数据
+                            tag.putDeep(path, value)
+                        }
+                        val newItem = item.setItemTag(tag)
+
+                        // 将 nbt 更新后的新物品 meta 转入原物品
+                        item.also { it.itemMeta = newItem.itemMeta }
+                    }
+                }
+            }
+            "remove" -> {
+                reader.transfer {
+                    combine(
+                        source,
+                        text(display = "path")
+                    ) { item, path ->
+                        val tag = item.getItemTag()
+                        tag.removeDeep(path)
                         val newItem = item.setItemTag(tag)
 
                         // 将 nbt 更新后的新物品 meta 转入原物品
