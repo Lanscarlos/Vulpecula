@@ -40,18 +40,11 @@ class CustomCommand(
             it.name.equals(value?.toString(), true)
         } ?: PermissionDefault.OP
     }
-    val main by wrapper.read("main") {
-        if (it != null) {
-            // 新配置
-            it as ConfigurationSection
-        } else {
-            // 旧配置
-            legacy = true
-            wrapper.root!!.getConfigurationSection("components.main")!!
-        }
+    val main by wrapper.read("main") { section ->
+        section as? ConfigurationSection
     }
     val components by wrapper.read("components") { section ->
-        section as ConfigurationSection
+        section as? ConfigurationSection
     }
 
     lateinit var root: CommandBase
@@ -63,53 +56,40 @@ class CustomCommand(
         register()
     }
 
-    fun buildMain() {
-        root = CommandComponentBuilder("main", main, false).build(-1) as CommandBase
+    private fun buildMain() {
+        root = CommandComponentBuilder("main", main ?: Configuration.empty()).build(-1) as CommandBase
     }
 
-    fun buildComponents() {
-        val section = components
+    private fun buildComponents() {
+        val section = components ?: return
 
         /*
         * 判断是否为新配置
         * 新配置会拥有 main 节点
         * */
-        if (wrapper.root!!.contains("main")) {
-            val loaded = mutableMapOf<String, CommandComponentBuilder>()
-            val entry = mutableSetOf<CommandComponentBuilder>() // 与 root 直接相连的二级节点，构建时的入口
+        val loaded = mutableMapOf<String, CommandComponentBuilder>()
+        val entry = mutableSetOf<CommandComponentBuilder>() // 与 root 直接相连的二级节点，构建时的入口
 
-            // 加载所有节点
-            for (key in section.getKeys(false)) {
-                val node = section.getConfigurationSection(key) ?: continue
-                loaded[key] = CommandComponentBuilder(key, node, false)
-            }
+        // 加载所有节点
+        for (key in section.getKeys(false)) {
+            val node = section.getConfigurationSection(key) ?: continue
+            loaded[key] = CommandComponentBuilder(key, node)
+        }
 
-            // 处理父子节点关系
-            for (builder in loaded.values) {
-                val parent = builder.section.getString("parent") ?: "main"
+        // 处理父子节点关系
+        for (builder in loaded.values) {
+            val parent = builder.section.getString("parent") ?: "main"
 
-                if (parent == "main") {
-                    entry += builder
-                } else {
-                    loaded[parent]?.children?.plusAssign(builder)
-                }
+            if (parent == "main") {
+                entry += builder
+            } else {
+                loaded[parent]?.children?.plusAssign(builder)
             }
+        }
 
-            // 构建命令组件
-            for (builder in entry) {
-                root.children += builder.build(root.index + 1)
-            }
-        } else {
-            section.getConfigurationSection("dynamic")?.let {
-                root.children += CommandComponentBuilder("dynamic", it, true).build(root.index + 1)
-            }
-
-            section.getConfigurationSection("literal")?.let { next ->
-                for (literal in next.getKeys(false)) {
-                    val node = next.getConfigurationSection(literal) ?: continue
-                    root.children += CommandComponentBuilder(literal, node, true).build(root.index + 1)
-                }
-            }
+        // 构建命令组件
+        for (builder in entry) {
+            root.children += builder.build(root.index + 1)
         }
     }
 

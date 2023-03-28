@@ -26,38 +26,16 @@ import top.lanscarlos.vulpecula.utils.toKetherScript
  * @author Lanscarlos
  * @since 2023-02-09 20:15
  */
-class CommandComponentBuilder(val id: String, val section: ConfigurationSection, val legacy: Boolean) : ScriptCompiler {
+class CommandComponentBuilder(val id: String, val section: ConfigurationSection) : ScriptCompiler {
 
     val children = mutableSetOf<CommandComponentBuilder>()
-
-    init {
-        if (legacy) {
-            section.getConfigurationSection("dynamic")?.let {
-                children += CommandComponentBuilder("dynamic", it, legacy)
-            }
-
-            section.getConfigurationSection("literal")?.let { next ->
-                for (literal in next.getKeys(false)) {
-                    val node = next.getConfigurationSection(literal) ?: continue
-                    children += CommandComponentBuilder(literal, node, legacy)
-                }
-            }
-        }
-    }
 
     fun build(index: Int): CommandComponent {
         val component = when {
             id == "main" -> CommandBase().also { it.createHelper() }
-            legacy -> {
-                if (id == "dynamic") {
-                    buildDynamic(index)
-                } else {
-                    buildDLiteral(index)
-                }
-            }
-            "literal" in section || "aliases" in section -> buildDLiteral(index)
+            "literal" in section || "aliases" in section -> buildLiteral(index)
             "dynamic" in section || "suggest" in section || "optional" in section -> buildDynamic(index)
-            else -> buildDLiteral(index)
+            else -> buildLiteral(index)
         }
 
         section["execute"]?.let {
@@ -82,7 +60,7 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection,
     fun buildDynamic(index: Int) : CommandComponent {
         val component = CommandComponentDynamic(
             index,
-            if (!legacy) section.getString("dynamic") ?: id else section.getString("comment") ?: "...",
+            section.getString("dynamic") ?: id,
             section.getBoolean("optional", false),
             section.getString("permission") ?: ""
         )
@@ -108,11 +86,9 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection,
         return component
     }
 
-    fun buildDLiteral(index: Int): CommandComponent {
+    fun buildLiteral(index: Int): CommandComponent {
 
-        val literal = if (legacy) {
-            listOf(id)
-        } else if (section.contains("literal")) {
+        val literal = if (section.contains("literal")) {
             section.getStringOrList("literal")
         } else {
             section.getStringOrList("aliases").plus(id)
