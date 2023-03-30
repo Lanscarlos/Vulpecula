@@ -13,7 +13,7 @@ import java.awt.Color
  */
 object ActionItemColor : ActionItem.Resolver {
 
-    override val name: Array<String> = arrayOf("consume")
+    override val name: Array<String> = arrayOf("color")
 
     override fun resolve(reader: ActionItem.Reader): ActionItem.Handler<out Any?> {
         return reader.transfer {

@@ -158,7 +158,7 @@ object ActionIfElse {
         return expression
     }
 
-    private val symbols = setOf(
+    private val checkSymbols = setOf(
         "==", "is",
         "!=", "!is", "not",
         "=!", "is!",
@@ -225,7 +225,7 @@ object ActionIfElse {
         val action = reader.readAction()
         reader.mark()
         val next = reader.nextToken().lowercase()
-        return if (next in symbols) {
+        return if (next in checkSymbols) {
             val other = reader.readAction()
             val checkType = CheckType.fromString(next)
             ExpressionActionCheck(action, other, checkType)

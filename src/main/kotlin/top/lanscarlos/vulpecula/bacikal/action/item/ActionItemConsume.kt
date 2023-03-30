@@ -9,13 +9,13 @@ package top.lanscarlos.vulpecula.bacikal.action.item
  */
 object ActionItemConsume : ActionItem.Resolver {
 
-    override val name: Array<String> = arrayOf("color")
+    override val name: Array<String> = arrayOf("consume")
 
     override fun resolve(reader: ActionItem.Reader): ActionItem.Handler<out Any?> {
         return reader.transfer {
             combine(
                 source(),
-                trim("by", "with", then = int(display = "amount"))
+                optional("with", "to", then = int(display = "amount"), def = 1)
             ) { item, amount ->
                 item.amount = (item.amount - amount).coerceIn(0, item.type.maxStackSize)
                 item
