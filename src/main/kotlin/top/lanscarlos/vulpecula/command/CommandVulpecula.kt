@@ -5,11 +5,14 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.command.*
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.expansion.createHelper
+import taboolib.module.kether.KetherShell
+import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.VulpeculaContext
 import top.lanscarlos.vulpecula.bacikal.action.internal.ActionUnicode
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.utils.runActions
+import top.lanscarlos.vulpecula.utils.timing
 import top.lanscarlos.vulpecula.utils.toKetherScript
 
 /**
@@ -26,6 +29,25 @@ object CommandVulpecula {
     val main = mainCommand {
         createHelper()
     }
+
+//    @CommandBody
+//    val test = subCommand {
+//        dynamic {
+//            execute<CommandSender> { sender, _, argument ->
+//                val cache = mutableListOf<Double>()
+//                repeat(10) {
+//                    val start = timing()
+//                    repeat(100000) {
+//                        KetherShell.eval(argument, ScriptOptions(
+//                            sender = adaptCommandSender(sender)
+//                        )).getNow(null)
+//                    }
+//                    cache += timing(start)
+//                }
+//                sender.sendMessage(" §5§l‹ ›§r §7平均耗时: §f${cache.average()}ms")
+//            }
+//        }
+//    }
 
     @CommandBody
     val eval = subCommand {
