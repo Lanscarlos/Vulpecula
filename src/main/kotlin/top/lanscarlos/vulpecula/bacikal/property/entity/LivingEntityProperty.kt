@@ -9,6 +9,7 @@ import taboolib.common.OpenResult
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
 import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveItemStack
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 import top.lanscarlos.vulpecula.utils.coerceDouble
 import top.lanscarlos.vulpecula.utils.coerceFloat
@@ -163,14 +164,14 @@ class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity"
             }
 
             "hand*" -> {
-                instance.equipment?.setItemInHand(value as? ItemStack)
+                instance.equipment?.setItemInHand(value?.liveItemStack)
             }
             "drop-chance-hand*", "chance-hand*" -> {
                 instance.equipment?.itemInHandDropChance = value?.coerceFloat() ?: return OpenResult.successful()
             }
 
             "main", "main-hand", "hand" -> {
-                instance.equipment?.setItemInMainHand(value as? ItemStack)
+                instance.equipment?.setItemInMainHand(value?.liveItemStack)
             }
             "drop-chance-main", "chance-main",
             "drop-chance-main-hand", "chance-main-hand",
@@ -179,7 +180,7 @@ class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity"
             }
 
             "off", "off-hand" -> {
-                instance.equipment?.setItemInOffHand(value as? ItemStack)
+                instance.equipment?.setItemInOffHand(value?.liveItemStack)
             }
             "drop-chance-off", "chance-off",
             "drop-chance-off-hand", "chance-off-hand" -> {
@@ -187,7 +188,7 @@ class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity"
             }
 
             "helmet", "head" -> {
-                instance.equipment?.helmet = value as? ItemStack
+                instance.equipment?.helmet = value?.liveItemStack
             }
             "drop-chance-helmet", "chance-helmet",
             "drop-chance-head", "chance-head" -> {
@@ -195,7 +196,7 @@ class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity"
             }
 
             "chestplate", "chest" -> {
-                instance.equipment?.chestplate = value as? ItemStack
+                instance.equipment?.chestplate = value?.liveItemStack
             }
             "drop-chance-chestplate", "chance-chestplate",
             "drop-chance-chest", "chance-chest" -> {
@@ -203,7 +204,7 @@ class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity"
             }
 
             "leggings", "legs", "leg" -> {
-                instance.equipment?.chestplate = value as? ItemStack
+                instance.equipment?.chestplate = value?.liveItemStack
             }
             "drop-chance-leggings", "chance-leggings",
             "drop-chance-legs", "chance-legs",
@@ -212,7 +213,7 @@ class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity"
             }
 
             "boots", "feet", "foot" -> {
-                instance.equipment?.boots = value as? ItemStack
+                instance.equipment?.boots = value?.liveItemStack
             }
             "drop-chance-boots", "chance-boots",
             "drop-chance-feet", "chance-feet",
