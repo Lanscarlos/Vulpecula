@@ -38,14 +38,14 @@ open class BacikalReader(private val source: QuestReader) {
 
     val argumentPrefixPattern = "-\\D+".toRegex()
     val methods = HashMap<String, () -> Bacikal.Parser<Any?>>()
-    var other: (() -> Bacikal.Parser<Any?>)? = null
+    var other: (() -> Bacikal.Parser<out Any?>)? = null
         private set
 
     fun case(vararg name: String, func: () -> Bacikal.Parser<Any?>) {
         name.forEach { methods[it] = func }
     }
 
-    fun other(func: () -> Bacikal.Parser<Any?>) {
+    fun other(func: () -> Bacikal.Parser<out Any?>) {
         other = func
     }
 
@@ -894,6 +894,508 @@ open class BacikalReader(private val source: QuestReader) {
                 p11.accept(frame)
             ).thenCompose {
                 func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7, it.t8, it.t9, it.t10, it.t11)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7, it.t8, it.t9, it.t10, it.t11, it.t12)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, R> combineOf(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12) -> CompletableFuture<R>
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7, it.t8, it.t9, it.t10, it.t11, it.t12)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame)
+            ).thenApply {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7, it.t8, it.t9, it.t10, it.t11, it.t12, it.t13)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, R> combineOf(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13) -> CompletableFuture<R>
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame)
+            ).thenCompose {
+                func(frame, it.t1, it.t2, it.t3, it.t4, it.t5, it.t6, it.t7, it.t8, it.t9, it.t10, it.t11, it.t12, it.t13)
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        p14: LiveData<P14>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame),
+                p14.accept(frame)
+            ).thenApply {
+                func(
+                    frame,
+                    it.t1,
+                    it.t2,
+                    it.t3,
+                    it.t4,
+                    it.t5,
+                    it.t6,
+                    it.t7,
+                    it.t8,
+                    it.t9,
+                    it.t10,
+                    it.t11,
+                    it.t12,
+                    it.t13,
+                    it.t14
+                )
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, R> combineOf(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        p14: LiveData<P14>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14) -> CompletableFuture<R>
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame),
+                p14.accept(frame)
+            ).thenCompose {
+                func(
+                    frame,
+                    it.t1,
+                    it.t2,
+                    it.t3,
+                    it.t4,
+                    it.t5,
+                    it.t6,
+                    it.t7,
+                    it.t8,
+                    it.t9,
+                    it.t10,
+                    it.t11,
+                    it.t12,
+                    it.t13,
+                    it.t14
+                )
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        p14: LiveData<P14>,
+        p15: LiveData<P15>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame),
+                p14.accept(frame),
+                p15.accept(frame)
+            ).thenApply {
+                func(
+                    frame,
+                    it.t1,
+                    it.t2,
+                    it.t3,
+                    it.t4,
+                    it.t5,
+                    it.t6,
+                    it.t7,
+                    it.t8,
+                    it.t9,
+                    it.t10,
+                    it.t11,
+                    it.t12,
+                    it.t13,
+                    it.t14,
+                    it.t15
+                )
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, R> combineOf(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        p14: LiveData<P14>,
+        p15: LiveData<P15>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15) -> CompletableFuture<R>
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame),
+                p14.accept(frame),
+                p15.accept(frame)
+            ).thenCompose {
+                func(
+                    frame,
+                    it.t1,
+                    it.t2,
+                    it.t3,
+                    it.t4,
+                    it.t5,
+                    it.t6,
+                    it.t7,
+                    it.t8,
+                    it.t9,
+                    it.t10,
+                    it.t11,
+                    it.t12,
+                    it.t13,
+                    it.t14,
+                    it.t15
+                )
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, R> combine(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        p14: LiveData<P14>,
+        p15: LiveData<P15>,
+        p16: LiveData<P16>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16) -> R
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame),
+                p14.accept(frame),
+                p15.accept(frame),
+                p16.accept(frame)
+            ).thenApply {
+                func(
+                    frame,
+                    it.t1,
+                    it.t2,
+                    it.t3,
+                    it.t4,
+                    it.t5,
+                    it.t6,
+                    it.t7,
+                    it.t8,
+                    it.t9,
+                    it.t10,
+                    it.t11,
+                    it.t12,
+                    it.t13,
+                    it.t14,
+                    it.t15,
+                    it.t16
+                )
+            }
+        }
+    }
+
+    fun <P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, R> combineOf(
+        p1: LiveData<P1>,
+        p2: LiveData<P2>,
+        p3: LiveData<P3>,
+        p4: LiveData<P4>,
+        p5: LiveData<P5>,
+        p6: LiveData<P6>,
+        p7: LiveData<P7>,
+        p8: LiveData<P8>,
+        p9: LiveData<P9>,
+        p10: LiveData<P10>,
+        p11: LiveData<P11>,
+        p12: LiveData<P12>,
+        p13: LiveData<P13>,
+        p14: LiveData<P14>,
+        p15: LiveData<P15>,
+        p16: LiveData<P16>,
+        func: ScriptFrame.(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16) -> CompletableFuture<R>
+    ): Bacikal.Parser<R> {
+        applyLiveData(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
+        return Bacikal.Parser { frame ->
+            applicative(
+                p1.accept(frame),
+                p2.accept(frame),
+                p3.accept(frame),
+                p4.accept(frame),
+                p5.accept(frame),
+                p6.accept(frame),
+                p7.accept(frame),
+                p8.accept(frame),
+                p9.accept(frame),
+                p10.accept(frame),
+                p11.accept(frame),
+                p12.accept(frame),
+                p13.accept(frame),
+                p14.accept(frame),
+                p15.accept(frame),
+                p16.accept(frame)
+            ).thenCompose {
+                func(
+                    frame,
+                    it.t1,
+                    it.t2,
+                    it.t3,
+                    it.t4,
+                    it.t5,
+                    it.t6,
+                    it.t7,
+                    it.t8,
+                    it.t9,
+                    it.t10,
+                    it.t11,
+                    it.t12,
+                    it.t13,
+                    it.t14,
+                    it.t15,
+                    it.t16
+                )
             }
         }
     }
