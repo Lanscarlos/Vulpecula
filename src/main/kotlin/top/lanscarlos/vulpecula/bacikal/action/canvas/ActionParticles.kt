@@ -1,16 +1,8 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
-import org.bukkit.entity.Player
-import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.function.adaptPlayer
-import taboolib.common.util.Location
-import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.readLocation
-import top.lanscarlos.vulpecula.utils.*
-import java.util.concurrent.CompletableFuture
+import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
 
 /**
  * Vulpecula
@@ -19,74 +11,57 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-11-10 19:29
  */
-class ActionParticles(
-    val viewers: ParsedAction<*>,
-    val options: Map<String, LiveData<*>>
-) : ScriptAction<Any?>() {
+object ActionParticles {
 
-    override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        return options.mapValues {
-            it.value.getOrNull(frame)
-        }.plus("viewers" to frame.run(viewers)).thenTake().thenApply { args ->
+    /**
+     *
+     * particles play at &loc -x -xx
+     *
+     * */
+    @BacikalParser(
+        id = "particles",
+        name = ["particles"]
+    )
+    fun parser() = bacikalSwitch {
+        case("play") {
+            combine(
+                optional("at", then = location()),
+                argument("viewer", then = ActionViewers.viewers()),
+                argument("type", "t", then = text(display = "type")),
+                argument("count", "c", then = int(display = "count")),
+                argument("speed", "sp", then = double(display = "speed")),
+                argument("offset", "o", then = vector(display = "offset")),
+                argument("spread", "s", then = vector(display = "spread")),
+                argument("velocity", "vel", "v", then = vector(display = "velocity")),
+                argument("size", then = float(display = "size")),
+                argument("color", then = color(display = "color")),
+                argument("transition", then = color(display = "transition")),
+                argument("material", "mat", then = text(display = "material")),
+                argument("data", then = int(display = "data")),
+                argument("name", then = text(display = "name")),
+                argument("lore", then = multiline(display = "lore")),
+                argument("customModelData", "model", then = int(display = "model"))
+            ) { location, viewers, type, count, speed, offset, spread, velocity, size, color, transition, material, data, name, lore, model ->
+                val brush = CanvasBrush()
+                ActionBrush.modify(
+                    brush,
+                    type,
+                    count,
+                    speed,
+                    offset,
+                    spread,
+                    velocity,
+                    size,
+                    color,
+                    transition,
+                    material,
+                    data,
+                    name,
+                    lore,
+                    model
+                )
 
-            val brush = CanvasBrush()
-            val location = args["location"] as? Location ?: frame.playerOrNull()?.location ?: error("No location selected.")
-            val viewers = when (val value = args["viewers"]) {
-                is ProxyPlayer -> listOf(value)
-                is Player -> listOf(adaptPlayer(value))
-                is Collection<*> -> {
-                    value.mapNotNull {
-                        when (it) {
-                            is ProxyPlayer -> it
-                            is Player -> adaptPlayer(it)
-                            else -> null
-                        }
-                    }
-                }
-                else -> listOf(frame.player())
-            }
-
-            for (option in args) {
-                ActionBrush.modify(brush, option.key, option.value)
-            }
-
-            brush.draw(location, viewers)
-        }
-    }
-
-    companion object {
-
-        /**
-         *
-         * particles play at &loc -x -xx
-         *
-         * */
-        @BacikalParser(
-            id = "particles",
-            name = ["particles"]
-        )
-        fun parser() = scriptParser { reader ->
-            reader.switch {
-                case("play") {
-                    val options = mutableMapOf<String, LiveData<*>>()
-
-                    if (reader.hasNextToken("at")) {
-                        options["location"] = reader.readLocation()
-                    }
-
-                    val viewers = mutableSetOf<Any>()
-
-                    while (reader.nextPeek().startsWith('-')) {
-                        when (val it = reader.nextToken().substring(1)) {
-                            "viewers", "viewer" -> {
-                                viewers.addAll(ActionViewers.read(reader))
-                            }
-                            else -> ActionBrush.read(reader, it, options)
-                        }
-                    }
-
-                    ActionParticles(ParsedAction(ActionViewers(viewers)), options)
-                }
+                brush.draw(location ?: this.player().location, viewers ?: listOf(this.player()))
             }
         }
     }

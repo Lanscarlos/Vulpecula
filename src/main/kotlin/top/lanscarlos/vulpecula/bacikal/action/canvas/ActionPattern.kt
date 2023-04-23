@@ -1,12 +1,11 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.util.Location
-import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
+import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.bacikal.action.canvas.pattern.CanvasPattern
-import top.lanscarlos.vulpecula.kether.live.readLocation
+import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
 import top.lanscarlos.vulpecula.utils.*
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -15,76 +14,65 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-11-10 11:14
  */
-class ActionPattern(val builder: CanvasPattern.Builder) : ScriptAction<Any>() {
+object ActionPattern {
 
-    override fun run(frame: ScriptFrame): CompletableFuture<Any> {
-        return builder.build(frame).thenApply { pattern ->
-            frame.setVariable(ActionCanvas.VARIABLE_PATTERN, pattern)
+    /**
+     *
+     * 获取图案的下一点坐标
+     * pattern next [origin &origin] [by &pattern]
+     *
+     * 获取图案的所有点坐标
+     * pattern points [origin &origin] [by &pattern]
+     *
+     * 定义图案
+     * pattern [other token]
+     * pattern line [from xxx] to xxx
+     * pattern
+     *
+     * */
+    @BacikalParser(
+        id = "pattern",
+        name = ["pattern"],
+        namespace = "vulpecula-canvas"
+    )
+    fun parser() = bacikalSwitch {
+        case("next") {
+            combine(
+                optional("origin", then = location()),
+                optional("by", then = pattern())
+            ) { origin, _pattern ->
+                val pattern = _pattern ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN)
+                ?: error("No canvas pattern selected.")
+
+                val location =
+                    origin ?: this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
+                    ?: error("No canvas base or origin location selected.")
+
+                pattern.nextPoint(location)
+            }
+        }
+        case("points") {
+            combine(
+                optional("origin", then = location()),
+                optional("by", then = pattern())
+            ) { origin, _pattern ->
+                val pattern = _pattern ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN)
+                ?: error("No canvas pattern selected.")
+
+                val location =
+                    origin ?: this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
+                    ?: error("No canvas base or origin location selected.")
+
+                pattern.points(location)
+            }
+        }
+        other {
+            val name = this.nextToken()
+            CanvasPattern.getResolver(name)?.resolve(this) ?: error("Unknown pattern type: \"$name\"")
         }
     }
 
-    companion object {
-
-        /**
-         *
-         * 获取图案的下一点坐标
-         * pattern next [origin &origin] [by &pattern]
-         *
-         * 获取图案的所有点坐标
-         * pattern points [origin &origin] [by &pattern]
-         *
-         * 定义图案
-         * pattern [other token]
-         * pattern line [from xxx] to xxx
-         * pattern
-         *
-         * */
-        @BacikalParser(
-            id = "pattern",
-            name = ["pattern"],
-            namespace = "vulpecula-canvas"
-        )
-        fun parser() = scriptParser { reader ->
-            when (val name = reader.nextToken()) {
-                "next" -> {
-                    val originRaw = if (reader.hasNextToken("origin")) reader.readLocation() else null
-                    val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
-
-                    actionTake {
-                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
-                        listOf(
-                            if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),
-                            patternRaw?.let { this.run(it) }
-                        ).thenTake().thenApply { args ->
-                            val pattern = args[0] as? CanvasPattern ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN) ?: error("No canvas pattern selected.")
-                            val origin = args[1] as? Location ?: base ?: error("No canvas base or origin location selected.")
-
-                            pattern.nextPoint(origin)
-                        }
-                    }
-                }
-                "points" -> {
-                    val originRaw = if (reader.hasNextToken("origin")) reader.readLocation() else null
-                    val patternRaw = if (reader.hasNextToken("by")) reader.nextBlock() else null
-
-                    actionTake {
-                        val base = this.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: this.playerOrNull()?.location
-                        listOf(
-                            if (base != null) originRaw?.get(this, base) else originRaw?.getOrNull(this),
-                            patternRaw?.let { this.run(it) }
-                        ).thenTake().thenApply { args ->
-                            val pattern = args[0] as? CanvasPattern ?: this.getVariable<CanvasPattern>(ActionCanvas.VARIABLE_PATTERN) ?: error("No canvas pattern selected.")
-                            val origin = args[1] as? Location ?: base ?: error("No canvas base or origin location selected.")
-
-                            pattern.points(origin)
-                        }
-                    }
-                }
-                else -> {
-                    val patternReader = CanvasPattern.getReader(name) ?: error("Unknown pattern type: \"$name\"")
-                    ActionPattern(patternReader.read(reader))
-                }
-            }
-        }
+    fun pattern(): LiveData<CanvasPattern?> {
+        return LiveData.frameBy { it as? CanvasPattern }
     }
 }

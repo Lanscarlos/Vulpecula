@@ -1,21 +1,15 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
-import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
-import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.live.LocationLiveData
-import top.lanscarlos.vulpecula.kether.live.VectorLiveData
-import top.lanscarlos.vulpecula.kether.live.readLocation
-import top.lanscarlos.vulpecula.kether.live.readVector
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
+import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
 import top.lanscarlos.vulpecula.utils.*
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -24,14 +18,72 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-11-09 00:20
  */
-class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
+object ActionDraw {
 
-    override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
+    /**
+     *
+     * 定义基准点, 即原点
+     * draw origin &loc
+     * draw base &loc
+     *
+     * 根据偏移量作画
+     * draw &x &y &z
+     *
+     * 根据向量偏移作画
+     * draw by/with &vec
+     *
+     * 根据坐标直接作画
+     * draw at &loc
+     * draw at pattern next
+     * draw at pattern points
+     *
+     * */
+    @BacikalParser(
+        id = "draw",
+        name = ["draw", "draw"],
+        namespace = "vulpecula-canvas"
+    )
+    fun parser() = bacikalSwitch {
+        case("origin", "base") {
+            combine(
+                locationOrNull()
+            ) { location ->
+                this.setVariable(ActionCanvas.VARIABLE_ORIGIN, location)
+            }
+        }
+        case("by", "with") {
+            combine(
+                vector()
+            ) { vector ->
+                draw(this, vector)
+            }
+        }
+        case("at") {
+            combine(
+                location()
+            ) { location ->
+                draw(this, location)
+            }
+        }
+        other {
+            combine(
+                double(0.0),
+                double(0.0),
+                double(0.0)
+            ) { x, y, z ->
+                draw(this, Vector(x, y, z))
+            }
+        }
+    }
 
+    fun draw(frame: ScriptFrame, target: Any) {
+
+        // 获取笔刷对象
         val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
             frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
         }
 
+        // 获取观察者对象
         val viewers = when (val value = frame.getVariable<Any>(ActionCanvas.VARIABLE_VIEWERS)) {
             is ProxyPlayer -> listOf(value)
             is Player -> listOf(adaptPlayer(value))
@@ -47,112 +99,22 @@ class ActionDraw(val raw: Any) : ScriptAction<Any?>() {
             else -> listOf(frame.player())
         }
 
+        // 获取原点
         val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.playerOrNull()?.location
 
-        when (raw) {
-            is LocationLiveData -> {
-                return if (base != null) {
-                    raw.get(frame, base).thenApply {
-                        brush.draw(it, viewers)
-                    }
-                } else {
-                    raw.getOrNull(frame).thenApply {
-                        brush.draw(it ?: error("No location selected."), viewers)
-                    }
-                }
+        // 获取作画位置
+        val locations = when (target) {
+            is Location -> listOf(target)
+            is Vector -> listOf(base?.clone()?.add(target) ?: error("No base or origin selected."))
+            is Array<*> -> {
+                target.mapNotNull { it?.liveLocation }
             }
-            is VectorLiveData -> {
-                return raw.get(frame, Vector(0, 0, 0)).thenApply { offset ->
-                    val location = base?.clone()?.add(offset) ?: error("No base or origin selected.")
-                    brush.draw(location, viewers)
-                }
+            is Collection<*> -> {
+                target.mapNotNull { it?.liveLocation }
             }
-            is ParsedAction<*> -> {
-                return frame.run(raw).thenApply { value ->
-                    val location = when (value) {
-                        is Location -> value
-                        is org.bukkit.Location -> value.toProxyLocation()
-                        is ProxyPlayer -> value.location
-                        is Entity -> value.location.toProxyLocation()
-                        is Vector -> Location(base?.world, value.x, value.y, value.z)
-                        is org.bukkit.util.Vector -> Location(base?.world, value.x, value.y, value.z)
-                        is Collection<*> -> {
-                            val locations = value.mapNotNull { content ->
-                                when (content) {
-                                    is Location -> content
-                                    is org.bukkit.Location -> content.toProxyLocation()
-                                    is ProxyPlayer -> content.location
-                                    is Entity -> content.location.toProxyLocation()
-                                    is Vector -> Location(base?.world, content.x, content.y, content.z)
-                                    is org.bukkit.util.Vector -> Location(base?.world, content.x, content.y, content.z)
-                                    else -> null
-                                }
-                            }
-
-                            for (location in locations) {
-                                brush.draw(location, viewers)
-                            }
-
-                            return@thenApply
-                        }
-                        else -> base
-                    }
-
-                    brush.draw(location ?: error("No location selected."), viewers)
-                }
-            }
-            else -> return CompletableFuture.completedFuture(false)
+            else -> listOf(base ?: error("No base or origin selected."))
         }
-    }
 
-    companion object {
-
-        /**
-         *
-         * 定义基准点, 即原点
-         * draw origin &loc
-         * draw base &loc
-         *
-         * 根据偏移量作画
-         * draw &x &y &z
-         *
-         * 根据向量偏移作画
-         * draw by/with &vec
-         *
-         * 根据坐标直接作画
-         * draw at &loc
-         * draw at pattern next
-         * draw at pattern points
-         *
-         * */
-        @BacikalParser(
-            id = "draw",
-            name = ["draw", "draw"],
-            namespace = "vulpecula-canvas"
-        )
-        fun parser() = scriptParser { reader ->
-            reader.mark()
-            when (reader.nextToken()) {
-                "origin", "base" -> {
-                    val location = reader.readLocation()
-                    actionTake {
-                        location.getOrNull(this).thenApply {
-                            this.setVariable(ActionCanvas.VARIABLE_ORIGIN, it ?: this.playerOrNull()?.location)
-                            return@thenApply it
-                        }
-                    }
-                }
-                "by", "with" -> {
-                    ActionDraw(reader.readVector(false))
-                }
-                "at" -> {
-                    ActionDraw(reader.nextBlock())
-                }
-                else -> {
-                    reader.reset()
-                    ActionDraw(reader.readVector(true))
-                }
-            }
-        }
+        brush.draw(locations, viewers)
     }
 }

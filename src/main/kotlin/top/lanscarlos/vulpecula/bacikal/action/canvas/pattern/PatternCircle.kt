@@ -1,10 +1,8 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.util.Location
-import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.kether.live.LiveData
-import top.lanscarlos.vulpecula.kether.live.readDouble
-import top.lanscarlos.vulpecula.utils.*
+import top.lanscarlos.vulpecula.bacikal.Bacikal
+import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -16,11 +14,11 @@ import kotlin.math.sin
  * @since 2022-11-10 10:33
  */
 
-class PatternCircle : CanvasPattern {
-
-    var radius = 1.0
-    var step = 10.0
-    var yOffset = 0.0
+class PatternCircle(
+    val radius: Double = 1.0,
+    val step: Double = 10.0,
+    val yOffset: Double = 0.0
+) : CanvasPattern {
 
     var currentAngle = 0.0
 
@@ -45,38 +43,21 @@ class PatternCircle : CanvasPattern {
         return origin.clone().add(x, yOffset, z)
     }
 
-    companion object : CanvasPattern.Reader {
+    companion object : CanvasPattern.Resolver {
 
-        override val name = arrayOf("Circle")
+        override val name = arrayOf("circle")
 
-        override fun read(reader: QuestReader): CanvasPattern.Builder {
-            val options = mutableMapOf<String, LiveData<*>>()
-
-            while (reader.nextPeek().startsWith('-')) {
-                when (reader.nextToken().substring(1)) {
-                    "radius", "r" -> {
-                        options["radius"] = reader.readDouble()
-                    }
-                    "step", "s" -> {
-                        options["step"] = reader.readDouble()
-                    }
-                    "y-offset", "y" -> {
-                        options["y-offset"] = reader.readDouble()
-                    }
-                }
-            }
-
-            return buildFuture {
-                options.mapValues { it.value.getOrNull(this) }.thenTake().thenApply { args ->
-                    val pattern = PatternCircle()
-                    for (option in args) {
-                        when (option.key) {
-                            "radius" -> pattern.radius = option.value?.coerceDouble() ?: continue
-                            "step" -> pattern.step = option.value?.coerceDouble() ?: continue
-                            "y-offset" -> pattern.yOffset = option.value?.coerceDouble() ?: continue
-                        }
-                    }
-                    return@thenApply pattern
+        /**
+         * pattern circle -radius &radius -step &step -y-offset &yOffset
+         * */
+        override fun resolve(reader: BacikalReader): Bacikal.Parser<CanvasPattern> {
+            return reader.run {
+                combine(
+                    argument("radius", "r", then = double(1.0), def = 1.0),
+                    argument("step", "s", then = double(10.0), def = 10.0),
+                    argument("y-offset", "y", then = double(0.0), def = 0.0)
+                ) { radius, step, yOffset ->
+                    PatternCircle(radius, step, yOffset)
                 }
             }
         }

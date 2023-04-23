@@ -33,7 +33,12 @@ object ActionIfElse {
     )
     fun parser() = bacikal {
         combineOf(
-            expression(),
+            LiveData {
+                val expression = buildExpression(parseExpression(reader = this))
+                Bacikal.Action { frame ->
+                    evaluate(frame, expression)
+                }
+            },
             trim("then", then = action()),
             optional("else", then = action())
         ) { result, pass, deny ->
@@ -43,15 +48,6 @@ object ActionIfElse {
                 this.run(deny)
             } else {
                 CompletableFuture.completedFuture(null)
-            }
-        }
-    }
-
-    private fun BacikalReader.expression(): LiveData<Boolean> {
-        return LiveData {
-            val expression = buildExpression(parseExpression(reader = this@expression))
-            Bacikal.Action { frame ->
-                evaluate(frame, expression)
             }
         }
     }

@@ -2,16 +2,11 @@ package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.platform.ProxyParticle
 import taboolib.common.util.Vector
-import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptAction
-import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.scriptParser
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.kether.live.*
+import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.utils.*
 import java.awt.Color
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -21,154 +16,152 @@ import java.util.concurrent.CompletableFuture
  * @since 2022-11-08 23:25
  */
 
-class ActionBrush(val options: Map<String, LiveData<*>>) : ScriptAction<CanvasBrush>() {
+object ActionBrush {
 
-    override fun run(frame: ScriptFrame): CompletableFuture<CanvasBrush> {
-        val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
-            frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
-        }
-        return options.mapValues { it.value.getOrNull(frame) }.thenTake().thenApply { args ->
-            for (it in args) {
-                modify(brush, it.key, it.value)
+    @BacikalParser(
+        id = "brush",
+        name = ["brush", "pen"],
+        namespace = "vulpecula-canvas"
+    )
+    fun parser() = bacikal {
+        combine(
+            argument("type", "t", then = text(display = "type")),
+            argument("count", "c", then = int(display = "count")),
+            argument("speed", "sp", then = double(display = "speed")),
+            argument("offset", "o", then = vector(display = "offset")),
+            argument("spread", "s", then = vector(display = "spread")),
+            argument("velocity", "vel", "v", then = vector(display = "velocity")),
+            argument("size", then = float(display = "size")),
+            argument("color", then = color(display = "color")),
+            argument("transition", then = color(display = "transition")),
+            argument("material", "mat", then = text(display = "material")),
+            argument("data", then = int(display = "data")),
+            argument("name", then = text(display = "name")),
+            argument("lore", then = multiline(display = "lore")),
+            argument("customModelData", "model", then = int(display = "model"))
+        ) { type, count, speed, offset, spread, velocity, size, color, transition, material, data, name, lore, model ->
+
+            // 获取笔刷对象
+            val brush = this.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
+                this.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
             }
 
-            return@thenApply brush
+            modify(
+                brush,
+                type,
+                count,
+                speed,
+                offset,
+                spread,
+                velocity,
+                size,
+                color,
+                transition,
+                material,
+                data,
+                name,
+                lore,
+                model
+            )
         }
     }
 
-    companion object {
-
-        @BacikalParser(
-            id = "brush",
-            name = ["brush", "pen"],
-            namespace = "vulpecula-canvas"
-        )
-        fun parser() = scriptParser { reader ->
-            val options = mutableMapOf<String, LiveData<*>>()
-            while (reader.nextPeek().startsWith('-')) {
-                read(reader, reader.nextToken().substring(1), options)
-            }
-            ActionBrush(options)
+    fun modify(
+        brush: CanvasBrush,
+        type: String?,
+        count: Int?,
+        speed: Double?,
+        offset: Vector?,
+        spread: Vector?,
+        velocity: Vector?,
+        size: Float?,
+        color: Color?,
+        transition: Color?,
+        material: String?,
+        data: Int?,
+        name: String?,
+        lore: List<String>?,
+        model: Int?
+    ) {
+        if (type != null) {
+            brush.particle = ProxyParticle.values().firstOrNull {
+                it.name.equals(type, true)
+            } ?: error("Unknown particle type: \"$type\"!")
         }
 
-        /**
-         * 读取与粒子笔刷相关的参数
-         *
-         * @param option 参数名
-         * @param options 参数集合缓存
-         * */
-        fun read(reader: QuestReader, option: String, options: MutableMap<String, LiveData<*>>) {
-            when (option) {
-                "type", "t" -> {
-                    options["type"] = reader.readString()
-                }
-                "count", "c" -> {
-                    options["count"] = reader.readInt()
-                }
-                "speed", "sp" -> {
-                    options["speed"] = reader.readDouble()
-                }
-                "offset", "o" -> {
-                    options["offset"] = reader.readVector(!reader.hasNextToken("to"))
-                }
-                "spread", "s" -> {
-                    options["spread"] = reader.readVector(!reader.hasNextToken("to"))
-                }
-                "velocity", "vel", "v" -> {
-                    options["velocity"] = reader.readVector(!reader.hasNextToken("to"))
-                }
-
-                "size" -> {
-                    options["size"] = reader.readInt()
-                }
-                "color" -> {
-                    options["color"] = reader.readColor()
-                    if (reader.hasNextToken("to")) {
-                        options["transition"] = reader.readColor()
-                    }
-                }
-                "transition" -> {
-                    options["transition"] = reader.readColor()
-                }
-                "material", "mat" -> {
-                    options["material"] = reader.readString()
-                    if (reader.hasNextToken("with")) {
-                        options["data"] = reader.readInt()
-                    }
-                }
-                "data" -> {
-                    options["data"] = reader.readInt()
-                }
-                "name" -> {
-                    options["name"] = reader.readString()
-                }
-                "lore" -> {
-                    options["lore"] = reader.readStringList()
-                }
-                "customModelData", "model" -> {
-                    options["model"] = reader.readInt()
-                }
-            }
+        if (count != null) {
+            brush.count = count
         }
 
-        /**
-         * 修改笔刷属性
-         *
-         * @param option 属性名
-         * @param value 属性值
-         * */
-        @Suppress("UNCHECKED_CAST")
-        fun modify(brush: CanvasBrush, option: String, value: Any?) {
-            when (option) {
-                "type" -> {
-                    val type = value?.toString()?.uppercase() ?: return
-                    brush.particle = ProxyParticle.values().firstOrNull {
-                        it.name.equals(type, true)
-                    } ?: error("Unknown particle type: \"$type\"!")
-                }
-                "count" -> brush.count = value?.coerceInt() ?: return
-                "speed" -> brush.speed = value?.coerceDouble() ?: return
-                "offset" -> brush.offset = value as? Vector ?: return
-                "spread" -> brush.vector = value as? Vector ?: return
-                "velocity" -> {
-                    brush.vector = value as? Vector ?: return
+        if (speed != null) {
+            brush.speed = speed
+        }
+
+        if (offset != null) {
+            brush.offset = offset
+        }
+
+        if (spread != null) {
+            brush.vector = spread
+        }
+
+        if (velocity != null) {
+            brush.vector = velocity
+            brush.count = 0
+            if (brush.speed == 0.0) brush.speed = 0.15
+        }
+
+        if (size != null) {
+            brush.size = size
+        }
+
+        if (color != null) {
+            brush.color = color
+
+            when {
+                brush.particle == ProxyParticle.SPELL_MOB
+                        || brush.particle == ProxyParticle.SPELL_MOB_AMBIENT -> {
+                    // 药水粒子
                     brush.count = 0
-                    if (brush.speed == 0.0) brush.speed = 0.15
+                    brush.speed = color.alpha.div(255.0)
+                    brush.vector.x = color.red.div(255.0)
+                    brush.vector.y = color.green.div(255.0)
+                    brush.vector.z = color.blue.div(255.0)
                 }
-
-                "size" -> brush.size = value?.coerceFloat() ?: return
-                "color" -> {
-                    val color = value as? Color ?: return
-                    brush.color = color
-
-                    when {
-                        brush.particle == ProxyParticle.SPELL_MOB
-                                || brush.particle == ProxyParticle.SPELL_MOB_AMBIENT -> {
-                            // 药水粒子
-                            brush.count = 0
-                            brush.speed = color.alpha.div(255.0)
-                            brush.vector.x = color.red.div(255.0)
-                            brush.vector.y = color.green.div(255.0)
-                            brush.vector.z = color.blue.div(255.0)
-                        }
-                        brush.particle == ProxyParticle.REDSTONE
-                                && MinecraftVersion.major <= 4 -> {
-                            // v1.12 及以下
-                            brush.count = 0
-                            brush.speed = color.alpha.div(255.0).coerceAtLeast(1e-3)
-                            brush.vector.x = color.red.div(255.0)
-                            brush.vector.y = color.green.div(255.0)
-                            brush.vector.z = color.blue.div(255.0)
-                        }
-                    }
+                brush.particle == ProxyParticle.REDSTONE
+                        && MinecraftVersion.major <= 4 -> {
+                    // v1.12 及以下
+                    brush.count = 0
+                    brush.speed = color.alpha.div(255.0).coerceAtLeast(1e-3)
+                    brush.vector.x = color.red.div(255.0)
+                    brush.vector.y = color.green.div(255.0)
+                    brush.vector.z = color.blue.div(255.0)
                 }
-                "transition" -> brush.transition = value as? Color ?: return
-                "material" -> brush.material = value?.toString() ?: return
-                "data" -> brush.data = value?.coerceInt() ?: return
-                "name" -> brush.name = value?.toString() ?: return
-                "lore" -> brush.lore = value as? List<String> ?: return
-                "model" -> brush.customModelData = value?.coerceInt() ?: return
             }
+        }
+
+        if (transition != null) {
+            brush.transition = transition
+        }
+
+        if (material != null) {
+            brush.material = material
+        }
+
+        if (data != null) {
+            brush.data = data
+        }
+
+        if (name != null) {
+            brush.name = name
+        }
+
+        if (lore != null) {
+            brush.lore = lore
+        }
+
+        if (model != null) {
+            brush.model = model
         }
     }
 }

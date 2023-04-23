@@ -6,14 +6,10 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.library.kether.ParsedAction
-import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
-import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextBlock
+import top.lanscarlos.vulpecula.bacikal.*
 import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula
@@ -22,74 +18,89 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Lanscarlos
  * @since 2022-11-09 00:23
  */
-class ActionViewers(val raw: Collection<Any>) : ScriptAction<Collection<ProxyPlayer>>() {
+object ActionViewers {
 
-    override fun run(frame: ScriptFrame): CompletableFuture<Collection<ProxyPlayer>> {
-        val future = CompletableFuture<Collection<ProxyPlayer>>()
-        val viewers = mutableSetOf<ProxyPlayer>()
-        val wait = mutableSetOf<CompletableFuture<*>>()
-
-        // 处理原始数据
-        for (value in raw) {
-            when (value) {
-                '*', "*" -> {
-                    viewers += onlinePlayers()
-                    break
-                }
-                is String -> {
-                    viewers += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
-                }
-                is ParsedAction<*> -> {
-                    wait += frame.run(value)
-                }
-            }
+    /**
+     *
+     * 所有在线玩家
+     * viewers *
+     *
+     * 指定玩家名字
+     * viewers Lanscarlos
+     * viewers [ Lanscarlos Tony ]
+     *
+     * 从 action 中获取玩家或其名字
+     * viewers to {action}
+     * viewers to target select EIR -r 6
+     *
+     * viewers to [ {actions...} ]
+     * viewers to [ player name literal Lanscarlos ]
+     *
+     * */
+    @BacikalParser(
+        id = "brush",
+        name = ["brush", "pen"],
+        namespace = "vulpecula-canvas"
+    )
+    fun parser() = bacikal {
+        combine(
+            viewers()
+        ) { viewers ->
+            this.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
+            viewers
         }
+    }
 
-        if (wait.isNotEmpty()) {
-            // 处理等待列表
-            val counter = AtomicInteger(0)
-            for (it in wait) {
-                if (it.isDone) {
-                    viewers.tryPlus(it.getNow(null))
-
-                    val count = counter.incrementAndGet()
-                    // 判断等待队列是否全部执行完毕
-                    if (!future.isDone && count >= wait.size) {
-                        future.complete(viewers)
+    fun viewers(): LiveData<Collection<ProxyPlayer>> {
+        return LiveData {
+            val cache = mutableSetOf<Any>()
+            if (this.expectToken("to")) {
+                if (this.expectToken("[")) {
+                    while (!this.expectToken("]")) {
+                        cache += this.readAction()
                     }
                 } else {
-                    it.thenAccept { value ->
-                        viewers.tryPlus(value)
+                    cache += this.readAction()
+                }
+            } else {
+                if (this.expectToken("[")) {
+                    while (!this.expectToken("]")) {
+                        cache += this.nextToken()
+                    }
+                } else {
+                    cache += this.nextToken()
+                }
+            }
 
-                        val count = counter.incrementAndGet()
-                        // 判断等待队列是否全部执行完毕
-                        if (!future.isDone && count >= wait.size) {
-                            future.complete(viewers)
+            Bacikal.Action { frame ->
+                val viewers = mutableSetOf<ProxyPlayer>()
+                val wait = mutableListOf<CompletableFuture<*>>()
+
+                // 处理原始数据
+                for (value in cache) {
+                    when (value) {
+                        '*', "*" -> {
+                            viewers += onlinePlayers()
+                            break
+                        }
+                        is String -> {
+                            viewers += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
+                        }
+                        is ParsedAction<*> -> {
+                            wait += frame.run(value)
                         }
                     }
                 }
-            }
 
-            return future.thenApply {
-                frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
-
-                return@thenApply if (it.isNotEmpty()) {
-                    it.distinctBy { player -> player.uniqueId.toString() }
+                if (wait.isEmpty()) {
+                    return@Action CompletableFuture.completedFuture(viewers)
                 } else {
-                    listOf(frame.player())
+                    return@Action wait.union().thenApply {
+                        viewers.tryPlus(it)
+                        viewers
+                    }
                 }
             }
-        } else {
-            frame.setVariable(ActionCanvas.VARIABLE_VIEWERS, viewers)
-            future.complete(
-                if (viewers.isNotEmpty()) {
-                    viewers.distinctBy { player -> player.uniqueId.toString() }
-                } else {
-                    listOf(frame.player())
-                }
-            )
-
-            return future
         }
     }
 
@@ -117,57 +128,6 @@ class ActionViewers(val raw: Collection<Any>) : ScriptAction<Collection<ProxyPla
                     }
                 }
             }
-        }
-    }
-
-    companion object {
-
-        /**
-         *
-         * 所有在线玩家
-         * viewers *
-         *
-         * 指定玩家名字
-         * viewers Lanscarlos
-         * viewers [ Lanscarlos Tony ]
-         *
-         * 从 action 中获取玩家或其名字
-         * viewers to {action}
-         * viewers to target select EIR -r 6
-         *
-         * viewers to [ {actions...} ]
-         * viewers to [ player name literal Lanscarlos ]
-         *
-         * */
-        @BacikalParser(
-            id = "viewers",
-            name = ["viewers", "viewer"],
-            namespace = "vulpecula-canvas"
-        )
-        fun parser() = scriptParser { reader ->
-            ActionViewers(read(reader))
-        }
-
-        fun read(reader: QuestReader): Collection<Any> {
-            val viewers = mutableSetOf<Any>()
-            if (reader.hasNextToken("to")) {
-                if (reader.hasNextToken("[")) {
-                    while (!reader.hasNextToken("]")) {
-                        viewers += reader.nextBlock()
-                    }
-                } else {
-                    viewers += reader.nextBlock()
-                }
-            } else {
-                if (reader.hasNextToken("[")) {
-                    while (!reader.hasNextToken("]")) {
-                        viewers += reader.nextToken()
-                    }
-                } else {
-                    viewers += reader.nextToken()
-                }
-            }
-            return viewers
         }
     }
 }

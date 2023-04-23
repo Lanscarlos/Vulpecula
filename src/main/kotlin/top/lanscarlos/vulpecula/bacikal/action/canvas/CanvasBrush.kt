@@ -18,11 +18,11 @@ import java.awt.Color
  */
 class CanvasBrush {
 
-    var particle = ProxyParticle.FLAME
-    var count = 1
-    var speed = -1.0
-    var offset = Vector(0, 0, 0)
-    var vector = Vector(0, 0, 0)
+    var particle: ProxyParticle = ProxyParticle.FLAME
+    var count: Int = 1
+    var speed: Double = -1.0
+    var offset: Vector = Vector(0, 0, 0)
+    var vector: Vector = Vector(0, 0, 0)
 
     var size: Float = 1f
     var color: Color = Color.WHITE
@@ -31,9 +31,14 @@ class CanvasBrush {
     var data: Int = 0
     var name: String = ""
     var lore: List<String> = emptyList()
-    var customModelData: Int = -1
+    var model: Int = -1
 
     fun draw(locations: Collection<Location>, viewers: Collection<ProxyPlayer>) {
+        if (locations.isEmpty()) return
+        if (locations.size == 1) {
+            draw(locations.first(), viewers)
+            return
+        }
         locations.forEach { draw(it, viewers) }
     }
 
@@ -43,7 +48,7 @@ class CanvasBrush {
         val meta = when (particle) {
             ProxyParticle.BLOCK_DUST -> ProxyParticle.BlockData(material, data)
             ProxyParticle.DUST_COLOR_TRANSITION -> ProxyParticle.DustTransitionData(color, transition, size)
-            ProxyParticle.ITEM_CRACK -> ProxyParticle.ItemData(material, data, name, lore, customModelData)
+            ProxyParticle.ITEM_CRACK -> ProxyParticle.ItemData(material, data, name, lore, model)
             ProxyParticle.SPELL_MOB,
             ProxyParticle.SPELL_MOB_AMBIENT -> {
                 // 默认调整为彩色粒子
