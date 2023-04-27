@@ -9,6 +9,7 @@ import taboolib.library.kether.ExitStatus
 import taboolib.module.kether.*
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 import java.nio.charset.StandardCharsets

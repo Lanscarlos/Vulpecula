@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils.config
+package top.lanscarlos.vulpecula.config
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.ConfigLoader
@@ -6,17 +6,17 @@ import kotlin.reflect.KProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.utils.config
+ * top.lanscarlos.vulpecula.config
  *
  * @author Lanscarlos
  * @since 2022-12-15 22:05
  */
 @Suppress("UNCHECKED_CAST")
-class VulConfigNodeBinding<R>(
+class DynamicConfigNodeBinding<R>(
     val path: String,
     bind: String,
     private val transfer: ConfigurationSection.(Any?) -> R
-) : VulConfigNode<R>, Runnable {
+) : DynamicConfigNode<R>, Runnable {
 
     var isInitialized = false
     var value: R? = null

@@ -10,7 +10,9 @@ import taboolib.library.kether.Quest
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -25,7 +27,7 @@ import java.io.File
 class EventHandler(
     val id: String,
     val path: String,
-    val wrapper: VulConfig
+    val wrapper: DynamicConfig
 ) : ScriptCompiler {
 
     val hash = id.digest("md5")
@@ -299,7 +301,7 @@ class EventHandler(
                     config.getConfigurationSection(key)?.let { section ->
                         if (section.getBoolean("disable", false)) return@let
 
-                        cache[key] = EventHandler(key, path, section.wrapper()).apply {
+                        cache[key] = EventHandler(key, path, section.toDynamic()).apply {
                             this.dispatchers.forEach { it.compileScript() }
                         }
 
@@ -343,7 +345,7 @@ class EventHandler(
                             return@forEachSection
                         }
 
-                        cache[key] = EventHandler(key, path, section.wrapper())
+                        cache[key] = EventHandler(key, path, section.toDynamic())
                         debug(Debug.HIGH, "Handler loaded \"$key\"")
                     }
                 }

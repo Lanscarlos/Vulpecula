@@ -23,7 +23,9 @@ import taboolib.module.kether.Script
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -40,7 +42,7 @@ import java.util.concurrent.TimeUnit
 class EventDispatcher(
     val id: String,
     val path: String,
-    val wrapper: VulConfig
+    val wrapper: DynamicConfig
 ) : ScriptCompiler {
 
     val eventName by wrapper.read("listen") { name ->
@@ -448,7 +450,7 @@ class EventDispatcher(
                     config.getConfigurationSection(key)?.let { section ->
                         if (section.getBoolean("disable", false)) return@let
 
-                        val dispatcher = EventDispatcher(key, path, section.wrapper())
+                        val dispatcher = EventDispatcher(key, path, section.toDynamic())
                         cache[key] = dispatcher
 
                         // 绑定 handler
@@ -503,7 +505,7 @@ class EventDispatcher(
                             return@forEachSection
                         }
 
-                        cache[key] = EventDispatcher(key, path, section.wrapper())
+                        cache[key] = EventDispatcher(key, path, section.toDynamic())
                         debug(Debug.HIGH, "Handler loaded \"$key\"")
                     }
                 }

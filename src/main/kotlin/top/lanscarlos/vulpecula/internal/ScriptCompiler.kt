@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.internal
 
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.utils.bindConfigNode
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.utils.coerceListNotNull
 
 /**

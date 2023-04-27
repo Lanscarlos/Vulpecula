@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.internal
 
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig
 
 /**
  * Vulpecula
@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.utils.config.VulConfig
  */
 class VulScriptFunction(
     val id: String,
-    val wrapper: VulConfig
+    val wrapper: DynamicConfig
 ) : ScriptCompiler {
 
     val name = "function_$id"

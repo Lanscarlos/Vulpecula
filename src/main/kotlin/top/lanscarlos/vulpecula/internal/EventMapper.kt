@@ -7,6 +7,7 @@ import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.cbool
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 

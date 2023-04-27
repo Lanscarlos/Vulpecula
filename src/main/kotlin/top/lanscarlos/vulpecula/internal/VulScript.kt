@@ -9,7 +9,9 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -23,7 +25,7 @@ import java.io.File
  */
 class VulScript(
     val id: String,
-    val wrapper: VulConfig
+    val wrapper: DynamicConfig
 ) : ScriptCompiler {
 
     val targetPath by wrapper.read("build-setting.target-path") { value ->
@@ -236,7 +238,7 @@ class VulScript(
         // 遍历新的函数
         for (key in keys) {
             val section = config.getConfigurationSection(key) ?: continue
-            functions[key] = VulScriptFunction(key, section.wrapper())
+            functions[key] = VulScriptFunction(key, section.toDynamic())
             debug(Debug.HIGH, "Function delete \"$key\" at Script \"$id\"")
         }
     }
@@ -311,7 +313,7 @@ class VulScript(
                     val file = path.toFile().apply {
                         if (automaticReload) addWatcher(false) { onFileChanged(this) }
                     }
-                    cache[name] = VulScript(name, file.toConfig().wrapper())
+                    cache[name] = VulScript(name, file.toConfig().toDynamic())
                 }
 
                 console().asLangText("Script-Compile-Load-Succeeded", cache.size, timing(start)).also {

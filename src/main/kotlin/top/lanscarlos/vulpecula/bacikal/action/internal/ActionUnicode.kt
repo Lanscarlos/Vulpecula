@@ -9,6 +9,7 @@ import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.bacikal.bacikal
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.utils.*
 import java.io.File
 

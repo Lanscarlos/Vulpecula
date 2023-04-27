@@ -2,9 +2,6 @@ package top.lanscarlos.vulpecula.utils
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.utils.config.VulConfig
-import top.lanscarlos.vulpecula.utils.config.VulConfigNode
-import top.lanscarlos.vulpecula.utils.config.VulConfigNodeBinding
 
 /**
  * Vulpecula
@@ -57,12 +54,4 @@ fun ConfigurationSection.root(): Configuration? {
         parent = parent.parent!!
     }
     return parent as? Configuration
-}
-
-fun ConfigurationSection.wrapper(): VulConfig {
-    return VulConfig(this)
-}
-
-fun <T> bindConfigNode(path: String, bind: String = "config.yml", func: ConfigurationSection.(Any?) -> T): VulConfigNode<T> {
-    return VulConfigNodeBinding(path, bind, func)
 }

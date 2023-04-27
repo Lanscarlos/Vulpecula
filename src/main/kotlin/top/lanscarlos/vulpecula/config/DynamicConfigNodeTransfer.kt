@@ -1,22 +1,22 @@
-package top.lanscarlos.vulpecula.utils.config
+package top.lanscarlos.vulpecula.config
 
 import taboolib.library.configuration.ConfigurationSection
 import kotlin.reflect.KProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.utils.config
+ * top.lanscarlos.vulpecula.config
  *
  * @author Lanscarlos
  * @since 2022-12-15 21:36
  */
 
 @Suppress("UNCHECKED_CAST")
-class VulConfigNodeTransfer<R>(
+class DynamicConfigNodeTransfer<R>(
     val path: String,
-    val wrapper: VulConfig,
+    val wrapper: DynamicConfig,
     private val transfer: ConfigurationSection.(Any?) -> R
-) : VulConfigNode<R> {
+) : DynamicConfigNode<R> {
 
     var isInitialized = false
     var raw: Any? = null

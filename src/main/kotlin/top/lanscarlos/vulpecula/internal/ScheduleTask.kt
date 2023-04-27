@@ -10,7 +10,9 @@ import taboolib.module.kether.Script
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -27,7 +29,7 @@ import java.time.Duration
 class ScheduleTask(
     val id: String,
     val path: String, // 所在文件路径
-    val wrapper: VulConfig
+    val wrapper: DynamicConfig
 ) : ScriptCompiler {
 
     val dateFormat by wrapper.read("date-format") {
@@ -343,7 +345,7 @@ class ScheduleTask(
                     config.getConfigurationSection(key)?.let { section ->
                         if (section.getBoolean("disable", false)) return@let
 
-                        cache[key] = ScheduleTask(key, path, section.wrapper()).also {
+                        cache[key] = ScheduleTask(key, path, section.toDynamic()).also {
                             // 启动新任务
                             it.runTask()
                         }
@@ -395,7 +397,7 @@ class ScheduleTask(
                             return@forEachSection
                         }
 
-                        cache[key] = ScheduleTask(key, path, section.wrapper())
+                        cache[key] = ScheduleTask(key, path, section.toDynamic())
                         debug(Debug.HIGH, "ScheduleTask loaded \"$key\"")
                     }
                 }

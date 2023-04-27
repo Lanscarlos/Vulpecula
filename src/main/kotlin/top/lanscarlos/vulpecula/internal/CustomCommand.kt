@@ -9,7 +9,9 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.utils.config.VulConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
 import top.lanscarlos.vulpecula.utils.*
 import top.lanscarlos.vulpecula.utils.Debug.debug
 import java.io.File
@@ -24,7 +26,7 @@ import java.nio.file.Files
  */
 class CustomCommand(
     val id: String,
-    val wrapper: VulConfig
+    val wrapper: DynamicConfig
 ) {
 
     var legacy = false
@@ -190,7 +192,7 @@ class CustomCommand(
                     debug(Debug.HIGH, "Command contrasting \"$id\"")
                     command.contrast(config)
                 } else {
-                    cache[id] = CustomCommand(id, config.wrapper())
+                    cache[id] = CustomCommand(id, config.toDynamic())
                 }
 
                 console().sendLang("Custom-Command-Load-Automatic-Succeeded", file.name, timing(start))
@@ -229,7 +231,7 @@ class CustomCommand(
                         if (automaticReload) addWatcher(false) { onFileChanged(this) }
                     }.toConfig()
                     if (config.getBoolean("disable", false)) continue
-                    cache[id] = CustomCommand(id, config.wrapper())
+                    cache[id] = CustomCommand(id, config.toDynamic())
                 }
 
                 console().asLangText("Custom-Command-Load-Succeeded", cache.size, timing(start)).also {

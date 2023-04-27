@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.utils
 
 import taboolib.common.platform.function.console
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 
 /**
  * Vulpecula
