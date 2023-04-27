@@ -1,15 +1,11 @@
 package top.lanscarlos.vulpecula.utils
 
-import com.mojang.datafixers.kinds.App
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.*
 import taboolib.module.kether.*
 import taboolib.platform.type.BukkitPlayer
 import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
-import top.lanscarlos.vulpecula.kether.LiteralParserBuilder
-import top.lanscarlos.vulpecula.kether.ParserBuilder
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -22,55 +18,6 @@ import java.util.concurrent.CompletableFuture
 fun String.toKetherScript(namespace: List<String> = emptyList()): Script {
     return this.parseKetherScript(namespace.plus("vulpecula"))
 }
-
-/**
- * @see taboolib.library.kether.Parser.build
- * */
-@Suppress("UNCHECKED_CAST")
-fun <A> buildParser(builder: ParserBuilder.(QuestReader) -> App<Parser.Mu, Parser.Action<A>>): ScriptActionParser<A> {
-    val parser =  object : QuestActionParser {
-        override fun <A> resolve(resolve: QuestReader): QuestAction<A> {
-            val reader = (builder(ParserBuilder(), resolve) as Parser<Parser.Action<A>>).reader
-            val action = reader.apply(resolve) as Parser.Action<Parser.Action<A>>
-            return object : QuestAction<A>() {
-                override fun process(frame: QuestContext.Frame): CompletableFuture<A> {
-                    return action.run(frame).thenCompose {
-                        it.run(frame)
-                    }
-                }
-            }
-        }
-    }
-    return ScriptActionParser { parser.resolve<A>(this) }
-}
-
-/**
- * @see taboolib.library.kether.Parser.build
- * */
-@Suppress("UNCHECKED_CAST")
-fun buildParserLiteral(builder: LiteralParserBuilder.(QuestReader) -> Unit): ScriptActionParser<Any?> {
-    val parser =  object : QuestActionParser {
-        override fun <A> resolve(resolve: QuestReader): QuestAction<A> {
-            resolve.mark()
-            val next = resolve.nextToken()
-            val dsl = LiteralParserBuilder().also { builder(it, resolve) }
-            val method = dsl.methods[next] ?: resolve.reset().let { dsl.other }
-                ?: throw LoadError.NOT_MATCH.create("[${dsl.methods.keys.joinToString(", ")}]", next)
-
-            val reader = (method() as Parser<Parser.Action<A>>).reader
-            val action = reader.apply(resolve) as Parser.Action<Parser.Action<A>>
-            return object : QuestAction<A>() {
-                override fun process(frame: QuestContext.Frame): CompletableFuture<A> {
-                    return action.run(frame).thenCompose {
-                        it.run(frame)
-                    }
-                }
-            }
-        }
-    }
-    return ScriptActionParser { parser.resolve<Any?>(this) }
-}
-
 
 /**
  * 查看下一个 Token 但不改变位置
