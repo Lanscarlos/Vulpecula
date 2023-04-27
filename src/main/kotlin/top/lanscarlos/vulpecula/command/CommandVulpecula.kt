@@ -22,32 +22,18 @@ import top.lanscarlos.vulpecula.utils.toKetherScript
  * @author Lanscarlos
  * @since 2022-10-17 20:39
  */
-@CommandHeader(name = "vulpecula", aliases = ["vul"])
+@CommandHeader(
+    name = "vulpecula",
+    aliases = ["vul"],
+    permission = "vulpecula.command",
+    permissionDefault = PermissionDefault.OP
+)
 object CommandVulpecula {
 
     @CommandBody
     val main = mainCommand {
         createHelper()
     }
-
-//    @CommandBody
-//    val test = subCommand {
-//        dynamic {
-//            execute<CommandSender> { sender, _, argument ->
-//                val cache = mutableListOf<Double>()
-//                repeat(10) {
-//                    val start = timing()
-//                    repeat(100000) {
-//                        KetherShell.eval(argument, ScriptOptions(
-//                            sender = adaptCommandSender(sender)
-//                        )).getNow(null)
-//                    }
-//                    cache += timing(start)
-//                }
-//                sender.sendMessage(" §5§l‹ ›§r §7平均耗时: §f${cache.average()}ms")
-//            }
-//        }
-//    }
 
     @CommandBody
     val eval = subCommand {
@@ -142,5 +128,10 @@ object CommandVulpecula {
 
     @CommandBody
     val dispatcher = subCommand(CommandDispatcher.main)
+
+    @CommandBody(permission = "vulpecula.command.util", permissionDefault = PermissionDefault.FALSE)
+    val util = subCommand {
+        CommandUtilTiming.main(this)
+    }
 
 }
