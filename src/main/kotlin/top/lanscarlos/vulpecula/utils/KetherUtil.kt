@@ -16,7 +16,11 @@ import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
  */
 
 fun String.toKetherScript(namespace: List<String> = emptyList()): Script {
-    return this.parseKetherScript(namespace.plus("vulpecula"))
+    return if (namespace.contains("vulpecula")) {
+        this.parseKetherScript(namespace)
+    } else {
+        this.parseKetherScript(namespace.plus("vulpecula"))
+    }
 }
 
 /**

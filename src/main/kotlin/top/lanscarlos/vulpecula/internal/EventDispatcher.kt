@@ -234,7 +234,6 @@ class EventDispatcher(
             val source = buildSource()
             val quest = source.toString().toKetherScript(namespace)
 
-
             // 编译通过
             this.source = source
             script = DispatcherQuest(this, quest.blocks)
