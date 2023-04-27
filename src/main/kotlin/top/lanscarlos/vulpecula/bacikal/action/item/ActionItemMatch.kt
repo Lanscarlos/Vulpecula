@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.item
 
-import top.lanscarlos.vulpecula.utils.chemdah.InferItem.Companion.toInferItem
+import top.lanscarlos.vulpecula.api.chemdah.InferItem.Companion.toInferItem
 
 /**
  * Vulpecula

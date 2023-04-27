@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.api.event
 
 import taboolib.platform.type.BukkitProxyEvent
-import top.lanscarlos.vulpecula.utils.chemdah.InferItem
+import top.lanscarlos.vulpecula.api.chemdah.InferItem
 
 /**
  * Chemdah

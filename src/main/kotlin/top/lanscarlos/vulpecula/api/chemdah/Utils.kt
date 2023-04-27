@@ -1,8 +1,8 @@
-package top.lanscarlos.vulpecula.utils.chemdah
+package top.lanscarlos.vulpecula.api.chemdah
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.utils.chemdah
+ * top.lanscarlos.vulpecula.api.chemdah
  *
  * @author Lanscarlos
  * @since 2023-01-23 00:24

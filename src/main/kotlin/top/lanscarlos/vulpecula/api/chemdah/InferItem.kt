@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils.chemdah
+package top.lanscarlos.vulpecula.api.chemdah
 
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -13,7 +13,7 @@ import taboolib.platform.util.countItem
 import taboolib.platform.util.hasItem
 import taboolib.platform.util.takeItem
 import top.lanscarlos.vulpecula.api.event.InferItemHookEvent
-import top.lanscarlos.vulpecula.utils.chemdah.Flags.Companion.matchType
+import top.lanscarlos.vulpecula.api.chemdah.Flags.Companion.matchType
 
 /**
  * Chemdah
