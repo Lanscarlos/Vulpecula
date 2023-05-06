@@ -65,10 +65,6 @@ class CustomCommand(
     private fun buildComponents() {
         val section = components ?: return
 
-        /*
-        * 判断是否为新配置
-        * 新配置会拥有 main 节点
-        * */
         val loaded = mutableMapOf<String, CommandComponentBuilder>()
         val entry = mutableSetOf<CommandComponentBuilder>() // 与 root 直接相连的二级节点，构建时的入口
 
