@@ -5,6 +5,7 @@ import taboolib.common.platform.command.*
 import taboolib.common.platform.command.component.CommandBase
 import taboolib.common.platform.function.*
 import taboolib.common5.cbool
+import taboolib.expansion.createHelper
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
@@ -29,8 +30,6 @@ class CustomCommand(
     val wrapper: DynamicConfig
 ) {
 
-    var legacy = false
-
     val name by wrapper.readString("name")
     val aliases by wrapper.readStringList("aliases")
     val description by wrapper.readString("description", "")
@@ -42,6 +41,7 @@ class CustomCommand(
             it.name.equals(value?.toString(), true)
         } ?: PermissionDefault.OP
     }
+    val newParser by wrapper.readBoolean("enable-parser", false)
     val main by wrapper.read("main") { section ->
         section as? ConfigurationSection
     }
@@ -59,7 +59,8 @@ class CustomCommand(
     }
 
     private fun buildMain() {
-        root = CommandComponentBuilder("main", main ?: Configuration.empty()).build(-1) as CommandBase
+        root = CommandBase()
+        root.createHelper()
     }
 
     private fun buildComponents() {
@@ -107,13 +108,13 @@ class CustomCommand(
             // 创建执行器
             executor = object : CommandExecutor {
                 override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): Boolean {
-                    return root.execute(CommandContext(sender, command, name, root, true, args))
+                    return root.execute(CommandContext(sender, command, name, root, newParser, args))
                 }
             },
             // 创建补全器
             completer = object : CommandCompleter {
                 override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): List<String>? {
-                    return root.suggest(CommandContext(sender, command, name, root, true, args))
+                    return root.suggest(CommandContext(sender, command, name, root, newParser, args))
                 }
             },
             // 传入原始命令构建器

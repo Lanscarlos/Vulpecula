@@ -15,6 +15,7 @@ import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.*
 import taboolib.common5.Baffle
 import taboolib.common5.cbool
+import taboolib.common5.cint
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
@@ -88,7 +89,7 @@ class EventDispatcher(
         when {
             "time" in section -> {
                 // 按时间阻断
-                val time = section["time"].coerceInt(-1)
+                val time = section["time"]?.cint ?: -1
                 if (time > 0) {
                     Baffle.of(time * 50L, TimeUnit.MILLISECONDS)
                 } else {
@@ -98,7 +99,7 @@ class EventDispatcher(
             }
             "count" in section -> {
                 // 按次数阻断
-                val count = section["count"].coerceInt(-1)
+                val count = section["count"]?.cint ?: -1
                 if (count > 0) {
                     Baffle.of(count)
                 } else {

@@ -52,9 +52,6 @@ object Vulpecula : Plugin() {
         metrics.addCustomChart(SingleLineChart("custom-command") {
             CustomCommand.cache.size
         })
-        metrics.addCustomChart(SingleLineChart("custom-command-legacy") {
-            CustomCommand.cache.values.count { it.legacy }
-        })
         metrics.addCustomChart(SingleLineChart("dispatchers") {
             EventDispatcher.cache.size
         })
