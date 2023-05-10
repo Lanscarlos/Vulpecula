@@ -28,11 +28,22 @@ object ActionRegex {
             combine(
                 int(0)
             ) { index ->
-                val matcher = this.getVariable<Matcher>("@Matcher") ?: error("No matcher selected.")
-                if (index in 0..matcher.groupCount()) {
-                    matcher.group(index)
-                } else {
-                    null
+                val result = this.getVariable<MatchResult>("@MatchResult")
+                    ?: this.getVariable<Matcher>("@Matcher")
+                    ?: error("No matcher selected.")
+
+                when (result) {
+                    is MatchResult -> {
+                        result.groupValues.getOrNull(index)
+                    }
+                    is Matcher -> {
+                        if (index in 0..result.groupCount()) {
+                            result.group(index)
+                        } else {
+                            null
+                        }
+                    }
+                    else -> null
                 }
             }
         }
@@ -42,13 +53,9 @@ object ActionRegex {
                 stringOrList(),
                 trim("using", "with", "by", then = text())
             ) { source, pattern ->
-                val matcher = pattern.toPattern().matcher(source.format())
-                this.variables()["@Matcher"] = matcher
-                this.variables()["matcher"] = matcher
-                matcher.find().also {
-                    this.variables()["found"] = matcher.group()
-                    this.variables()["count"] = matcher.groupCount()
-                }
+                val result = pattern.toRegex().find(source.format())
+                this.injectVariables(result)
+                return@combine result != null
             }
         }
 
@@ -57,7 +64,9 @@ object ActionRegex {
                 stringOrList(),
                 trim("using", "with", "by", then = text())
             ) { source, pattern ->
-                source.format().matches(pattern.toRegex())
+                val result = pattern.toRegex().matchEntire(source.format())
+                this.injectVariables(result)
+                return@combine result != null
             }
         }
 
@@ -69,35 +78,43 @@ object ActionRegex {
                     if (expectToken("to")) {
                         val action = readAction()
                         Bacikal.Action { frame -> frame.run(action) }
-                    } else {
-                        expectToken("then")
+                    } else if (expectToken("then")) {
                         val action = readAction()
                         Bacikal.Action { CompletableFuture.completedFuture(action) }
+                    } else {
+                        Bacikal.Action { CompletableFuture.completedFuture(null) }
                     }
                 }
             ) { source, pattern, handle ->
 
-                val matcher = pattern.toPattern().matcher(source.format())
-                val buffer = StringBuffer()
-                val result = mutableListOf<Any?>()
+                val found = mutableListOf<Any?>()
+                val results = pattern.toRegex().findAll(source.format())
 
-                while (matcher.find()) {
-                    if (handle is ParsedAction<*>) {
-                        result += this.runHandle(matcher, handle).getNow(null)
+                if (handle is ParsedAction<*>) {
+                    for (result in results) {
+                        found += this.newFrame(handle)
+                            .injectVariables(result)
+                            .run<Any?>()
+                            .getNow(null)
 
                         if (this.script().breakLoop) {
                             // 跳出循环
                             this.script().breakLoop = false
                             break
                         }
-                        matcher.appendReplacement(buffer, "")
-                        continue
-                    } else {
-                        result += matcher.group()
+                    }
+                } else if (handle != null) {
+                    for (result in results) {
+                        found += handle
+                    }
+                } else {
+                    for (result in results) {
+                        found += result.value
                     }
                 }
 
-                return@combine result
+                this.injectVariables(results.lastOrNull())
+                return@combine found
             }
         }
 
@@ -109,32 +126,41 @@ object ActionRegex {
                     if (expectToken("to")) {
                         val action = readAction()
                         Bacikal.Action { frame -> frame.run(action) }
-                    } else {
-                        expectToken("then")
+                    } else if (expectToken("then")) {
                         val action = readAction()
                         Bacikal.Action { CompletableFuture.completedFuture(action) }
+                    } else {
+                        Bacikal.Action { CompletableFuture.completedFuture(null) }
                     }
                 }
             ) { source, pattern, handle ->
-                val matcher = pattern.toPattern().matcher(source.format())
-                val buffer = StringBuffer()
-
-                while (matcher.find()) {
-                    if (handle is ParsedAction<*>) {
-                        val replacement = this.runHandle(matcher, handle).getNow(null)
-                        matcher.appendReplacement(buffer, replacement?.toString() ?: "")
-
+                val regex = pattern.toRegex()
+                val result = if (handle is ParsedAction<*>) {
+                    // 使用处理语句替换
+                    regex.replace(source.format()) { result ->
                         if (this.script().breakLoop) {
-                            // 跳出循环
-                            this.script().breakLoop = false
-                            break
+                            // 跳出循环，返回原值
+                            result.value
+                        } else {
+                            this.newFrame(handle)
+                                .injectVariables(result)
+                                .run<Any?>()
+                                .getNow(null)
+                                ?.toString() ?: ""
                         }
-                    } else {
-                        matcher.appendReplacement(buffer, handle?.toString() ?: "")
+                    }.also {
+                        if (this.script().breakLoop) {
+                            this.script().breakLoop = false
+                        }
                     }
+                } else if (handle != null) {
+                    // 使用固定值替换
+                    regex.replace(source.format(), handle.toString())
+                } else {
+                    // 使用空值替换
+                    regex.replace(source.format(), "")
                 }
 
-                val result = matcher.appendTail(buffer).toString()
                 return@combine if (source is String) {
                     // 原内容为字符串
                     result
@@ -146,16 +172,17 @@ object ActionRegex {
         }
     }
 
-    private fun ScriptFrame.runHandle(matcher: Matcher, handle: ParsedAction<*>): CompletableFuture<Any?> {
-        return this.newFrame(handle).also {
-            it.variables()["@Matcher"] = matcher
-            it.variables()["matcher"] = matcher
-            it.variables()["found"] = matcher.group()
-            it.variables()["count"] = matcher.groupCount()
-        }.run<Any?>()
+    private fun ScriptFrame.injectVariables(result: MatchResult?): ScriptFrame {
+        this.variables()["@MatchResult"] = result
+        this.variables()["Found"] = result?.value
+        this.variables()["Group"] = result?.groupValues ?: emptyList<String>()
+        this.variables()["Count"] = result?.groupValues?.size
+
+        this.variables()["found"] = result?.value
+        this.variables()["count"] = result?.groupValues?.size
+
+        return this
     }
-
-
 
     private fun Any?.format(): String {
         return when (this) {

@@ -71,13 +71,16 @@ class VulScript(
         /*
         * 加载自定义函数
         *
+        * 由于 dynamic config 无法获取改变之前的值，需要外置更新判断
         * 如果 functions 发生变化，则下面的函数会被调用
         * 此时可以类似于 Handler 通知 Function 检查更新
         * */
         wrapper.source.getConfigurationSection("functions")?.let {
+            // 初始加载
             initFunctions(it)
         }
         wrapper.read("functions") { value ->
+            // 更新重载
             initFunctions(value as? ConfigurationSection ?: return@read)
         }
 
