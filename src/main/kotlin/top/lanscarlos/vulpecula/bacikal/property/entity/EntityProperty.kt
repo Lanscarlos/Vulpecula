@@ -5,7 +5,7 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 import top.lanscarlos.vulpecula.utils.coerceFloat
 import top.lanscarlos.vulpecula.utils.coerceInt
@@ -22,7 +22,7 @@ import top.lanscarlos.vulpecula.utils.coerceInt
     bind = Entity::class
 )
 @Suppress("deprecation")
-class EntityProperty : BacikalScriptProperty<Entity>("entity") {
+class EntityProperty : BacikalGenericProperty<Entity>("entity") {
 
     override fun readProperty(instance: Entity, key: String): OpenResult {
         val property: Any? = when (key) {

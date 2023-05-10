@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.*
 
 /**
@@ -19,7 +19,7 @@ import top.lanscarlos.vulpecula.utils.*
     id = "itemstack",
     bind = ItemStack::class
 )
-class ItemStackProperty : BacikalScriptProperty<ItemStack>("itemstack") {
+class ItemStackProperty : BacikalGenericProperty<ItemStack>("itemstack") {
 
     override fun readProperty(instance: ItemStack, key: String): OpenResult {
         val property: Any? = when (key) {

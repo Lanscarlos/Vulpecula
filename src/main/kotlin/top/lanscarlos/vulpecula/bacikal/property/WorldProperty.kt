@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property
 import org.bukkit.World
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "world",
     bind = World::class
 )
-class WorldProperty : BacikalScriptProperty<World>("world") {
+class WorldProperty : BacikalGenericProperty<World>("world") {
     override fun readProperty(instance: World, key: String): OpenResult {
         val property: Any? = when (key) {
             "name" -> instance.name

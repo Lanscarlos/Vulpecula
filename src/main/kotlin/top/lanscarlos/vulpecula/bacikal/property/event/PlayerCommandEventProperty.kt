@@ -4,7 +4,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-command-event",
     bind = PlayerCommandPreprocessEvent::class
 )
-class PlayerCommandEventProperty : BacikalScriptProperty<PlayerCommandPreprocessEvent>("player-command-event") {
+class PlayerCommandEventProperty : BacikalGenericProperty<PlayerCommandPreprocessEvent>("player-command-event") {
 
     override fun readProperty(instance: PlayerCommandPreprocessEvent, key: String): OpenResult {
         val property: Any = when (key) {

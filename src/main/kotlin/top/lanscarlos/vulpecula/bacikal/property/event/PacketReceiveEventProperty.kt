@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property.event
 import taboolib.common.OpenResult
 import taboolib.module.nms.PacketReceiveEvent
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "packet-receive-event",
     bind = PacketReceiveEvent::class
 )
-class PacketReceiveEventProperty : BacikalScriptProperty<PacketReceiveEvent>("packet-receive-event") {
+class PacketReceiveEventProperty : BacikalGenericProperty<PacketReceiveEvent>("packet-receive-event") {
 
     override fun readProperty(instance: PacketReceiveEvent, key: String): OpenResult {
         val property: Any = when (key) {

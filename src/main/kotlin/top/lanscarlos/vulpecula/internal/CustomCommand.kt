@@ -53,17 +53,14 @@ class CustomCommand(
 
     init {
         // 先加载 main 后加载 components
-        buildMain()
-        buildComponents()
+        buildCommand()
         register()
     }
 
-    private fun buildMain() {
+    private fun buildCommand() {
         root = CommandBase()
         root.createHelper()
-    }
 
-    private fun buildComponents() {
         val section = components ?: return
 
         val loaded = mutableMapOf<String, CommandComponentBuilder>()
@@ -143,8 +140,7 @@ class CustomCommand(
 
         // 重构
         if (rebuild) {
-            buildMain()
-            buildComponents()
+            buildCommand()
         }
 
         // 重新注册

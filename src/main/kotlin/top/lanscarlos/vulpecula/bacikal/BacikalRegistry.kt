@@ -59,7 +59,7 @@ object BacikalRegistry : ClassInjector() {
 
     // 加载 Vulpecula 脚本属性
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
-        if (!clazz.isAnnotationPresent(BacikalProperty::class.java) || !BacikalScriptProperty::class.java.isAssignableFrom(clazz)) return
+        if (!clazz.isAnnotationPresent(BacikalProperty::class.java) || !BacikalGenericProperty::class.java.isAssignableFrom(clazz)) return
 
         // 加载注解
         val annotation = clazz.getAnnotation(BacikalProperty::class.java)
@@ -76,7 +76,7 @@ object BacikalRegistry : ClassInjector() {
             } catch (e: Exception) {
                 null
             }
-        } as? BacikalScriptProperty<*> ?: return
+        } as? BacikalGenericProperty<*> ?: return
 
         if (annotation.shared) {
             // 是否分享属性

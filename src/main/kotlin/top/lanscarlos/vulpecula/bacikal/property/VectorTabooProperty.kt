@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property
 import taboolib.common.OpenResult
 import taboolib.common.util.Vector
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceDouble
 
 /**
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.utils.coerceDouble
     id = "vector-taboo",
     bind = Vector::class
 )
-class VectorTabooProperty : BacikalScriptProperty<Vector>("vector-taboo") {
+class VectorTabooProperty : BacikalGenericProperty<Vector>("vector-taboo") {
 
     override fun readProperty(instance: Vector, key: String): OpenResult {
         val property: Any = when (key) {

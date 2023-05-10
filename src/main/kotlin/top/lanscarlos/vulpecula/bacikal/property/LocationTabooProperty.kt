@@ -5,7 +5,7 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceDouble
 import top.lanscarlos.vulpecula.utils.coerceFloat
 
@@ -20,7 +20,7 @@ import top.lanscarlos.vulpecula.utils.coerceFloat
     id = "block",
     bind = Location::class
 )
-class LocationTabooProperty : BacikalScriptProperty<Location>("location-taboo") {
+class LocationTabooProperty : BacikalGenericProperty<Location>("location-taboo") {
 
     override fun readProperty(instance: Location, key: String): OpenResult {
         val property: Any? = when (key) {

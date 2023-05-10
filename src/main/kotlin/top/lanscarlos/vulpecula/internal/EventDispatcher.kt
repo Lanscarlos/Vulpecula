@@ -20,10 +20,10 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
 import taboolib.library.reflex.Reflex.Companion.getProperty
-import taboolib.module.kether.Script
-import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
+import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
@@ -44,7 +44,7 @@ class EventDispatcher(
     val id: String,
     val path: String,
     val wrapper: DynamicConfig
-) : ScriptCompiler {
+) {
 
     val eventName by wrapper.read("listen") { name ->
         name?.toString() ?: error("Dispatcher \"$id\" 's listen event is undefined!")
@@ -59,22 +59,10 @@ class EventDispatcher(
     val ignoreCancelled by wrapper.readBoolean("ignore-cancelled", true)
 
     val namespace by wrapper.readStringList("namespace")
-
-    val preHandle by wrapper.read("pre-handle") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-
-    val postHandle by wrapper.read("post-handle") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-
-    val exception by wrapper.read("exception") {
-        if (it != null) buildException(it) else emptyList()
-    }
-
-    val variables by wrapper.read("variables") { value ->
-        buildVariables(value, mapOf())
-    }
+    val variables by wrapper.read("variables")
+    val preHandle by wrapper.read("pre-handle")
+    val postHandle by wrapper.read("post-handle")
+    val exception by wrapper.read("exception")
 
     /* 玩家字段，用于反射获取一些奇怪事件中的玩家对象 */
     val playerReference by wrapper.readString("player-ref")
@@ -113,11 +101,8 @@ class EventDispatcher(
 
     val handlers = mutableListOf<EventHandler>()
 
-    /* 含主方法的方法体 */
-    lateinit var source: StringBuilder
-
     /* 包含主方法的可执行脚本 */
-    lateinit var script: Script
+    lateinit var script: BacikalScript
 
     val isRunning get() = EventListener.get("dispatcher-$id") != null
     val isStopped get() = EventListener.get("dispatcher-$id") == null
@@ -135,114 +120,30 @@ class EventDispatcher(
         EventListener.unregisterTask("dispatcher-$id")
     }
 
-    override fun buildSource(): StringBuilder {
-        val builder = StringBuilder()
+    fun compileScript() {
 
-        /*
-        * 构建前置变量
-        * */
-        if (variables.isNotEmpty()) {
-            compileVariables(builder, variables)
-            builder.append('\n')
-        }
+        script = buildBacikalScript(namespace) {
+            appendVariables(this@EventDispatcher.variables)
+            appendContent(preHandle)
 
-        /*
-        * 构建预处理语句
-        * */
-        if (preHandle.isNotEmpty()) {
-            builder.append(preHandle.toString())
-            builder.append("\n\n")
-        }
-
-        /*
-        * 构建调度语句
-        * call $handler_<hash>
-        * */
-        if (handlers.isNotEmpty()) {
-            // 根据处理器优先级升序排序，优先级越高越先被执行
-            handlers.sortByDescending { it.priority }
-
-            handlers.forEach {
-                builder.append("call ${it.hashName}\n")
-            }
-            builder.append('\n')
-        }
-
-        /*
-        * 构建尾处理语句
-        * */
-        if (postHandle.isNotEmpty()) {
-            builder.append(postHandle.toString())
-            builder.append('\n')
-        }
-
-        /*
-        * 构建异常处理
-        * try {
-        *   ...$content
-        * } catch with "..." {
-        *   ...
-        * }
-        * */
-        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
-            // 提取先前所有内容
-            val content = builder.extract()
-
-            builder.append("try {\n")
-            builder.append(content)
-            builder.append("\n}")
-
-            for (it in exception) {
-                if (it.second.isEmpty()) continue
-
-                builder.append(" catch")
-                if (it.first.isNotEmpty()) {
-                    builder.append(" with \"")
-                    builder.append(it.first.joinToString(separator = "|"))
-                    builder.append("\" ")
+            /*
+            * 构建调度语句
+            * call $handler_<hash>
+            * */
+            if (handlers.isNotEmpty()) {
+                // 根据处理器优先级升序排序，优先级越高越先被执行
+                handlers.sortByDescending { it.priority }
+                for (it in handlers) {
+                    appendLiteral("call ${it.hashName}\n")
                 }
-                builder.append("{\n")
-                builder.appendWithIndent(it.second.toString(), suffix = "\n")
-                builder.append("}")
+                appendLiteral("\n")
             }
+
+            appendContent(postHandle)
+            appendExceptions(this@EventDispatcher.exception)
         }
 
-        /*
-        * 收尾
-        * 构建主方法
-        * def main = {
-        *   ...$content
-        * }
-        * */
-
-        // 提取先前所有内容
-        val content = builder.extract()
-
-        // 构建方法体
-        builder.append("def main = {\n")
-        builder.appendWithIndent(content, suffix = "\n")
-        builder.append("}")
-
-        /* 消除注释 */
-        eraseComment(builder)
-
-        return builder
-    }
-
-    override fun compileScript() {
-        try {
-            // 尝试构建脚本
-            val source = buildSource()
-            val quest = source.toString().toKetherScript(namespace)
-
-            // 编译通过
-            this.source = source
-            script = DispatcherQuest(this, quest.blocks)
-
-            debug(Debug.HIGHEST, "dispatcher \"$id\" build source:\n$source")
-        } catch (e: Exception) {
-            e.printKetherErrorMessage()
-        }
+        debug(Debug.HIGHEST, "dispatcher \"$id\" build source:\n${script.source}")
     }
 
     fun call(event: Event) {
@@ -293,16 +194,16 @@ class EventDispatcher(
         debug(Debug.HIGHEST, "调度器 $id 正在运行...")
 
         // 执行脚本
-        script.runActions {
-            this.sender = if (player != null) {
-                adaptPlayer(player)
-            } else {
-                console()
-            }
-            setVariable("@Event", "event", value = event)
-            setVariable("@Player", "player", value = player)
-            setVariable("playerName", value = player?.name)
-        }
+        script.runActions(
+            sender = player,
+            variables = mapOf(
+                "@Event" to event,
+                "event" to event,
+                "@Player" to player,
+                "player" to player,
+                "playerName" to player?.name
+            )
+        )
     }
 
     /**

@@ -4,7 +4,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-command-event",
     bind = PlayerInteractEvent::class
 )
-class PlayerInteractEventProperty : BacikalScriptProperty<PlayerInteractEvent>("player-command-event") {
+class PlayerInteractEventProperty : BacikalGenericProperty<PlayerInteractEvent>("player-command-event") {
     override fun readProperty(instance: PlayerInteractEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "action" -> instance.action.name

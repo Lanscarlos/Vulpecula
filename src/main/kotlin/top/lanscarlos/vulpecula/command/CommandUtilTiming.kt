@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.command
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.function.adaptCommandSender
+import taboolib.common5.format
 import taboolib.module.kether.KetherShell
 import taboolib.module.kether.ScriptOptions
 import top.lanscarlos.vulpecula.utils.timing
@@ -32,7 +33,7 @@ object CommandUtilTiming {
                         }
                         cache += timing(start)
                     }
-                    sender.sendMessage(" §5§l‹ ›§r §7平均耗时: §f${cache.average()}ms")
+                    sender.sendMessage(" §5§l‹ ›§r §7平均耗时: §f${cache.average().format(3)}ms")
                 }
             }
         }

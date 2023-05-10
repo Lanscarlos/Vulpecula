@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property.event
 import org.bukkit.event.player.PlayerJoinEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-join-event",
     bind = PlayerJoinEvent::class
 )
-class PlayerJoinEventProperty : BacikalScriptProperty<PlayerJoinEvent>("player-join-event") {
+class PlayerJoinEventProperty : BacikalGenericProperty<PlayerJoinEvent>("player-join-event") {
     override fun readProperty(instance: PlayerJoinEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "message", "msg", "join-message", "join-msg" -> instance.joinMessage

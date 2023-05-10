@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.OpenResult
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveItemStack
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 import top.lanscarlos.vulpecula.utils.coerceDouble
@@ -27,7 +27,7 @@ import top.lanscarlos.vulpecula.utils.coerceInt
     bind = LivingEntity::class
 )
 @Suppress("UNCHECKED_CAST", "deprecation")
-class LivingEntityProperty : BacikalScriptProperty<LivingEntity>("living-entity") {
+class LivingEntityProperty : BacikalGenericProperty<LivingEntity>("living-entity") {
 
     override fun readProperty(instance: LivingEntity, key: String): OpenResult {
         val property: Any? = when (key) {

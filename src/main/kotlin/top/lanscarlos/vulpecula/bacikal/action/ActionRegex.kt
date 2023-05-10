@@ -155,6 +155,8 @@ object ActionRegex {
         }.run<Any?>()
     }
 
+
+
     private fun Any?.format(): String {
         return when (this) {
             is String -> this
@@ -162,6 +164,32 @@ object ActionRegex {
             is Collection<*> -> this.mapNotNull { el -> el?.toString() }.joinToString("\n")
             else -> ""
         }
+    }
+
+    private val regex = Regex("/(.*)(?<!\\\\)/([imgs])+")
+
+    /**
+     * 将字符串解析为正则表达式
+     * /${regex}/${options}
+     * */
+    fun String.decodeToRegex(): Regex {
+        val result = regex.matchEntire(this) ?: return this.toRegex()
+
+        // 修饰符
+        val modifiers = mutableSetOf<RegexOption>()
+        val options = result.groupValues.getOrNull(2) ?: return this.toRegex()
+
+        if ('i' in options) {
+            modifiers += RegexOption.IGNORE_CASE
+        }
+        if ('m' in options) {
+            modifiers += RegexOption.MULTILINE
+        }
+        if ('g' in options || 's' in options) {
+            modifiers += RegexOption.DOT_MATCHES_ALL
+        }
+
+        return result.groupValues.getOrNull(1)?.toRegex(modifiers) ?: this.toRegex()
     }
 
 }

@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.event.player.PlayerEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
@@ -22,7 +22,7 @@ import top.lanscarlos.vulpecula.utils.coerceBoolean
     id = "event",
     bind = Event::class
 )
-class EventProperty : BacikalScriptProperty<Event>("event") {
+class EventProperty : BacikalGenericProperty<Event>("event") {
 
     override fun readProperty(instance: Event, key: String): OpenResult {
         val property: Any? = when (key) {

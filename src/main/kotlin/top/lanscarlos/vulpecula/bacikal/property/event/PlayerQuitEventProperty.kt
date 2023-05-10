@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property.event
 import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-quit-event",
     bind = PlayerQuitEvent::class
 )
-class PlayerQuitEventProperty : BacikalScriptProperty<PlayerQuitEvent>("player-quit-event") {
+class PlayerQuitEventProperty : BacikalGenericProperty<PlayerQuitEvent>("player-quit-event") {
     override fun readProperty(instance: PlayerQuitEvent, key: String): OpenResult {
         val property: Any? = when (key) {
             "message", "msg", "quit-message", "quit-msg" -> instance.quitMessage

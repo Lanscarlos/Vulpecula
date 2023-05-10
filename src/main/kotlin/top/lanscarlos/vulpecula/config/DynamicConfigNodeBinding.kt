@@ -34,6 +34,7 @@ class DynamicConfigNodeBinding<R>(
     override fun getValue(any: Any?, property: KProperty<*>): R {
         if (!isInitialized) {
             value = transfer(config, config[path])
+            isInitialized = true
         }
         return value as R
     }

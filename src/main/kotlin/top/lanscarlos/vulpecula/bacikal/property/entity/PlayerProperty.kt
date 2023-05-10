@@ -10,7 +10,7 @@ import taboolib.common5.cfloat
 import taboolib.common5.cint
 import taboolib.common5.clong
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -23,7 +23,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player",
     bind = Player::class
 )
-class PlayerProperty : BacikalScriptProperty<Player>("player") {
+class PlayerProperty : BacikalGenericProperty<Player>("player") {
 
     override fun readProperty(instance: Player, key: String): OpenResult {
         val property: Any? = when (key) {

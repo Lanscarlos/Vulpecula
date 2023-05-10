@@ -4,7 +4,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.event.entity.EntityShootBowEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
@@ -18,7 +18,7 @@ import top.lanscarlos.vulpecula.utils.coerceBoolean
     id = "entity-shoot-event",
     bind = EntityShootBowEvent::class
 )
-class EntityShootBowEventProperty : BacikalScriptProperty<EntityShootBowEvent>("entity-shoot-event") {
+class EntityShootBowEventProperty : BacikalGenericProperty<EntityShootBowEvent>("entity-shoot-event") {
 
     override fun readProperty(instance: EntityShootBowEvent, key: String): OpenResult {
         val property: Any? = when (key) {

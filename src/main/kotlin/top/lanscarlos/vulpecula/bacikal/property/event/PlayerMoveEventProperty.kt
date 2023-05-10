@@ -4,7 +4,7 @@ import org.bukkit.Location
 import org.bukkit.event.player.PlayerMoveEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-move-event",
     bind = PlayerMoveEvent::class
 )
-class PlayerMoveEventProperty : BacikalScriptProperty<PlayerMoveEvent>("player-move-event") {
+class PlayerMoveEventProperty : BacikalGenericProperty<PlayerMoveEvent>("player-move-event") {
 
     override fun readProperty(instance: PlayerMoveEvent, key: String): OpenResult {
         val property: Any? = when (key) {

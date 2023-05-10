@@ -11,7 +11,7 @@ import taboolib.module.kether.action.ActionProperty
  * @author Lanscarlos
  * @since 2023-03-19 22:17
  */
-abstract class BacikalScriptProperty<T : Any>(
+abstract class BacikalGenericProperty<T : Any>(
     id: String
 ) : ScriptProperty<T>("vulpecula.$id.operator") {
 
@@ -104,7 +104,7 @@ abstract class BacikalScriptProperty<T : Any>(
             // 排除自己，防止无限调用
             if (this.id == it.id) return@forEach
 
-            val result = if (it is BacikalScriptProperty) {
+            val result = if (it is BacikalGenericProperty) {
                 // 这里不再使用泛型写入，防止套娃
                 it.readProperty(instance, key)
             } else {
@@ -126,7 +126,7 @@ abstract class BacikalScriptProperty<T : Any>(
             // 排除自己，防止无限调用
             if (this.id == it.id) return@forEach
 
-            val result = if (it is BacikalScriptProperty) {
+            val result = if (it is BacikalGenericProperty) {
                 // 这里不再使用泛型写入，防止套娃
                 it.writeProperty(instance, key, value)
             } else {

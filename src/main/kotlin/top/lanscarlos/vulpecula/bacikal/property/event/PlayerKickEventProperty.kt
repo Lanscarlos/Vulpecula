@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property.event
 import org.bukkit.event.player.PlayerKickEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-kick-event",
     bind = PlayerKickEvent::class
 )
-class PlayerKickEventProperty : BacikalScriptProperty<PlayerKickEvent>("player-kick-event") {
+class PlayerKickEventProperty : BacikalGenericProperty<PlayerKickEvent>("player-kick-event") {
     override fun readProperty(instance: PlayerKickEvent, key: String): OpenResult {
         val property: Any = when (key) {
             "message", "msg", "leave-message", "leave-msg" -> instance.leaveMessage

@@ -4,7 +4,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.inventory.ItemStack
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-item-held-event",
     bind = PlayerItemHeldEvent::class
 )
-class PlayerItemHeldEventProperty : BacikalScriptProperty<PlayerItemHeldEvent>("player-item-held-event") {
+class PlayerItemHeldEventProperty : BacikalGenericProperty<PlayerItemHeldEvent>("player-item-held-event") {
 
     override fun readProperty(instance: PlayerItemHeldEvent, key: String): OpenResult {
         val property: Any? = when (key) {

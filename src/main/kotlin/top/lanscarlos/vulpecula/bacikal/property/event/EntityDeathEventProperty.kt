@@ -6,7 +6,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceInt
 
 /**
@@ -20,7 +20,7 @@ import top.lanscarlos.vulpecula.utils.coerceInt
     id = "entity-death-event",
     bind = EntityDeathEvent::class
 )
-class EntityDeathEventProperty : BacikalScriptProperty<EntityDeathEvent>("entity-death-event") {
+class EntityDeathEventProperty : BacikalGenericProperty<EntityDeathEvent>("entity-death-event") {
 
     override fun readProperty(instance: EntityDeathEvent, key: String): OpenResult {
         val property: Any? = when (key) {

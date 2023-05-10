@@ -9,6 +9,7 @@ import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
@@ -26,11 +27,14 @@ import java.io.File
 class VulScript(
     val id: String,
     val wrapper: DynamicConfig
-) : ScriptCompiler {
+) {
 
     val targetPath by wrapper.read("build-setting.target-path") { value ->
         val def = id.substringBeforeLast('.').replace('.', File.separatorChar) + ".ks"
-        val path = value?.toString()?.let { if (!it.substringAfterLast('/').contains('.')) "$it.ks" else it }
+        val path = value?.toString()?.let {
+            if (!it.substringAfterLast('/').contains('.')) "$it.ks" else it
+        }
+
         if (path?.startsWith("/") == true) {
             File(".$path")
         } else {
@@ -46,25 +50,11 @@ class VulScript(
 
     val namespace by wrapper.readStringList("namespace")
 
-    val main by wrapper.read("main") {
-        if (it != null) buildSection(it) else StringBuilder("null")
-    }
-
-    val variables by wrapper.read("variables") { value ->
-        buildVariables(value, mapOf())
-    }
-
-    val condition by wrapper.read("condition") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-
-    val deny by wrapper.read("deny") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-
-    val exception by wrapper.read("exception") {
-        if (it != null) buildException(it) else emptyList()
-    }
+    val main by wrapper.read("main")
+    val variables by wrapper.read("variables")
+    val condition by wrapper.read("condition")
+    val deny by wrapper.read("deny")
+    val exception by wrapper.read("exception")
 
     val fragments by wrapper.read("fragments") { value ->
         val config = value as? ConfigurationSection ?: return@read mapOf()
@@ -75,7 +65,7 @@ class VulScript(
 
     val functions = mutableMapOf<String, VulScriptFunction>()
 
-    lateinit var source: StringBuilder
+    lateinit var source: String
 
     init {
         /*
@@ -95,106 +85,12 @@ class VulScript(
         if (autoCompile) compileScript()
     }
 
-    override fun buildSource(): StringBuilder {
-        val builder = StringBuilder()
-
-        /* 构建前置变量 */
-        if (variables.isNotEmpty()) {
-            compileVariables(builder, variables)
-            builder.append('\n')
-        }
-
-        /* 构建核心语句 */
-        builder.append(main.toString())
-
-        /* 构建异常处理 */
-        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
-            // 提取先前所有内容
-            val content = builder.extract()
-            compileException(builder, content, exception)
-        }
-
-        /* 构建条件处理 */
-        if (condition.isNotEmpty()) {
-            // 提取先前所有内容
-            val content = builder.extract()
-            compileCondition(builder, content, condition, deny)
-        }
-
-        /*
-        * 构建主方法体
-        * def main = {
-        *   ...$content
-        * }
-        * */
-        // 提取先前所有内容
-        val content = builder.extract()
-
-        builder.append("def main = {\n")
-        // 导入命名空间
-        if (namespace.isNotEmpty()) {
-            for (it in namespace) {
-                builder.appendWithIndent("import $it", suffix = "\n")
-            }
-            builder.append('\n')
-        }
-        builder.appendWithIndent(content, suffix = "\n")
-        builder.append("}")
-
-        /*
-        * 构建自定义函数
-        * */
-        if (functions.isNotEmpty()) {
-            functions.forEach { (_, function) ->
-                builder.append("\n\n")
-                builder.append(function.source)
-            }
-        }
-
-        /*
-        * 碎片替换
-        * */
-        if (fragments.isNotEmpty()) {
-            val keys = fragments.keys.joinToString("|")
-            val pattern = "\\\$($keys)(?=\\b)|\\\$\\{($keys)}".toPattern()
-            val matcher = pattern.matcher(builder.extract())
-            val buffer = StringBuffer()
-
-            while (matcher.find()) {
-                val found = matcher.group().substring(1).let {
-                    if (it.startsWith('{') || it.endsWith('}')) {
-                        it.substring(1, it.lastIndex)
-                    } else it
-                }
-                matcher.appendReplacement(buffer, fragments[found] ?: "")
-            }
-            // 兼容 Github 构建系统
-            builder.append(matcher.appendTail(buffer))
-        }
-
-        /* 消除注释 */
-        eraseComment(builder)
-
-        /* 转义 Unicode */
-        if (escapeUnicode) {
-            val pattern = "\\\\u([A-Za-z0-9]{4})".toPattern()
-            val matcher = pattern.matcher(builder.extract())
-            val buffer = StringBuffer()
-
-            while (matcher.find()) {
-                matcher.appendReplacement(buffer, Integer.parseInt(matcher.group(1), 16).toChar().toString())
-            }
-            // 兼容 Github 构建系统
-            builder.append(matcher.appendTail(buffer))
-        }
-
-        return builder
-    }
-
-    override fun compileScript() {
+    fun compileScript() {
         try {
             // 尝试构建脚本
-            this.source = buildSource()
+            this.source = buildBacikalScript(namespace) {
+
+            }.source
 
             // 导出脚本
             if (!targetPath.exists()) {
@@ -205,7 +101,7 @@ class VulScript(
                 return
             }
             targetPath.outputStream().use {
-                it.write(source.toString().toByteArray())
+                it.write(source.toByteArray())
             }
         } catch (e: Exception) {
             e.printStackTrace()

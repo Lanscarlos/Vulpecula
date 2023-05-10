@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property
 import org.bukkit.OfflinePlayer
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceBoolean
 
 /**
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.utils.coerceBoolean
     id = "offline-player",
     bind = OfflinePlayer::class
 )
-class OfflinePlayerProperty : BacikalScriptProperty<OfflinePlayer>("offline-player") {
+class OfflinePlayerProperty : BacikalGenericProperty<OfflinePlayer>("offline-player") {
 
     override fun readProperty(instance: OfflinePlayer, key: String): OpenResult {
         val property: Any? = when (key) {

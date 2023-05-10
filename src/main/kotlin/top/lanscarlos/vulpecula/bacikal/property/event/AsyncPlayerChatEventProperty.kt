@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property.event
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-chat-event",
     bind = AsyncPlayerChatEvent::class
 )
-class AsyncPlayerChatEventProperty : BacikalScriptProperty<AsyncPlayerChatEvent>("player-chat-event") {
+class AsyncPlayerChatEventProperty : BacikalGenericProperty<AsyncPlayerChatEvent>("player-chat-event") {
     override fun readProperty(instance: AsyncPlayerChatEvent, key: String): OpenResult {
         val property: Any = when (key) {
             "format" -> instance.format

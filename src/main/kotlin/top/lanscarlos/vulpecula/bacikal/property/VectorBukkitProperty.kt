@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.property
 import org.bukkit.util.Vector
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.coerceDouble
 
 /**
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.utils.coerceDouble
     id = "vector-bukkit",
     bind = Vector::class
 )
-class VectorBukkitProperty : BacikalScriptProperty<Vector>("vector-bukkit") {
+class VectorBukkitProperty : BacikalGenericProperty<Vector>("vector-bukkit") {
 
     override fun readProperty(instance: Vector, key: String): OpenResult {
         val property: Any = when (key) {

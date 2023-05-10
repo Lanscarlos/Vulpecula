@@ -7,9 +7,10 @@ import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.Quest
-import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
+import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
@@ -28,7 +29,7 @@ class EventHandler(
     val id: String,
     val path: String,
     val wrapper: DynamicConfig
-) : ScriptCompiler {
+) {
 
     val hash = id.digest("md5")
     val hashName = "handler_$hash"
@@ -36,29 +37,21 @@ class EventHandler(
     val priority by wrapper.readInt("priority", 8)
 
     val namespace by wrapper.readStringList("namespace")
-
-    val condition by wrapper.read("condition") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-    val deny by wrapper.read("deny") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-    val handle by wrapper.read("handle") {
-        if (it != null) buildSection(it) else StringBuilder("null")
-    }
-    val exception by wrapper.read("exception") {
-        if (it != null) buildException(it) else emptyList()
-    }
+    val condition by wrapper.read("condition")
+    val deny by wrapper.read("deny")
+    val handle by wrapper.read("handle")
+    val exception by wrapper.read("exception")
 
     val dispatchers = mutableSetOf<EventDispatcher>()
 
-    /* 不包含主方法的方法体 */
-    lateinit var source: StringBuilder
+    lateinit var script: BacikalScript
 
     /* 与方法体对应的语句块 */
-    lateinit var scriptBlocks: Map<String, Quest.Block>
+    val scriptBlocks: Map<String, Quest.Block>
+        get() = script.script.blocks ?: emptyMap()
 
     init {
+
         // 编译脚本
         compileScript()
 
@@ -74,62 +67,19 @@ class EventHandler(
         }
     }
 
-    override fun buildSource(): StringBuilder {
-        val builder = StringBuilder()
-
-        /* 构建核心语句 */
-        builder.append(handle.toString())
-
-        /* 构建异常处理 */
-        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
-            // 提取先前所有内容
-            val content = builder.extract()
-            compileException(builder, content, exception)
+    /**
+     * 编译脚本
+     * */
+    fun compileScript() {
+        script = buildBacikalScript(namespace) {
+            name = this@EventHandler.hashName
+            appendCondition(this@EventHandler.condition)
+            appendDeny(this@EventHandler.deny)
+            appendContent(this@EventHandler.handle)
+            appendExceptions(this@EventHandler.exception)
         }
 
-        /* 构建条件处理 */
-        if (condition.isNotEmpty()) {
-            // 提取先前所有内容
-            val content = builder.extract()
-            compileCondition(builder, content, condition, deny)
-        }
-
-        /*
-        * 收尾
-        * 构建方法体
-        * def handler_$hash = {
-        *   ...$content
-        * }
-        * */
-
-        // 提取先前所有内容
-        val content = builder.extract()
-
-        // 构建方法体
-        builder.append("def $hashName = {\n")
-        builder.appendWithIndent(content, suffix = "\n")
-        builder.append("}")
-
-        /* 消除注释 */
-        eraseComment(builder)
-
-        return builder
-    }
-
-    override fun compileScript() {
-        try {
-            // 尝试构建脚本
-            val source = buildSource()
-            val quest = source.toString().toKetherScript(namespace)
-
-            // 编译通过
-            this.source = source
-            this.scriptBlocks = quest.blocks
-
-            debug(Debug.HIGHEST, "handler \"$id\" build source:\n$source")
-        } catch (e: Exception) {
-            e.printKetherErrorMessage()
-        }
+        debug(Debug.HIGHEST, "handler \"$id\" build source:\n${script.source}")
     }
 
     /**

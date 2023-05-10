@@ -2,6 +2,8 @@ package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.library.kether.LoadError
 import taboolib.module.kether.ScriptActionParser
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScriptBuilder
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -26,6 +28,10 @@ fun bacikalSwitch(func: BacikalReader.() -> Unit): ScriptActionParser<Any?> {
 
         method().resolve()
     }
+}
+
+fun buildBacikalScript(namespace: List<String> = emptyList(), compile: Boolean = true, func: BacikalScriptBuilder.() -> Unit): BacikalScript {
+    return BacikalScript(BacikalScriptBuilder().also(func).build(), namespace, compile)
 }
 
 /**

@@ -10,6 +10,8 @@ import taboolib.module.kether.Script
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
@@ -30,7 +32,7 @@ class ScheduleTask(
     val id: String,
     val path: String, // 所在文件路径
     val wrapper: DynamicConfig
-) : ScriptCompiler {
+) {
 
     val dateFormat by wrapper.read("date-format") {
         SimpleDateFormat(it?.toString() ?: defDateFormat)
@@ -78,23 +80,13 @@ class ScheduleTask(
         Duration.ofSeconds(seconds)
     }
 
-    val namespace by wrapper.readStringList("namespace", listOf("vulpecula"))
+    val namespace by wrapper.readStringList("namespace")
+    val condition by wrapper.read("condition")
+    val deny by wrapper.read("deny")
+    val executable by wrapper.read("execute")
+    val exception by wrapper.read("exception")
 
-    val condition by wrapper.read("condition") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-    val deny by wrapper.read("deny") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-    val executable by wrapper.read("execute") {
-        if (it != null) buildSection(it) else StringBuilder()
-    }
-    val exception by wrapper.read("exception") {
-        if (it != null) buildException(it) else emptyList()
-    }
-
-    lateinit var source: StringBuilder
-    lateinit var script: Script
+    lateinit var script: BacikalScript
 
     private var task: PlatformExecutor.PlatformTask? = null
 
@@ -109,58 +101,16 @@ class ScheduleTask(
         compileScript()
     }
 
-    override fun buildSource(): StringBuilder {
-        val builder = StringBuilder()
+    fun compileScript() {
 
-        /* 构建核心语句 */
-        builder.append(executable)
-
-        /* 构建异常处理 */
-        if (exception.isNotEmpty() && (exception.size > 1 || exception.first().second.isNotEmpty())) {
-            // 提取先前所有内容
-            val content = builder.extract()
-            compileException(builder, content, exception)
+        script = buildBacikalScript {
+            appendCondition(this@ScheduleTask.condition)
+            appendDeny(this@ScheduleTask.deny)
+            appendContent(this@ScheduleTask.executable)
+            appendExceptions(this@ScheduleTask.exception)
         }
 
-        /* 构建条件处理 */
-        if (condition.isNotEmpty()) {
-            // 提取先前所有内容
-            val content = builder.extract()
-            compileCondition(builder, content, condition, deny)
-        }
-
-        /*
-        * 收尾
-        * 构建方法体
-        * */
-
-        // 提取先前所有内容
-        val content = builder.extract()
-
-        // 构建方法体
-        builder.append("def main = {\n")
-        builder.appendWithIndent(content, suffix = "\n")
-        builder.append("}")
-
-        // 消除注释
-        eraseComment(builder)
-
-        return builder
-    }
-
-    override fun compileScript() {
-        try {
-            // 尝试构建脚本
-            val source = buildSource()
-            this.script = source.toString().toKetherScript(namespace)
-
-            // 编译通过
-            this.source = source
-
-            debug(Debug.HIGHEST, "schedule \"$id\" build source:\n$source")
-        } catch (e: Exception) {
-            e.printKetherErrorMessage()
-        }
+        debug(Debug.HIGHEST, "schedule \"$id\" build source:\n${script.source}")
     }
 
     /**

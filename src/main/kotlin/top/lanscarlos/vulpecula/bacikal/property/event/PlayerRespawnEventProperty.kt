@@ -4,7 +4,7 @@ import org.bukkit.Location
 import org.bukkit.event.player.PlayerRespawnEvent
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "player-respawn-event",
     bind = PlayerRespawnEvent::class
 )
-class PlayerRespawnEventProperty : BacikalScriptProperty<PlayerRespawnEvent>("player-respawn-event") {
+class PlayerRespawnEventProperty : BacikalGenericProperty<PlayerRespawnEvent>("player-respawn-event") {
 
     override fun readProperty(instance: PlayerRespawnEvent, key: String): OpenResult {
         val property: Any = when (key) {

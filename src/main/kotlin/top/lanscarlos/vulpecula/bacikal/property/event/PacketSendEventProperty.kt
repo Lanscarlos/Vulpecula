@@ -1,10 +1,9 @@
 package top.lanscarlos.vulpecula.bacikal.property.event
 
-import org.bukkit.entity.Player
 import taboolib.common.OpenResult
 import taboolib.module.nms.PacketSendEvent
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -17,7 +16,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "packet-send-event",
     bind = PacketSendEvent::class
 )
-class PacketSendEventProperty : BacikalScriptProperty<PacketSendEvent>("packet-send-event") {
+class PacketSendEventProperty : BacikalGenericProperty<PacketSendEvent>("packet-send-event") {
 
     override fun readProperty(instance: PacketSendEvent, key: String): OpenResult {
         val property: Any = when (key) {

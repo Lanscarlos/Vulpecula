@@ -11,11 +11,10 @@ import taboolib.common.platform.command.component.CommandComponentLiteral
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common5.cbool
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.kether.printKetherErrorMessage
-import top.lanscarlos.vulpecula.utils.getStringOrList
-import top.lanscarlos.vulpecula.utils.runActions
-import top.lanscarlos.vulpecula.utils.setVariable
-import top.lanscarlos.vulpecula.utils.toKetherScript
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
+import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
+import top.lanscarlos.vulpecula.utils.*
+import top.lanscarlos.vulpecula.utils.Debug.debug
 
 /**
  * Vulpecula
@@ -24,7 +23,7 @@ import top.lanscarlos.vulpecula.utils.toKetherScript
  * @author Lanscarlos
  * @since 2023-02-09 20:15
  */
-class CommandComponentBuilder(val id: String, val section: ConfigurationSection) : ScriptCompiler {
+class CommandComponentBuilder(val id: String, val section: ConfigurationSection) {
 
     val children = mutableSetOf<CommandComponentBuilder>()
 
@@ -77,8 +76,15 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
     }
 
     fun CommandComponent.buildExecutor() {
-        // 执行的脚本
+
         val executable = section["execute"] ?: return
+
+        // 执行的脚本
+        val script = buildBacikalScript {
+            appendContent(executable)
+        }
+
+        debug(Debug.HIGHEST, "custom command \"$id\" build source:\n${script.source}")
 
         // 当前节点是否只允许玩家执行
         val playerOnly = section.getBoolean("player-only", false)
@@ -116,12 +122,12 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
                 parameters[i - 1].children += parameter
             }
 
-            // 当前节点可选或为最后一个节点，为当前节点添加执行器
-            if (parameter.optional || i == parameters.lastIndex) {
+            // 最后一个节点 或 后面的节点为可选节点时，为当前节点添加执行器
+            if (i == parameters.lastIndex || parameters[i + 1].optional) {
                 if (playerOnly) {
-                    parameter.executeScript<Player>(executable, index, comments)
+                    parameter.executeScript<Player>(script, index, comments)
                 } else {
-                    parameter.executeScript<CommandSender>(executable, index, comments)
+                    parameter.executeScript<CommandSender>(script, index, comments)
                 }
             }
         }
@@ -129,9 +135,9 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
         // 若参数为空或第一个参数节点为可选，则为当前节点添加执行器
         if (parameters.isEmpty() || parameters.first().optional) {
             if (playerOnly) {
-                this.executeScript<Player>(executable)
+                this.executeScript<Player>(script)
             } else {
-                this.executeScript<CommandSender>(executable)
+                this.executeScript<CommandSender>(script)
             }
         }
     }
@@ -187,21 +193,8 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
      * @param force 是否强制等待脚本返回结果
      * */
     inline fun <reified T : Any> CommandComponentDynamic.suggestScript(source: Any, uncheck: Boolean, force: Boolean) {
-        val builder = buildSection(source, StringBuilder())
-
-        // 加上默认的 main 函数
-        if (!builder.startsWith("def")) {
-            val content = builder.extract()
-            builder.append("def main = {\n")
-            builder.appendWithIndent(content, suffix = "\n")
-            builder.append("}")
-        }
-
-        val script = try {
-            builder.toString().toKetherScript()
-        } catch (e: Exception) {
-            e.printKetherErrorMessage()
-            return
+        val script = buildBacikalScript {
+            appendContent(source)
         }
 
         this.suggestion<T>(uncheck) { sender, context ->
@@ -229,23 +222,7 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
         }
     }
 
-    inline fun <reified T : Any> CommandComponent.executeScript(source: Any, index: Int = this.index, comments: List<String> = emptyList()) {
-        val builder = buildSection(source, StringBuilder())
-
-        // 加上默认的 main 函数
-        if (!builder.startsWith("def")) {
-            val content = builder.extract()
-            builder.append("def main = {\n")
-            builder.appendWithIndent(content, suffix = "\n")
-            builder.append("}")
-        }
-
-        val script = try {
-            builder.toString().toKetherScript()
-        } catch (e: Exception) {
-            e.printKetherErrorMessage()
-            return
-        }
+    inline fun <reified T : Any> CommandComponent.executeScript(script: BacikalScript, index: Int = this.index, comments: List<String> = emptyList()) {
 
         this.execute<T> { sender, context, argument ->
             script.runActions {
@@ -272,12 +249,5 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
                 }
             }
         }
-    }
-
-    override fun buildSource(): StringBuilder {
-        return StringBuilder()
-    }
-
-    override fun compileScript() {
     }
 }

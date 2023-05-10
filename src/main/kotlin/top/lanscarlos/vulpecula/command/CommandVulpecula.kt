@@ -126,7 +126,7 @@ object CommandVulpecula {
     @CommandBody
     val dispatcher = subCommand(CommandDispatcher.main)
 
-    @CommandBody(permission = "vulpecula.command.util", permissionDefault = PermissionDefault.FALSE)
+    @CommandBody(permission = "vulpecula.command.util")
     val util = subCommand {
         CommandUtilTiming.main(this)
     }

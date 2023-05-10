@@ -42,6 +42,12 @@ class DynamicConfig(
         return parent as? Configuration
     }
 
+    fun read(path: String): DynamicConfigNode<Any?> {
+        return DynamicConfigNodeTransfer(path, this, transfer = { it }).also {
+            nodes += it
+        }
+    }
+
     fun <T> read(path: String, transfer: ConfigurationSection.(Any?) -> T): DynamicConfigNode<T> {
         return DynamicConfigNodeTransfer(path, this, transfer).also {
             nodes += it

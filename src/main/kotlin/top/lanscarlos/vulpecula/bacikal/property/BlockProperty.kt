@@ -5,7 +5,7 @@ import org.bukkit.block.Biome
 import org.bukkit.block.Block
 import taboolib.common.OpenResult
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
-import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
+import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 
 /**
  * Vulpecula
@@ -18,7 +18,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalScriptProperty
     id = "block",
     bind = Block::class
 )
-class BlockProperty : BacikalScriptProperty<Block>("block") {
+class BlockProperty : BacikalGenericProperty<Block>("block") {
 
     override fun readProperty(instance: Block, key: String): OpenResult {
         val property: Any? = when (key) {
