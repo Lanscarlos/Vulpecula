@@ -51,7 +51,7 @@ object ActionRegex {
         case("match") {
             combine(
                 stringOrList(),
-                trim("using", "with", "by", then = text())
+                trim("by", then = text())
             ) { source, pattern ->
                 val result = pattern.toRegex().find(source.format())
                 this.injectVariables(result)
@@ -62,7 +62,7 @@ object ActionRegex {
         case("matches") {
             combine(
                 stringOrList(),
-                trim("using", "with", "by", then = text())
+                trim("by", then = text())
             ) { source, pattern ->
                 val result = pattern.toRegex().matchEntire(source.format())
                 this.injectVariables(result)
@@ -73,7 +73,7 @@ object ActionRegex {
         case("find") {
             combine(
                 stringOrList(),
-                trim("using", "with", "by", then = text()),
+                trim("by", then = text()),
                 LiveData {
                     if (expectToken("to")) {
                         val action = readAction()
@@ -113,60 +113,73 @@ object ActionRegex {
                     }
                 }
 
-                this.injectVariables(results.lastOrNull())
                 return@combine found
             }
         }
 
         case("replace", "rep") {
-            combine(
-                stringOrList(),
-                trim("using", "with", "by", then = text()),
-                LiveData {
-                    if (expectToken("to")) {
-                        val action = readAction()
-                        Bacikal.Action { frame -> frame.run(action) }
-                    } else if (expectToken("then")) {
-                        val action = readAction()
-                        Bacikal.Action { CompletableFuture.completedFuture(action) }
-                    } else {
-                        Bacikal.Action { CompletableFuture.completedFuture(null) }
-                    }
-                }
-            ) { source, pattern, handle ->
-                val regex = pattern.toRegex()
-                val result = if (handle is ParsedAction<*>) {
-                    // 使用处理语句替换
-                    regex.replace(source.format()) { result ->
-                        if (this.script().breakLoop) {
-                            // 跳出循环，返回原值
-                            result.value
-                        } else {
-                            this.newFrame(handle)
-                                .injectVariables(result)
-                                .run<Any?>()
-                                .getNow(null)
-                                ?.toString() ?: ""
-                        }
-                    }.also {
-                        if (this.script().breakLoop) {
-                            this.script().breakLoop = false
-                        }
-                    }
-                } else if (handle != null) {
-                    // 使用固定值替换
-                    regex.replace(source.format(), handle.toString())
-                } else {
-                    // 使用空值替换
-                    regex.replace(source.format(), "")
-                }
+            val cache = stringOrList().accept(reader = this)
 
-                return@combine if (source is String) {
-                    // 原内容为字符串
-                    result
-                } else {
-                    // 原内容为 list
-                    result.split('\n').toList()
+            if (this.expectToken("using")) {
+                // 简单替换
+                combine(
+                    cache,
+                    text(),
+                    trim("to", then = text())
+                ) { source, pattern, replacement ->
+                    source.format().replace(pattern, replacement)
+                }
+            } else {
+                // 正则替换
+                combine(
+                    cache,
+                    trim("by", then = text()),
+                    LiveData {
+                        if (expectToken("to")) {
+                            val action = readAction()
+                            Bacikal.Action { frame -> frame.run(action) }
+                        } else if (expectToken("then")) {
+                            val action = readAction()
+                            Bacikal.Action { CompletableFuture.completedFuture(action) }
+                        } else {
+                            Bacikal.Action { CompletableFuture.completedFuture(null) }
+                        }
+                    }
+                ) { source, pattern, handle ->
+                    val regex = pattern.toRegex()
+                    val result = if (handle is ParsedAction<*>) {
+                        // 使用处理语句替换
+                        regex.replace(source.format()) { result ->
+                            if (this.script().breakLoop) {
+                                // 跳出循环，返回原值
+                                result.value
+                            } else {
+                                this.newFrame(handle)
+                                    .injectVariables(result)
+                                    .run<Any?>()
+                                    .getNow(null)
+                                    ?.toString() ?: ""
+                            }
+                        }.also {
+                            if (this.script().breakLoop) {
+                                this.script().breakLoop = false
+                            }
+                        }
+                    } else if (handle != null) {
+                        // 使用固定值替换
+                        regex.replace(source.format(), handle.toString())
+                    } else {
+                        // 使用空值替换
+                        regex.replace(source.format(), "")
+                    }
+
+                    return@combine if (source is String) {
+                        // 原内容为字符串
+                        result
+                    } else {
+                        // 原内容为 list
+                        result.split('\n').toList()
+                    }
                 }
             }
         }
@@ -175,11 +188,11 @@ object ActionRegex {
     private fun ScriptFrame.injectVariables(result: MatchResult?): ScriptFrame {
         this.variables()["@MatchResult"] = result
         this.variables()["Found"] = result?.value
-        this.variables()["Group"] = result?.groupValues ?: emptyList<String>()
-        this.variables()["Count"] = result?.groupValues?.size
+        this.variables()["Group"] = result?.groupValues
+        this.variables()["Count"] = result?.groupValues?.size ?: 0
 
         this.variables()["found"] = result?.value
-        this.variables()["count"] = result?.groupValues?.size
+        this.variables()["count"] = result?.groupValues?.size ?: 0
 
         return this
     }
@@ -194,17 +207,28 @@ object ActionRegex {
     }
 
     private val regex = Regex("/(.*)(?<!\\\\)/([imgs])+")
+    private val cache = mutableMapOf<String, Regex>()
+
+    private fun String.regex(options: Set<RegexOption> = emptySet()): Regex {
+        return cache.getOrPut(this) {
+            if (options.isNotEmpty()) {
+                this.toRegex(options)
+            } else {
+                this.toRegex()
+            }
+        }
+    }
 
     /**
      * 将字符串解析为正则表达式
      * /${regex}/${options}
      * */
     fun String.decodeToRegex(): Regex {
-        val result = regex.matchEntire(this) ?: return this.toRegex()
+        val result = regex.matchEntire(this) ?: return this.regex()
 
         // 修饰符
         val modifiers = mutableSetOf<RegexOption>()
-        val options = result.groupValues.getOrNull(2) ?: return this.toRegex()
+        val options = result.groupValues.getOrNull(2) ?: return this.regex()
 
         if ('i' in options) {
             modifiers += RegexOption.IGNORE_CASE
@@ -216,7 +240,7 @@ object ActionRegex {
             modifiers += RegexOption.DOT_MATCHES_ALL
         }
 
-        return result.groupValues.getOrNull(1)?.toRegex(modifiers) ?: this.toRegex()
+        return result.groupValues.getOrNull(1)?.regex(modifiers) ?: this.toRegex()
     }
 
 }
