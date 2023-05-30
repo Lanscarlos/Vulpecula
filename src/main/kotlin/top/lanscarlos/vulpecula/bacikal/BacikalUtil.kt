@@ -15,7 +15,13 @@ import java.util.concurrent.CompletableFuture
  */
 
 fun <T> bacikal(func: BacikalReader.() -> Bacikal.Parser<T>): ScriptActionParser<T> {
-    return ScriptActionParser { func(BacikalReader((this))).resolve() }
+    return ScriptActionParser {
+        val reader = BacikalReader(this)
+        func(reader).also {
+            // 重置命名空间
+            reader.resetNamespace()
+        }.resolve()
+    }
 }
 
 fun bacikalSwitch(func: BacikalReader.() -> Unit): ScriptActionParser<Any?> {

@@ -14,8 +14,8 @@ import java.util.*
 class CanvasQuest(
     val uniqueId: String,
     val period: Int,
-    val condition: ParsedAction<*>,
     val body: ParsedAction<*>,
+    val condition: ParsedAction<*>,
     val preHandle: ParsedAction<*>,
     val postHandle: ParsedAction<*>
 ) : Quest {

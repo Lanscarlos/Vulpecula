@@ -10,6 +10,7 @@ import taboolib.common5.*
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
+import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.frameBy
@@ -37,6 +38,7 @@ import java.util.concurrent.CompletableFuture
 open class BacikalReader(private val source: QuestReader) {
 
     val argumentPrefixPattern = "-\\D+".toRegex()
+    val namespace = mutableListOf<String>()
     val methods = HashMap<String, () -> Bacikal.Parser<Any?>>()
     var other: (() -> Bacikal.Parser<out Any?>)? = null
         private set
@@ -52,6 +54,24 @@ open class BacikalReader(private val source: QuestReader) {
     /*
     * QuestReader 操作
     * */
+
+    fun namespace(): MutableList<String> {
+        return source.getProperty<MutableList<String>>("namespace")!!
+    }
+
+    fun addNamespace(namespace: String) {
+        this.namespace += namespace
+        namespace() += namespace
+    }
+
+    fun resetNamespace() {
+        if (this.namespace.isEmpty()) return
+
+        val namespace = namespace()
+        for (it in this.namespace) {
+            namespace -= it
+        }
+    }
 
     fun mark(): Int {
         source.mark()

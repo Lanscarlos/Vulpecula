@@ -4,13 +4,9 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import taboolib.common.platform.function.submit
 import taboolib.library.kether.ParsedAction
-import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
-import top.lanscarlos.vulpecula.kether.live.*
-import top.lanscarlos.vulpecula.utils.*
-import java.util.concurrent.CompletableFuture
+import top.lanscarlos.vulpecula.bacikal.bacikal
 
 /**
  * Vulpecula
@@ -19,122 +15,82 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2022-11-08 10:05
  */
-class ActionCanvas : ScriptAction<Any?>() {
+object ActionCanvas {
 
-    var uniqueMain: LiveData<String>? = null
-    var uniqueExtend: ParsedAction<*>? = null
-    var force: LiveData<Boolean> = BooleanLiveData(false)
-    var period: LiveData<Int> = IntLiveData(20)
-    var condition: ParsedAction<*>? = null
-    val actions = mutableListOf<ParsedAction<*>>()
-    var preHandle = mutableListOf<ParsedAction<*>>()
-    var postHandle = mutableListOf<ParsedAction<*>>()
+    private const val NAMESPACE_EXTEND = "vulpecula-canvas"
+    const val VARIABLE_DURATION_START = "@CanvasStartTime"
+    const val VARIABLE_DURATION_END = "@CanvasEndTime"
+    const val VARIABLE_BRUSH = "@CanvasBrush"
+    const val VARIABLE_ORIGIN = "@CanvasOrigin"
+    const val VARIABLE_VIEWERS = "@CanvasViewers"
+    const val VARIABLE_PATTERN = "@CanvasPattern"
 
-    override fun run(frame: ScriptFrame): CompletableFuture<Any?> {
-        return listOf(
-            uniqueMain?.getOrNull(frame),
-            uniqueExtend?.let { frame.run(it) },
-            force.getOrNull(frame),
-            period.getOrNull(frame)
-        ).thenTake().thenApply { args ->
+    @BacikalParser(
+        id = "canvas",
+        name = ["canvas"],
+    )
+    fun parser() = bacikal {
+        // 添加内部命名空间
+        addNamespace(NAMESPACE_EXTEND)
 
-            // 处理绘画任务 ID
-            val mainId = args[0]?.toString() ?: frame.playerOrNull()?.uniqueId?.toString() ?: error("No canvas unique id selected.")
-            val extendId = when (val it = args[1]) {
+        combine(
+            argument("unique", "uuid", then = text(display = "unique id").union(optional("with", then = any()))),
+            argument("force", then = bool(false), def = false),
+            argument("period", then = int(0), def = 0),
+            argument("condition", then = action()),
+            argument("pre-handle", "on-start", "pre", then = action()),
+            argument("post-handle", "on-end", "post", then = action()),
+            trim("then", then = action())
+        ) { uuid, force, period, condition, preHandle, postHandle, body ->
+
+            // 组装 unique id
+            val mainId = uuid?.first ?: error("No canvas unique id selected.")
+            val extendId = when (val it = uuid.second) {
                 is Block -> it.location.toString()
                 is Entity -> it.uniqueId.toString()
                 else -> it?.toString()
             }
-
             val uniqueId =  if (extendId != null) mainId + '_' + extendId else mainId
-            val force = args[2].coerceBoolean(false)
-            val period = args[3].coerceInt(20)
-            val condition = this.condition
-            val body = ParsedAction(ActionBlock(actions))
-            val preHandle = ParsedAction(ActionBlock(this.preHandle))
-            val postHandle = ParsedAction(ActionBlock(this.postHandle))
 
             if (period <= 0 || condition == null) {
                 // 循环条件未定义 任务只执行一次
                 submit(async = true) {
-                    frame.run(preHandle).thenRun {
-                        frame.run(body).thenRun {
-                            frame.run(postHandle)
+                    when {
+                        preHandle != null && postHandle != null -> {
+                            this@combine.run(preHandle).thenRun {
+                                this@combine.run(body).thenRun {
+                                    this@combine.run(postHandle)
+                                }
+                            }
+                        }
+                        preHandle != null -> {
+                            this@combine.run(preHandle).thenRun {
+                                this@combine.run(body)
+                            }
+                        }
+                        postHandle != null -> {
+                            this@combine.run(body).thenRun {
+                                this@combine.run(postHandle)
+                            }
+                        }
+                        else -> {
+                            this@combine.run(body)
                         }
                     }
                 }
 //            warning("Canvas Condition not defined.")
             } else {
-                val quest = CanvasQuest(uniqueId, period, condition, body, preHandle, postHandle)
+                val quest = CanvasQuest(
+                    uniqueId,
+                    period,
+                    body,
+                    condition,
+                    preHandle ?: ParsedAction.noop<Any?>(),
+                    postHandle ?: ParsedAction.noop<Any?>()
+                )
                 // 提交绘画任务
-                CanvasScriptContext.submit(quest, frame.deepVars(), force)
+                CanvasScriptContext.submit(quest, this.deepVars(), force)
             }
-
-            return@thenApply null
-        }
-    }
-
-    companion object {
-
-        private const val NAMESPACE_EXTEND = "vulpecula-canvas"
-        const val VARIABLE_DURATION_START = "@CanvasStartTime"
-        const val VARIABLE_DURATION_END = "@CanvasEndTime"
-        const val VARIABLE_BRUSH = "@CanvasBrush"
-        const val VARIABLE_ORIGIN = "@CanvasOrigin"
-        const val VARIABLE_VIEWERS = "@CanvasViewers"
-        const val VARIABLE_PATTERN = "@CanvasPattern"
-
-        @BacikalParser(
-            id = "canvas",
-            name = ["canvas"]
-        )
-        fun parser() = scriptParser { reader ->
-
-            // 添加内部命名空间
-            val namespace = reader.getProperty<MutableList<String>>("namespace")!!
-            namespace += NAMESPACE_EXTEND
-
-            val canvas = ActionCanvas()
-
-            if (!reader.hasNextToken("{")) {
-                return@scriptParser canvas
-            }
-
-            while (!reader.hasNextToken("}")) {
-                reader.mark()
-                when (reader.nextToken().lowercase()) {
-                    "unique" -> {
-                        canvas.uniqueMain = reader.readString()
-                        if (reader.hasNextToken("with")) {
-                            canvas.uniqueExtend = reader.nextBlock()
-                        }
-                    }
-                    "period" -> {
-                        canvas.period = reader.readInt()
-                    }
-                    "force" -> {
-                        canvas.force = reader.readBoolean()
-                    }
-                    "condition" -> {
-                        canvas.condition = reader.nextBlock()
-                    }
-                    "pre-handle", "on-start" -> {
-                        canvas.preHandle += reader.nextBlock()
-                    }
-                    "post-handle", "on-end" -> {
-                        canvas.postHandle += reader.nextBlock()
-                    }
-                    else -> {
-                        reader.reset()
-                        canvas.actions += reader.nextBlock()
-                    }
-                }
-            }
-
-            // 移除内部命名空间
-            namespace -= NAMESPACE_EXTEND
-
-            return@scriptParser canvas
         }
     }
 }

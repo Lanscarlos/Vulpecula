@@ -40,7 +40,7 @@ object ActionDraw {
      * */
     @BacikalParser(
         id = "draw",
-        name = ["draw", "draw"],
+        name = ["draw"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikalSwitch {
