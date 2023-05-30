@@ -49,8 +49,8 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
 
     fun buildDynamic(index: Int): CommandComponent {
         val component = CommandComponentDynamic(
-            index,
             section.getString("dynamic") ?: id,
+            index,
             section.getBoolean("optional", false),
             section.getString("permission") ?: ""
         )
@@ -68,8 +68,9 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
         literal += section.getStringOrList("aliases")
 
         return CommandComponentLiteral(
+            literal.toTypedArray(),
+            section.getBoolean("hidden", false),
             index,
-            *literal.toTypedArray(),
             optional = section.getBoolean("optional", false),
             permission = section.getString("permission") ?: ""
         )
@@ -93,7 +94,7 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
         val parameters = section.getMapList("args").mapIndexedNotNull { i, arg ->
             if (arg.size == 1) {
                 val entry = arg.entries.first()
-                CommandComponentDynamic(index + i + 1, entry.key!!.toString(), false, "").also {
+                CommandComponentDynamic(entry.key!!.toString(), index + i + 1, false, "").also {
                     it.buildSuggest(entry.value!!, false)
                 }
             } else {
@@ -106,7 +107,7 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
                 val uncheck = arg["uncheck"]?.cbool ?: false
                 val suggest = arg["suggest"] ?: entry?.value ?: "*"
 
-                CommandComponentDynamic(index + i + 1, name, optional, permission).also {
+                CommandComponentDynamic(name, index + i + 1, optional, permission).also {
                     it.buildSuggest(suggest, uncheck)
                 }
             }

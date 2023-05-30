@@ -40,6 +40,7 @@ fun Script.runActions(func: ScriptContext.() -> Unit): CompletableFuture<Any?> {
 /**
  * 运行脚本
  * */
+@Deprecated("")
 fun eval(
     script: String,
     sender: Any? = null,

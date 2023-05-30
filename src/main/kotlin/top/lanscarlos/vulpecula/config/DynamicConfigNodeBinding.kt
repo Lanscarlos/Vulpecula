@@ -22,7 +22,7 @@ class DynamicConfigNodeBinding<R>(
     var value: R? = null
 
     val config by lazy {
-        ConfigLoader.files[bind]?.conf?.also {
+        ConfigLoader.files[bind]?.configuration?.also {
             it.onReload(this)
         } ?: error("config \"$bind\" not defined.")
     }
