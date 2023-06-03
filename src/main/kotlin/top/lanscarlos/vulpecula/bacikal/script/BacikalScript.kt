@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture
 class BacikalScript(val source: String, namespace: List<String> = emptyList(), compile: Boolean = true) {
 
     val namespace = namespace.toMutableList()
-    lateinit var script: Script
+    var script: Script? = null
 
     // 阻断器 5s
     private var baffle = -1L
@@ -80,14 +80,14 @@ class BacikalScript(val source: String, namespace: List<String> = emptyList(), c
      * 执行脚本
      * */
     fun runActions(func: ScriptContext.() -> Unit): CompletableFuture<Any?> {
-        if (!::script.isInitialized) {
+        if (script == null) {
             if (System.currentTimeMillis() > baffle) {
                 throwable?.printKetherErrorMessage(detailError = true) ?: error("Script has not compile yet!")
                 baffle = System.currentTimeMillis() + 5000L
             }
         }
         return try {
-            ScriptContext.create(script).also(func).runActions()
+            ScriptContext.create(script!!).also(func).runActions()
         } catch (e: Exception) {
             e.printKetherErrorMessage()
             CompletableFuture.completedFuture(null)

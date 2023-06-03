@@ -42,29 +42,17 @@ class EventHandler(
     val handle by wrapper.read("handle")
     val exception by wrapper.read("exception")
 
-    val dispatchers = mutableSetOf<EventDispatcher>()
+    val dispatchers = mutableSetOf<String>()
 
     lateinit var script: BacikalScript
 
     /* 与方法体对应的语句块 */
     val scriptBlocks: Map<String, Quest.Block>
-        get() = script.script.blocks ?: emptyMap()
+        get() = script.script?.blocks ?: emptyMap()
 
     init {
-
         // 编译脚本
         compileScript()
-
-        // 绑定调度器
-        for (id in binding) {
-            val dispatcher = EventDispatcher.get(id)
-            if (dispatcher == null) {
-                console().sendLang("Handler-Load-Dispatcher-Not-Found", this.id, id)
-                continue
-            }
-
-            bind(dispatcher)
-        }
     }
 
     /**
@@ -87,10 +75,23 @@ class EventHandler(
      * @param dispatcher 调度器
      * */
     fun bind(dispatcher: EventDispatcher) {
-        if (dispatcher in dispatchers) return
-
-        dispatchers += dispatcher
+        dispatchers += dispatcher.id
         dispatcher.addHandler(this)
+    }
+
+    /**
+     * 绑定所有调度器
+     * */
+    fun bindAll() {
+        for (id in binding) {
+            val dispatcher = EventDispatcher.get(id)
+            if (dispatcher == null) {
+                console().sendLang("Handler-Load-Dispatcher-Not-Found", this.id, id)
+                continue
+            }
+
+            bind(dispatcher)
+        }
     }
 
     /**
@@ -98,20 +99,39 @@ class EventHandler(
      * @param dispatcher 调度器
      * */
     fun unbind(dispatcher: EventDispatcher) {
-        dispatchers -= dispatcher
-        console().sendLang("Handler-Load-Dispatcher-Unbind", this.id, id)
+        dispatchers -= dispatcher.id
+        dispatcher.removeHandler(this)
+        console().sendLang("Handler-Load-Dispatcher-Unbind", this.id, dispatcher.id)
     }
 
     /**
-     * 重新绑定调度模块
+     * 解绑所有调度模块，并让调度模块重新编译脚本
+     * */
+    fun unbindAll() {
+        val iterator = dispatchers.iterator()
+        while (iterator.hasNext()) {
+            val id = iterator.next()
+            iterator.remove()
+            val dispatcher = EventDispatcher.get(id) ?: continue
+            dispatcher.removeHandler(this)
+            dispatcher.compileScript()
+        }
+    }
+
+    /**
+     * 重新绑定所有调度模块
      * @param reorder 是否令已绑定的调度模块重新排序
      * */
-    fun rebind(reorder: Boolean) {
+    fun rebindAll(reorder: Boolean) {
 
         // 检查已绑定的调度器
         val iterator = dispatchers.iterator()
         while (iterator.hasNext()) {
-            val dispatcher = iterator.next()
+            val id = iterator.next()
+            // 移出队列
+            iterator.remove()
+            val dispatcher = EventDispatcher.get(id) ?: continue
+
             if (dispatcher.id in binding) {
                 // 仍然处于绑定状态
                 if (reorder) dispatcher.compileScript()
@@ -120,15 +140,12 @@ class EventHandler(
                 dispatcher.removeHandler(this)
                 // 重新编译脚本
                 dispatcher.compileScript()
-                // 移出队列
-                iterator.remove()
             }
         }
 
         // 加载未绑定的调度器
-        val existing = dispatchers.map { it.id }
         for (id in binding) {
-            if (id in existing) continue
+            if (id in dispatchers) continue
 
             val dispatcher = EventDispatcher.get(id)
             if (dispatcher == null) {
@@ -140,17 +157,6 @@ class EventHandler(
             bind(dispatcher)
             if (reorder) dispatcher.compileScript()
         }
-    }
-
-    /**
-     * 解绑所有调度模块
-     * */
-    fun unbindAll() {
-        dispatchers.forEach {
-            it.removeHandler(this)
-            it.compileScript()
-        }
-        dispatchers.clear()
     }
 
     /**
@@ -173,7 +179,7 @@ class EventHandler(
         }
 
         if (recompile) compileScript()
-        if (rebind) rebind(reorder)
+        if (rebind) rebindAll(reorder)
     }
 
     override fun toString(): String {
@@ -252,7 +258,7 @@ class EventHandler(
                         if (section.getBoolean("disable", false)) return@let
 
                         cache[key] = EventHandler(key, path, section.toDynamic()).apply {
-                            this.dispatchers.forEach { it.compileScript() }
+                            this.dispatchers.forEach { EventDispatcher.get(it)?.compileScript() }
                         }
 
                         counter += 1
@@ -307,6 +313,15 @@ class EventHandler(
                 console().asLangText("Handler-Load-Failed", e.localizedMessage, timing(start)).also {
                     console().sendMessage(it)
                 }
+            }
+        }
+
+        /**
+         * 绑定调度模块
+         * */
+        fun postLoad() {
+            for ((_, handler) in cache) {
+                handler.bindAll()
             }
         }
     }

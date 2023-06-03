@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.script
 
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.config.DynamicConfig
 
 /**
  * Vulpecula

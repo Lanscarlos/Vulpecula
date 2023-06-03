@@ -125,13 +125,13 @@ class EventDispatcher(
         script = buildBacikalScript(namespace) {
             appendVariables(this@EventDispatcher.variables)
             appendContent(preHandle)
-            appendContent("\n\n")
 
             /*
             * 构建调度语句
             * call $handler_<hash>
             * */
             if (handlers.isNotEmpty()) {
+                appendContent("\n")
                 // 根据处理器优先级升序排序，优先级越高越先被执行
                 handlers.sortByDescending { it.priority }
                 for (it in handlers) {
@@ -145,7 +145,7 @@ class EventDispatcher(
         }
 
         // 替换任务
-        script.script = DispatcherQuest(this, script.script.blocks)
+        script.script = script.script?.let { DispatcherQuest(this, it.blocks) }
 
         debug(Debug.HIGHEST, "dispatcher \"$id\" build source:\n${script.source}")
     }
@@ -240,9 +240,8 @@ class EventDispatcher(
     }
 
     fun addHandler(handler: EventHandler) {
-        if (handler !in handlers) {
-            handlers += handler
-        }
+        if (handler in handlers) return
+        handlers += handler
     }
 
     fun removeHandler(handler: EventHandler) {
@@ -390,7 +389,6 @@ class EventDispatcher(
                 while (iterator.hasNext()) {
                     val dispatcher = iterator.next().value
                     dispatcher.unregisterListener()
-                    dispatcher.handlers.forEach { it.unbind(dispatcher) }
                     iterator.remove()
                 }
 
@@ -433,6 +431,9 @@ class EventDispatcher(
         }
 
         fun postLoad() {
+            // 绑定 handler
+            EventHandler.postLoad()
+
             cache.values.forEach {
                 // 编译脚本
                 it.compileScript()
