@@ -22,8 +22,8 @@ import taboolib.library.kether.Quest
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
-import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
 import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
@@ -125,6 +125,7 @@ class EventDispatcher(
         script = buildBacikalScript(namespace) {
             appendVariables(this@EventDispatcher.variables)
             appendContent(preHandle)
+            appendContent("\n\n")
 
             /*
             * 构建调度语句
@@ -142,6 +143,9 @@ class EventDispatcher(
             appendContent(postHandle)
             appendExceptions(this@EventDispatcher.exception)
         }
+
+        // 替换任务
+        script.script = DispatcherQuest(this, script.script.blocks)
 
         debug(Debug.HIGHEST, "dispatcher \"$id\" build source:\n${script.source}")
     }
