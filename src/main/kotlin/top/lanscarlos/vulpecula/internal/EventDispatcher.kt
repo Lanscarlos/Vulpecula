@@ -381,9 +381,16 @@ class EventDispatcher(
             val start = timing()
             return try {
 
-                // 清除缓存
-                cache.clear()
+                // 注销所有监听器
+                val iterator = cache.iterator()
+                while (iterator.hasNext()) {
+                    val dispatcher = iterator.next().value
+                    dispatcher.unregisterListener()
+                    dispatcher.handlers.forEach { it.unbind(dispatcher) }
+                    iterator.remove()
+                }
 
+                // 加载调度器
                 folder.ifNotExists {
                     releaseResourceFile("dispatchers/#def.yml", true)
                 }.getFiles().forEach { file ->
