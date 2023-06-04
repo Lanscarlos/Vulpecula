@@ -1,8 +1,8 @@
 package top.lanscarlos.vulpecula.config
 
+import taboolib.common5.*
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -56,7 +56,7 @@ class DynamicConfig(
 
     fun readBoolean(path: String, def: Boolean = false): DynamicConfigNode<Boolean> {
         return DynamicConfigNodeTransfer(path, this) {
-            it.coerceBoolean(def)
+            it?.cbool ?: def
         }.also {
             nodes += it
         }
@@ -64,7 +64,7 @@ class DynamicConfig(
 
     fun readShort(path: String, def: Short = 0): DynamicConfigNode<Short> {
         return DynamicConfigNodeTransfer(path, this) {
-            it.coerceShort(def)
+            it?.cshort ?: def
         }.also {
             nodes += it
         }
@@ -72,7 +72,7 @@ class DynamicConfig(
 
     fun readInt(path: String, def: Int = 0): DynamicConfigNode<Int> {
         return DynamicConfigNodeTransfer(path, this) {
-            it.coerceInt(def)
+            it?.cint ?: def
         }.also {
             nodes += it
         }
@@ -80,7 +80,7 @@ class DynamicConfig(
 
     fun readLong(path: String, def: Long = 0): DynamicConfigNode<Long> {
         return DynamicConfigNodeTransfer(path, this) {
-            it.coerceLong(def)
+            it?.clong ?: def
         }.also {
             nodes += it
         }
@@ -88,7 +88,7 @@ class DynamicConfig(
 
     fun readFloat(path: String, def: Float = 0f): DynamicConfigNode<Float> {
         return DynamicConfigNodeTransfer(path, this) {
-            it.coerceFloat(def)
+            it?.cfloat ?: def
         }.also {
             nodes += it
         }
@@ -96,7 +96,7 @@ class DynamicConfig(
 
     fun readDouble(path: String, def: Double = 0.0): DynamicConfigNode<Double> {
         return DynamicConfigNodeTransfer(path, this) {
-            it.coerceDouble(def)
+            it?.cdouble ?: def
         }.also {
             nodes += it
         }
@@ -122,9 +122,9 @@ class DynamicConfig(
         return DynamicConfigNodeTransfer(path, this) { value ->
             when (value) {
                 is Int -> listOf(value)
-                is String -> listOf(value.coerceInt())
-                is Array<*> -> value.mapNotNull { it?.coerceInt() }
-                is Collection<*> -> value.mapNotNull { it?.coerceInt() }
+                is String -> listOf(value.cint)
+                is Array<*> -> value.mapNotNull { it?.cint }
+                is Collection<*> -> value.mapNotNull { it?.cint }
                 else -> def
             }
         }.also {
