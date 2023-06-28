@@ -42,6 +42,12 @@ object ActionDuration {
                 check(this, duration, false)
             }
         }
+        case("reset") {
+            discrete {
+                this.setVariable(ActionCanvas.VARIABLE_DURATION_START, System.currentTimeMillis())
+                this.setVariable(ActionCanvas.VARIABLE_DURATION_END, null)
+            }
+        }
     }
 
     fun check(frame: ScriptFrame, duration: Int, between: Boolean): Boolean {
