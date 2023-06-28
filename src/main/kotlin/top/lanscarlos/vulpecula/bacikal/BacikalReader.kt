@@ -353,28 +353,39 @@ open class BacikalReader(private val source: QuestReader) {
 
         for ((index, it) in liveData.withIndex()) {
             if (it is LiveDataProxy<*>) {
+                if (startIndex > -1) {
+                    // 已定位 argument 开始位置，跳过
+                    continue
+                }
+                // 定位 argument 开始位置
                 startIndex = index
-                break
+            } else if (startIndex < 0) {
+
+                if (endIndex < liveData.lastIndex) {
+                    // 已定位 argument 结束位置，结束循环
+                    break
+                }
+
+                // 此处 argument 结束
+                endIndex = index - 1
+            } else {
+                // 非 argument，直接执行
+                it.accept(reader = this)
             }
-            it.accept(reader = this)
-        }
-
-        if (startIndex < 0) return
-
-        if (liveData.last() !is LiveDataProxy<*>) {
-            // 处理特殊情况
-            endIndex -= 1
         }
 
         while (peekToken().matches(argumentPrefixPattern)) {
             val prefix = nextToken().substring(1)
-            for (index in startIndex..endIndex) {
+            for (index in startIndex .. endIndex) {
                 (liveData[index] as LiveDataProxy<*>).accept(prefix, reader = this)
             }
         }
 
-        if (liveData.last() !is LiveDataProxy<*>) {
-            liveData.last().accept(reader = this)
+        if (endIndex < liveData.lastIndex) {
+            // 执行剩余部分
+            for (index in endIndex + 1 .. liveData.lastIndex) {
+                liveData[index].accept(reader = this)
+            }
         }
     }
 
@@ -383,11 +394,11 @@ open class BacikalReader(private val source: QuestReader) {
      * 无参数
      * */
 
-    fun <R> discrete(func: (ScriptFrame) -> R): Bacikal.Parser<R> {
+    inline fun <R> discrete(crossinline func: ScriptFrame.() -> R): Bacikal.Parser<R> {
         return Bacikal.Parser { CompletableFuture.completedFuture(func(it)) }
     }
 
-    fun <R> discreteOf(func: () -> Bacikal.Action<R>): Bacikal.Parser<R> {
+    inline fun <R> discreteOf(crossinline func: () -> Bacikal.Action<R>): Bacikal.Parser<R> {
         return Bacikal.Parser { frame ->
             func().run(frame)
         }
