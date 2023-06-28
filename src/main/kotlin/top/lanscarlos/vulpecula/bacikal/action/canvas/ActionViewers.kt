@@ -38,8 +38,8 @@ object ActionViewers {
      *
      * */
     @BacikalParser(
-        id = "brush",
-        name = ["brush", "pen"],
+        id = "viewers",
+        name = ["viewers", "viewer"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikal {
@@ -54,22 +54,12 @@ object ActionViewers {
     fun viewers(): LiveData<Collection<ProxyPlayer>> {
         return LiveData {
             val cache = mutableSetOf<Any>()
-            if (this.expectToken("to")) {
-                if (this.expectToken("[")) {
-                    while (!this.expectToken("]")) {
-                        cache += this.readAction()
-                    }
-                } else {
+            if (this.expectToken("[")) {
+                while (!this.expectToken("]")) {
                     cache += this.readAction()
                 }
             } else {
-                if (this.expectToken("[")) {
-                    while (!this.expectToken("]")) {
-                        cache += this.nextToken()
-                    }
-                } else {
-                    cache += this.nextToken()
-                }
+                cache += this.readAction()
             }
 
             Bacikal.Action { frame ->
@@ -84,7 +74,12 @@ object ActionViewers {
                             break
                         }
                         is String -> {
-                            viewers += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
+                            if (value[0] == '!') {
+                                val exclude = value.substring(1)
+                                viewers.removeIf { it.name.equals(exclude, true) }
+                            } else {
+                                viewers += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
+                            }
                         }
                         is ParsedAction<*> -> {
                             wait += frame.run(value)
@@ -92,6 +87,7 @@ object ActionViewers {
                     }
                 }
 
+                // 处理等待数据
                 if (wait.isEmpty()) {
                     return@Action CompletableFuture.completedFuture(viewers)
                 } else {
