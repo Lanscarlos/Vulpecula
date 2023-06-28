@@ -1,8 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
-import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.module.kether.*
@@ -78,25 +76,16 @@ object ActionDraw {
 
     fun draw(frame: ScriptFrame, target: Any) {
 
+        // 获取观察者对象
+        val viewers = frame.getVariable<Collection<ProxyPlayer>>(ActionCanvas.VARIABLE_VIEWERS) ?: setOf(frame.player())
+        if (viewers.isEmpty()) {
+            // 观察者为空, 不作画
+            return
+        }
+
         // 获取笔刷对象
         val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
             frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
-        }
-
-        // 获取观察者对象
-        val viewers = when (val value = frame.getVariable<Any>(ActionCanvas.VARIABLE_VIEWERS)) {
-            is ProxyPlayer -> listOf(value)
-            is Player -> listOf(adaptPlayer(value))
-            is Collection<*> -> {
-                value.mapNotNull {
-                    when (it) {
-                        is ProxyPlayer -> it
-                        is Player -> adaptPlayer(it)
-                        else -> null
-                    }
-                }
-            }
-            else -> listOf(frame.player())
         }
 
         // 获取原点
