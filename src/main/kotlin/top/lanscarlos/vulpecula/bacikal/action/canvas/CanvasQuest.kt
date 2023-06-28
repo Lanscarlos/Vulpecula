@@ -15,7 +15,6 @@ class CanvasQuest(
     val uniqueId: String,
     val period: Int,
     val body: ParsedAction<*>,
-    val condition: ParsedAction<*>,
     val preHandle: ParsedAction<*>,
     val postHandle: ParsedAction<*>
 ) : Quest {
