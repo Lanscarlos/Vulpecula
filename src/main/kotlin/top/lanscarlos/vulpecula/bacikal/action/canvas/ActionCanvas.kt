@@ -26,7 +26,7 @@ object ActionCanvas {
     const val VARIABLE_BRUSH = "@CanvasBrush"
     const val VARIABLE_ORIGIN = "@CanvasOrigin"
     const val VARIABLE_VIEWERS = "@CanvasViewers"
-    const val VARIABLE_PATTERN = "@CanvasPattern"
+    const val VARIABLE_PATTERNS = "@CanvasPatterns"
 
     @BacikalParser(
         id = "canvas",

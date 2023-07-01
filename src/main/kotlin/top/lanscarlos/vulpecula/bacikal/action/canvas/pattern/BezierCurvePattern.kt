@@ -1,8 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.util.Location
-import top.lanscarlos.vulpecula.bacikal.Bacikal
-import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
 
 /**
@@ -12,7 +10,7 @@ import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
  * @author Lanscarlos
  * @since 2022-11-20 17:07
  */
-class PatternBezierCurve(
+class BezierCurvePattern(
     locations: List<Location>
 ) : CanvasPattern {
 
@@ -49,28 +47,28 @@ class PatternBezierCurve(
         return calculate(temp, step)
     }
 
-    override fun points(origin: Location): Collection<Location> {
+    override fun shape(origin: Location): Collection<Location> {
         return points
     }
 
-    override fun nextPoint(origin: Location): Location {
+    override fun point(origin: Location): Location {
         if (index >= points.size) index = 0
         return points[index++]
     }
 
-    companion object : CanvasPattern.Resolver {
+    companion object : ActionPattern.PatternResolver {
 
         override val name = arrayOf("Bezier-Curve", "Bezier", "Curve")
 
         /**
          * pattern bezier [ &loc1 &loc2... ]
          * */
-        override fun resolve(reader: BacikalReader): Bacikal.Parser<CanvasPattern> {
-            return reader.run {
+        override fun resolve(reader: ActionPattern.Reader): ActionPattern.Handler<CanvasPattern> {
+            return reader.handle {
                 combine(
                     list()
                 ) { locations ->
-                    PatternBezierCurve(locations.mapNotNull { it?.liveLocation })
+                    BezierCurvePattern(locations.mapNotNull { it?.liveLocation })
                 }
             }
         }

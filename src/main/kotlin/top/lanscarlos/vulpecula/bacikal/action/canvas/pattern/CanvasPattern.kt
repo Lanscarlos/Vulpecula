@@ -5,6 +5,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.util.Location
 import top.lanscarlos.vulpecula.bacikal.Bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalReader
+import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.ClassInjector
 import java.util.function.Supplier
 
@@ -18,20 +19,20 @@ import java.util.function.Supplier
 interface CanvasPattern {
 
     /**
-     * 获取图案的所有点坐标
-     *
-     * @param origin 原点
-     * @return 坐标集合
-     * */
-    fun points(origin: Location): Collection<Location>
-
-    /**
      * 获取图案的下一个点坐标
      *
-     * @param origin 原点
+     * @param origin 原点，当内置原点时，优先使用内置原点
      * @return 点坐标
      * */
-    fun nextPoint(origin: Location): Location
+    fun point(origin: Location): Location
+
+    /**
+     * 获取图案的所有点坐标
+     *
+     * @param origin 原点，当内置原点时，优先使用内置原点
+     * @return 坐标集合
+     * */
+    fun shape(origin: Location): Collection<Location>
 
     interface Resolver {
 
@@ -41,7 +42,11 @@ interface CanvasPattern {
          * */
         val name: Array<String>
 
-        fun resolve(reader: BacikalReader): Bacikal.Parser<CanvasPattern>
+        fun resolve(
+            reader: BacikalReader,
+            nameLiveData: LiveData<String>,
+            originLiveData: LiveData<Location?>
+        ): Bacikal.Parser<CanvasPattern>
     }
 
     @Awake(LifeCycle.LOAD)
@@ -55,7 +60,7 @@ interface CanvasPattern {
 
         fun register(reader: Resolver) {
             reader.name.forEach {
-                registry[it.lowercase()] =  reader
+                registry[it.lowercase()] = reader
             }
         }
 

@@ -6,7 +6,9 @@ import taboolib.common.util.Vector
 import taboolib.module.kether.*
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
-import top.lanscarlos.vulpecula.bacikal.bacikalSwitch
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
+import top.lanscarlos.vulpecula.bacikal.action.canvas.pattern.CanvasPattern
+import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.utils.*
 
 /**
@@ -18,59 +20,51 @@ import top.lanscarlos.vulpecula.utils.*
  */
 object ActionDraw {
 
-    /**
-     *
-     * 定义基准点, 即原点
-     * draw origin &loc
-     * draw base &loc
-     *
-     * 根据偏移量作画
-     * draw &x &y &z
-     *
-     * 根据向量偏移作画
-     * draw by/with &vec
-     *
-     * 根据坐标直接作画
-     * draw at &loc
-     * draw at pattern next
-     * draw at pattern points
-     *
-     * */
     @BacikalParser(
         id = "draw",
         name = ["draw"],
         namespace = "vulpecula-canvas"
     )
-    fun parser() = bacikalSwitch {
-        case("origin", "base") {
-            combine(
-                locationOrNull()
-            ) { location ->
-                this.setVariable(ActionCanvas.VARIABLE_ORIGIN, location)
-            }
-        }
-        case("by", "with") {
-            combine(
-                vector()
-            ) { vector ->
-                draw(this, vector)
-            }
-        }
-        case("at") {
-            combine(
-                location()
-            ) { location ->
+    fun parser() = bacikal {
+        combine(
+            trim("at", then = location()),
+            optional("using", "with", "by", then = readerOf { r ->
+                r.expectToken("pattern")
+                r.nextToken()
+            }),
+            argument("index", "i", then = int(0), def = 0)
+        ) { location, template, index ->
+
+            if (template == null) {
                 draw(this, location)
+                return@combine true
             }
-        }
-        other {
-            combine(
-                double(0.0),
-                double(0.0),
-                double(0.0)
-            ) { x, y, z ->
-                draw(this, Vector(x, y, z))
+
+            // 使用图案绘制
+            val patterns = this.getVariable<List<CanvasPattern>>(ActionCanvas.VARIABLE_PATTERNS) ?: return@combine setOf<Location>()
+
+            if (index < 0 || index > patterns.size) {
+                error("Index out of bounds of patterns.")
             }
+
+            when (template) {
+                "point" -> {
+                    if (index == 0) {
+                        draw(this, patterns.map { it.point(location) })
+                    } else {
+                        draw(this, patterns[index - 1].point(location))
+                    }
+                }
+                "shape" -> {
+                    if (index == 0) {
+                        draw(this, patterns.flatMap { it.shape(location) })
+                    } else {
+                        draw(this, patterns[index - 1].shape(location))
+                    }
+                }
+                else -> error("Unknown pattern sub action.")
+            }
+            return@combine true
         }
     }
 

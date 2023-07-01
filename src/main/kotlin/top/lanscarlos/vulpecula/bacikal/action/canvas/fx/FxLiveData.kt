@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas.fx
 
 import top.lanscarlos.vulpecula.bacikal.LiveData
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveDouble
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
 
 /**

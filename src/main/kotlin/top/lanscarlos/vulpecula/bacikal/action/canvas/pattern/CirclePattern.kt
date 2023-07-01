@@ -1,8 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.util.Location
-import top.lanscarlos.vulpecula.bacikal.Bacikal
-import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -14,15 +12,23 @@ import kotlin.math.sin
  * @since 2022-11-10 10:33
  */
 
-class PatternCircle(
+class CirclePattern(
     val radius: Double = 1.0,
     val step: Double = 10.0,
-    val yOffset: Double = 0.0
+    val init: Double = 0.0
 ) : CanvasPattern {
 
-    var currentAngle = 0.0
+    var currentAngle = init
 
-    override fun points(origin: Location): Collection<Location> {
+    override fun point(origin: Location): Location {
+        val radians = Math.toRadians(currentAngle)
+        val x = radius * cos(radians)
+        val z = radius * sin(radians)
+        currentAngle += step
+        return origin.clone().add(x, 0.0, z)
+    }
+
+    override fun shape(origin: Location): Collection<Location> {
         val points = mutableListOf<Location>()
         var angle = 0.0
         while (angle < 360) {
@@ -35,29 +41,23 @@ class PatternCircle(
         return points
     }
 
-    override fun nextPoint(origin: Location): Location {
-        val radians = Math.toRadians(currentAngle)
-        val x = radius * cos(radians)
-        val z = radius * sin(radians)
-        currentAngle += step
-        return origin.clone().add(x, yOffset, z)
-    }
-
-    companion object : CanvasPattern.Resolver {
+    companion object : ActionPattern.PatternResolver {
 
         override val name = arrayOf("circle")
 
         /**
-         * pattern circle -radius &radius -step &step -y-offset &yOffset
+         * pattern circle -radius ... -step ... -init ...
          * */
-        override fun resolve(reader: BacikalReader): Bacikal.Parser<CanvasPattern> {
-            return reader.run {
+        override fun resolve(
+            reader: ActionPattern.Reader
+        ): ActionPattern.Handler<CanvasPattern> {
+            return reader.handle {
                 combine(
                     argument("radius", "r", then = double(1.0), def = 1.0),
                     argument("step", "s", then = double(10.0), def = 10.0),
-                    argument("y-offset", "y", then = double(0.0), def = 0.0)
-                ) { radius, step, yOffset ->
-                    PatternCircle(radius, step, yOffset)
+                    argument("init", "i", then = double(0.0), def = 0.0)
+                ) { radius, step, init ->
+                    CirclePattern(radius, step, init)
                 }
             }
         }
