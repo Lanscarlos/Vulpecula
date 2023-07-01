@@ -38,12 +38,6 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
         super.terminate()
     }
 
-    override fun runActions(): CompletableFuture<Any> {
-        // 设置开始时间
-        set(ActionCanvas.VARIABLE_DURATION_START, System.currentTimeMillis())
-        return super.runActions()
-    }
-
     /**
      * 是否已终止运行
      * */
@@ -58,7 +52,7 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
         varTable.clear()
         variables?.forEach { (key, value) -> varTable.set(key, value) }
 
-        this@CanvasScriptContext.runActions().thenRun {
+        this.runActions().thenRun {
             // 运行完毕
             if (!forceTerminated) {
                 // 非强制终止任务，删除队列中的当前任务
@@ -111,8 +105,14 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
         private val executor: suspend CoroutineScope.() -> Unit = {
             try {
                 val delay = quest.period * 50L
+                val startTime = varTable.get<Long>(ActionCanvas.VARIABLE_DURATION_START)
+                    .let { if (it.isPresent) System.currentTimeMillis() else it.get() }
+                val endTime = startTime + quest.duration * 50L
 
                 while (!context.isTerminated()) {
+                    if (System.currentTimeMillis() >= endTime) {
+                        break
+                    }
                     quest.body.process(this@CanvasNamedFrame).join()
                     delay(delay)
                 }
@@ -156,6 +156,8 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
         override fun <T : Any?> run(): CompletableFuture<T> {
             varTable.initialize(this)
             future = CompletableFuture<Any?>()
+
+            varTable.set(ActionCanvas.VARIABLE_DURATION_START, System.currentTimeMillis())
 
             // 预处理
             quest.preHandle.process(this).exceptionally {

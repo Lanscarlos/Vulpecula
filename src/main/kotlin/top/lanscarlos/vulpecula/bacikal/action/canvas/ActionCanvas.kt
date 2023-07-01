@@ -40,11 +40,12 @@ object ActionCanvas {
             argument("unique", "uuid", then = text(display = "unique id").union(optional("with", then = any()))),
             argument("force", then = bool(false), def = false),
             argument("period", then = int(0), def = 0),
+            argument("duration", then = int(200), def = 200),
             argument("viewers", "viewer", then = ActionViewers.viewers()),
             argument("pre-handle", "on-start", "pre", then = action()),
             argument("post-handle", "on-end", "post", then = action()),
             trim("then", then = action())
-        ) { uuid, force, period, viewers, preHandle, postHandle, body ->
+        ) { uuid, force, period, duration, viewers, preHandle, postHandle, body ->
 
             // 设置观察者
             if (viewers != null) {
@@ -90,9 +91,7 @@ object ActionCanvas {
                 val uniqueId =  if (extendId != null) mainId + '_' + extendId else mainId
 
                 val quest = CanvasQuest(
-                    uniqueId,
-                    period,
-                    body,
+                    uniqueId, period, duration, body,
                     preHandle ?: ParsedAction.noop<Any?>(),
                     postHandle ?: ParsedAction.noop<Any?>()
                 )

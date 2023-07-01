@@ -42,16 +42,18 @@ object ActionDuration {
                 check(this, duration, false)
             }
         }
-        case("reset") {
+        case("show") {
             discrete {
-                this.setVariable(ActionCanvas.VARIABLE_DURATION_START, System.currentTimeMillis())
-                this.setVariable(ActionCanvas.VARIABLE_DURATION_END, null)
+                val startTime = this.getVariable<Long>(ActionCanvas.VARIABLE_DURATION_START)
+                    ?: error("No canvas start time record.")
+                return@discrete (System.currentTimeMillis() - startTime) / 50
             }
         }
     }
 
     fun check(frame: ScriptFrame, duration: Int, between: Boolean): Boolean {
-        val startTime = frame.getVariable<Long>(ActionCanvas.VARIABLE_DURATION_START) ?: error("No canvas start time record.")
+        val startTime =
+            frame.getVariable<Long>(ActionCanvas.VARIABLE_DURATION_START) ?: error("No canvas start time record.")
         val endTime = frame.getVariable<Long>(ActionCanvas.VARIABLE_DURATION_END) ?: (startTime + duration * 50L).also {
             frame.setVariable(ActionCanvas.VARIABLE_DURATION_END, it)
         }
