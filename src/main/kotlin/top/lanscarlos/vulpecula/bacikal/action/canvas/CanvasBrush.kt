@@ -26,6 +26,15 @@ class CanvasBrush {
 
     var size: Float = 1f
     var color: Color = Color.WHITE
+        set(value) {
+            field = value
+            count = 0
+            speed = value.alpha.div(255.0)
+            vector.x = value.red.div(255.0)
+            vector.y = value.green.div(255.0)
+            vector.z = value.blue.div(255.0)
+        }
+
     var transition: Color = Color.WHITE
     var material: String = "STONE"
     var data: Int = 0
@@ -51,14 +60,17 @@ class CanvasBrush {
             ProxyParticle.ITEM_CRACK -> ProxyParticle.ItemData(material, data, name, lore, model)
             ProxyParticle.SPELL_MOB,
             ProxyParticle.SPELL_MOB_AMBIENT -> {
-                // 默认调整为彩色粒子
-                if (speed < 0) speed = 1.0
+                if (speed < 0) {
+                    // 默认调整为彩色粒子
+                    speed = 1.0
+                }
                 null
             }
             ProxyParticle.REDSTONE -> {
-
-                // 默认调整为彩色粒子
-                if (speed < 0) speed = 1.0
+                if (speed < 0) {
+                    // 默认调整为彩色粒子
+                    speed = 1.0
+                }
 
                 if (MinecraftVersion.major >= 5) {
                     // v1.13+

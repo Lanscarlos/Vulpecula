@@ -117,27 +117,6 @@ object ActionBrush {
 
         if (color != null) {
             brush.color = color
-
-            when {
-                brush.particle == ProxyParticle.SPELL_MOB
-                        || brush.particle == ProxyParticle.SPELL_MOB_AMBIENT -> {
-                    // 药水粒子
-                    brush.count = 0
-                    brush.speed = color.alpha.div(255.0)
-                    brush.vector.x = color.red.div(255.0)
-                    brush.vector.y = color.green.div(255.0)
-                    brush.vector.z = color.blue.div(255.0)
-                }
-                brush.particle == ProxyParticle.REDSTONE
-                        && MinecraftVersion.major <= 4 -> {
-                    // v1.12 及以下
-                    brush.count = 0
-                    brush.speed = color.alpha.div(255.0).coerceAtLeast(1e-3)
-                    brush.vector.x = color.red.div(255.0)
-                    brush.vector.y = color.green.div(255.0)
-                    brush.vector.z = color.blue.div(255.0)
-                }
-            }
         }
 
         if (transition != null) {

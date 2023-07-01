@@ -17,7 +17,6 @@ import taboolib.module.kether.ScriptFrame
 import taboolib.platform.type.BukkitPlayer
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.toProxyLocation
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -161,6 +160,63 @@ open class LiveData<T>(
             }
         }
 
+        val Any.liveBoolean: Boolean?
+            get() {
+                return when (this) {
+                    is Boolean -> this
+                    "true", "yes" -> true
+                    "false", "no" -> false
+                    is Number -> this.toInt() != 0
+                    is String -> this.toBoolean()
+                    else -> null
+                }
+            }
+
+        val Any.liveShort: Short?
+            get() {
+                return when (this) {
+                    is Number -> this.toShort()
+                    is String -> this.toShortOrNull()
+                    else -> null
+                }
+            }
+
+        val Any.liveInt: Int?
+            get() {
+                return when (this) {
+                    is Number -> this.toInt()
+                    is String -> this.toIntOrNull()
+                    else -> null
+                }
+            }
+
+        val Any.liveLong: Long?
+            get() {
+                return when (this) {
+                    is Number -> this.toLong()
+                    is String -> this.toLongOrNull()
+                    else -> null
+                }
+            }
+
+        val Any.liveFloat: Float?
+            get() {
+                return when (this) {
+                    is Number -> this.toFloat()
+                    is String -> this.toFloatOrNull()
+                    else -> null
+                }
+            }
+
+        val Any.liveDouble: Double?
+            get() {
+                return when (this) {
+                    is Number -> this.toDouble()
+                    is String -> this.toDoubleOrNull()
+                    else -> null
+                }
+            }
+
         val Any.liveStringList: List<String>?
             get() {
                 return when (this) {
@@ -168,67 +224,77 @@ open class LiveData<T>(
                     is Array<*> -> {
                         this.mapNotNull { el -> el?.toString() }
                     }
+
                     is Collection<*> -> {
                         this.mapNotNull { el -> el?.toString() }
                     }
+
                     else -> null
                 }
             }
 
         val Any.liveVector: Vector?
-            get() {
-                return when (this) {
-                    is Vector -> this
-                    is org.bukkit.util.Vector -> Vector(this.x, this.y, this.z)
-                    is Location -> this.direction
-                    is org.bukkit.Location -> this.toProxyLocation().direction
-                    is String -> {
-                        // x,y,z
-                        if (!this.matches("^\\d+(\\.\\d+)?,\\d+(\\.\\d+)?,\\d+(\\.\\d+)?\$".toRegex())) return null
-                        val demand = this.split(",").map { el -> el.toDouble() }
-                        Vector(demand[0], demand[1], demand[2])
+            get() = when (this) {
+                is Vector -> this
+                is org.bukkit.util.Vector -> Vector(this.x, this.y, this.z)
+                is Location -> this.direction
+                is org.bukkit.Location -> this.toProxyLocation().direction
+                is String -> {
+                    when {
+                        this == "x" -> Vector(1.0, 0.0, 0.0)
+                        this == "y" -> Vector(0.0, 1.0, 0.0)
+                        this == "z" -> Vector(0.0, 0.0, 1.0)
+                        this.matches("-?\\d+(\\.\\d+)?".toRegex()) -> {
+                            // 数字
+                            val number = this.toDouble()
+                            Vector(number, number, number)
+                        }
+                        this.matches("^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()) -> {
+                            // x,y,z
+                            val demand = this.split(",").map { it.toDouble() }
+                            Vector(demand[0], demand[1], demand[2])
+                        }
+                        else -> null
                     }
-                    else -> null
                 }
+                else -> null
             }
 
         val Any.liveLocation: Location?
-            get() {
-                return when (this) {
-                    is Location -> this
-                    is org.bukkit.Location -> this.toProxyLocation()
-                    is ProxyPlayer -> this.location
-                    is Entity -> this.location.toProxyLocation()
-                    is Vector -> Location(null, this.x, this.y, this.z)
-                    is org.bukkit.util.Vector -> Location(null, this.x, this.y, this.z)
-                    is String -> {
-                        if (this.matches("-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?".toRegex())) {
-                            /*
-                            * x,y,z
-                            * x,y,z,yaw,pitch
-                            * */
-                            val demand = this.split(",")
-                            Location(
-                                null,
-                                demand[0].toDouble(), demand[1].toDouble(), demand[2].toDouble(),
-                                demand.getOrNull(3)?.toFloatOrNull() ?: 0f,
-                                demand.getOrNull(4)?.toFloatOrNull() ?: 0f
-                            )
-                        } else if (this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) {
-                            /*
-                            * world,x,y,z
-                            * world,x,y,z,yaw,pitch
-                            * */
-                            val demand = this.split(",")
-                            Location(
-                                demand[0], demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
-                                demand.getOrNull(4)?.toFloatOrNull() ?: 0f,
-                                demand.getOrNull(5)?.toFloatOrNull() ?: 0f
-                            )
-                        } else null
-                    }
-                    else -> null
+            get() = when (this) {
+                is Location -> this
+                is org.bukkit.Location -> this.toProxyLocation()
+                is ProxyPlayer -> this.location
+                is Entity -> this.location.toProxyLocation()
+                is Vector -> Location(null, this.x, this.y, this.z)
+                is org.bukkit.util.Vector -> Location(null, this.x, this.y, this.z)
+                is String -> {
+                    if (this.matches("-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?".toRegex())) {
+                        /*
+                        * x,y,z
+                        * x,y,z,yaw,pitch
+                        * */
+                        val demand = this.split(",")
+                        Location(
+                            null,
+                            demand[0].toDouble(), demand[1].toDouble(), demand[2].toDouble(),
+                            demand.getOrNull(3)?.toFloatOrNull() ?: 0f,
+                            demand.getOrNull(4)?.toFloatOrNull() ?: 0f
+                        )
+                    } else if (this.matches("^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex())) {
+                        /*
+                        * world,x,y,z
+                        * world,x,y,z,yaw,pitch
+                        * */
+                        val demand = this.split(",")
+                        Location(
+                            demand[0], demand[1].toDouble(), demand[2].toDouble(), demand[3].toDouble(),
+                            demand.getOrNull(4)?.toFloatOrNull() ?: 0f,
+                            demand.getOrNull(5)?.toFloatOrNull() ?: 0f
+                        )
+                    } else null
                 }
+                else -> null
             }
 
         val Any.liveColor: Color?
@@ -237,18 +303,23 @@ open class LiveData<T>(
                     is Color -> this
                     is org.bukkit.Color -> Color(this.red, this.green, this.blue)
                     is String -> {
-                        if (this.startsWith('#') && this.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex())) {
+                        if (this.startsWith('#') && this.matches("^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex())) {
                             // hex
-                            val hex = this.substring(1)
-                            Color.decode(hex)
-                        } else if (this.matches("^((2[0-4][0-9]|25[0-5])(,|-)){2}(2[0-4][0-9]|25[0-5])\$".toRegex())) {
-                            val demand = this.split(",").map { el -> el.toInt() }
-                            Color(demand[0], demand[1], demand[2])
+                            Color.decode(this)
+                        } else if (this.matches("^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex())) {
+                            val demand = this.split("-").map { it.toInt().coerceIn(0, 255) }
+                            if (demand.size == 4) {
+                                // r-g-b-a
+                                Color(demand[0], demand[1], demand[2], demand[3])
+                            } else {
+                                Color(demand[0], demand[1], demand[2])
+                            }
                         } else {
                             val rgb = this.toIntOrNull() ?: return null
                             Color(rgb)
                         }
                     }
+
                     else -> null
                 }
             }
@@ -286,6 +357,7 @@ open class LiveData<T>(
                         }
                         buildItem(material)
                     }
+
                     else -> null
                 }
             }
@@ -299,6 +371,7 @@ open class LiveData<T>(
                     is String -> {
                         Bukkit.getPlayerExact(this)?.inventory
                     }
+
                     else -> null
                 }
             }
