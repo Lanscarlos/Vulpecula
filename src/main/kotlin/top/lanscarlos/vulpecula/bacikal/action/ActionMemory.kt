@@ -7,7 +7,6 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.function.info
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal

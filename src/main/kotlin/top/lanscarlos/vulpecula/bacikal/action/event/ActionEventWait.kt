@@ -1,13 +1,10 @@
 package top.lanscarlos.vulpecula.bacikal.action.event
 
 import taboolib.common.platform.event.EventPriority
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common5.cbool
-import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.EventListener
-import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 

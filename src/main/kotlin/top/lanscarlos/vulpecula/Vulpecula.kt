@@ -1,12 +1,12 @@
 package top.lanscarlos.vulpecula
 
+import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.Platform
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.info
 import taboolib.module.metrics.Metrics
 import taboolib.module.metrics.charts.SingleLineChart
 import taboolib.platform.BukkitPlugin
-import top.lanscarlos.vulpecula.bacikal.BacikalWorkspace
 import top.lanscarlos.vulpecula.internal.CustomCommand
 import top.lanscarlos.vulpecula.internal.EventDispatcher
 import top.lanscarlos.vulpecula.internal.EventHandler
@@ -15,11 +15,11 @@ import top.lanscarlos.vulpecula.internal.ScheduleTask
 import top.lanscarlos.vulpecula.internal.VulScript
 import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 
-//@RuntimeDependency(
-//    "!org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4",
-//    test = "kotlinx.coroutines.Dispatchers",
-//    relocate = ["!kotlin.", "!kotlin@kotlin_version_escape@."]
-//)
+@RuntimeDependency(
+    "!org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4",
+    test = "kotlinx.coroutines.Dispatchers",
+    relocate = ["!kotlin.", "!kotlin@kotlin_version_escape@."]
+)
 object Vulpecula : Plugin() {
 
     val plugin by lazy {

@@ -1,7 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal.action.location
 
-import taboolib.common.platform.function.info
-
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.bacikal.action.location
@@ -53,9 +51,7 @@ object ActionLocationAdd : ActionLocation.Resolver {
                     argument("yaw", then = float(), def = 0f),
                     argument("pitch", "p", then = float(), def = 0f)
                 ) { location, x, y, z, yaw, pitch ->
-                    info(location.x, "x 1")
                     location.x += x
-                    info(location.x, "x 2")
                     location.y += y
                     location.z += z
                     location.yaw += yaw

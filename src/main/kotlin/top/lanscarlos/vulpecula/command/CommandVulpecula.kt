@@ -42,6 +42,7 @@ object CommandVulpecula {
                     } else {
                         "def main = { $content }"
                     }
+
                     script.toKetherScript().runActions {
                         this.sender = adaptCommandSender(sender)
                         if (sender is Player) {

@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.internal
 
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.cbool
 import taboolib.module.lang.asLangText
@@ -72,9 +71,7 @@ object EventMapper {
                 if (mapper.key in keys) {
                     // 当前映射仍然存在与配置中
                     val newValue = config.getString(mapper.key) ?: "MAPPING_UNDEFINED"
-                    info("mapping...")
                     if (mapper.value != newValue) {
-                        info("mapping...change!")
                         // 更新数据
                         cache[mapper.key] = newValue
                         // 数据发生变化，通知相关调度器重新注册事件监听器

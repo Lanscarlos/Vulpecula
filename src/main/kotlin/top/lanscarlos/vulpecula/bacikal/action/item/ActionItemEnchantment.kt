@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.item
 
 import org.bukkit.enchantments.Enchantment
-import taboolib.common.platform.function.info
 
 /**
  * Vulpecula
