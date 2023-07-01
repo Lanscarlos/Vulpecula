@@ -25,6 +25,21 @@ taboolib {
     install("platform-bukkit")
     classifier = null
     version = taboolib_version
+
+    description {
+        contributors {
+            name("Lanscarlos")
+        }
+        desc("A Kether Script Extension System for TabooLib")
+        dependencies {
+            name("Adyeshach").optional(true)
+            name("Chemdah").optional(true)
+            name("DungeonPlus").optional(true)
+            name("Planners").optional(true)
+            name("Invero").optional(true)
+            name("Zaphkiel").optional(true)
+        }
+    }
 }
 
 repositories {
