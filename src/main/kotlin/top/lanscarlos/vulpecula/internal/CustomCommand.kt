@@ -5,7 +5,6 @@ import taboolib.common.platform.command.*
 import taboolib.common.platform.command.component.CommandBase
 import taboolib.common.platform.function.*
 import taboolib.common5.cbool
-import taboolib.expansion.createHelper
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
