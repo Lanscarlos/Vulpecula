@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.bacikal.action.canvas
 
 import taboolib.common.platform.ProxyParticle
 import taboolib.common.util.Vector
-import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.utils.*

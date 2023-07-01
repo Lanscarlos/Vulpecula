@@ -5,11 +5,13 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
+import taboolib.common.platform.command.component.CommandBase
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.common.platform.command.component.CommandComponentLiteral
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common5.cbool
+import taboolib.expansion.createHelper
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.bacikal.script.BacikalScript
 import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
@@ -29,6 +31,7 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
 
     fun build(index: Int): CommandComponent {
         val component = when {
+            id == "main" -> CommandBase()
             "literal" in section || "aliases" in section -> buildLiteral(index)
             "dynamic" in section || "suggest" in section || "optional" in section -> buildDynamic(index)
             else -> buildLiteral(index)
@@ -78,7 +81,13 @@ class CommandComponentBuilder(val id: String, val section: ConfigurationSection)
 
     fun CommandComponent.buildExecutor() {
 
-        val executable = section["execute"] ?: return
+        val executable = section["execute"] ?: let {
+            if (id == "main") {
+                // 若为主命令，则创建帮助执行器
+                createHelper()
+            }
+            return
+        }
 
         // 执行的脚本
         val script = buildBacikalScript {

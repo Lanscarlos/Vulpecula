@@ -58,13 +58,15 @@ class CustomCommand(
     }
 
     private fun buildCommand() {
-        root = CommandBase()
-        root.createHelper()
 
-        val section = components ?: return
+        val root = CommandComponentBuilder("main", main ?: Configuration.empty())
+        val section = components ?: let {
+            // 没有 components 节点，直接构建 root 节点
+            this.root = root.build(-1) as CommandBase
+            return
+        }
 
         val loaded = mutableMapOf<String, CommandComponentBuilder>()
-        val entry = mutableSetOf<CommandComponentBuilder>() // 与 root 直接相连的二级节点，构建时的入口
 
         // 加载所有节点
         for (key in section.getKeys(false)) {
@@ -77,16 +79,13 @@ class CustomCommand(
             val parent = builder.section.getString("parent") ?: "main"
 
             if (parent == "main") {
-                entry += builder
+                root.children += builder
             } else {
                 loaded[parent]?.children?.plusAssign(builder)
             }
         }
 
-        // 构建命令组件
-        for (builder in entry) {
-            root.children += builder.build(root.index + 1)
-        }
+        this.root = root.build(-1) as CommandBase
     }
 
     fun register() {
