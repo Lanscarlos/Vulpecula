@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal
 
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Vulpecula
@@ -189,6 +190,50 @@ data class Applicative16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
     val t15: T15,
     val t16: T16
 )
+
+/**
+ * 将一组 CompletableFuture 转成对应列表结果
+ * */
+inline fun <reified T: Any?> applicative(queue: List<CompletableFuture<T>>): CompletableFuture<List<T>> {
+    val result = CompletableFuture<List<T>>()
+
+    if (queue.isEmpty()) {
+        // 队列为空
+        result.complete(listOf())
+    } else if (queue.size == 1) {
+        // 队列仅有一个
+        val future = queue.first()
+        if (future.isDone) {
+            result.complete(listOf(future.getNow(null)))
+        } else {
+            future.thenAccept { result.complete(listOf(it)) }
+        }
+    } else {
+        // 队列有多个
+        val counter = AtomicInteger(0)
+        for (it in queue) {
+            if (it.isDone) {
+                val count = counter.incrementAndGet()
+
+                // 判断 futures 是否全部执行完毕
+                if (!result.isDone && count >= queue.size) {
+                    result.complete(queue.map { it.getNow(null) })
+                    return result
+                }
+            } else {
+                it.thenRun {
+                    val count = counter.incrementAndGet()
+
+                    // 判断 futures 是否全部执行完毕
+                    if (!result.isDone && count >= queue.size) {
+                        result.complete(queue.map { it.getNow(null) })
+                    }
+                }
+            }
+        }
+    }
+    return result
+}
 
 fun <P1, P2> applicative(
     p1: CompletableFuture<P1>,

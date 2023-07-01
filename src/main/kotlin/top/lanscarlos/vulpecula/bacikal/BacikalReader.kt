@@ -6,7 +6,6 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
-import taboolib.common5.*
 import taboolib.library.kether.ArgTypes
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
@@ -14,16 +13,23 @@ import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.ScriptFrame
 import taboolib.module.kether.run
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.frameBy
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveBoolean
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveColor
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveDouble
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveEntity
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveFloat
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveInt
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveInventory
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveItemStack
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLong
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.livePlayer
+import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveShort
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveStringList
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
 import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
+import top.lanscarlos.vulpecula.bacikal.action.canvas.fx.NumberFx
 import top.lanscarlos.vulpecula.utils.nextBlock
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
@@ -184,106 +190,40 @@ open class BacikalReader(private val source: QuestReader) {
         }
     }
 
-    fun boolOrNull(): LiveData<Boolean?> {
-        return LiveData {
-            source.mark()
-            source.nextToken()
-            when (source.nextToken()) {
-                "true", "yes" -> Bacikal.Action { CompletableFuture.completedFuture(true) }
-                "false", "no" -> Bacikal.Action { CompletableFuture.completedFuture(true) }
-                else -> {
-                    source.reset()
-                    val action = source.nextBlock()
-                    Bacikal.Action { frame ->
-                        frame.run(action).thenApply { it?.cbool }
-                    }
-                }
-            }
-        }
-    }
+    fun boolOrNull(): LiveData<Boolean?> = frameBy { it?.liveBoolean }
 
     fun bool(def: Boolean? = null, display: String = "boolean"): LiveData<Boolean> {
-        return boolOrNull().map { it ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveBoolean ?: def ?: error("No $display selected.") }
     }
 
-    fun intOrNull(): LiveData<Int?> {
-        return LiveData {
-            source.mark()
-            source.nextToken().toIntOrNull()?.let { int ->
-                Bacikal.Action {
-                    CompletableFuture.completedFuture(int)
-                }
-            } ?: source.reset().let {
-                val action = source.nextBlock()
-                Bacikal.Action { frame ->
-                    frame.run(action).thenApply { it?.cint }
-                }
-            }
-        }
+    fun shortOrNull(): LiveData<Short?> = frameBy { it?.liveShort }
+
+    fun short(def: Short? = null, display: String = "short"): LiveData<Short> {
+        return frameBy { it?.liveShort ?: def ?: error("No $display selected.") }
     }
+
+    fun intOrNull(): LiveData<Int?> = frameBy { it?.liveInt }
 
     fun int(def: Int? = null, display: String = "int"): LiveData<Int> {
-        return intOrNull().map { it ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveInt ?: def ?: error("No $display selected.") }
     }
 
-    fun longOrNull(): LiveData<Long?> {
-        return LiveData {
-            source.mark()
-            source.nextToken().toLongOrNull()?.let { long ->
-                Bacikal.Action {
-                    CompletableFuture.completedFuture(long)
-                }
-            } ?: source.reset().let {
-                val action = source.nextBlock()
-                Bacikal.Action { frame ->
-                    frame.run(action).thenApply { it?.clong }
-                }
-            }
-        }
-    }
+    fun longOrNull(): LiveData<Long?> = frameBy { it?.liveLong }
 
     fun long(def: Long? = null, display: String = "long"): LiveData<Long> {
-        return longOrNull().map { it ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveLong ?: def ?: error("No $display selected.") }
     }
 
-    fun floatOrNull(): LiveData<Float?> {
-        return LiveData {
-            source.mark()
-            source.nextToken().toFloatOrNull()?.let { float ->
-                Bacikal.Action {
-                    CompletableFuture.completedFuture(float)
-                }
-            } ?: source.reset().let {
-                val action = source.nextBlock()
-                Bacikal.Action { frame ->
-                    frame.run(action).thenApply { it?.cfloat }
-                }
-            }
-        }
-    }
+    fun floatOrNull(): LiveData<Float?> = frameBy { it?.liveFloat }
 
     fun float(def: Float? = null, display: String = "float"): LiveData<Float> {
-        return floatOrNull().map { it ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveFloat ?: def ?: error("No $display selected.") }
     }
 
-    fun doubleOrNull(): LiveData<Double?> {
-        return LiveData {
-            source.mark()
-            source.nextToken().toDoubleOrNull()?.let { double ->
-                Bacikal.Action {
-                    CompletableFuture.completedFuture(double)
-                }
-            } ?: source.reset().let {
-                val action = source.nextBlock()
-                Bacikal.Action { frame ->
-                    frame.run(action).thenApply { it?.cdouble }
-                }
-            }
-        }
-    }
+    fun doubleOrNull(): LiveData<Double?> = frameBy { it?.liveDouble }
 
     fun double(def: Double? = null, display: String = "double"): LiveData<Double> {
-        return doubleOrNull().map { it ?: def ?: error("No $display selected.") }
+        return frameBy { it?.liveDouble ?: def ?: error("No $display selected.") }
     }
 
     fun literal(): LiveData<String> = readerOf { it.nextToken() }
@@ -347,46 +287,43 @@ open class BacikalReader(private val source: QuestReader) {
     }
 
     fun applyLiveData(vararg liveData: LiveData<*>) {
+        if (liveData.isEmpty()) return
 
-        var startIndex = -1
-        var endIndex = liveData.lastIndex
+        val proxy = mutableListOf<LiveDataProxy<*>>()
+        var breakpoint = 0
 
         for ((index, it) in liveData.withIndex()) {
             if (it is LiveDataProxy<*>) {
-                if (startIndex > -1) {
-                    // 已定位 argument 开始位置，跳过
-                    continue
-                }
-                // 定位 argument 开始位置
-                startIndex = index
-            } else if (startIndex < 0) {
-
-                if (endIndex < liveData.lastIndex) {
-                    // 已定位 argument 结束位置，结束循环
-                    break
-                }
-
-                // 此处 argument 结束
-                endIndex = index - 1
-            } else {
-                // 非 argument，直接执行
+                proxy.add(it)
+            } else if (proxy.isEmpty()) {
+                // 未检索到附加参数，读取语句
                 it.accept(reader = this)
+            } else {
+                // 已检索到附加参数，将此处设置为断点
+                breakpoint = index
+                break
             }
         }
 
-        while (peekToken().matches(argumentPrefixPattern)) {
-            val prefix = nextToken().substring(1)
-            for (index in startIndex .. endIndex) {
-                (liveData[index] as LiveDataProxy<*>).accept(prefix, reader = this)
+        if (proxy.isNotEmpty()) {
+            // 读取附加参数
+            while (peekToken().matches(argumentPrefixPattern)) {
+                val prefix = nextToken().substring(1)
+                for (it in proxy) {
+                    it.accept(prefix, reader = this)
+                }
+            }
+
+            // 读取剩余语句
+            if (breakpoint > 0) {
+                // 已定位断点，跳过断点前的语句；（断点必须大于零，因为前面必须至少有一个附加参数）
+                for (index in breakpoint until liveData.size) {
+                    liveData[index].accept(reader = this)
+                }
             }
         }
 
-        if (endIndex < liveData.lastIndex) {
-            // 执行剩余部分
-            for (index in endIndex + 1 .. liveData.lastIndex) {
-                liveData[index].accept(reader = this)
-            }
-        }
+        // 没有附加参数时，所有语句都已被读取，此时不应该有剩余语句
     }
 
     /*
@@ -415,7 +352,9 @@ open class BacikalReader(private val source: QuestReader) {
     ): Bacikal.Parser<R> {
         applyLiveData(p1)
         return Bacikal.Parser { frame ->
-            p1.accept(frame).thenApply { t1 -> func(frame, t1) }
+            p1.accept(frame).thenApply { t1 ->
+                func(frame, t1)
+            }
         }
     }
 

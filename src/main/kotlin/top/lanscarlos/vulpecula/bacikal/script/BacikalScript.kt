@@ -73,6 +73,9 @@ class BacikalScript(val source: String, namespace: List<String> = emptyList(), c
             for (it in variables) {
                 set(it.key, it.value)
             }
+        }.exceptionally { e ->
+            e.printKetherErrorMessage()
+            null
         }
     }
 

@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.library.kether.QuestAction
 import taboolib.module.kether.ScriptFrame
+import taboolib.module.kether.printKetherErrorMessage
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -15,7 +16,10 @@ class Bacikal {
 
     class Action<T>(val func: (ScriptFrame) -> CompletableFuture<T>) {
         fun run(frame: ScriptFrame): CompletableFuture<T> {
-            return func(frame)
+            return func(frame).exceptionally {
+                it.printKetherErrorMessage()
+                null
+            }
         }
     }
 

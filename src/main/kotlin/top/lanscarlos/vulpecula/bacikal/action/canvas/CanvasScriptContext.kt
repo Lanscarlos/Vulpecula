@@ -58,18 +58,17 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
         varTable.clear()
         variables?.forEach { (key, value) -> varTable.set(key, value) }
 
-        try {
-            this@CanvasScriptContext.runActions().thenRun {
-                // 运行完毕
-                if (!forceTerminated) {
-                    // 非强制结束，删除队列中的当前任务
-                    quests.remove(super.id)
-                }
+        this@CanvasScriptContext.runActions().thenRun {
+            // 运行完毕
+            if (!forceTerminated) {
+                // 非强制终止任务，删除队列中的当前任务
+                quests.remove(super.id)
             }
-        } catch (e: Exception) {
-            e.printKetherErrorMessage()
+        }.exceptionally {
+            // 使用 terminate() 强制终止任务时，会抛出 QuestCloseException
+//            it.printKetherErrorMessage(detailError = true)
             quests.remove(super.id)
-            e.printStackTrace()
+            null
         }
     }
 
@@ -118,11 +117,26 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
                     delay(delay)
                 }
 
-                // 检测到跳出信号，结束
-                this@CanvasNamedFrame.cancel()
+                // 后置处理
+                postprocessing()
             } catch (e: Exception) {
-                this@CanvasNamedFrame.cancel()
-                e.printKetherErrorMessage()
+                if (e::class.java.name == "kotlinx.coroutines.JobCancellationException") {
+                    // 任务被取消
+                } else {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        fun postprocessing() {
+            // 后置处理
+            quest.postHandle.process(this).thenRun {
+                if (future?.isDone == true) return@thenRun
+                future.complete(null)
+            }.exceptionally {
+                future.complete(null)
+                it.printKetherErrorMessage()
+                null
             }
         }
 
@@ -130,16 +144,6 @@ class CanvasScriptContext(quest: CanvasQuest) : ScriptContext(ScriptService, que
          * 取消任务
          * */
         fun cancel() {
-            // 尾处理
-            quest.postHandle.process(this).exceptionally {
-                future.complete(null)
-                it.printKetherErrorMessage()
-                null
-            }.thenRun {
-                if (future?.isDone == true) return@thenRun
-                future.complete(null)
-            }
-
             task?.cancel()
             task = null
         }
