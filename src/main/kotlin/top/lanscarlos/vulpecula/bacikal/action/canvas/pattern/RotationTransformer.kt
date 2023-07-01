@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
-import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.bacikal.action.canvas.fx.*
 
 /**

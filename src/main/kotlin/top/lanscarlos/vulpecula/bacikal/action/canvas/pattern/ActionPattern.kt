@@ -180,11 +180,6 @@ class ActionPattern : QuestAction<Any?>() {
     }
 
     /**
-     * 用于获取转换对象
-     * */
-    open class Transfer(parser: Bacikal.Parser<Transformer>) : Handler<Transformer>(parser)
-
-    /**
      * 用于选择 Pattern
      * */
     open class Selector(val index: Int, parser: Bacikal.Parser<CanvasPattern>) : Handler<CanvasPattern>(parser)

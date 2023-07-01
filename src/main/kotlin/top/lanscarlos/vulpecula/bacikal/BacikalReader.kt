@@ -29,8 +29,6 @@ import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveStringList
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
 import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
-import top.lanscarlos.vulpecula.bacikal.action.canvas.fx.NumberFx
-import top.lanscarlos.vulpecula.utils.nextBlock
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
