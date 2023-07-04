@@ -58,7 +58,7 @@ class BezierCurvePattern(
 
     companion object : ActionPattern.PatternResolver {
 
-        override val name = arrayOf("Bezier-Curve", "Bezier", "Curve")
+        override val name = arrayOf("Bezier-Curve", "Bezier")
 
         /**
          * pattern bezier [ &loc1 &loc2... ]

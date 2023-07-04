@@ -13,12 +13,12 @@ import kotlin.math.sin
  */
 
 class CirclePattern(
-    val radius: Double = 1.0,
-    val step: Double = 10.0,
-    val init: Double = 0.0
+    val radius: Double,
+    val step: Double,
+    val initialAngle: Double
 ) : CanvasPattern {
 
-    var currentAngle = init
+    var currentAngle = initialAngle
 
     override fun point(origin: Location): Location {
         val radians = Math.toRadians(currentAngle)
