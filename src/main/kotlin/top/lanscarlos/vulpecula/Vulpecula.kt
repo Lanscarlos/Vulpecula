@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.internal.EventDispatcher
 import top.lanscarlos.vulpecula.internal.EventHandler
 import top.lanscarlos.vulpecula.internal.EventMapper
 import top.lanscarlos.vulpecula.internal.ScheduleTask
-import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ExternalScript
 import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 
 @RuntimeDependency(
@@ -44,7 +44,7 @@ object Vulpecula : Plugin() {
             EventMapper.cache.size
         })
         metrics.addCustomChart(SingleLineChart("scripts-source") {
-            VulScript.cache.size
+            ExternalScript.cache.size
         })
         metrics.addCustomChart(SingleLineChart("scripts-compiled") {
             ScriptWorkspace.scripts.size

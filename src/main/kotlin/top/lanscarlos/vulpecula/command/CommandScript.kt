@@ -8,7 +8,7 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
-import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ExternalScript
 import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 import top.lanscarlos.vulpecula.utils.sendSyncLang
 
@@ -115,7 +115,7 @@ object CommandScript {
     private val compile: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             try {
-                VulScript.getAll().forEach { it.compileScript() }
+                ExternalScript.getAll().forEach { it.compileScript() }
                 sender.sendSyncLang("Script-Compile-Command-All-Succeeded")
             } catch (e: Exception) {
                 sender.sendSyncLang("Script-Compile-Command-All-Failed", e.localizedMessage)
@@ -124,10 +124,10 @@ object CommandScript {
         }
 
         dynamic("file", optional = true) {
-            suggest { VulScript.getAll().map { it.id } }
+            suggest { ExternalScript.getAll().map { it.id } }
             execute<CommandSender> { sender, _, file ->
                 try {
-                    VulScript.get(file)?.compileScript()
+                    ExternalScript.get(file)?.compileScript()
                     sender.sendSyncLang("Script-Compile-Command-Succeeded", file)
                 } catch (e: Exception) {
                     sender.sendSyncLang("Script-Compile-Command-Failed", file, e.localizedMessage)
@@ -150,7 +150,7 @@ object CommandScript {
     private val reload: CommandComponent.() -> Unit = {
         execute<CommandSender> { sender, _, _ ->
             ScriptWorkspace.terminateAllScript()
-            VulScript.load().let {
+            ExternalScript.load().let {
                 if (sender is Player) sender.sendMessage(it)
             }
             ScriptWorkspace.load().let {

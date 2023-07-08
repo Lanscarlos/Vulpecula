@@ -10,6 +10,8 @@ import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
+import top.lanscarlos.vulpecula.bacikal.script.BacikalScriptBuilder
+import top.lanscarlos.vulpecula.bacikal.script.ScriptTransfer
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.bindConfigNode
 import top.lanscarlos.vulpecula.config.DynamicConfig.Companion.toDynamic
@@ -24,7 +26,7 @@ import java.io.File
  * @author Lanscarlos
  * @since 2022-12-23 12:11
  */
-class VulScript(
+class ExternalScript(
     val id: String,
     val wrapper: DynamicConfig
 ) {
@@ -44,8 +46,6 @@ class VulScript(
 
     val targetOverride by wrapper.readBoolean("build-setting.target-override", true)
 
-    val escapeUnicode by wrapper.readBoolean("build-setting.escape-unicode", false)
-
     val autoCompile by wrapper.readBoolean("build-setting.auto-compile", true)
 
     val namespace by wrapper.readStringList("namespace")
@@ -63,27 +63,37 @@ class VulScript(
         }
     }
 
-    val functions = mutableMapOf<String, VulScriptFunction>()
+    val functions by wrapper.read("functions") { value ->
+        val config = value as? ConfigurationSection ?: return@read emptyList()
+        config.getKeys(false).map { name ->
+            val section = config.getConfigurationSection(name)!!
+
+            BacikalScriptBuilder().apply {
+                // 修正函数名
+                this.name = name
+
+                /* 构建参数转换 */
+                section.getStringList("args").let { args ->
+                    if (args.isNotEmpty()) {
+                        for ((i, it) in args.withIndex()) {
+                            appendPreprocessor("set $it to &arg$i\n")
+                        }
+                        appendPreprocessor("\n")
+                    }
+                }
+
+                appendContent(section.getString("content"))
+                appendCondition(section.getString("condition"))
+                appendDeny(section.getString("deny"))
+                appendExceptions(section.getConfigurationSection("exception"))
+                appendVariables(section.getConfigurationSection("variables"))
+            }
+        }
+    }
 
     lateinit var source: String
 
     init {
-        /*
-        * 加载自定义函数
-        *
-        * 由于 dynamic config 无法获取改变之前的值，需要外置更新判断
-        * 如果 functions 发生变化，则下面的函数会被调用
-        * 此时可以类似于 Handler 通知 Function 检查更新
-        * */
-        wrapper.source.getConfigurationSection("functions")?.let {
-            // 初始加载
-            initFunctions(it)
-        }
-        wrapper.read("functions") { value ->
-            // 更新重载
-            initFunctions(value as? ConfigurationSection ?: return@read)
-        }
-
         // 编译脚本
         if (autoCompile) compileScript()
     }
@@ -91,8 +101,39 @@ class VulScript(
     fun compileScript() {
         try {
             // 尝试构建脚本
-            this.source = buildBacikalScript(namespace) {
+            this.source = buildBacikalScript(namespace, false) {
+                appendCondition(this@ExternalScript.condition)
+                appendDeny(this@ExternalScript.deny)
+                appendContent(this@ExternalScript.main)
+                appendExceptions(this@ExternalScript.exception)
+                appendVariables(this@ExternalScript.variables)
 
+                for (it in this@ExternalScript.functions) {
+                    appendFunction(it)
+                }
+
+                // 添加局部碎片替换
+                addTransfer(object : ScriptTransfer {
+                    override fun transfer(source: StringBuilder) {
+                        if (fragments.isNotEmpty()) {
+                            val keys = fragments.keys.joinToString("|")
+                            val pattern = "\\\$($keys)(?=\\b)|\\\$\\{($keys)}".toPattern()
+                            val matcher = pattern.matcher(source.extract())
+                            val buffer = StringBuffer()
+
+                            while (matcher.find()) {
+                                val found = matcher.group().substring(1).let {
+                                    if (it.startsWith('{') || it.endsWith('}')) {
+                                        it.substring(1, it.lastIndex)
+                                    } else it
+                                }
+                                matcher.appendReplacement(buffer, fragments[found] ?: "")
+                            }
+                            // 兼容 Github 构建系统
+                            source.append(matcher.appendTail(buffer))
+                        }
+                    }
+                })
             }.source
 
             // 导出脚本
@@ -108,37 +149,6 @@ class VulScript(
             }
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-    }
-
-    fun initFunctions(config: ConfigurationSection) {
-        val keys = config.getKeys(false).toMutableSet()
-
-        if (functions.isNotEmpty()) {
-            // 遍历已存在的函数
-            val iterator = functions.iterator()
-            while (iterator.hasNext()) {
-                val function = iterator.next().value
-                if (function.id in keys) {
-                    // 函数仍然存在，尝试更新属性
-                    debug(Debug.HIGH, "Function contrasting \"${function.id}\" at Script \"$id\"")
-                    function.contrast(config.getConfigurationSection(function.id)!!)
-
-                    // 移除该 id
-                    keys -= function.id
-                } else {
-                    // 函数已被用户移除
-                    iterator.remove()
-                    debug(Debug.HIGH, "Function delete \"${function.id}\" at Script \"$id\"")
-                }
-            }
-        }
-
-        // 遍历新的函数
-        for (key in keys) {
-            val section = config.getConfigurationSection(key) ?: continue
-            functions[key] = VulScriptFunction(key, section.toDynamic())
-            debug(Debug.HIGH, "Function delete \"$key\" at Script \"$id\"")
         }
     }
 
@@ -159,11 +169,11 @@ class VulScript(
 
         val folder = File(getDataFolder(), "scripts")
 
-        val cache = mutableMapOf<String, VulScript>()
+        val cache = mutableMapOf<String, ExternalScript>()
 
-        fun get(id: String): VulScript? = cache[id]
+        fun get(id: String): ExternalScript? = cache[id]
 
-        fun getAll(): Collection<VulScript> = cache.values
+        fun getAll(): Collection<ExternalScript> = cache.values
 
         fun onFileChanged(file: File) {
             if (!automaticReload) {
@@ -212,7 +222,7 @@ class VulScript(
                     val file = path.toFile().apply {
                         if (automaticReload) addWatcher(false) { onFileChanged(this) }
                     }
-                    cache[name] = VulScript(name, file.toConfig().toDynamic())
+                    cache[name] = ExternalScript(name, file.toConfig().toDynamic())
                 }
 
                 console().asLangText("Script-Compile-Load-Succeeded", cache.size, timing(start)).also {

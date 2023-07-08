@@ -99,7 +99,7 @@ object CommandVulpecula {
                         "config" -> VulpeculaContext.loadConfig()
                         "listen-mapping" -> EventHandler.load()
                         "unicode" -> if (ActionUnicode.enable) ActionUnicode.load() else continue
-                        "script-source" -> VulScript.load()
+                        "script-source" -> ExternalScript.load()
                         "script-compiled" -> ScriptWorkspace.load()
                         "dispatcher" -> EventDispatcher.load()
                         "handler" -> EventHandler.load()

@@ -9,7 +9,7 @@ import top.lanscarlos.vulpecula.bacikal.action.internal.ActionUnicode
 import top.lanscarlos.vulpecula.internal.CustomCommand
 import top.lanscarlos.vulpecula.internal.*
 import top.lanscarlos.vulpecula.internal.ScheduleTask
-import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ExternalScript
 import top.lanscarlos.vulpecula.internal.ScriptWorkspace
 import top.lanscarlos.vulpecula.utils.timing
 
@@ -68,7 +68,7 @@ object VulpeculaContext {
         }
 
         // 加载脚本
-        messages += VulScript.load()
+        messages += ExternalScript.load()
         messages += ScriptWorkspace.load()
 
         // 初步加载调度模块

@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.bacikal.action.internal
 
 import top.lanscarlos.vulpecula.bacikal.*
 import top.lanscarlos.vulpecula.internal.ScriptWorkspace
-import top.lanscarlos.vulpecula.internal.VulScript
+import top.lanscarlos.vulpecula.internal.ExternalScript
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -69,9 +69,9 @@ object ActionVulpeculaScript {
                         text(display = "file")
                     ) { file ->
                         if (file == "*") {
-                            VulScript.getAll().forEach { it.compileScript() }
+                            ExternalScript.getAll().forEach { it.compileScript() }
                         } else {
-                            VulScript.get(file)?.compileScript() ?: error("No script source found: \"$file\"")
+                            ExternalScript.get(file)?.compileScript() ?: error("No script source found: \"$file\"")
                         }
                     }
                 }

@@ -24,6 +24,16 @@ open class BacikalScriptBuilder {
     val namespace = mutableListOf<String>()
 
     /**
+     * 前置处理
+     * */
+    val preprocessor = StringBuilder()
+
+    /**
+     * 后置处理
+     * */
+    val postprocessor = StringBuilder()
+
+    /**
      * 预设变量
      * */
     val variables = LinkedHashMap<String, StringBuilder>()
@@ -67,6 +77,22 @@ open class BacikalScriptBuilder {
      * */
     val source = StringBuilder()
 
+    fun addTransfer(transfer: ScriptTransfer) {
+        addTransfer(0, transfer)
+    }
+
+    fun addTransfer(index: Int, transfer: ScriptTransfer) {
+        this.transfer.add(index, transfer)
+    }
+
+    fun removeTransfer(index: Int) {
+        this.transfer.removeAt(index)
+    }
+
+    fun removeTransfer(transfer: ScriptTransfer) {
+        this.transfer.remove(transfer)
+    }
+
     /**
      * 构建源码
      * */
@@ -81,6 +107,14 @@ open class BacikalScriptBuilder {
             for (it in namespace) {
                 builder.append("import $it\n")
             }
+            builder.append('\n')
+        }
+
+        /*
+        * 构建前置处理语句
+        * */
+        if (preprocessor.isNotEmpty()) {
+            builder.append(preprocessor.toString())
             builder.append('\n')
         }
 
@@ -166,6 +200,14 @@ open class BacikalScriptBuilder {
         }
 
         /*
+        * 构建后置语句
+        * */
+        if (postprocessor.isNotEmpty()) {
+            builder.append('\n')
+            builder.append(postprocessor.toString())
+        }
+
+        /*
         * 构建方法体
         * def $name = {
         *   ...$content
@@ -199,6 +241,22 @@ open class BacikalScriptBuilder {
         }
 
         return builder.toString()
+    }
+
+    /**
+     * 追加前置处理
+     * */
+    fun appendPreprocessor(value: Any?) {
+        if (value == null) return
+        preprocessor.appendSection(value)
+    }
+
+    /**
+     * 追加后置处理
+     * */
+    fun appendPostprocessor(value: Any?) {
+        if (value == null) return
+        postprocessor.appendSection(value)
     }
 
     /**
@@ -266,8 +324,12 @@ open class BacikalScriptBuilder {
         }
     }
 
+    fun appendFunction(builder: BacikalScriptBuilder) {
+        functions.add(builder)
+    }
+
     fun appendFunction(builder: BacikalScriptBuilder.() -> Unit) {
-        functions.add(BacikalScriptBuilder().also(builder))
+        appendFunction(BacikalScriptBuilder().also(builder))
     }
 
     /**
@@ -275,12 +337,12 @@ open class BacikalScriptBuilder {
      * */
     private fun StringBuilder.appendSection(section: Any) {
         when (section) {
-            is String -> {
+            is String, is StringBuilder, is StringBuffer -> {
                 if (this.isNotEmpty()) {
                     // 此前含有其他内容，换行隔开
                     this.append('\n')
                 }
-                this.append(section)
+                this.append(section.toString())
             }
             is Map<*, *>,
             is ConfigurationSection -> {
@@ -301,6 +363,9 @@ open class BacikalScriptBuilder {
                     if (it == null) return@forEach
                     appendSection(it)
                 }
+            }
+            else -> {
+                error("Unsupported section type: ${section::class.java.name} [ERROR@BacikalScriptBuilder#appendSection]")
             }
         }
     }
