@@ -7,7 +7,7 @@ package top.lanscarlos.vulpecula.bacikal.action.canvas.fx
  * @author Lanscarlos
  * @since 2023-06-30 00:06
  */
-abstract class NumberFx<T: Number> : Number(), Fx<T, T> {
+abstract class NumberFx<T, R: Number> : Number(), Fx<T, R> {
 
     override fun toByte(): Byte {
         return calculate().toByte()

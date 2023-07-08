@@ -13,7 +13,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalReader
 class LinearFx(
     val m: Double, // 斜率
     val b: Double // 截距
-) : DecimalFx() {
+) : DecimalFx<Double>() {
 
     var x = 0.0
 

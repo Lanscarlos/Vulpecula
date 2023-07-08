@@ -10,7 +10,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalReader
  * @author Lanscarlos
  * @since 2023-06-29 11:45
  */
-class ConstantFx(val value: Double) : DecimalFx() {
+class ConstantFx(val value: Double) : DecimalFx<Double>() {
 
     override fun calculate(): Double {
         return value

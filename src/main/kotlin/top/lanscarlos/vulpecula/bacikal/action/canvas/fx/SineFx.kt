@@ -16,7 +16,7 @@ class SineFx(
     val w: Double, // 周期
     val init: Double, // 初相位
     val b: Double // 偏移
-) : DecimalFx() {
+) : DecimalFx<Double>() {
 
     var x = 0.0
 
