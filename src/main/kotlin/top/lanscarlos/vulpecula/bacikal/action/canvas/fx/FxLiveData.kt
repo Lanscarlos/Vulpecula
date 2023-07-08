@@ -45,10 +45,10 @@ fun number(def: Number? = null, display: String = "number"): LiveData<Number> {
     return LiveData.frameBy { it?.liveNumber ?: def ?: error("No $display selected.") }
 }
 
-fun fxNumberOrNull(): LiveData<NumberFx<*>?> = LiveData.frameBy { it as? NumberFx<*> }
+fun fxNumberOrNull(): LiveData<NumberFx<*, *>?> = LiveData.frameBy { it as? NumberFx<*, *> }
 
-fun fxNumber(def: NumberFx<*>? = null, display: String = "fx number"): LiveData<NumberFx<*>> {
-    return LiveData.frameBy { it as? NumberFx<*> ?: def ?: error("No $display selected.") }
+fun fxNumber(def: NumberFx<*, *>? = null, display: String = "fx number"): LiveData<NumberFx<*, *>> {
+    return LiveData.frameBy { it as? NumberFx<*, *> ?: def ?: error("No $display selected.") }
 }
 
 fun fxVectorOrNull(): LiveData<VectorFx<*>?> = LiveData.frameBy { it?.liveFxVector }
