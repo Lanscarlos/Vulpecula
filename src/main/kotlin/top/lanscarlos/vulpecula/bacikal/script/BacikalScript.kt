@@ -90,7 +90,10 @@ class BacikalScript(val source: String, namespace: List<String> = emptyList(), c
             }
         }
         return try {
-            ScriptContext.create(script!!).also(func).runActions()
+            ScriptContext.create(script!!).also(func).runActions().exceptionally {
+                it.printKetherErrorMessage()
+                null
+            }
         } catch (e: Exception) {
             e.printKetherErrorMessage()
             CompletableFuture.completedFuture(null)
