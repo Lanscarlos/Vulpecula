@@ -22,7 +22,7 @@ import top.lanscarlos.vulpecula.utils.toKetherScript
 @CommandHeader(
     name = "vulpecula",
     aliases = ["vul"],
-    permission = "vulpecula.command",
+    permission = "vulpecula.command.internal",
     permissionDefault = PermissionDefault.OP
 )
 object CommandVulpecula {
