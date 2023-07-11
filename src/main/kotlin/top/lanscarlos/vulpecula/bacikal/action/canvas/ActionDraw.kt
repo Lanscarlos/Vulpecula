@@ -1,9 +1,13 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
+import org.bukkit.block.Block
+import org.bukkit.entity.Entity
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.module.kether.*
+import taboolib.platform.type.BukkitPlayer
+import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
@@ -27,7 +31,7 @@ object ActionDraw {
     )
     fun parser() = bacikal {
         combine(
-            trim("at", then = location()),
+            optional("at", then = location()),
             optional("using", "with", "by", then = readerOf { r ->
                 r.expectToken("pattern")
                 r.nextToken()
@@ -35,69 +39,57 @@ object ActionDraw {
             argument("index", "i", then = int(0), def = 0)
         ) { location, template, index ->
 
+            // 获取观察者对象
+            val viewers = this.getVariable<Collection<ProxyPlayer>>(ActionCanvas.VARIABLE_VIEWERS) ?: setOf(this.player())
+            if (viewers.isEmpty()) {
+                // 观察者为空, 不作画
+                return@combine true
+            }
+
+            // 获取笔刷对象
+            val brush = this.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
+                this.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
+            }
+
+            // 获取绘制坐标或图案原点
+            val target = location ?: when (val bind = this.getVariable<Any?>(ActionCanvas.VARIABLE_TARGET)) {
+                is Block -> bind.location.toProxyLocation()
+                is Entity -> bind.location.toProxyLocation()
+                is BukkitPlayer -> bind.location
+                else -> playerOrNull()?.location ?: error("No target location selected.")
+            }
+
+            // 无图案绘制
             if (template == null) {
-                draw(this, location)
+                brush.draw(target, viewers)
                 return@combine true
             }
 
             // 使用图案绘制
             val patterns = this.getVariable<List<CanvasPattern>>(ActionCanvas.VARIABLE_PATTERNS) ?: return@combine setOf<Location>()
 
-            if (index < 0 || index > patterns.size) {
-                error("Index out of bounds of patterns.")
+            if (index < 0 || index >= patterns.size) {
+                error("Pattern index \"$index\" is out of bounds of patterns.")
             }
 
             when (template) {
                 "point" -> {
                     if (index == 0) {
-                        draw(this, patterns.map { it.point(location) })
+                        brush.draw(patterns.map { it.point(target) }, viewers)
                     } else {
-                        draw(this, patterns[index - 1].point(location))
+                        brush.draw(patterns[index - 1].point(target), viewers)
                     }
                 }
                 "shape" -> {
                     if (index == 0) {
-                        draw(this, patterns.flatMap { it.shape(location) })
+                        brush.draw(patterns.flatMap { it.shape(target) }, viewers)
                     } else {
-                        draw(this, patterns[index - 1].shape(location))
+                        brush.draw(patterns[index - 1].shape(target), viewers)
                     }
                 }
-                else -> error("Unknown pattern sub action.")
+                else -> error("Unknown pattern sub action：\"$template\"")
             }
             return@combine true
         }
-    }
-
-    fun draw(frame: ScriptFrame, target: Any) {
-
-        // 获取观察者对象
-        val viewers = frame.getVariable<Collection<ProxyPlayer>>(ActionCanvas.VARIABLE_VIEWERS) ?: setOf(frame.player())
-        if (viewers.isEmpty()) {
-            // 观察者为空, 不作画
-            return
-        }
-
-        // 获取笔刷对象
-        val brush = frame.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
-            frame.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
-        }
-
-        // 获取原点
-        val base = frame.getVariable<Location>(ActionCanvas.VARIABLE_ORIGIN) ?: frame.playerOrNull()?.location
-
-        // 获取作画位置
-        val locations = when (target) {
-            is Location -> listOf(target)
-            is Vector -> listOf(base?.clone()?.add(target) ?: error("No base or origin selected."))
-            is Array<*> -> {
-                target.mapNotNull { it?.liveLocation }
-            }
-            is Collection<*> -> {
-                target.mapNotNull { it?.liveLocation }
-            }
-            else -> listOf(base ?: error("No base or origin selected."))
-        }
-
-        brush.draw(locations, viewers)
     }
 }
