@@ -49,14 +49,14 @@ class LissajousCurvePattern(
                         list(),
                         argument("start", then = double(), def = 0.0),
                         argument("end", then = double(), def = 360.0),
-                        argument("step", then = double(1.0), def = 1.0)
+                        argument("step", "s", then = double(10.0), def = 10.0)
                     ) { coefficients, start, end, step ->
                         LissajousCurvePattern(coefficients.map { line ->
                             if (line.toString().matches("^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex())) {
                                 val (a, b, c) = line.toString().split(",").map { it.toDouble() * 0.01 }
                                 Triple(a, b, c)
                             } else {
-                                error("Invalid coefficient: $line")
+                                error("Invalid lissajous coefficient: $line")
                             }
                         }, start, end, step)
                     }

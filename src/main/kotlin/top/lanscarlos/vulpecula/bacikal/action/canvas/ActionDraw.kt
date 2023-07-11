@@ -4,12 +4,10 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
-import taboolib.common.util.Vector
 import taboolib.module.kether.*
 import taboolib.platform.type.BukkitPlayer
 import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveLocation
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
 import top.lanscarlos.vulpecula.bacikal.action.canvas.pattern.CanvasPattern
 import top.lanscarlos.vulpecula.bacikal.bacikal
