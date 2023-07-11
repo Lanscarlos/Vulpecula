@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
 
 import taboolib.common.util.Location
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 
 /**
@@ -9,10 +10,9 @@ import kotlin.math.sin
  * top.lanscarlos.vulpecula.bacikal.action.canvas.pattern
  *
  * @author Lanscarlos
- * @since 2022-11-10 10:33
+ * @since 2023-07-11 00:06
  */
-
-class CirclePattern(
+class StarPattern(
     val radius: Double,
     val step: Double,
     val initialAngle: Double
@@ -22,8 +22,8 @@ class CirclePattern(
 
     override fun point(origin: Location): Location {
         val radians = Math.toRadians(currentAngle)
-        val x = radius * cos(radians)
-        val z = radius * sin(radians)
+        val x = radius * cos(radians).pow(3.0)
+        val z = radius * sin(radians).pow(3.0)
         currentAngle += step
         return origin.clone().add(x, 0.0, z)
     }
@@ -33,8 +33,8 @@ class CirclePattern(
         var angle = 0.0
         while (angle < 360) {
             val radians = Math.toRadians(angle)
-            val x = radius * cos(radians)
-            val z = radius * sin(radians)
+            val x = radius * cos(radians).pow(3.0)
+            val z = radius * sin(radians).pow(3.0)
             points += origin.clone().add(x, 0.0, z)
             angle += step
         }
@@ -43,18 +43,18 @@ class CirclePattern(
 
     companion object : ActionPattern.PatternResolver {
 
-        override val name = arrayOf("circle")
+        override val name = arrayOf("star")
 
         override fun resolve(
             reader: ActionPattern.Reader
         ): ActionPattern.Handler<CanvasPattern> {
             return reader.handle {
                 combine(
-                    argument("radius", "r", then = double(1.0), def = 1.0),
-                    argument("step", "s", then = double(10.0), def = 10.0),
-                    argument("init", "i", then = double(0.0), def = 0.0)
+                    argument("radius", "r", then = double(), def = 1.0),
+                    argument("step", "s", then = double(), def = 10.0),
+                    argument("init", "i", then = double(), def = 0.0)
                 ) { radius, step, init ->
-                    CirclePattern(radius, step, init)
+                    StarPattern(radius, step, init)
                 }
             }
         }

@@ -41,7 +41,7 @@ class LissajousCurvePattern(
 
     companion object : ActionPattern.PatternResolver {
 
-            override val name = arrayOf("lissajous-curve", "lissajous")
+            override val name = arrayOf("Lissajous-Curve", "Lissajous")
 
             override fun resolve(reader: ActionPattern.Reader): ActionPattern.Handler<CanvasPattern> {
                 return reader.handle {
