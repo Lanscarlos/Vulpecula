@@ -61,7 +61,7 @@ class ActionPattern : QuestAction<Any?>() {
                 val patterns =
                     frame.getVariable<MutableList<CanvasPattern>>(ActionCanvas.VARIABLE_PATTERNS) ?: mutableListOf()
                 patterns += pattern
-                frame.setVariable(ActionCanvas.VARIABLE_PATTERNS, patterns)
+                frame.setVariable(ActionCanvas.VARIABLE_PATTERNS, patterns, deep = false)
                 pattern
             }
         }
@@ -80,7 +80,7 @@ class ActionPattern : QuestAction<Any?>() {
                 val patterns =
                     frame.getVariable<MutableList<CanvasPattern>>(ActionCanvas.VARIABLE_PATTERNS) ?: mutableListOf()
                 patterns += decorator
-                frame.setVariable(ActionCanvas.VARIABLE_PATTERNS, patterns)
+                frame.setVariable(ActionCanvas.VARIABLE_PATTERNS, patterns, deep = false)
             }
 
             // 将图案对象存入变量用于传递

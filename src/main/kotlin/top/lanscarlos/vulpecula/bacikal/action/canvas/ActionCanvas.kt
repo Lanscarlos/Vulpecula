@@ -44,44 +44,36 @@ object ActionCanvas {
             argument("period", then = int(0), def = 0),
             argument("duration", then = int(200), def = 200),
             argument("viewers", "viewer", then = ActionViewers.viewers()),
-            argument("pre-handle", "on-start", "pre", then = action()),
-            argument("post-handle", "on-end", "post", then = action()),
+            argument("preprocessing", "pre", then = action(), def = ParsedAction.noop<Any?>()),
+            argument("postprocessing", "post", then = action(), def = ParsedAction.noop<Any?>()),
             trim("then", then = action())
-        ) { uuid, force, bind, period, duration, viewers, preHandle, postHandle, body ->
+        ) { uuid, force, bind, period, duration, viewers, preprocessing, postprocessing, body ->
 
             // 设置绑定目标
             if (bind != null) {
-                this.setVariable(VARIABLE_TARGET, viewers, deep = false)
-                this.setVariable("target", viewers, deep = false)
+                this.variables().set(VARIABLE_TARGET, bind)
+                this.variables().set("target", bind)
             }
 
             // 设置观察者
             if (viewers != null) {
-                this.setVariable(VARIABLE_VIEWERS, viewers, deep = false)
+                this.variables().set(VARIABLE_VIEWERS, viewers)
             }
 
             if (period <= 0) {
                 // 执行周期小于零，直接执行
-                return@combineOf when {
-                    preHandle != null && postHandle != null -> {
-                        this@combineOf.run(preHandle).thenCompose {
-                            this@combineOf.run(body).thenCompose {
-                                this@combineOf.run(postHandle)
-                            }
+                return@combineOf this.newFrame(preprocessing).run<Any?>().thenCompose {
+                    this.newFrame(body).run<Any?>().thenCompose {
+                        this.newFrame(postprocessing).run<Any?>().thenRun {
+                            // 删除变量
+                            this.variables().remove(VARIABLE_TARGET)
+                            this.variables().remove("target")
+                            this.variables().remove(VARIABLE_DURATION_START)
+                            this.variables().remove(VARIABLE_DURATION_END)
+                            this.variables().remove(VARIABLE_BRUSH)
+                            this.variables().remove(VARIABLE_VIEWERS)
+                            this.variables().remove(VARIABLE_PATTERNS)
                         }
-                    }
-                    preHandle != null -> {
-                        this@combineOf.run(preHandle).thenCompose {
-                            this@combineOf.run(body)
-                        }
-                    }
-                    postHandle != null -> {
-                        this@combineOf.run(body).thenCompose {
-                            this@combineOf.run(postHandle)
-                        }
-                    }
-                    else -> {
-                        this@combineOf.run(body)
                     }
                 }
             } else {
@@ -95,15 +87,19 @@ object ActionCanvas {
                     else -> bind?.toString()
                 }
                 val uniqueId =  if (extendId != null) mainId + '_' + extendId else mainId
-
-                val quest = CanvasQuest(
-                    uniqueId, period, duration, body,
-                    preHandle ?: ParsedAction.noop<Any?>(),
-                    postHandle ?: ParsedAction.noop<Any?>()
-                )
+                val quest = CanvasQuest(uniqueId, period, duration, body, preprocessing, postprocessing)
 
                 // 提交绘画任务
                 CanvasScriptContext.submit(quest, this.deepVars(), force)
+
+                // 删除变量
+                this.variables().remove(VARIABLE_TARGET)
+                this.variables().remove("target")
+                this.variables().remove(VARIABLE_DURATION_START)
+                this.variables().remove(VARIABLE_DURATION_END)
+                this.variables().remove(VARIABLE_BRUSH)
+                this.variables().remove(VARIABLE_VIEWERS)
+                this.variables().remove(VARIABLE_PATTERNS)
             }
 
             return@combineOf CompletableFuture.completedFuture(null)

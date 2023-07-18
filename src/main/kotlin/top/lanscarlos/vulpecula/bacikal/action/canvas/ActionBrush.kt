@@ -42,7 +42,7 @@ object ActionBrush {
 
             // 获取笔刷对象
             val brush = this.getVariable<CanvasBrush>(ActionCanvas.VARIABLE_BRUSH) ?: CanvasBrush().also {
-                this.setVariable(ActionCanvas.VARIABLE_BRUSH, it)
+                this.setVariable(ActionCanvas.VARIABLE_BRUSH, it, deep = false)
             }
 
             modify(
