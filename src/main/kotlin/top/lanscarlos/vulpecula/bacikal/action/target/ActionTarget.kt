@@ -29,7 +29,6 @@ class ActionTarget : QuestAction<Any?>() {
 
     val handlers = mutableListOf<Handler<*>>()
 
-    @Suppress("UNCHECKED_CAST")
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
             val next = reader.nextToken().lowercase()

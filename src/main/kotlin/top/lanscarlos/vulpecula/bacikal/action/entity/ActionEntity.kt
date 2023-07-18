@@ -31,7 +31,7 @@ class ActionEntity : QuestAction<Any?>() {
         do {
             val next = reader.nextToken()
             val isRoot = handlers.isEmpty()
-            handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
+            handlers += registry[next.lowercase()]?.resolve(Reader(next, reader, isRoot))
                 ?: error("Unknown sub action \"$next\" at entity action.")
 
             // 判断管道是否已关闭
@@ -98,7 +98,7 @@ class ActionEntity : QuestAction<Any?>() {
          * @param resolver 子语句解析器
          * */
         fun registerResolver(resolver: Resolver) {
-            resolver.name.forEach { registry[it] = resolver }
+            resolver.name.forEach { registry[it.lowercase()] = resolver }
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {

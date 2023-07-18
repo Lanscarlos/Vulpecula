@@ -20,7 +20,7 @@ object ActionFx : ClassInjector() {
      * @param resolver 子语句解析器
      * */
     fun registerResolver(resolver: Resolver) {
-        resolver.name.forEach { registry[it] = resolver }
+        resolver.name.forEach { registry[it.lowercase()] = resolver }
     }
 
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
@@ -48,7 +48,7 @@ object ActionFx : ClassInjector() {
         combine(
             LiveData {
                 val next = nextToken()
-                val parser = registry[next]?.resolve(this) ?: error("Unknown sub action \"$next\" at fx action.")
+                val parser = registry[next.lowercase()]?.resolve(this) ?: error("Unknown sub action \"$next\" at fx action.")
                 Bacikal.Action {
                     parser.action.run(it)
                 }

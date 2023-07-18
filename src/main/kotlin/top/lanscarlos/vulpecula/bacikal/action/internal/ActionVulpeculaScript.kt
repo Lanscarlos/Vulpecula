@@ -35,7 +35,7 @@ object ActionVulpeculaScript {
                     ) { file, viewer, async, args ->
 
                         val result = if (args != null) {
-                            ScriptWorkspace.runScript(file, viewer, *args.toTypedArray())
+                            ScriptWorkspace.runScript(file, viewer, args.toTypedArray())
                         } else {
                             ScriptWorkspace.runScript(file, viewer)
                         } ?: error("No script found: \"$file\"")

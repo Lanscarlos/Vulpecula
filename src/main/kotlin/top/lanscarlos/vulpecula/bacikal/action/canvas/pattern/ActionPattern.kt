@@ -30,7 +30,7 @@ class ActionPattern : QuestAction<Any?>() {
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
             val next = reader.nextToken()
-            val resolver = registry[next] ?: error("Unknown sub action \"$next\" at pattern action.")
+            val resolver = registry[next.lowercase()] ?: error("Unknown sub action \"$next\" at pattern action.")
 
             if (::header.isInitialized) {
                 handlers += (resolver as? TransformResolver)?.resolve(Reader(next, reader))
@@ -113,7 +113,7 @@ class ActionPattern : QuestAction<Any?>() {
          * @param resolver 子语句解析器
          * */
         fun registerResolver(resolver: Resolver<*>) {
-            resolver.name.forEach { registry[it] = resolver }
+            resolver.name.forEach { registry[it.lowercase()] = resolver }
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {

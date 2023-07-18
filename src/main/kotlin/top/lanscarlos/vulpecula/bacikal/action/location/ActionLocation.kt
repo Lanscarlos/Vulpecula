@@ -33,7 +33,7 @@ class ActionLocation : QuestAction<Any?>() {
             reader.mark()
             val next = reader.nextToken()
             val isRoot = handlers.isEmpty()
-            handlers += registry[next]?.resolve(Reader(next, reader, isRoot))
+            handlers += registry[next.lowercase()]?.resolve(Reader(next, reader, isRoot))
                 ?: let {
                     // 兼容 TabooLib 原生 location 语句的构建坐标功能
                     reader.reset()
@@ -111,7 +111,7 @@ class ActionLocation : QuestAction<Any?>() {
          * @param resolver 子语句解析器
          * */
         fun registerResolver(resolver: Resolver) {
-            resolver.name.forEach { registry[it] = resolver }
+            resolver.name.forEach { registry[it.lowercase()] = resolver }
         }
 
         override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
