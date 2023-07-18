@@ -34,7 +34,7 @@ object ActionDraw {
                 r.expectToken("pattern")
                 r.nextToken()
             }),
-            argument("index", "i", then = int(0), def = 0)
+            argument("index", "i", then = int(), def = 0)
         ) { location, template, index ->
 
             // 获取观察者对象
@@ -66,23 +66,23 @@ object ActionDraw {
             // 使用图案绘制
             val patterns = this.getVariable<List<CanvasPattern>>(ActionCanvas.VARIABLE_PATTERNS) ?: return@combine setOf<Location>()
 
-            if (index < 0 || index >= patterns.size) {
+            if (index < -1 || index >= patterns.size) {
                 error("Pattern index \"$index\" is out of bounds of patterns.")
             }
 
             when (template) {
                 "point" -> {
-                    if (index == 0) {
+                    if (index == -1) {
                         brush.draw(patterns.map { it.point(target) }, viewers)
                     } else {
-                        brush.draw(patterns[index - 1].point(target), viewers)
+                        brush.draw(patterns[index].point(target), viewers)
                     }
                 }
                 "shape" -> {
-                    if (index == 0) {
+                    if (index == -1) {
                         brush.draw(patterns.flatMap { it.shape(target) }, viewers)
                     } else {
-                        brush.draw(patterns[index - 1].shape(target), viewers)
+                        brush.draw(patterns[index].shape(target), viewers)
                     }
                 }
                 else -> error("Unknown pattern sub action：\"$template\"")
