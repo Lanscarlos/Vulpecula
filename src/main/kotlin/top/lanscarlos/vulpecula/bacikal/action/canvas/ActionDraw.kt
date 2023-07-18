@@ -34,7 +34,7 @@ object ActionDraw {
                 r.expectToken("pattern")
                 r.nextToken()
             }),
-            argument("index", "i", then = int(), def = 0)
+            argument("index", "i", then = int(), def = -1)
         ) { location, template, index ->
 
             // 获取观察者对象

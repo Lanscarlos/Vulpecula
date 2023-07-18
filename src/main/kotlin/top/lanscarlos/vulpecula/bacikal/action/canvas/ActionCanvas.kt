@@ -7,7 +7,6 @@ import taboolib.module.kether.*
 import taboolib.platform.type.BukkitPlayer
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
-import top.lanscarlos.vulpecula.utils.setVariable
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
