@@ -8,104 +8,104 @@ block:
   shared: true
   # 是否写入 Kether 命名空间
   # 不写入则第三方插件使用前需要导入命名空间
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 canvas:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 ceil:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 coerce:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 cos:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 event:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 floor:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 if-else:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
   # 是否覆盖原生 If & Else
   # 覆盖之后，原生 If 功能将由此语句替代
   override-default-action: false
 
 item:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 lg:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 ln:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 location:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
   override-default-action: false
 
 log:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 memory:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 particles:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 pow:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 radian:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 sin:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 sound:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
   override-default-action: false
 
 sqrt:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 tan:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 try-catch:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 unicode:
   disable: true
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 vector:
   shared: true
-  inject-default-namespace: true
+  inject-default-namespace: false
 
 

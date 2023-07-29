@@ -109,7 +109,7 @@ object BacikalRegistry : ClassInjector() {
         val name = annotation.property<Any>("name")?.asList()?.toTypedArray() ?: arrayOf()
         val namespace = annotation.property("namespace", "vulpecula")
         val override = annotation.property<Any>("override")?.asList()?.toTypedArray() ?: arrayOf()
-        val injectDefaultNamespace = actionConfig.getBoolean("$id.inject-default-namespace", true)
+        val injectDefaultNamespace = actionConfig.getBoolean("$id.inject-default-namespace", false)
         val overrideDefaultAction = actionConfig.getBoolean("$id.override-default-action", false)
 
         // 是否分享语句
