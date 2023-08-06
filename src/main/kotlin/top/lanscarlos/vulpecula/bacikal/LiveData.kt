@@ -65,14 +65,14 @@ open class LiveData<T>(
 
     fun optional(vararg expect: String): LiveData<T?> {
         return if (expect.isEmpty()) {
-            LiveData {
+            LiveData optional@{
                 this@LiveData.accept(reader = this)
                 Bacikal.Action { frame ->
                     this@LiveData.accept(frame).thenApply { it }
                 }
             }
         } else {
-            LiveData {
+            LiveData optional@{
                 if (this.expectToken(*expect)) {
                     this@LiveData.accept(reader = this)
                     Bacikal.Action { frame ->
@@ -87,7 +87,7 @@ open class LiveData<T>(
 
     fun optional(vararg expect: String, def: T): LiveData<T> {
         return if (expect.isNotEmpty()) {
-            LiveData {
+            LiveData optional@{
                 if (this.expectToken(*expect)) {
                     this@LiveData.accept(reader = this)
                     Bacikal.Action { frame ->
@@ -101,7 +101,7 @@ open class LiveData<T>(
     }
 
     fun <R> map(func: (T) -> R): LiveData<R> {
-        return LiveData {
+        return LiveData map@{
             this@LiveData.accept(reader = this)
             Bacikal.Action { frame ->
                 this@LiveData.accept(frame).thenApply(func)
@@ -110,7 +110,7 @@ open class LiveData<T>(
     }
 
     fun <R> union(other: LiveData<R>): LiveData<Pair<T, R>> {
-        return LiveData {
+        return LiveData union@{
             this@LiveData.accept(reader = this)
             other.accept(reader = this)
             Bacikal.Action { frame ->

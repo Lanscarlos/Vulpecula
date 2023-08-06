@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal.action.inventory
 
-import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.api.chemdah.InferItem.Companion.toInferItem
 
 /**
