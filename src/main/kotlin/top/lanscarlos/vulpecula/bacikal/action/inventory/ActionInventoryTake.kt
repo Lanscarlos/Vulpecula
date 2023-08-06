@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.action.inventory
 
+import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.api.chemdah.InferItem.Companion.toInferItem
 
 /**
@@ -18,9 +19,15 @@ object ActionInventoryTake : ActionInventory.Resolver {
             combine(
                 source(),
                 text("pattern"),
-                optional("amount", "amt", then = int(display = "amount"), def = 1)
+                argument("amount", "amt", then = int(display = "amount"), def = 1)
             ) { inventory, pattern, amount ->
-                pattern.toInferItem().take(inventory, amount)
+                val infer = pattern.toInferItem()
+                if (!infer.check(inventory, amount)) {
+                    return@combine false
+                }
+                infer.take(inventory, amount)
+                updateInventory()
+                return@combine true
             }
         }
     }

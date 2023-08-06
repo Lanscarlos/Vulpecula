@@ -249,14 +249,17 @@ open class LiveData<T>(
                             val number = this.toDouble()
                             Vector(number, number, number)
                         }
+
                         this.matches("^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()) -> {
                             // x,y,z
                             val demand = this.split(",").map { it.toDouble() }
                             Vector(demand[0], demand[1], demand[2])
                         }
+
                         else -> null
                     }
                 }
+
                 else -> null
             }
 
@@ -294,6 +297,7 @@ open class LiveData<T>(
                         )
                     } else null
                 }
+
                 else -> null
             }
 

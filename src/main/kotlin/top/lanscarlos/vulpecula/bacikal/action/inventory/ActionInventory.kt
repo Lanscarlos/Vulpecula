@@ -1,8 +1,10 @@
 package top.lanscarlos.vulpecula.bacikal.action.inventory
 
+import org.bukkit.block.BlockState
 import org.bukkit.inventory.Inventory
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptActionParser
@@ -12,10 +14,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.internal.ClassInjector
-import top.lanscarlos.vulpecula.utils.getVariable
-import top.lanscarlos.vulpecula.utils.hasNextToken
-import top.lanscarlos.vulpecula.utils.nextPeek
-import top.lanscarlos.vulpecula.utils.setVariable
+import top.lanscarlos.vulpecula.utils.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
@@ -33,59 +32,34 @@ class ActionInventory : QuestAction<Any?>() {
     fun resolve(reader: QuestReader): QuestAction<Any?> {
         do {
             val next = reader.nextToken()
-            val isRoot = handlers.isEmpty()
-            handlers += registry[next.lowercase()]?.resolve(Reader(next, reader, isRoot))
+            handlers += registry[next.lowercase()]?.resolve(Reader(next, reader))
                 ?: error("Unknown sub action \"$next\" at inventory action.")
 
-            // 判断管道是否已关闭
-            if (handlers.lastOrNull() !is Transfer) {
-                if (reader.hasNextToken(">>")) {
-                    error("Cannot use \">> ${reader.nextPeek()}\", previous action \"$next\" has closed the pipeline.")
-                }
-                break
-            }
         } while (reader.hasNextToken(">>"))
 
         return this
     }
 
     override fun process(frame: ScriptFrame): CompletableFuture<Any?> {
-        if (handlers.size == 1 || handlers[0] !is Transfer) {
+        if (handlers.size == 1) {
             return handlers[0].accept(frame).thenApply { it }
         }
 
-        var previous: CompletableFuture<Inventory> = (handlers[0] as Transfer).accept(frame)
+        var previous = handlers[0].accept(frame)
 
-        for (index in 1 until handlers.size - 1) {
+        for (index in 1 until  handlers.size) {
             val current = handlers[index]
 
-            // 除去最后一个 Handler 以及非 Transfer
-            if (current !is Transfer) break
-
-            // 判断 future 是否已完成，减少嵌套
             previous = if (previous.isDone) {
-                val item = previous.getNow(null)
-                frame.setVariable("@Transfer", item, false)
                 current.accept(frame)
             } else {
-                previous.thenCompose { item ->
-                    frame.setVariable("@Transfer", item, false)
+                previous.thenCompose { _ ->
                     current.accept(frame)
                 }
             }
         }
 
-        // 判断 future 是否已完成，减少嵌套
-        return if (previous.isDone) {
-            val item = previous.getNow(null)
-            frame.setVariable("@Transfer", item, false)
-            handlers.last().accept(frame).thenApply { it }
-        } else {
-            previous.thenCompose { item ->
-                frame.setVariable("@Transfer", item, false)
-                handlers.last().accept(frame).thenApply { it }
-            }
-        }
+        return previous.thenApply { it }
     }
 
     /*
@@ -122,7 +96,7 @@ class ActionInventory : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "inventory",
-            name = ["inventory*", "inv*"],
+            name = ["v-inv", "inventory*", "inv*"],
             override = ["inventory", "inv"]
         )
         fun parser() = ScriptActionParser<Any?> {
@@ -143,31 +117,29 @@ class ActionInventory : QuestAction<Any?>() {
     /**
      * 语句读取器
      * */
-    class Reader(val token: String, source: QuestReader, val isRoot: Boolean) : BacikalReader(source) {
+    class Reader(val token: String, source: QuestReader) : BacikalReader(source) {
 
         fun <T> handle(func: Reader.() -> Bacikal.Parser<T>): Handler<T> {
             return Handler(func(this))
         }
 
-        fun transfer(func: Reader.() -> Bacikal.Parser<Inventory>): Handler<Inventory> {
-            return Transfer(func(this))
-        }
-
         fun source(): LiveData<Inventory> {
-            return if (isRoot) {
-                inventory()
-            } else {
-                LiveData {
-                    Bacikal.Action { frame ->
-                        CompletableFuture.completedFuture(
-                            frame.getVariable<Inventory>("@Transfer")
-                                ?: error("No item source selected. [ERROR: item@$token]")
-                        )
-                    }
+            return LiveData {
+                Bacikal.Action { frame ->
+                    val inventory =
+                        frame.getVariable<Inventory>("@Inventory") ?: frame.playerOrNull()?.toBukkit()?.inventory
+                        ?: error("No inventory source selected. [ERROR: item@$token]")
+                    CompletableFuture.completedFuture(inventory)
                 }
             }
         }
 
+        /**
+         * 更新容器，用于更新方块类容器
+         * */
+        fun ScriptFrame.updateInventory() {
+            this.getVariable<BlockState>("@InventoryHolder")?.update(true) ?: info("卧槽？")
+        }
     }
 
     /**
@@ -182,9 +154,4 @@ class ActionInventory : QuestAction<Any?>() {
             return parser.action.run(frame)
         }
     }
-
-    /**
-     * 用于传递 Item
-     * */
-    open class Transfer(parser: Bacikal.Parser<Inventory>) : Handler<Inventory>(parser)
 }

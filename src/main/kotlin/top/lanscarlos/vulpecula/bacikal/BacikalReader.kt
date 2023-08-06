@@ -280,7 +280,7 @@ open class BacikalReader(private val source: QuestReader) {
     }
 
     fun inventoryOrNull(): LiveData<Inventory?> = frameBy { it?.liveInventory }
-    fun inventory(def: Inventory? = null, display: String = "itemStack"): LiveData<Inventory> {
+    fun inventory(def: Inventory? = null, display: String = "inventory"): LiveData<Inventory> {
         return frameBy { it?.liveInventory ?: def ?: error("No $display selected.") }
     }
 

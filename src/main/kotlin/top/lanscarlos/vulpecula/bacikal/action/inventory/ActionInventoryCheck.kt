@@ -18,7 +18,7 @@ object ActionInventoryCheck : ActionInventory.Resolver {
             combine(
                 source(),
                 text("pattern"),
-                optional("amount", "amt", then = int(display = "amount"), def = 1)
+                argument("amount", "amt", then = int(display = "amount"), def = 1)
             ) { inventory, pattern, amount ->
                 pattern.toInferItem().check(inventory, amount)
             }
