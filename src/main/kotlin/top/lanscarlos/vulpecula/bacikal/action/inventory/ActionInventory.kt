@@ -4,7 +4,6 @@ import org.bukkit.block.BlockState
 import org.bukkit.inventory.Inventory
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.ScriptActionParser
@@ -138,7 +137,7 @@ class ActionInventory : QuestAction<Any?>() {
          * 更新容器，用于更新方块类容器
          * */
         fun ScriptFrame.updateInventory() {
-            this.getVariable<BlockState>("@InventoryHolder")?.update(true) ?: info("卧槽？")
+            this.getVariable<BlockState>("@InventoryHolder")?.update(true)
         }
     }
 
