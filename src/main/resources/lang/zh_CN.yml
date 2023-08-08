@@ -23,8 +23,7 @@ Config-Load-Failed: |-
 
 # Kether 相关
 
-Kether-Override-Action-Local-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 本地覆盖语句 &a{0}&7 完毕！ &8({1} ms)'
-Kether-Override-Action-Remote-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 同步覆盖语句 &a{0}&7 完毕！ &8({1} ms)'
+Kether-Action-Register-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 语句注册完毕！ &8({0} ms)'
 Kether-Action-Register-Failed: |-
   &8[&3Vul&bpecula&8] &c错误 &8|&7 注册语句时遇到了问题！
   &e[ERROR: Config@Load]: {0}

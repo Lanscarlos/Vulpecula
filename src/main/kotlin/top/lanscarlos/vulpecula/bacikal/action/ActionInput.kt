@@ -36,7 +36,7 @@ object ActionInput {
 
     @BacikalParser(
         id = "input",
-        name = ["input"]
+        aliases = ["input"]
     )
     fun parser() = bacikal {
         combineOf(

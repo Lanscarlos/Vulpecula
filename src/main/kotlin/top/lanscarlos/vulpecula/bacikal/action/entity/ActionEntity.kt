@@ -119,7 +119,7 @@ class ActionEntity : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "entity",
-            name = ["entity"]
+            aliases = ["entity"]
         )
         fun parser() = ScriptActionParser<Any?> {
             ActionEntity().resolve(this)

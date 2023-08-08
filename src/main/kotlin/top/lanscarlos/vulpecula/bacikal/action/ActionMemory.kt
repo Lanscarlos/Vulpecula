@@ -26,7 +26,7 @@ object ActionMemory {
 
     @BacikalParser(
         id = "memory",
-        name = ["memory"]
+        aliases = ["memory"]
     )
     fun parser() = bacikal {
         combine(

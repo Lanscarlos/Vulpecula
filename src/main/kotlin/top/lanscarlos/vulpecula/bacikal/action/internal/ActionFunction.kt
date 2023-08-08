@@ -17,7 +17,7 @@ object ActionFunction {
      * */
     @BacikalParser(
         id = "func",
-        name = ["func"],
+        aliases = ["func"],
         namespace = "vulpecula-script"
     )
     fun parser() = bacikal {

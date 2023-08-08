@@ -1,14 +1,10 @@
 package top.lanscarlos.vulpecula.bacikal.action
 
-import org.bukkit.Sound
-import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.common.util.Location
 import taboolib.module.kether.player
-import taboolib.platform.util.toBukkitLocation
-import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.LiveData
 import top.lanscarlos.vulpecula.bacikal.bacikal
@@ -24,8 +20,7 @@ object ActionSound {
 
     @BacikalParser(
         id = "sound",
-        name = ["sound*"],
-        override = ["sound"]
+        aliases = ["sound"]
     )
     fun parser() = bacikal {
         combine(

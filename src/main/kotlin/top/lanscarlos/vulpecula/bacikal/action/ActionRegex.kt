@@ -21,7 +21,7 @@ object ActionRegex {
 
     @BacikalParser(
         id = "regex",
-        name = ["regex"]
+        aliases = ["regex"]
     )
     fun parser() = bacikalSwitch {
         case("group") {

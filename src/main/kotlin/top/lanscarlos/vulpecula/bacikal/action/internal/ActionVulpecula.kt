@@ -14,7 +14,7 @@ object ActionVulpecula {
 
     @BacikalParser(
         id = "vulpecula",
-        name = ["vulpecula", "vul"]
+        aliases = ["vulpecula", "vul"]
     )
     fun parser() = bacikal {
         when (val next = this.nextToken()) {

@@ -30,7 +30,7 @@ object ActionCanvas {
 
     @BacikalParser(
         id = "canvas",
-        name = ["canvas"],
+        aliases = ["canvas"],
     )
     fun parser() = bacikal {
         // 添加内部命名空间

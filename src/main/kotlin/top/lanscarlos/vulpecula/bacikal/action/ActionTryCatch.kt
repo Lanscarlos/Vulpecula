@@ -18,7 +18,7 @@ object ActionTryCatch {
 
     @BacikalParser(
         id = "try-catch",
-        name = ["try"]
+        aliases = ["try"]
     )
     fun parser() = bacikal {
         combineOf(

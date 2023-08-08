@@ -23,7 +23,7 @@ object ActionCoerce {
      * coerce &n most &max
      *
      * */
-    @BacikalParser(id = "coerce", name = ["coerce"])
+    @BacikalParser(id = "coerce", aliases = ["coerce"])
     fun parser() = bacikalSwitch {
         val any = any().accept(this)
 

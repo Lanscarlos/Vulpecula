@@ -12,10 +12,8 @@ import taboolib.library.kether.QuestActionParser
 class RegistryMetadata(
     val id: String,
     val parser: QuestActionParser,
-    val name: Array<String>,
-    val namespace: String,
+    val aliases: Array<String>,
+    val namespace: Array<String>,
     val shared: Boolean,
-    val override: Array<String>,
-    val injectDefaultNamespace: Boolean,
-    val overrideDefaultAction: Boolean
+    val injectDefaultNamespace: Boolean
 )

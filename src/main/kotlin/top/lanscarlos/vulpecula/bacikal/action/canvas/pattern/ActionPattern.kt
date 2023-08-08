@@ -134,7 +134,7 @@ class ActionPattern : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "pattern",
-            name = ["pattern"],
+            aliases = ["pattern"],
             namespace = "vulpecula-canvas"
         )
         fun parser() = ScriptActionParser<Any?> {

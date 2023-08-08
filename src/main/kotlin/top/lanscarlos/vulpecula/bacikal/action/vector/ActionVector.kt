@@ -134,7 +134,7 @@ class ActionVector : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "vector",
-            name = ["vector", "vec"]
+            aliases = ["vector", "vec"]
         )
         fun parser() = ScriptActionParser<Any?> {
             ActionVector().resolve(this)

@@ -24,7 +24,7 @@ object ActionUnicode {
 
     @BacikalParser(
         id = "unicode",
-        name = ["unicode"]
+        aliases = ["unicode"]
     )
     fun parser() = bacikal {
         combine(

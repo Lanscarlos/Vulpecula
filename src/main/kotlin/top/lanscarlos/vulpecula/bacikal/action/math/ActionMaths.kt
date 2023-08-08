@@ -13,7 +13,7 @@ import kotlin.math.*
  */
 object ActionMaths {
 
-    @BacikalParser(id = "pow", name = ["pow"])
+    @BacikalParser(id = "pow", aliases = ["pow"])
     fun powParser() = bacikal {
         combine(
             double(),
@@ -21,56 +21,56 @@ object ActionMaths {
         ) { base, power -> base.pow(power) }
     }
 
-    @BacikalParser(id = "sqrt", name = ["sqrt"])
+    @BacikalParser(id = "sqrt", aliases = ["sqrt"])
     fun sqrtParser() = bacikal {
         combine(
             double()
         ) { base -> sqrt(base) }
     }
 
-    @BacikalParser(id = "ceil", name = ["ceil"])
+    @BacikalParser(id = "ceil", aliases = ["ceil"])
     fun ceilParser() = bacikal {
         combine(
             double()
         ) { base -> ceil(base) }
     }
 
-    @BacikalParser(id = "ln", name = ["ln"])
+    @BacikalParser(id = "ln", aliases = ["ln"])
     fun lnParser() = bacikal {
         combine(
             double()
         ) { base -> ln(base) }
     }
 
-    @BacikalParser(id = "lg", name = ["lg"])
+    @BacikalParser(id = "lg", aliases = ["lg"])
     fun lgParser() = bacikal {
         combine(
             double()
         ) { base -> log10(base) }
     }
 
-    @BacikalParser(id = "radian", name = ["radian", "rad"])
+    @BacikalParser(id = "radian", aliases = ["radian", "rad"])
     fun radianParser() = bacikal {
         combine(
             double()
         ) { base -> Math.toRadians(base) }
     }
 
-    @BacikalParser(id = "sin", name = ["sin"])
+    @BacikalParser(id = "sin", aliases = ["sin"])
     fun sinParser() = bacikal {
         combine(
             double()
         ) { base -> sin(base) }
     }
 
-    @BacikalParser(id = "cos", name = ["cos"])
+    @BacikalParser(id = "cos", aliases = ["cos"])
     fun cosParser() = bacikal {
         combine(
             double()
         ) { base -> cos(base) }
     }
 
-    @BacikalParser(id = "tan", name = ["tan"])
+    @BacikalParser(id = "tan", aliases = ["tan"])
     fun tanParser() = bacikal {
         combine(
             double()

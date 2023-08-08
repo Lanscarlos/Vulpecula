@@ -59,7 +59,10 @@ object BacikalRegistry : ClassInjector() {
 
     // 加载 Vulpecula 脚本属性
     override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
-        if (!clazz.isAnnotationPresent(BacikalProperty::class.java) || !BacikalGenericProperty::class.java.isAssignableFrom(clazz)) return
+        if (!clazz.isAnnotationPresent(BacikalProperty::class.java) || !BacikalGenericProperty::class.java.isAssignableFrom(
+                clazz
+            )
+        ) return
 
         // 加载注解
         val annotation = clazz.getAnnotation(BacikalProperty::class.java)
@@ -106,11 +109,9 @@ object BacikalRegistry : ClassInjector() {
         if (actionConfig.getBoolean("$id.disable", false)) return
 
         // 加载注解属性
-        val name = annotation.property<Any>("name")?.asList()?.toTypedArray() ?: arrayOf()
-        val namespace = annotation.property("namespace", "vulpecula")
-        val override = annotation.property<Any>("override")?.asList()?.toTypedArray() ?: arrayOf()
+        val aliases = annotation.property<Any>("aliases")?.asList()?.toTypedArray() ?: arrayOf()
+        val namespace = arrayOf("kether", "vul", annotation.property("namespace", "vulpecula"))
         val injectDefaultNamespace = actionConfig.getBoolean("$id.inject-default-namespace", false)
-        val overrideDefaultAction = actionConfig.getBoolean("$id.override-default-action", false)
 
         // 是否分享语句
         val shared = if (annotation.property("shared", true)) {
@@ -120,15 +121,20 @@ object BacikalRegistry : ClassInjector() {
         }
 
         // 获取解析器
-        val parser = (if (supplier == null) method.invokeStatic() else method.invoke(supplier.get())) as ScriptActionParser<*>
-        parserRegistry[id] = RegistryMetadata(id, parser, name, namespace, shared, override, injectDefaultNamespace, overrideDefaultAction)
+        val parser =
+            (if (supplier == null) method.invokeStatic() else method.invoke(supplier.get())) as ScriptActionParser<*>
+        parserRegistry[id] = RegistryMetadata(id, parser, aliases, namespace, shared, injectDefaultNamespace)
 
         // 注册语句
-        name.forEach {
-            Kether.scriptRegistry.registerAction("vul", it, parser)
-            if (namespace != "kether") {
-                // 防止注入原生命名空间
-                Kether.scriptRegistry.registerAction(namespace, it, parser)
+        for (name in aliases) {
+            for (space in namespace) {
+                if (name.last() == '*' || name.startsWith("vul-")) {
+                    // Legacy 拓展标识，无视命名空间直接注册
+                    Kether.scriptRegistry.registerAction(space, name, parser)
+                    continue
+                }
+
+                Kether.scriptRegistry.registerAction(space, "v-$name", parser)
             }
         }
     }
@@ -137,54 +143,49 @@ object BacikalRegistry : ClassInjector() {
      * 使用 ENABLE 防止被原生加载器覆盖语句解析器
      * */
     @Awake(LifeCycle.ENABLE)
-    fun autoRegisterAction() {
+    fun registerAction() {
         val start = timing()
         try {
-            parserRegistry.forEach { (id, meta) ->
+            for ((_, meta) in parserRegistry) {
 
-                // 注入原生命名空间
                 if (meta.injectDefaultNamespace) {
-                    meta.name.forEach {
-                        Kether.scriptRegistry.registerAction("kether", it, meta.parser)
+                    // 允许注入默认命名空间
+                    for (name in meta.aliases) {
+                        if (name.last() == '*') {
+                            // 忽略已注册过的 Legacy 拓展标识
+                            continue
+                        }
+                        Kether.scriptRegistry.registerAction("kether", name, meta.parser)
                     }
                 }
 
-                // 覆盖原生语句
-                if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
-                    meta.override.forEach {
-                        Kether.scriptRegistry.registerAction("kether", it, meta.parser)
-                    }
-                    console().sendLang("Kether-Override-Action-Local-Succeeded", id, timing(start))
+                if (!meta.shared) {
+                    // 私有语句
+                    continue
                 }
 
-                // 是否分享语句
-                if (!meta.shared) return@forEach
-
-                getOpenContainers().forEach inner@{
-
-                    if (it.name == pluginId) return@inner
-
-                    it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "vul"))
-                    if (meta.namespace != "kether") {
-                        // 防止注入原生命名空间
-                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, meta.namespace))
+                for (container in getOpenContainers()) {
+                    if (container.name == pluginId) {
+                        // 不分享给自己
+                        continue
                     }
 
-                    // 注入原生命名空间
-                    if (meta.injectDefaultNamespace) {
-                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.name, "kether"))
-                    }
+                    for (space in meta.namespace) {
+                        if (space == "kether" && meta.injectDefaultNamespace) {
+                            // 允许注入默认命名空间
+                            container.call(
+                                StandardChannel.REMOTE_ADD_ACTION,
+                                arrayOf(pluginId, meta.aliases.filter { it.last() != '*' }, space)
+                            )
+                        }
 
-                    // 覆盖原生语句
-                    if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
-                        it.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, meta.override, "kether"))
+                        val aliases =
+                            meta.aliases.map { if (it.last() == '*' || it.startsWith("vul-")) it else "v-$it" }
+                        container.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, aliases, space))
                     }
-                }
-
-                if (meta.overrideDefaultAction && meta.override.isNotEmpty()) {
-                    console().sendLang("Kether-Override-Action-Remote-Succeeded", id, timing(start))
                 }
             }
+            console().sendLang("Kether-Override-Action-Remote-Succeeded", timing(start))
         } catch (e: Exception) {
             console().sendLang("Kether-Action-Register-Failed", e.localizedMessage, timing(start))
         }

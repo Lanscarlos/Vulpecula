@@ -24,7 +24,7 @@ object ActionDuration {
      * */
     @BacikalParser(
         id = "duration",
-        name = ["duration"],
+        aliases = ["duration"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikalSwitch {

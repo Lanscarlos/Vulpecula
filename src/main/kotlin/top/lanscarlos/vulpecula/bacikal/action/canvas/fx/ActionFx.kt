@@ -41,7 +41,7 @@ object ActionFx : ClassInjector() {
 
     @BacikalParser(
         id = "fx",
-        name = ["fx"],
+        aliases = ["fx"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikal {

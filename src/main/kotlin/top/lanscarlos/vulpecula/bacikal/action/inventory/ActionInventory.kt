@@ -95,8 +95,7 @@ class ActionInventory : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "inventory",
-            name = ["v-inv", "inventory*", "inv*"],
-            override = ["inventory", "inv"]
+            aliases = ["inventory", "inv"]
         )
         fun parser() = ScriptActionParser<Any?> {
             ActionInventory().resolve(this)

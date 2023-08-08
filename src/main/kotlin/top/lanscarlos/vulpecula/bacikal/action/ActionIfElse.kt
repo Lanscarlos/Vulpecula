@@ -28,8 +28,7 @@ object ActionIfElse {
      * */
     @BacikalParser(
         id = "if-else",
-        name = ["if*"],
-        override = ["if"]
+        aliases = ["if"]
     )
     fun parser() = bacikal {
         combineOf(

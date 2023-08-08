@@ -20,7 +20,7 @@ object ActionTellRaw {
      * */
     @BacikalParser(
         id = "tell-raw",
-        name = ["tell-raw"]
+        aliases = ["tell-raw"]
     )
     fun tellRawParser() = bacikal {
         combine(
@@ -36,8 +36,7 @@ object ActionTellRaw {
      * */
     @BacikalParser(
         id = "tell",
-        name = ["tell*"],
-        override = ["tell"]
+        aliases = ["tell"]
     )
     fun tellParser() = bacikal {
         combine(

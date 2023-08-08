@@ -17,7 +17,7 @@ object ActionVulpeculaSchedule {
 
     @BacikalParser(
         id = "vulpecula-schedule",
-        name = ["vul-schedule"]
+        aliases = ["vul-schedule"]
     )
     fun parser() = bacikal {
         resolve(this)

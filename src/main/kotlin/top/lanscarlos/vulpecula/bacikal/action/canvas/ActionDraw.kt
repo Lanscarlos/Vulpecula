@@ -24,7 +24,7 @@ object ActionDraw {
 
     @BacikalParser(
         id = "draw",
-        name = ["draw"],
+        aliases = ["draw"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikal {

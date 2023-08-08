@@ -19,7 +19,7 @@ object ActionBrush {
 
     @BacikalParser(
         id = "brush",
-        name = ["brush", "pen"],
+        aliases = ["brush", "pen"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikal {

@@ -39,7 +39,7 @@ object ActionViewers {
      * */
     @BacikalParser(
         id = "viewers",
-        name = ["viewers", "viewer"],
+        aliases = ["viewers", "viewer"],
         namespace = "vulpecula-canvas"
     )
     fun parser() = bacikal {

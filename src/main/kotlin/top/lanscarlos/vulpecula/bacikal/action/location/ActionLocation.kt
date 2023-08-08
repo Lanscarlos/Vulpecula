@@ -132,8 +132,7 @@ class ActionLocation : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "location",
-            name = ["location*", "loc*"],
-            override = ["location", "loc"]
+            aliases = ["location", "loc"]
         )
         fun parser() = ScriptActionParser<Any?> {
             ActionLocation().resolve(this)

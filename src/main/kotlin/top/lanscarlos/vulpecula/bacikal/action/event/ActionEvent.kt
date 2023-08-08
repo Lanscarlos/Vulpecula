@@ -123,7 +123,7 @@ class ActionEvent : QuestAction<Any?>() {
 
         @BacikalParser(
             id = "event",
-            name = ["event"]
+            aliases = ["event"]
         )
         fun parser() = ScriptActionParser<Any?> {
             ActionEvent().resolve(this)

@@ -16,7 +16,7 @@ object ActionVulpeculaScript {
 
     @BacikalParser(
         id = "vulpecula-script",
-        name = ["vul-script"]
+        aliases = ["vul-script", "script"]
     )
     fun parser() = bacikal {
         resolve(this)
