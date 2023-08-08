@@ -38,6 +38,9 @@ taboolib {
             name("Planners").optional(true)
             name("Invero").optional(true)
             name("Zaphkiel").optional(true)
+
+            name("PlaceholderAPI").optional(true)
+            name("LuckPerms").optional(true)
         }
     }
 }
