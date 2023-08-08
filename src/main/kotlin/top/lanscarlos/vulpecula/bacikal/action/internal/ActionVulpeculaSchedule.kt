@@ -33,7 +33,7 @@ object ActionVulpeculaSchedule {
                         optional("with", then = list())
                     ) { id, args ->
                         if (args != null) {
-                            ScheduleTask.get(id)?.runTask(*args.toTypedArray())
+                            ScheduleTask.get(id)?.runTask(args.toTypedArray())
                         } else {
                             ScheduleTask.get(id)?.runTask()
                         } ?: error("No schedule found: \"$id\"")
