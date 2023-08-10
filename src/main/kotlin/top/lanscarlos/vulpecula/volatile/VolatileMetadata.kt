@@ -1,8 +1,6 @@
 package top.lanscarlos.vulpecula.volatile
 
 import taboolib.module.nms.nmsProxy
-import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveFloat
-import top.lanscarlos.vulpecula.internal.ClassInjector.Companion.packageName
 
 /**
  * Vulpecula
