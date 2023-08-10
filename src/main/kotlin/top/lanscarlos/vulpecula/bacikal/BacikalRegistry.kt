@@ -105,6 +105,11 @@ object BacikalRegistry : ClassInjector() {
 
         val id = annotation.property<String>("id") ?: return
 
+        if (actionConfig[id] == null) {
+            // 未在配置文件中检测到语句
+            warning("Action \"$id\" was not found in action-registry.yml!")
+        }
+
         // 是否禁用语句
         if (actionConfig.getBoolean("$id.disable", false)) return
 
@@ -128,8 +133,8 @@ object BacikalRegistry : ClassInjector() {
         // 注册语句
         for (name in aliases) {
             for (space in namespace) {
-                if (name.last() == '*' || name.startsWith("vul-")) {
-                    // Legacy 拓展标识，无视命名空间直接注册
+                if (space == "vulpecula" || space == "vul" || name.last() == '*' || name.startsWith("vul-")) {
+                    // 本地命名空间 或 Legacy 拓展标识，直接注册
                     Kether.scriptRegistry.registerAction(space, name, parser)
                     continue
                 }

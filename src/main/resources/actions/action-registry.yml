@@ -3,15 +3,16 @@
 # 改动此文件后需要重启才能加载
 
 
-block:
+canvas:
+  # 是否禁用语句
+  disable: false
   # 是否为公有语句
   shared: true
   # 是否写入 Kether 命名空间
-  # 不写入则第三方插件使用前需要导入命名空间
-  inject-default-namespace: false
-
-canvas:
-  shared: true
+  # 若为 false 则在第三方插件中使用时需要导入命名空间
+  # 例如：import vulpecula 或 import vul
+  # 或者添加 v- 前缀，以绕过命名空间的导入步骤
+  # 例如：v-canvas
   inject-default-namespace: false
 
 ceil:
@@ -34,12 +35,13 @@ floor:
   shared: true
   inject-default-namespace: false
 
+fx:
+  shared: true
+  inject-default-namespace: false
+
 if-else:
   shared: true
   inject-default-namespace: false
-  # 是否覆盖原生 If & Else
-  # 覆盖之后，原生 If 功能将由此语句替代
-  override-default-action: false
 
 item:
   shared: true
@@ -56,7 +58,6 @@ ln:
 location:
   shared: true
   inject-default-namespace: false
-  override-default-action: false
 
 log:
   shared: true
@@ -66,7 +67,7 @@ memory:
   shared: true
   inject-default-namespace: false
 
-particles:
+pattern:
   shared: true
   inject-default-namespace: false
 
@@ -85,7 +86,6 @@ sin:
 sound:
   shared: true
   inject-default-namespace: false
-  override-default-action: false
 
 sqrt:
   shared: true
