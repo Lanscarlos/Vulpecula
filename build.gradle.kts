@@ -57,8 +57,10 @@ dependencies {
 
     // server
     compileOnly("ink.ptms:nms-all:1.0.0")
-    compileOnly("ink.ptms.core:v11900:11900-minimize:mapped")
-    compileOnly("ink.ptms.core:v11900:11900-minimize:universal")
+    compileOnly("ink.ptms.core:v12000:12000:mapped")
+    compileOnly("ink.ptms.core:v11900:11900:mapped")
+    compileOnly("ink.ptms.core:v11900:11900:universal")
+
     compileOnly("com.google.guava:guava:31.1-jre")
 
     // for kether
