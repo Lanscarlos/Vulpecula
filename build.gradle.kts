@@ -42,19 +42,6 @@ subprojects {
         compileOnly("io.izzel.taboolib:expansion-command-helper:$taboolib_version")
         compileOnly("io.izzel.taboolib:expansion-javascript:$taboolib_version")
         compileOnly("io.izzel.taboolib:platform-bukkit:$taboolib_version")
-
-        // server
-        compileOnly("ink.ptms:nms-all:1.0.0")
-
-        compileOnly("com.google.guava:guava:31.1-jre")
-
-        // for kether
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4") // 协程
-        compileOnly("com.mojang:datafixerupper:4.0.26")
-        compileOnly("net.luckperms:api:5.4")
-
-        // other
-        compileOnly(fileTree("libs"))
     }
 
     java {
