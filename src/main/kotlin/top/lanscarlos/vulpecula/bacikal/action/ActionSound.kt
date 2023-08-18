@@ -31,7 +31,7 @@ object ActionSound {
             optional("to", then = player())
         ) { resource, meta, center, global, player ->
             val volume = meta.first
-            val pitch = meta.first
+            val pitch = meta.second
 
             if (player != null) {
                 playSound(adaptPlayer(player), resource, volume, pitch, center)
