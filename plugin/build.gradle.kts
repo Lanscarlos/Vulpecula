@@ -46,12 +46,6 @@ tasks {
 
                     // 运行环境及标准库
                     applyToZip(new, version, "runtime/core", "common-core")
-                    applyToZip(new, version, "runtime/script-api", "common-script-api")
-                    applyToZip(new, version, "runtime/script-api-bukkit", "common-script-api-bukkit")
-                    applyToZip(new, version, "runtime/script-api-bungee", "common-script-api-bungee")
-                    // jar 代理
-                    applyToZip(new, version, "proxy/bukkit", "jar-proxy-bukkit")
-                    applyToZip(new, version, "proxy/bungee", "jar-proxy-bungee")
                 }
             }
             file.delete()
