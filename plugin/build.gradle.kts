@@ -8,6 +8,7 @@ tasks {
     withType<ShadowJar> {
         archiveBaseName.set("Vulpecula")
         archiveClassifier.set("")
+        destinationDirectory.set(file("${rootDir}/build/libs"))
         exclude("META-INF/maven/**")
         exclude("META-INF/tf/**")
         exclude("module-info.java")
