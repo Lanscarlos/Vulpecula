@@ -1,6 +1,7 @@
 rootProject.name="Vulpecula"
 include("plugin")
 include("project:common")
+include("project:common-bacikal")
 include("project:common-core")
 include("project:common-legacy")
 include("project:common-volatile")
