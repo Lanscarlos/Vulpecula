@@ -1,7 +1,10 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 dependencies {
-    implementation(project(":project:common-legacy"))
+    implementation(project(":project:common"))
+//    implementation(project(":project:common-core"))
+//    implementation(project(":project:common-volatile"))
+    implementation(project(":project:platform-bukkit"))
 }
 
 tasks {

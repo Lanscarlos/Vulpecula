@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula
+package top.lanscarlos.vulpecula.core
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake

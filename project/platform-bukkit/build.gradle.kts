@@ -6,6 +6,7 @@ plugins {
 
 taboolib {
     description {
+        name = "Vulpecula"
         contributors {
             name("Lanscarlos")
         }
@@ -24,7 +25,7 @@ taboolib {
     }
 
     install("common", "platform-bukkit")
-    options("skip-minimize", "keep-kotlin-module", "skip-taboolib-relocate")
+//    options("skip-minimize", "keep-kotlin-module", "skip-taboolib-relocate")
     classifier = null
     version = taboolib_version
 }

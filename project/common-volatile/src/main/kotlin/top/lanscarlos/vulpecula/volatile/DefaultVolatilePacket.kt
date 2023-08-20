@@ -1,10 +1,8 @@
 package top.lanscarlos.vulpecula.volatile
 
-import net.minecraft.network.syncher.DataWatcher
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.library.reflex.Reflex.Companion.unsafeInstance
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.volatile17.Volatile17Packet
 
 /**
  * Vulpecula
@@ -20,9 +18,9 @@ class DefaultVolatilePacket : VolatilePacket {
 
     override fun createPacketPlayOutEntityMetadata(entityId: Int, vararg metadata: Pair<Int, Any>): Any {
         return if (minecraftVersion >= 11903) {
-            Volatile17Packet.createPacketPlayOutEntityMetadata(
+            NMSPacketPlayOutEntityMetadata(
                 entityId,
-                *metadata.map { VolatileMetadata.deconstruct(it) }.toTypedArray()
+                metadata.map { VolatileMetadata.deconstruct(it) as DataWatcherB<*> }
             )
         } else if (isUniversal) {
             NMSPacketPlayOutEntityMetadata::class.java.unsafeInstance().apply {
@@ -39,5 +37,6 @@ class DefaultVolatilePacket : VolatilePacket {
 }
 
 typealias NMSPacketPlayOutEntityMetadata = net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata
-
 typealias NMS16PacketPlayOutEntityMetadata = net.minecraft.server.v1_16_R1.PacketPlayOutEntityMetadata
+
+typealias DataWatcherB<T> = net.minecraft.network.syncher.DataWatcher.b<T>
