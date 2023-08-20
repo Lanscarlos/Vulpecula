@@ -6,7 +6,7 @@ plugins {
 
 taboolib {
     description {
-        name = "Vulpecula"
+        name = rootProject.name
         contributors {
             name("Lanscarlos")
         }
