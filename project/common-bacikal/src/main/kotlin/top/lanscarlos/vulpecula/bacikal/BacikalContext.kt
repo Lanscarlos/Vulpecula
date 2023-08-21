@@ -8,6 +8,7 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptFrame
+import top.lanscarlos.vulpecula.bacikal.seed.BacikalSeed
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -26,6 +27,8 @@ interface BacikalContext {
     val reader: BacikalReader
 
     fun <T> nullable(then: BacikalSeed<T>): BacikalSeed<T?>
+
+    fun <T, R> pair(first: BacikalSeed<T>, second: BacikalSeed<R>): BacikalSeed<Pair<T, R>>
 
     fun <T> expect(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T>
 

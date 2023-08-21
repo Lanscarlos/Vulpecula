@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.library.kether.*
 import taboolib.library.reflex.Reflex.Companion.setProperty
@@ -7,17 +7,18 @@ import taboolib.module.kether.ScriptService
 import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
+import top.lanscarlos.vulpecula.bacikal.DefaultBacikalQuest
 import java.nio.charset.StandardCharsets
 import java.util.*
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.bacikal.quest
  *
  * @author Lanscarlos
  * @since 2023-08-20 21:51
  */
-object DefaultBacikalCompiler : BacikalCompiler {
+object DefaultBacikalCompiler : BacikalQuestCompiler {
 
     override fun compile(source: String, namespace: List<String>): BacikalQuest {
         return DefaultBacikalQuest(

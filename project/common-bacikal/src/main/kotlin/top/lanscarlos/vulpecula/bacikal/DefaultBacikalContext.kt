@@ -47,6 +47,10 @@ class DefaultBacikalContext(val source: QuestReader) : BacikalContext {
         return NullableBacikalSeed(then)
     }
 
+    override fun <T, R> pair(first: BacikalSeed<T>, second: BacikalSeed<R>): BacikalSeed<Pair<T, R>> {
+        return PairBacikalSeed(first, second)
+    }
+
     override fun <T> expect(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T> {
         return ExpectedBacikalSeed(then, expect)
     }

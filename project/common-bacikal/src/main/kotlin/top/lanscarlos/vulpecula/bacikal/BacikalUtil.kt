@@ -11,16 +11,22 @@ import java.util.function.Function
  * @since 2023-08-21 10:29
  */
 
-fun <T> bacikal(func: Function<BacikalContext, BacikalFruit<T>>): ScriptActionParser<T> {
-    return ScriptActionParser {
-        val context = DefaultBacikalContext(this)
-        func.apply(context)
-    }
-}
-
-internal fun <T> bacikalInner(func: BacikalContext.() -> BacikalFruit<T>): ScriptActionParser<T> {
+/**
+ * 语句处理
+ * */
+fun <T> bacikal(func: BacikalContext.() -> BacikalFruit<T>): ScriptActionParser<T> {
     return ScriptActionParser {
         val context = DefaultBacikalContext(this)
         func(context)
+    }
+}
+
+/**
+ * 语句处理
+ * */
+fun <T> bacikalAPI(func: Function<BacikalContext, BacikalFruit<T>>): ScriptActionParser<T> {
+    return ScriptActionParser {
+        val context = DefaultBacikalContext(this)
+        func.apply(context)
     }
 }

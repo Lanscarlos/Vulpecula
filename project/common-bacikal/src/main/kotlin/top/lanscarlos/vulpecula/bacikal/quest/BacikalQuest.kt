@@ -1,8 +1,8 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.bacikal.quest
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.bacikal.quest
  *
  * @author Lanscarlos
  * @since 2023-08-20 22:02

@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.bacikal.seed
 
 import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.bacikal.BacikalReader
-import top.lanscarlos.vulpecula.bacikal.BacikalSeed
 import java.util.concurrent.CompletableFuture
 
 /**

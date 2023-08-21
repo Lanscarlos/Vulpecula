@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.library.kether.Quest
+import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 
 /**
  * Vulpecula

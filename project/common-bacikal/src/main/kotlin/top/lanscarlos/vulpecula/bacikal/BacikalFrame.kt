@@ -5,11 +5,7 @@ package top.lanscarlos.vulpecula.bacikal
  * top.lanscarlos.vulpecula.bacikal
  *
  * @author Lanscarlos
- * @since 2023-08-20 23:15
+ * @since 2023-08-21 20:06
  */
-open class BacikalSourceBuilder {
-
-    fun build(): String {
-        TODO()
-    }
+interface BacikalFrame {
 }
