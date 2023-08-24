@@ -2,9 +2,8 @@ package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.module.kether.KetherScriptLoader
 import taboolib.module.kether.ScriptService
-import top.lanscarlos.vulpecula.bacikal.DefaultBacikalQuest
+import taboolib.module.kether.printKetherErrorMessage
 import java.nio.charset.StandardCharsets
-import java.util.*
 
 /**
  * Vulpecula
@@ -13,17 +12,20 @@ import java.util.*
  * @author Lanscarlos
  * @since 2023-08-20 23:20
  */
-object DefaultKetherCompiler : BacikalQuestCompiler {
+object KetherQuestCompiler : BacikalQuestCompiler {
 
-    override fun compile(source: String, namespace: List<String>): BacikalQuest {
-        return DefaultBacikalQuest(
-            KetherScriptLoader().load(
+    override fun compile(name: String, source: String, namespace: List<String>): BacikalQuest {
+        return try {
+            val quest = KetherScriptLoader().load(
                 ScriptService,
-                "temp_${UUID.randomUUID()}",
+                "bacikal_$name",
                 source.toByteArray(StandardCharsets.UTF_8),
                 listOf("vulpecula", *namespace.toTypedArray())
             )
-        )
+            DefaultQuest(name, quest)
+        } catch (ex: Exception) {
+            ex.printKetherErrorMessage(true)
+            AberrantQuest(name, ex)
+        }
     }
-
 }

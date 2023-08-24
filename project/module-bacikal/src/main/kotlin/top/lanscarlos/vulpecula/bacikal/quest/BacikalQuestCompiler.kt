@@ -9,6 +9,6 @@ package top.lanscarlos.vulpecula.bacikal.quest
  */
 interface BacikalQuestCompiler {
 
-    fun compile(source: String, namespace: List<String>): BacikalQuest
+    fun compile(name: String, source: String, namespace: List<String>): BacikalQuest
 
 }
