@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.bacikal.parser
 
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -8,7 +8,8 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.bacikal.seed.BacikalSeed
+import top.lanscarlos.vulpecula.bacikal.BacikalFruit
+import top.lanscarlos.vulpecula.bacikal.Maturation
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 

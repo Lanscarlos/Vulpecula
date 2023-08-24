@@ -1,8 +1,7 @@
-package top.lanscarlos.vulpecula.bacikal.seed
+package top.lanscarlos.vulpecula.bacikal.parser
 
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import java.util.concurrent.CompletableFuture
 import java.util.function.BiFunction
 
@@ -13,7 +12,7 @@ import java.util.function.BiFunction
  * @author Lanscarlos
  * @since 2023-08-21 15:15
  */
-class DefaultBacikalSeed<T>(val transfer: BiFunction<ScriptFrame, Any?, T>) : BacikalSeed<T> {
+class DefaultSeed<T>(val transfer: BiFunction<ScriptFrame, Any?, T>) : BacikalSeed<T> {
 
     private lateinit var action: ParsedAction<*>
 

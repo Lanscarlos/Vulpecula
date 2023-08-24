@@ -1,7 +1,6 @@
-package top.lanscarlos.vulpecula.bacikal.seed
+package top.lanscarlos.vulpecula.bacikal.parser
 
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -11,7 +10,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-08-21 17:39
  */
-class ExpectedBacikalSeed<T>(val seed: BacikalSeed<T>, val expect: Array<out String>) : BacikalSeed<T> {
+class ExpectedSeed<T>(val seed: BacikalSeed<T>, val expect: Array<out String>) : BacikalSeed<T> {
 
     override val isAccepted: Boolean
         get() = seed.isAccepted

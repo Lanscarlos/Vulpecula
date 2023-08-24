@@ -1,17 +1,14 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.bacikal.parser
 
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import taboolib.common.platform.function.warning
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
-import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.kether.ScriptFrame
-import taboolib.module.kether.expects
 import top.lanscarlos.vulpecula.applicative.AbstractApplicative
 import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
 import top.lanscarlos.vulpecula.applicative.ColorApplicative.Companion.applicativeColor
@@ -28,7 +25,9 @@ import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShor
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
 import top.lanscarlos.vulpecula.applicative.VectorApplicative.Companion.applicativeVector
-import top.lanscarlos.vulpecula.bacikal.seed.*
+import top.lanscarlos.vulpecula.bacikal.BacikalFruit
+import top.lanscarlos.vulpecula.bacikal.Maturation
+import top.lanscarlos.vulpecula.bacikal.combineFuture
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
@@ -39,36 +38,40 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-08-21 11:59
  */
-class DefaultBacikalContext(val source: QuestReader) : BacikalContext {
+class DefaultContext(source: QuestReader) : BacikalContext {
 
-    override val reader: BacikalReader = Reader()
+    companion object {
+        val PATTERN_ARGUMENT_PREFIX = "-\\D+".toRegex()
+    }
+
+    override val reader: BacikalReader = DefaultReader(source)
 
     override fun <T> nullable(then: BacikalSeed<T>): BacikalSeed<T?> {
-        return NullableBacikalSeed(then)
+        return NullableSeed(then)
     }
 
     override fun <T, R> pair(first: BacikalSeed<T>, second: BacikalSeed<R>): BacikalSeed<Pair<T, R>> {
-        return PairBacikalSeed(first, second)
+        return PairSeed(first, second)
     }
 
     override fun <T> expect(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T> {
-        return ExpectedBacikalSeed(then, expect)
+        return ExpectedSeed(then, expect)
     }
 
     override fun <T> optional(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T?> {
-        return OptionalBacikalSeed(nullable(then), expect, def = null)
+        return OptionalSeed(nullable(then), expect, def = null)
     }
 
     override fun <T> optional(vararg expect: String, then: BacikalSeed<T>, def: T): BacikalSeed<T> {
-        return OptionalBacikalSeed(then, expect, def)
+        return OptionalSeed(then, expect, def)
     }
 
     override fun <T> argument(vararg prefix: String, then: BacikalSeed<T>): BacikalSeed<T?> {
-        return ArgumentBacikalSeed(nullable(then), prefix, null)
+        return ArgumentSeed(nullable(then), prefix, null)
     }
 
     override fun <T> argument(vararg prefix: String, then: BacikalSeed<T>, def: T): BacikalSeed<T> {
-        return ArgumentBacikalSeed(then, prefix, def)
+        return ArgumentSeed(then, prefix, def)
     }
 
     override fun token(): BacikalSeed<String> {
@@ -104,7 +107,7 @@ class DefaultBacikalContext(val source: QuestReader) : BacikalContext {
     }
 
     override fun any(): BacikalSeed<Any?> {
-        return DefaultBacikalSeed { _, source -> source }
+        return DefaultSeed { _, source -> source }
     }
 
     override fun boolean(def: Boolean?, warning: String): BacikalSeed<Boolean> {
@@ -208,7 +211,7 @@ class DefaultBacikalContext(val source: QuestReader) : BacikalContext {
     }
 
     private fun <T> buildSeed(def: T?, warning: String, func: (ScriptFrame, Any) -> T?): BacikalSeed<T> {
-        return DefaultBacikalSeed { frame, source ->
+        return DefaultSeed { frame, source ->
             if (source != null) {
                 func(frame, source) ?: def ?: error(warning)
             } else {
@@ -222,11 +225,11 @@ class DefaultBacikalContext(val source: QuestReader) : BacikalContext {
             return
         }
 
-        val arguments = mutableListOf<ArgumentBacikalSeed<*>>()
+        val arguments = mutableListOf<ArgumentSeed<*>>()
         var breakpoint = 0
 
         for ((index, it) in seed.withIndex()) {
-            if (it is ArgumentBacikalSeed<*>) {
+            if (it is ArgumentSeed<*>) {
                 arguments.add(it)
             } else if (arguments.isEmpty()) {
                 // 未检测到附加参数，正常解析语句
@@ -1377,99 +1380,6 @@ class DefaultBacikalContext(val source: QuestReader) : BacikalContext {
                     it.t15,
                     it.t16
                 )
-            }
-        }
-    }
-
-    companion object {
-        val PATTERN_ARGUMENT_PREFIX = "-\\D+".toRegex()
-    }
-
-    inner class Reader : BacikalReader {
-
-        private val marker: MutableList<Int> = mutableListOf()
-
-        override val index: Int
-            get() = source.index
-
-        override fun readToken(): String {
-            return source.nextToken()
-        }
-
-        override fun readAction(): ParsedAction<*> {
-            return if (hasToken("{")) {
-                // 语句块
-                source.nextParsedAction()
-            } else {
-                source.nextParsedAction()
-            }
-        }
-
-        override fun readActionList(): List<ParsedAction<*>> {
-            return if (hasToken("[")) {
-                mutableListOf<ParsedAction<*>>().also {
-                    while (!hasToken("]")) {
-                        it += readAction()
-                    }
-                }
-            } else {
-                emptyList()
-            }
-        }
-
-        override fun peekToken(): String {
-            source.mark()
-            val token = source.nextToken()
-            source.reset()
-            return token
-        }
-
-        override fun expectToken(vararg expect: String) {
-            source.expects(*expect)
-        }
-
-        override fun hasToken(vararg expect: String): Boolean {
-            source.mark()
-            val token = source.nextToken()
-            return if (token in expect) {
-                true
-            } else {
-                source.reset()
-                false
-            }
-        }
-
-        override fun mark(): Int {
-            source.mark()
-            marker += source.mark
-            return source.mark
-        }
-
-        override fun rollback(offset: Int) {
-            if (offset <= 0) {
-                return
-            }
-            if (marker.size <= offset) {
-                warning("Out of marker range. ${marker.size} <= $offset.")
-                return
-            }
-            if (offset == 1) {
-                // 常规回滚
-                source.reset()
-                marker.removeLast()
-            } else {
-                // 回滚到指定位置
-                val index = marker[marker.lastIndex - offset]
-                try {
-                    source.setProperty("index", index)
-                    // 移除多余的标记
-                    repeat(offset) {
-                        marker.removeLast()
-                    }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    warning("Failed to rollback to index $index.")
-                }
             }
         }
     }

@@ -1,7 +1,6 @@
-package top.lanscarlos.vulpecula.bacikal.seed
+package top.lanscarlos.vulpecula.bacikal.parser
 
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.bacikal.BacikalReader
 import top.lanscarlos.vulpecula.bacikal.combineFuture
 import java.util.concurrent.CompletableFuture
 
@@ -12,7 +11,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-08-21 20:00
  */
-class PairBacikalSeed<T, R>(val first: BacikalSeed<T>, val second: BacikalSeed<R>) : BacikalSeed<Pair<T, R>> {
+class PairSeed<T, R>(val first: BacikalSeed<T>, val second: BacikalSeed<R>) : BacikalSeed<Pair<T, R>> {
 
     override val isAccepted: Boolean
         get() = first.isAccepted && second.isAccepted
