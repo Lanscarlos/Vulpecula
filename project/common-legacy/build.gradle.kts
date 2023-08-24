@@ -43,7 +43,7 @@ taboolib {
 }
 
 dependencies {
-    compileOnly(project(":project:common-volatile"))
+    compileOnly(project(":project:module-volatile"))
 
     compileOnly("ink.ptms.core:v12000:12000:mapped")
     compileOnly("ink.ptms.core:v12000:12000:universal")
