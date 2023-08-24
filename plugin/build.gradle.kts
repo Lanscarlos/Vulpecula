@@ -1,4 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
+import shadow.org.apache.tools.zip.ZipEntry
+import shadow.org.apache.tools.zip.ZipOutputStream
 
 dependencies {
     implementation(project(":project:common"))
@@ -23,6 +27,9 @@ tasks {
         relocate("kotlin.", "kotlin1531.") {
             exclude("kotlin.Metadata")
         }
+
+        // merge config
+        transform(ConfigMergeTransformer::class.java)
     }
     kotlinSourcesJar {
         // include subprojects
@@ -53,3 +60,32 @@ tasks {
 //        }
 //    }
 //}
+
+class ConfigMergeTransformer : Transformer {
+
+    private val data = StringBuilder()
+
+    override fun getName(): String {
+        return "ConfigMergeTransformer"
+    }
+
+    override fun canTransformResource(element: FileTreeElement?): Boolean {
+        return element?.name == "config.yml"
+    }
+
+    override fun transform(context: TransformerContext?) {
+        data.append(context?.`is`?.reader()?.readText())
+    }
+
+    override fun hasTransformedResource(): Boolean {
+        return data.isNotEmpty()
+    }
+
+    override fun modifyOutputStream(output: ZipOutputStream?, b: Boolean) {
+        val newEntry = ZipEntry("config.yml")
+        output?.putNextEntry(newEntry)
+        output?.writer()?.use {
+            it.write(data.toString())
+        }
+    }
+}
