@@ -74,7 +74,10 @@ class ConfigMergeTransformer : Transformer {
     }
 
     override fun transform(context: TransformerContext?) {
-        data.append(context?.`is`?.reader()?.readText())
+        context?.`is`?.reader()?.readText()?.let {
+            data.append(it)
+            data.append("\n\n")
+        }
     }
 
     override fun hasTransformedResource(): Boolean {

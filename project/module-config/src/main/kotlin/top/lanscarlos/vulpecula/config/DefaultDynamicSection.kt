@@ -15,20 +15,20 @@ class DefaultDynamicSection<T>(
     val transfer: Function<Any?, T>
 ) : DynamicSection<T> {
 
-    var value: T? = null
+    var innerValue: T? = null
     var isInitialized = false
 
     @Suppress("UNCHECKED_CAST")
     override fun getValue(): T {
         if (!isInitialized) {
-            value = transfer.apply(parent[path])
+            innerValue = transfer.apply(parent[path])
             isInitialized = true
         }
-        return value as T
+        return innerValue as T
     }
 
     override fun update() {
-        value = transfer.apply(parent[path])
+        innerValue = transfer.apply(parent[path])
         isInitialized = true
     }
 }
