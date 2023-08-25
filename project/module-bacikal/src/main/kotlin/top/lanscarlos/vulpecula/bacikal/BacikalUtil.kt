@@ -7,8 +7,6 @@ import top.lanscarlos.vulpecula.bacikal.quest.BacikalBlockBuilder
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuestBuilder
 import top.lanscarlos.vulpecula.bacikal.quest.DefaultQuestBuilder
-import java.util.function.Consumer
-import java.util.function.Function
 
 /**
  * Vulpecula
