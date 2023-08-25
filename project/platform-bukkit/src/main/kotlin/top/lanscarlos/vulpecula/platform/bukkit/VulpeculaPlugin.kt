@@ -18,9 +18,6 @@ import taboolib.common.platform.function.info
 )
 object VulpeculaPlugin : Plugin() {
 
-    override fun onLoad() {
-    }
-
     override fun onEnable() {
         info("Successfully running Vulpecula!")
     }

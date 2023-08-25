@@ -4,11 +4,26 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContex
 import shadow.org.apache.tools.zip.ZipEntry
 import shadow.org.apache.tools.zip.ZipOutputStream
 
+val taboolib_version: String by project
+
 dependencies {
+    implementation("io.izzel.taboolib:common-5:$taboolib_version")
+    implementation("io.izzel.taboolib:module-chat:$taboolib_version")
+    implementation("io.izzel.taboolib:module-configuration:$taboolib_version")
+    implementation("io.izzel.taboolib:module-effect:$taboolib_version")
+    implementation("io.izzel.taboolib:module-lang:$taboolib_version")
+    implementation("io.izzel.taboolib:module-kether:$taboolib_version")
+    implementation("io.izzel.taboolib:module-nms:$taboolib_version")
+    implementation("io.izzel.taboolib:module-nms-util:$taboolib_version")
+    implementation("io.izzel.taboolib:module-metrics:$taboolib_version")
+    implementation("io.izzel.taboolib:expansion-command-helper:$taboolib_version")
+    implementation("io.izzel.taboolib:expansion-javascript:$taboolib_version")
+
     implementation(project(":project:common"))
     implementation(project(":project:common-core"))
     implementation(project(":project:module-applicative"))
     implementation(project(":project:module-bacikal"))
+    implementation(project(":project:module-config"))
     implementation(project(":project:module-volatile"))
     implementation(project(":project:platform-bukkit"))
 }

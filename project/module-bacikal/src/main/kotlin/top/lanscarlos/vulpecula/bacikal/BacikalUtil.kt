@@ -35,3 +35,11 @@ fun bacikalQuest(name: String, func: BacikalQuestBuilder.() -> Unit): BacikalQue
 fun bacikalSimpleQuest(name: String, func: BacikalBlockBuilder.() -> Unit): BacikalQuest {
     return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
 }
+
+fun String.toBacikalQuest(name: String): BacikalQuest {
+    return DefaultQuestBuilder(name).also {
+        it.appendBlock(name) {
+            appendContent(this@toBacikalQuest)
+        }
+    }.build()
+}

@@ -35,12 +35,12 @@ interface BacikalQuestContext {
     /**
      * 设置变量
      * */
-    fun setVariable(key: String, value: Any)
+    fun setVariable(key: String, value: Any?)
 
     /**
      * 设置变量
      * */
-    fun setVariables(vararg key: String, value: Any)
+    fun setVariables(vararg key: String, value: Any?)
 
     /**
      * 执行脚本

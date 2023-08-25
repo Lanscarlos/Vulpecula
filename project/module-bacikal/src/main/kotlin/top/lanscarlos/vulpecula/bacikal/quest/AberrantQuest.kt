@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import java.lang.Exception
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -13,5 +14,9 @@ class AberrantQuest(override val name: String, val exception: Exception) : Bacik
 
     override val source: KetherQuest
         get() = error("Quest $name is aberrant with compiling. exception: ${exception.localizedMessage}")
+
+    override fun runActions(context: BacikalQuestContext.() -> Unit): CompletableFuture<Any?> {
+        error("Quest $name is aberrant with compiling. exception: ${exception.localizedMessage}")
+    }
 
 }

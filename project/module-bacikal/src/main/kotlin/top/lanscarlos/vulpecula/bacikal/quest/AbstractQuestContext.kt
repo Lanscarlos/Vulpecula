@@ -32,11 +32,11 @@ abstract class AbstractQuestContext(override val quest: BacikalQuest) : BacikalQ
         return source.get<T>(key)
     }
 
-    override fun setVariable(key: String, value: Any) {
+    override fun setVariable(key: String, value: Any?) {
         source[key] = value
     }
 
-    override fun setVariables(vararg key: String, value: Any) {
+    override fun setVariables(vararg key: String, value: Any?) {
         key.forEach { source[it] = value }
     }
 

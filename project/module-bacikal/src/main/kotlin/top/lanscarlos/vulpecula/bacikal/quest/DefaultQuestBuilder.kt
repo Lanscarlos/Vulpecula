@@ -55,7 +55,7 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
             source.append("\n\n")
         }
 
-        return compiler.compile(source.toString(), namespace)
+        return compiler.compile(name, source.toString(), namespace)
     }
 
     override fun appendBlock(block: BacikalBlockBuilder) {
