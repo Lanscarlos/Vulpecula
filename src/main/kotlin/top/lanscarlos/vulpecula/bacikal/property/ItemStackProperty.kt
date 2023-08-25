@@ -4,6 +4,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import taboolib.common.OpenResult
+import taboolib.module.nms.getI18nName
 import top.lanscarlos.vulpecula.bacikal.BacikalProperty
 import top.lanscarlos.vulpecula.bacikal.BacikalGenericProperty
 import top.lanscarlos.vulpecula.utils.*
@@ -24,7 +25,7 @@ class ItemStackProperty : BacikalGenericProperty<ItemStack>("itemstack") {
     override fun readProperty(instance: ItemStack, key: String): OpenResult {
         val property: Any? = when (key) {
             "type", "material", "mat" -> instance.type.name
-            "name" -> instance.itemMeta?.displayName
+            "name" -> instance.itemMeta?.displayName ?: instance.getI18nName()
             "has-name" -> instance.itemMeta?.hasDisplayName()
 
             "lore" -> instance.itemMeta?.lore
