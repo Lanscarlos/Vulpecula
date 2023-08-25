@@ -28,28 +28,10 @@ fun <T> bacikalParser(func: BacikalContext.() -> BacikalFruit<T>): ScriptActionP
     }
 }
 
-/**
- * 语句处理
- * */
-fun <T> bacikalParserAPI(func: Function<BacikalContext, BacikalFruit<T>>): ScriptActionParser<T> {
-    return ScriptActionParser {
-        val context = DefaultContext(this)
-        func.apply(context)
-    }
-}
-
 fun bacikalQuest(name: String, func: BacikalQuestBuilder.() -> Unit): BacikalQuest {
     return DefaultQuestBuilder(name).also(func).build()
 }
 
-fun bacikalQuestAPI(name: String, func: Consumer<BacikalQuestBuilder>): BacikalQuest {
-    return DefaultQuestBuilder(name).also { func.accept(it) }.build()
-}
-
-fun bacikalQuestSimple(name: String, func: BacikalBlockBuilder.() -> Unit): BacikalQuest {
-    return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
-}
-
-fun bacikalQuestSimpleAPI(name: String, func: Consumer<BacikalBlockBuilder>): BacikalQuest {
+fun bacikalSimpleQuest(name: String, func: BacikalBlockBuilder.() -> Unit): BacikalQuest {
     return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
 }

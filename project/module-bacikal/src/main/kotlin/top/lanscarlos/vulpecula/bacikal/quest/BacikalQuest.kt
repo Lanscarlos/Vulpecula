@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.library.kether.Quest
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -15,6 +16,7 @@ interface BacikalQuest {
 
     val source: KetherQuest
 
+    fun runActions(context: BacikalQuestContext.() -> Unit): CompletableFuture<Any?>
 }
 
 typealias KetherQuest = Quest
