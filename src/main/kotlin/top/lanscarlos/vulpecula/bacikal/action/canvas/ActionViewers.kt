@@ -58,6 +58,8 @@ object ActionViewers {
                 while (!this.expectToken("]")) {
                     cache += this.readAction()
                 }
+            } else if (this.peekToken() == "*") {
+                cache += "*"
             } else {
                 cache += this.readAction()
             }
@@ -72,14 +74,6 @@ object ActionViewers {
                         '*', "*" -> {
                             viewers += onlinePlayers()
                             break
-                        }
-                        is String -> {
-                            if (value[0] == '!') {
-                                val exclude = value.substring(1)
-                                viewers.removeIf { it.name.equals(exclude, true) }
-                            } else {
-                                viewers += adaptPlayer(Bukkit.getPlayerExact(value) ?: continue)
-                            }
                         }
                         is ParsedAction<*> -> {
                             wait += frame.run(value)
@@ -105,7 +99,14 @@ object ActionViewers {
         when (value) {
             is ProxyPlayer -> this += value
             is Player -> this += adaptPlayer(value)
-            is String -> this += adaptPlayer(Bukkit.getPlayerExact(value) ?: return)
+            is String -> {
+                if (value[0] == '!') {
+                    val exclude = value.substring(1)
+                    this.removeIf { it.name.equals(exclude, true) }
+                } else {
+                    this += adaptPlayer(Bukkit.getPlayerExact(value) ?: return)
+                }
+            }
             is Collection<*> -> {
                 value.forEach {
                     when (it) {
