@@ -8,9 +8,8 @@ import taboolib.expansion.createHelper
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.VulpeculaContext
 import top.lanscarlos.vulpecula.bacikal.action.internal.ActionUnicode
+import top.lanscarlos.vulpecula.bacikal.buildBacikalScript
 import top.lanscarlos.vulpecula.internal.*
-import top.lanscarlos.vulpecula.utils.runActions
-import top.lanscarlos.vulpecula.utils.toKetherScript
 
 /**
  * Vulpecula
@@ -37,20 +36,14 @@ object CommandVulpecula {
         dynamic {
             execute<CommandSender> { sender, _, content ->
                 try {
-                    val script = if (content.startsWith("def")) {
-                        content
-                    } else {
-                        "def main = { $content }"
-                    }
-
-                    script.toKetherScript().runActions {
+                    buildBacikalScript {
+                        appendContent(content)
+                    }.runActions {
                         this.sender = adaptCommandSender(sender)
                         if (sender is Player) {
                             set("player", sender)
                             set("hand", sender.equipment?.itemInMainHand)
                         }
-                    }.thenAccept {
-                        sender.sendMessage(" §5§l‹ ›§r §7Result: §f$it")
                     }
                 } catch (e: Exception) {
                     e.printKetherErrorMessage()
