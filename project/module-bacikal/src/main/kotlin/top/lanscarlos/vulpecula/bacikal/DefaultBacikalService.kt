@@ -21,6 +21,10 @@ object DefaultBacikalService : BacikalService {
         }
     }
 
+    val questContext: String by bindConfigSection("bacikal.context") { value ->
+        value?.toString()?.lowercase() ?: "kether"
+    }
+
     override fun buildQuest(name: String, func: Consumer<BacikalQuestBuilder>): BacikalQuest {
         val builder = DefaultQuestBuilder(name)
         func.accept(builder)
@@ -32,7 +36,11 @@ object DefaultBacikalService : BacikalService {
     }
 
     override fun buildQuestContext(quest: BacikalQuest): BacikalQuestContext {
-        return CoroutinesQuestContext(quest)
+        return when (questContext) {
+            "coroutines" -> CoroutinesQuestContext(quest)
+            "kether" -> KetherQuestContext(quest)
+            else -> throw IllegalArgumentException("Unknown context: $questContext")
+        }
     }
 
 }

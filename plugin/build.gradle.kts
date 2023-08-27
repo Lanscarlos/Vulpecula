@@ -33,6 +33,8 @@ tasks {
         archiveBaseName.set("Vulpecula")
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs"))
+        append("config.yml")
+        append("lang/zh_CN.yml")
         exclude("META-INF/maven/**")
         exclude("META-INF/tf/**")
         exclude("module-info.java")
@@ -43,8 +45,6 @@ tasks {
             exclude("kotlin.Metadata")
         }
 
-        // merge config
-        transform(ConfigMergeTransformer::class.java)
     }
     kotlinSourcesJar {
         // include subprojects
@@ -75,35 +75,3 @@ tasks {
 //        }
 //    }
 //}
-
-class ConfigMergeTransformer : Transformer {
-
-    private val data = StringBuilder()
-
-    override fun getName(): String {
-        return "ConfigMergeTransformer"
-    }
-
-    override fun canTransformResource(element: FileTreeElement?): Boolean {
-        return element?.name == "config.yml"
-    }
-
-    override fun transform(context: TransformerContext?) {
-        context?.`is`?.reader()?.readText()?.let {
-            data.append(it)
-            data.append("\n\n")
-        }
-    }
-
-    override fun hasTransformedResource(): Boolean {
-        return data.isNotEmpty()
-    }
-
-    override fun modifyOutputStream(output: ZipOutputStream?, b: Boolean) {
-        val newEntry = ZipEntry("config.yml")
-        output?.putNextEntry(newEntry)
-        output?.writer()?.use {
-            it.write(data.toString())
-        }
-    }
-}

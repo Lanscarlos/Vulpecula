@@ -2,13 +2,17 @@ package top.lanscarlos.vulpecula.bacikal.quest
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
 import taboolib.library.kether.AbstractQuestContext.AbstractFrame
 import taboolib.library.kether.AbstractQuestContext.SimpleVarTable
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
 import taboolib.library.kether.QuestContext
+import taboolib.module.kether.ScriptContext
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -21,11 +25,12 @@ import java.util.concurrent.CompletableFuture
  */
 class CoroutinesQuestContext(quest: BacikalQuest) : AbstractQuestContext(quest) {
 
-    override fun createRootFrame(): QuestContext.Frame {
-        return InnerRootFrame()
+    override fun createRootFrame(context: InnerContext): QuestContext.Frame {
+        return InnerRootFrame(context)
     }
 
-    inner class InnerRootFrame : AbstractFrame(null, LinkedList(), SimpleVarTable(null), source) {
+    inner class InnerRootFrame(context: ScriptContext) :
+        AbstractFrame(null, LinkedList(), SimpleVarTable(null), context) {
 
         var block: Quest.Block? = null
         var current: Int = -1
@@ -100,5 +105,10 @@ class CoroutinesQuestContext(quest: BacikalQuest) : AbstractQuestContext(quest) 
 
     companion object {
         private val scope by lazy { CoroutineScope(Dispatchers.Default) }
+
+        @Awake(LifeCycle.DISABLE)
+        fun onDisable() {
+            scope.cancel()
+        }
     }
 }

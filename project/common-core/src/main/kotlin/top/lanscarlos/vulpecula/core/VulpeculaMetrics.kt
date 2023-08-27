@@ -13,7 +13,7 @@ import taboolib.platform.BukkitPlugin
  * @author Lanscarlos
  * @since 2023-08-14 17:27
  */
-object PluginMetrics {
+object VulpeculaMetrics {
 
     private lateinit var metrics: Metrics
 

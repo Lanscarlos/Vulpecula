@@ -1,4 +1,3 @@
 
-# 测试内容
-core:
-  test: 'Hello Vulpecula!'
+# 命令 Vulpecula Timing 测试次数
+command-timing-repeat: 10000

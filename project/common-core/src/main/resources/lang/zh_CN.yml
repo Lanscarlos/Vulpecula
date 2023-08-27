@@ -1,0 +1,8 @@
+
+
+# 主配置
+
+Config-Load-Succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 加载 Config.yml 完毕！ &8({0} ms)'
+Config-Load-Failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 Config.yml 加载失败！
+  &e[ERROR: Config@Load]: {0}

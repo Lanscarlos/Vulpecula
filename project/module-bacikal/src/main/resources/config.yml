@@ -1,4 +1,4 @@
 
 # bacikal 配置
 bacikal:
-  pattern: 'hi'
+  compiler: 'bacikal'

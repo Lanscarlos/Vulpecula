@@ -53,12 +53,15 @@ abstract class AbstractQuestContext(override val quest: BacikalQuest) : BacikalQ
         source.terminate()
     }
 
-    abstract fun createRootFrame(): QuestContext.Frame
+    abstract fun createRootFrame(context: InnerContext): QuestContext.Frame
 
     inner class InnerContext : ScriptContext(ScriptService, quest.source) {
         override fun createRootFrame(): QuestContext.Frame {
-            return this@AbstractQuestContext.createRootFrame()
+            return this@AbstractQuestContext.createRootFrame(this)
+        }
+
+        fun superCreateRootFrame(): QuestContext.Frame {
+            return super.createRootFrame()
         }
     }
-
 }
