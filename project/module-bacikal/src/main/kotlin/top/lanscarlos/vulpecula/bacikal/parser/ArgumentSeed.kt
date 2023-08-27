@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal.parser
 
-import taboolib.module.kether.ScriptFrame
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -24,7 +23,7 @@ class ArgumentSeed<T>(val seed: BacikalSeed<T>, val prefix: Array<out String>, v
     override fun accept(reader: BacikalReader) {
     }
 
-    override fun accept(frame: ScriptFrame): CompletableFuture<T> {
+    override fun accept(frame: BacikalFrame): CompletableFuture<T> {
         return if (seed.isAccepted) {
             seed.accept(frame)
         } else {

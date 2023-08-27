@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal.parser
 
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.bacikal.combineFuture
 import java.util.concurrent.CompletableFuture
 
@@ -21,7 +20,7 @@ class PairSeed<T, R>(val first: BacikalSeed<T>, val second: BacikalSeed<R>) : Ba
         second.accept(reader)
     }
 
-    override fun accept(frame: ScriptFrame): CompletableFuture<Pair<T, R>> {
+    override fun accept(frame: BacikalFrame): CompletableFuture<Pair<T, R>> {
         return combineFuture(
             first.accept(frame),
             second.accept(frame)

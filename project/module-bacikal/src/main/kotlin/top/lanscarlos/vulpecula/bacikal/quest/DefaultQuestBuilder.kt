@@ -55,6 +55,15 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
             source.append("\n\n")
         }
 
+        // 写入构建文件
+        artifactFile?.let {
+            try {
+                it.writeText(source.toString())
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+
         return compiler.compile(name, source.toString(), namespace)
     }
 

@@ -16,6 +16,6 @@ interface BacikalSeed<T> {
 
     fun accept(reader: BacikalReader)
 
-    fun accept(frame: ScriptFrame): CompletableFuture<T>
+    fun accept(frame: BacikalFrame): CompletableFuture<T>
 
 }

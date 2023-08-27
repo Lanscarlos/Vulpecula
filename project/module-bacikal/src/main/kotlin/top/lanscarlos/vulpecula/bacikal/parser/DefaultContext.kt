@@ -8,7 +8,6 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.applicative.AbstractApplicative
 import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
 import top.lanscarlos.vulpecula.applicative.ColorApplicative.Companion.applicativeColor
@@ -84,7 +83,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
                 isAccepted = true
             }
 
-            override fun accept(frame: ScriptFrame): CompletableFuture<String> {
+            override fun accept(frame: BacikalFrame): CompletableFuture<String> {
                 return CompletableFuture.completedFuture(literal)
             }
         }
@@ -100,7 +99,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
                 isAccepted = true
             }
 
-            override fun accept(frame: ScriptFrame): CompletableFuture<ParsedAction<*>> {
+            override fun accept(frame: BacikalFrame): CompletableFuture<ParsedAction<*>> {
                 return CompletableFuture.completedFuture(action)
             }
         }
@@ -210,7 +209,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         }
     }
 
-    private fun <T> buildSeed(def: T?, warning: String, func: (ScriptFrame, Any) -> T?): BacikalSeed<T> {
+    private fun <T> buildSeed(def: T?, warning: String, func: (BacikalFrame, Any) -> T?): BacikalSeed<T> {
         return DefaultSeed { frame, source ->
             if (source != null) {
                 func(frame, source) ?: def ?: error(warning)
@@ -262,7 +261,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         // 没有附加参数时，所有语句都已被读取，此时不应该有剩余语句
     }
 
-    override fun <R> fructus(func: Maturation.M0<ScriptFrame, R>): BacikalFruit<R> {
+    override fun <R> fructus(func: Maturation.M0<BacikalFrame, R>): BacikalFruit<R> {
         return BacikalFruit { frame ->
             CompletableFuture.completedFuture(func.apply(frame))
         }
@@ -270,7 +269,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
 
     override fun <S1, R> fructus(
         s1: BacikalSeed<S1>,
-        func: Maturation.M1<ScriptFrame, S1, R>
+        func: Maturation.M1<BacikalFrame, S1, R>
     ): BacikalFruit<R> {
         germinate(s1)
         return BacikalFruit { frame ->
@@ -283,7 +282,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
     override fun <S1, S2, R> fructus(
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
-        func: Maturation.M2<ScriptFrame, S1, S2, R>
+        func: Maturation.M2<BacikalFrame, S1, S2, R>
     ): BacikalFruit<R> {
         germinate(s1, s2)
         return BacikalFruit { frame ->
@@ -300,7 +299,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
-        func: Maturation.M3<ScriptFrame, S1, S2, S3, R>
+        func: Maturation.M3<BacikalFrame, S1, S2, S3, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3)
         return BacikalFruit { frame ->
@@ -319,7 +318,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
-        func: Maturation.M4<ScriptFrame, S1, S2, S3, S4, R>
+        func: Maturation.M4<BacikalFrame, S1, S2, S3, S4, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4)
         return BacikalFruit { frame ->
@@ -340,7 +339,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
-        func: Maturation.M5<ScriptFrame, S1, S2, S3, S4, S5, R>
+        func: Maturation.M5<BacikalFrame, S1, S2, S3, S4, S5, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5)
         return BacikalFruit { frame ->
@@ -363,7 +362,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
-        func: Maturation.M6<ScriptFrame, S1, S2, S3, S4, S5, S6, R>
+        func: Maturation.M6<BacikalFrame, S1, S2, S3, S4, S5, S6, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6)
         return BacikalFruit { frame ->
@@ -388,7 +387,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
-        func: Maturation.M7<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, R>
+        func: Maturation.M7<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7)
         return BacikalFruit { frame ->
@@ -415,7 +414,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
-        func: Maturation.M8<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, R>
+        func: Maturation.M8<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8)
         return BacikalFruit { frame ->
@@ -444,7 +443,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
-        func: Maturation.M9<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, R>
+        func: Maturation.M9<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9)
         return BacikalFruit { frame ->
@@ -475,7 +474,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
-        func: Maturation.M10<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, R>
+        func: Maturation.M10<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
         return BacikalFruit { frame ->
@@ -508,7 +507,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
-        func: Maturation.M11<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, R>
+        func: Maturation.M11<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
         return BacikalFruit { frame ->
@@ -556,7 +555,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
-        func: Maturation.M12<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, R>
+        func: Maturation.M12<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12)
         return BacikalFruit { frame ->
@@ -607,7 +606,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
-        func: Maturation.M13<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, R>
+        func: Maturation.M13<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13)
         return BacikalFruit { frame ->
@@ -661,7 +660,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
-        func: Maturation.M14<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, R>
+        func: Maturation.M14<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14)
         return BacikalFruit { frame ->
@@ -718,7 +717,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
-        func: Maturation.M15<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, R>
+        func: Maturation.M15<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15)
         return BacikalFruit { frame ->
@@ -778,7 +777,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
         s16: BacikalSeed<S16>,
-        func: Maturation.M16<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, R>
+        func: Maturation.M16<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, R>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16)
         return BacikalFruit { frame ->
@@ -823,7 +822,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         }
     }
 
-    override fun <R> fructusFuture(func: Maturation.M0<ScriptFrame, CompletableFuture<R>>): BacikalFruit<R> {
+    override fun <R> fructusFuture(func: Maturation.M0<BacikalFrame, CompletableFuture<R>>): BacikalFruit<R> {
         return BacikalFruit { frame ->
             func.apply(frame)
         }
@@ -831,7 +830,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
 
     override fun <S1, R> fructusFuture(
         s1: BacikalSeed<S1>,
-        func: Maturation.M1<ScriptFrame, S1, CompletableFuture<R>>
+        func: Maturation.M1<BacikalFrame, S1, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1)
         return BacikalFruit { frame ->
@@ -844,7 +843,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
     override fun <S1, S2, R> fructusFuture(
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
-        func: Maturation.M2<ScriptFrame, S1, S2, CompletableFuture<R>>
+        func: Maturation.M2<BacikalFrame, S1, S2, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2)
         return BacikalFruit { frame ->
@@ -861,7 +860,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
-        func: Maturation.M3<ScriptFrame, S1, S2, S3, CompletableFuture<R>>
+        func: Maturation.M3<BacikalFrame, S1, S2, S3, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3)
         return BacikalFruit { frame ->
@@ -880,7 +879,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
-        func: Maturation.M4<ScriptFrame, S1, S2, S3, S4, CompletableFuture<R>>
+        func: Maturation.M4<BacikalFrame, S1, S2, S3, S4, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4)
         return BacikalFruit { frame ->
@@ -901,7 +900,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
-        func: Maturation.M5<ScriptFrame, S1, S2, S3, S4, S5, CompletableFuture<R>>
+        func: Maturation.M5<BacikalFrame, S1, S2, S3, S4, S5, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5)
         return BacikalFruit { frame ->
@@ -924,7 +923,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
-        func: Maturation.M6<ScriptFrame, S1, S2, S3, S4, S5, S6, CompletableFuture<R>>
+        func: Maturation.M6<BacikalFrame, S1, S2, S3, S4, S5, S6, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6)
         return BacikalFruit { frame ->
@@ -949,7 +948,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
-        func: Maturation.M7<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, CompletableFuture<R>>
+        func: Maturation.M7<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7)
         return BacikalFruit { frame ->
@@ -976,7 +975,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
-        func: Maturation.M8<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, CompletableFuture<R>>
+        func: Maturation.M8<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8)
         return BacikalFruit { frame ->
@@ -1005,7 +1004,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
-        func: Maturation.M9<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, CompletableFuture<R>>
+        func: Maturation.M9<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9)
         return BacikalFruit { frame ->
@@ -1036,7 +1035,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
-        func: Maturation.M10<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, CompletableFuture<R>>
+        func: Maturation.M10<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
         return BacikalFruit { frame ->
@@ -1069,7 +1068,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
-        func: Maturation.M11<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, CompletableFuture<R>>
+        func: Maturation.M11<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
         return BacikalFruit { frame ->
@@ -1117,7 +1116,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
-        func: Maturation.M12<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, CompletableFuture<R>>
+        func: Maturation.M12<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12)
         return BacikalFruit { frame ->
@@ -1168,7 +1167,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
-        func: Maturation.M13<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, CompletableFuture<R>>
+        func: Maturation.M13<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13)
         return BacikalFruit { frame ->
@@ -1222,7 +1221,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
-        func: Maturation.M14<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, CompletableFuture<R>>
+        func: Maturation.M14<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14)
         return BacikalFruit { frame ->
@@ -1279,7 +1278,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
-        func: Maturation.M15<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, CompletableFuture<R>>
+        func: Maturation.M15<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15)
         return BacikalFruit { frame ->
@@ -1339,7 +1338,7 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
         s16: BacikalSeed<S16>,
-        func: Maturation.M16<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, CompletableFuture<R>>
+        func: Maturation.M16<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, CompletableFuture<R>>
     ): BacikalFruit<R> {
         germinate(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16)
         return BacikalFruit { frame ->

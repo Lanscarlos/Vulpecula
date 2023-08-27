@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
-import taboolib.module.kether.ScriptFrame
 import top.lanscarlos.vulpecula.bacikal.BacikalFruit
 import top.lanscarlos.vulpecula.bacikal.Maturation
 import java.awt.Color
@@ -80,25 +79,25 @@ interface BacikalContext {
     fun vector(def: Vector? = null, warning: String = "No vector selected."): BacikalSeed<Vector>
 
     fun <R> fructus(
-        func: Maturation.M0<ScriptFrame, R>
+        func: Maturation.M0<BacikalFrame, R>
     ): BacikalFruit<R>
 
     fun <S1, R> fructus(
         s1: BacikalSeed<S1>,
-        func: Maturation.M1<ScriptFrame, S1, R>
+        func: Maturation.M1<BacikalFrame, S1, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, R> fructus(
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
-        func: Maturation.M2<ScriptFrame, S1, S2, R>
+        func: Maturation.M2<BacikalFrame, S1, S2, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, R> fructus(
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
-        func: Maturation.M3<ScriptFrame, S1, S2, S3, R>
+        func: Maturation.M3<BacikalFrame, S1, S2, S3, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, R> fructus(
@@ -106,7 +105,7 @@ interface BacikalContext {
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
-        func: Maturation.M4<ScriptFrame, S1, S2, S3, S4, R>
+        func: Maturation.M4<BacikalFrame, S1, S2, S3, S4, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, R> fructus(
@@ -115,7 +114,7 @@ interface BacikalContext {
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
-        func: Maturation.M5<ScriptFrame, S1, S2, S3, S4, S5, R>
+        func: Maturation.M5<BacikalFrame, S1, S2, S3, S4, S5, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, R> fructus(
@@ -125,7 +124,7 @@ interface BacikalContext {
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
-        func: Maturation.M6<ScriptFrame, S1, S2, S3, S4, S5, S6, R>
+        func: Maturation.M6<BacikalFrame, S1, S2, S3, S4, S5, S6, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, R> fructus(
@@ -136,7 +135,7 @@ interface BacikalContext {
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
-        func: Maturation.M7<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, R>
+        func: Maturation.M7<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, R> fructus(
@@ -148,7 +147,7 @@ interface BacikalContext {
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
-        func: Maturation.M8<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, R>
+        func: Maturation.M8<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, R> fructus(
@@ -161,7 +160,7 @@ interface BacikalContext {
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
-        func: Maturation.M9<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, R>
+        func: Maturation.M9<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, R> fructus(
@@ -175,7 +174,7 @@ interface BacikalContext {
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
-        func: Maturation.M10<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, R>
+        func: Maturation.M10<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, R> fructus(
@@ -190,7 +189,7 @@ interface BacikalContext {
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
-        func: Maturation.M11<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, R>
+        func: Maturation.M11<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, R> fructus(
@@ -206,7 +205,7 @@ interface BacikalContext {
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
-        func: Maturation.M12<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, R>
+        func: Maturation.M12<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, R> fructus(
@@ -223,7 +222,7 @@ interface BacikalContext {
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
-        func: Maturation.M13<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, R>
+        func: Maturation.M13<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, R> fructus(
@@ -241,7 +240,7 @@ interface BacikalContext {
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
-        func: Maturation.M14<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, R>
+        func: Maturation.M14<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, R> fructus(
@@ -260,7 +259,7 @@ interface BacikalContext {
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
-        func: Maturation.M15<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, R>
+        func: Maturation.M15<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, R>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, R> fructus(
@@ -280,29 +279,29 @@ interface BacikalContext {
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
         s16: BacikalSeed<S16>,
-        func: Maturation.M16<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, R>
+        func: Maturation.M16<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, R>
     ): BacikalFruit<R>
 
     fun <R> fructusFuture(
-        func: Maturation.M0<ScriptFrame, CompletableFuture<R>>
+        func: Maturation.M0<BacikalFrame, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, R> fructusFuture(
         s1: BacikalSeed<S1>,
-        func: Maturation.M1<ScriptFrame, S1, CompletableFuture<R>>
+        func: Maturation.M1<BacikalFrame, S1, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, R> fructusFuture(
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
-        func: Maturation.M2<ScriptFrame, S1, S2, CompletableFuture<R>>
+        func: Maturation.M2<BacikalFrame, S1, S2, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, R> fructusFuture(
         s1: BacikalSeed<S1>,
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
-        func: Maturation.M3<ScriptFrame, S1, S2, S3, CompletableFuture<R>>
+        func: Maturation.M3<BacikalFrame, S1, S2, S3, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, R> fructusFuture(
@@ -310,7 +309,7 @@ interface BacikalContext {
         s2: BacikalSeed<S2>,
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
-        func: Maturation.M4<ScriptFrame, S1, S2, S3, S4, CompletableFuture<R>>
+        func: Maturation.M4<BacikalFrame, S1, S2, S3, S4, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, R> fructusFuture(
@@ -319,7 +318,7 @@ interface BacikalContext {
         s3: BacikalSeed<S3>,
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
-        func: Maturation.M5<ScriptFrame, S1, S2, S3, S4, S5, CompletableFuture<R>>
+        func: Maturation.M5<BacikalFrame, S1, S2, S3, S4, S5, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, R> fructusFuture(
@@ -329,7 +328,7 @@ interface BacikalContext {
         s4: BacikalSeed<S4>,
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
-        func: Maturation.M6<ScriptFrame, S1, S2, S3, S4, S5, S6, CompletableFuture<R>>
+        func: Maturation.M6<BacikalFrame, S1, S2, S3, S4, S5, S6, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, R> fructusFuture(
@@ -340,7 +339,7 @@ interface BacikalContext {
         s5: BacikalSeed<S5>,
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
-        func: Maturation.M7<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, CompletableFuture<R>>
+        func: Maturation.M7<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, R> fructusFuture(
@@ -352,7 +351,7 @@ interface BacikalContext {
         s6: BacikalSeed<S6>,
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
-        func: Maturation.M8<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, CompletableFuture<R>>
+        func: Maturation.M8<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, R> fructusFuture(
@@ -365,7 +364,7 @@ interface BacikalContext {
         s7: BacikalSeed<S7>,
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
-        func: Maturation.M9<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, CompletableFuture<R>>
+        func: Maturation.M9<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, R> fructusFuture(
@@ -379,7 +378,7 @@ interface BacikalContext {
         s8: BacikalSeed<S8>,
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
-        func: Maturation.M10<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, CompletableFuture<R>>
+        func: Maturation.M10<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, R> fructusFuture(
@@ -394,7 +393,7 @@ interface BacikalContext {
         s9: BacikalSeed<S9>,
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
-        func: Maturation.M11<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, CompletableFuture<R>>
+        func: Maturation.M11<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, R> fructusFuture(
@@ -410,7 +409,7 @@ interface BacikalContext {
         s10: BacikalSeed<S10>,
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
-        func: Maturation.M12<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, CompletableFuture<R>>
+        func: Maturation.M12<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, R> fructusFuture(
@@ -427,7 +426,7 @@ interface BacikalContext {
         s11: BacikalSeed<S11>,
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
-        func: Maturation.M13<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, CompletableFuture<R>>
+        func: Maturation.M13<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, R> fructusFuture(
@@ -445,7 +444,7 @@ interface BacikalContext {
         s12: BacikalSeed<S12>,
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
-        func: Maturation.M14<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, CompletableFuture<R>>
+        func: Maturation.M14<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, R> fructusFuture(
@@ -464,7 +463,7 @@ interface BacikalContext {
         s13: BacikalSeed<S13>,
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
-        func: Maturation.M15<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, CompletableFuture<R>>
+        func: Maturation.M15<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, CompletableFuture<R>>
     ): BacikalFruit<R>
 
     fun <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, R> fructusFuture(
@@ -484,6 +483,6 @@ interface BacikalContext {
         s14: BacikalSeed<S14>,
         s15: BacikalSeed<S15>,
         s16: BacikalSeed<S16>,
-        func: Maturation.M16<ScriptFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, CompletableFuture<R>>
+        func: Maturation.M16<BacikalFrame, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, CompletableFuture<R>>
     ): BacikalFruit<R>
 }
