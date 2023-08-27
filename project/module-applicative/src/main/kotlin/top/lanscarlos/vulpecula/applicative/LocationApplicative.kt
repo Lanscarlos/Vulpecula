@@ -95,9 +95,9 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
 
     fun parseRelative(source: String, def: Double): Double {
         return if (source[0] == '~') {
-            return def + (source.substring(1).toDoubleOrNull() ?: 0.0)
+            def + (source.substring(1).toDoubleOrNull() ?: 0.0)
         } else {
-            return source.toDoubleOrNull() ?: 0.0
+            source.toDoubleOrNull() ?: 0.0
         }
     }
 
