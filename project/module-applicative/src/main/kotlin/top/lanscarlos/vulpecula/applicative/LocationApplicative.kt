@@ -41,8 +41,18 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
 
             is String -> {
 
+                // 匹配相对坐标 Example: 1,~,~+3.5
+                PATTERN_RELATIVE.matchEntire(source)?.groupValues?.let { groupValues ->
+                    return Location(
+                        def?.world,
+                        parseRelative(groupValues[1], def?.x ?: 0.0),
+                        parseRelative(groupValues[2], def?.y ?: 0.0),
+                        parseRelative(groupValues[3], def?.z ?: 0.0),
+                    )
+                }
 
                 when {
+
                     source.matches(PATTERN_XYZ) -> {
                         /*
                         * x,y,z
@@ -58,6 +68,7 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
                             demand.getOrNull(4)?.toFloatOrNull() ?: 0f
                         )
                     }
+
                     source.matches(PATTERN_WORLD_XYZ) -> {
                         /*
                         * world,x,y,z
@@ -73,11 +84,20 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
                             demand.getOrNull(5)?.toFloatOrNull() ?: 0f
                         )
                     }
+
                     else -> def
                 }
             }
 
             else -> def
+        }
+    }
+
+    fun parseRelative(source: String, def: Double): Double {
+        return if (source[0] == '~') {
+            return def + (source.substring(1).toDoubleOrNull() ?: 0.0)
+        } else {
+            return source.toDoubleOrNull() ?: 0.0
         }
     }
 
@@ -88,6 +108,9 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
 
         val PATTERN_WORLD_XYZ =
             "^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex()
+
+        val PATTERN_RELATIVE =
+            "^(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?)\$".toRegex()
 
         fun Any.applicativeLocation() = LocationApplicative(this)
     }
