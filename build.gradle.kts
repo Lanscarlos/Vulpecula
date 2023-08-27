@@ -77,14 +77,14 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "16"
+        jvmTarget = "1.8"
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_14
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 publishing {
