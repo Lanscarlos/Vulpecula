@@ -1,4 +1,14 @@
 
 # bacikal 配置
 bacikal:
+  # 编译器
   compiler: 'bacikal'
+
+  # 注释匹配规则
+  comment-pattern:
+    # 单行注释
+    # 匹配 // 及其后所有字符直至换行
+    single-line: '(?<!\\)//[^\n]*(?=\n|\r)'
+    # 多行注释
+    # 匹配 /* 直到 */
+    multi-line: '(?<!\\)/\*[^(\*/)]*\*/'

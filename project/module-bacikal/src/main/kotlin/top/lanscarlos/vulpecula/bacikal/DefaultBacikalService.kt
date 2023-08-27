@@ -17,7 +17,7 @@ object DefaultBacikalService : BacikalService {
         when (value) {
             "bacikal" -> FixedQuestCompiler
             "kether" -> KetherQuestCompiler
-            else -> throw IllegalArgumentException("Unknown compiler: $value")
+            else -> FixedQuestCompiler
         }
     }
 
