@@ -103,14 +103,26 @@ object ActionEntityPotion : ActionEntity.Resolver {
                     return@combine entity
                 }
 
-                val potion = PotionEffect(
-                    type.asPotionEffectType() ?: error("No potion type \"$type\" found."),
-                    duration,
-                    level - 1,
-                    ambient,
-                    particles,
-                    icon
-                )
+                val potion = try {
+                    // Minecraft 1.13+
+                    PotionEffect(
+                        type.asPotionEffectType() ?: error("No potion type \"$type\" found."),
+                        duration,
+                        level - 1,
+                        ambient,
+                        particles,
+                        icon
+                    )
+                } catch (ex: NoSuchMethodError) {
+                    // Minecraft 1.12.2+
+                    PotionEffect(
+                        type.asPotionEffectType() ?: error("No potion type \"$type\" found."),
+                        duration,
+                        level - 1,
+                        ambient,
+                        particles
+                    )
+                }
 
                 entity.also { it.addPotionEffect(potion) }
             }
@@ -118,6 +130,6 @@ object ActionEntityPotion : ActionEntity.Resolver {
     }
 
     private fun String.asPotionEffectType(): PotionEffectType? {
-        return PotionEffectType.values().firstOrNull { it.name.equals(this, true) }
+        return PotionEffectType.getByName(this)
     }
 }
