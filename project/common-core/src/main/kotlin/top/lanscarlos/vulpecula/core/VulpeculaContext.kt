@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.core
 
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
@@ -32,6 +34,11 @@ object VulpeculaContext {
                 console().asLangText("Config-Load-Failed", ex.localizedMessage ?: "null")
             }
         }
+    }
+
+    @Awake(LifeCycle.ENABLE)
+    fun onEnable() {
+        reload()
     }
 
     /**

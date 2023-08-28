@@ -28,10 +28,10 @@ object FixedQuestCompiler : BacikalQuestCompiler {
                 source.toByteArray(StandardCharsets.UTF_8),
                 listOf("vulpecula", *namespace.toTypedArray())
             )
-            DefaultQuest(name, quest)
+            DefaultQuest(name, source, quest)
         } catch (ex: Exception) {
             ex.printKetherErrorMessage(true)
-            AberrantQuest(name, ex)
+            AberrantQuest(name, source, ex)
         }
     }
 

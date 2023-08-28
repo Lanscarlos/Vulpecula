@@ -1,0 +1,6 @@
+
+# 模块配置文件
+
+automatic-reload:
+  dispatcher: true
+  handler: true

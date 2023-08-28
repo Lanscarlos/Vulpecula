@@ -14,6 +14,11 @@ interface BacikalQuest {
 
     val name: String
 
+    /**
+     * 源码
+     * */
+    val content: String
+
     val source: KetherQuest
 
     fun runActions(context: BacikalQuestContext.() -> Unit): CompletableFuture<Any?>

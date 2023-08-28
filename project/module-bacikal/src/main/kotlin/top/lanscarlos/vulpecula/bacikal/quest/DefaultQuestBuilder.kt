@@ -28,8 +28,6 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
     val source = StringBuilder()
 
     init {
-        appendBlock(QuestContext.BASE_BLOCK) {
-        }
         appendTransfer(FragmentReplacer())
         appendTransfer(CommentEraser())
         appendTransfer(UnicodeEscalator())
@@ -40,14 +38,6 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
         // 注入预设命名空间
         main.namespace += namespace
-
-        // 添加调用语句
-        for (block in blocks.values) {
-            if (block.name == QuestContext.BASE_BLOCK) {
-                continue
-            }
-            main.appendLiteral("call ${block.name}\n")
-        }
 
         // 构建源码
         for (block in blocks.values) {
@@ -67,21 +57,35 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
         return compiler.compile(name, source.toString(), namespace)
     }
 
+    override fun appendBaseBlock(func: BacikalBlockBuilder.() -> Unit) {
+        val block = DefaultBlockBuilder(QuestContext.BASE_BLOCK)
+        appendBlock(block)
+        block.also(func)
+    }
+
+    override fun appendBlock(name: String?, content: String) {
+        appendBlock(name) {
+            appendLiteral(content)
+        }
+    }
+
+    override fun appendBlock(name: String?, func: BacikalBlockBuilder.() -> Unit) {
+        val block = DefaultBlockBuilder(name ?: UUID.randomUUID().toString())
+        appendBlock(block)
+        block.also(func)
+    }
+
+    override fun appendBlock(name: String?, func: Consumer<BacikalBlockBuilder>) {
+        val block = DefaultBlockBuilder(name ?: UUID.randomUUID().toString())
+        appendBlock(block)
+        func.accept(block)
+    }
+
     override fun appendBlock(block: BacikalBlockBuilder) {
         if (blocks.containsKey(block.name)) {
             throw IllegalArgumentException("Block name ${block.name} has already exists.")
         }
         blocks[block.name] = block
-    }
-
-    override fun appendBlock(name: String?, func: BacikalBlockBuilder.() -> Unit) {
-        appendBlock(DefaultBlockBuilder(name ?: UUID.randomUUID().toString()).also(func))
-    }
-
-    override fun appendBlock(name: String?, func: Consumer<BacikalBlockBuilder>) {
-        val block = DefaultBlockBuilder(name ?: UUID.randomUUID().toString())
-        func.accept(block)
-        appendBlock(block)
     }
 
     override fun appendTransfer(transfer: BacikalQuestTransfer) {

@@ -32,6 +32,10 @@ interface BacikalQuestBuilder {
 
     fun appendBlock(block: BacikalBlockBuilder)
 
+    fun appendBaseBlock(func: BacikalBlockBuilder.() -> Unit)
+
+    fun appendBlock(name: String? = null, content: String)
+
     fun appendBlock(name: String? = null, func: BacikalBlockBuilder.() -> Unit)
 
     fun appendBlock(name: String? = null, func: Consumer<BacikalBlockBuilder>)

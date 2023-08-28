@@ -34,3 +34,13 @@ coerce:
   remote:
     - 'kether:v-coerce'
     - 'vulpecula:coerce'
+
+item:
+  shared: true
+  switch: '@Item'
+  local:
+    - 'kether:v-item'
+    - 'vulpecula:item'
+  remote:
+    - 'kether:v-item'
+    - 'vulpecula:item'

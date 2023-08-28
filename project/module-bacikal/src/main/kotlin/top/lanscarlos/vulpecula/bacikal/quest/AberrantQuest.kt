@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-08-25 01:44
  */
-class AberrantQuest(override val name: String, val exception: Exception) : BacikalQuest {
+class AberrantQuest(override val name: String, override val content: String, val exception: Exception) : BacikalQuest {
 
     override val source: KetherQuest
         get() = error("Quest $name is aberrant with compiling. exception: ${exception.localizedMessage}")

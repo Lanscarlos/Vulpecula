@@ -1,7 +1,5 @@
 package top.lanscarlos.vulpecula.config
 
-import taboolib.module.configuration.ConfigLoader
-import taboolib.module.configuration.ConfigNodeFile
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeBoolean
@@ -11,6 +9,7 @@ import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShort
 import top.lanscarlos.vulpecula.applicative.StringListApplicative.Companion.applicativeStringList
+import java.io.File
 import java.util.function.Function
 
 /**
@@ -20,19 +19,14 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2023-08-25 00:30
  */
-class DefaultDynamicConfig(val bind: String) : DynamicConfig, Runnable {
+class DefaultDynamicConfig(override val file: File, val config: Configuration) : DynamicConfig, Runnable {
 
-    val config: ConfigNodeFile by lazy {
-        ConfigLoader.files[bind] ?: error("Config $bind not found.")
-    }
-
-    val configuration: Configuration
-        get() = config.configuration
+    constructor(file: File) : this(file, Configuration.loadFromFile(file))
 
     val sections = linkedMapOf<String, DynamicSection<*>>()
 
     init {
-        configuration.onReload(this)
+        config.onReload(this)
     }
 
     override fun run() {
@@ -42,7 +36,15 @@ class DefaultDynamicConfig(val bind: String) : DynamicConfig, Runnable {
     }
 
     override fun get(path: String): Any? {
-        return configuration[path]
+        return config[path]
+    }
+
+    override fun readKeys(deep: Boolean): Set<String> {
+        return config.getKeys(deep)
+    }
+
+    override fun readKeys(path: String, deep: Boolean): Set<String> {
+        return config.getConfigurationSection(path)?.getKeys(deep) ?: emptySet()
     }
 
     override fun <T> read(path: String, transfer: Function<Any?, T>): DynamicSection<T> {
@@ -77,6 +79,10 @@ class DefaultDynamicConfig(val bind: String) : DynamicConfig, Runnable {
 
     override fun readDouble(path: String, def: Double): DynamicSection<Double> {
         return read(path) { it?.applicativeDouble()?.getValue() ?: def }
+    }
+
+    override fun readString(path: String): DynamicSection<String?> {
+        return read(path) { it?.toString() }
     }
 
     override fun readString(path: String, def: String): DynamicSection<String> {
