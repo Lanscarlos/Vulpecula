@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.module.kether.ScriptActionParser
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalContext
+import top.lanscarlos.vulpecula.bacikal.parser.BacikalFruit
 import top.lanscarlos.vulpecula.bacikal.parser.DefaultContext
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalBlockBuilder
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest

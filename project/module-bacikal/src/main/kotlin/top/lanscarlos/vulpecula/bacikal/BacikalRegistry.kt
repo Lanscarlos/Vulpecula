@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.bacikal
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.taboolibPath
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.warning
@@ -24,7 +25,8 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2023-08-27 22:55
  */
-object BacikalRegistry : ClassVisitor(0) {
+@Awake(LifeCycle.LOAD)
+object BacikalRegistry : ClassVisitor(-1) {
 
     @Config("action-registry.yml")
     lateinit var actionRegistry: Configuration

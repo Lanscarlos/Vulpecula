@@ -1,15 +1,13 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.bacikal.parser
 
 import taboolib.library.kether.QuestAction
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalFrame
-import top.lanscarlos.vulpecula.bacikal.parser.DefaultFrame
 import java.util.concurrent.CompletableFuture
 import java.util.function.Function
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.bacikal.parser
  *
  * @author Lanscarlos
  * @since 2023-08-21 10:15

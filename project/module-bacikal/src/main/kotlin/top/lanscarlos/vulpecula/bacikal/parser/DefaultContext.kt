@@ -24,7 +24,6 @@ import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShor
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
 import top.lanscarlos.vulpecula.applicative.VectorApplicative.Companion.applicativeVector
-import top.lanscarlos.vulpecula.bacikal.BacikalFruit
 import top.lanscarlos.vulpecula.bacikal.Maturation
 import top.lanscarlos.vulpecula.bacikal.combineFuture
 import java.awt.Color

@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
-import top.lanscarlos.vulpecula.bacikal.BacikalFruit
 import top.lanscarlos.vulpecula.bacikal.Maturation
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
