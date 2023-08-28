@@ -1,0 +1,36 @@
+
+# 请注意
+# 改动此文件后需要重启才能加载
+
+
+canvas:
+  # 是否禁用语句
+  disable: false
+  # 是否为公有语句
+  shared: true
+  # 本地注册信息 [ 命名空间:语句名 ]
+  local:
+    - 'kether:v-canvas'
+    - 'vulpecula:canvas'
+  # 远程注册信息 [ 命名空间:语句名 ]
+  remote:
+    - 'kether:v-canvas'
+    - 'vulpecula:canvas'
+
+ceil:
+  shared: true
+  local:
+    - 'kether:v-ceil'
+    - 'vulpecula:ceil'
+  remote:
+    - 'kether:v-ceil'
+    - 'vulpecula:ceil'
+
+coerce:
+  shared: true
+  local:
+    - 'kether:v-coerce'
+    - 'vulpecula:coerce'
+  remote:
+    - 'kether:v-coerce'
+    - 'vulpecula:coerce'
