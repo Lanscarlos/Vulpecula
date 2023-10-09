@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
-import top.lanscarlos.vulpecula.bacikal.Bacikal
 import java.lang.Exception
 import java.util.concurrent.CompletableFuture
 
