@@ -44,8 +44,6 @@ abstract class AbstractQuestContext(override val quest: BacikalQuest) : BacikalQ
         return source.runActions().exceptionally { ex ->
             ex.printKetherErrorMessage(true)
             warning("Quest ${quest.name} run failed: ${ex.localizedMessage}")
-        }.thenApply {
-            it
         }
     }
 

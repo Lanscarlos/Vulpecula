@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal
 
+import taboolib.common.platform.function.warning
+import top.lanscarlos.vulpecula.applicative.StringListApplicative.Companion.applicativeStringList
 import top.lanscarlos.vulpecula.bacikal.quest.*
 import top.lanscarlos.vulpecula.config.bindConfigSection
 import java.util.function.Consumer
@@ -13,11 +15,18 @@ import java.util.function.Consumer
  */
 object DefaultBacikalService : BacikalService {
 
+    override val compileNamespace: List<String> by bindConfigSection("bacikal.compile-namespace") { value ->
+        value?.applicativeStringList()?.getValue() ?: emptyList()
+    }
+
     override val questCompiler: BacikalQuestCompiler by bindConfigSection("bacikal.compiler") { value ->
         when (value) {
             "bacikal" -> FixedQuestCompiler
             "kether" -> KetherQuestCompiler
-            else -> FixedQuestCompiler
+            else -> {
+                warning("Unknown compiler: $value, use bacikal compiler.")
+                FixedQuestCompiler
+            }
         }
     }
 
@@ -35,11 +44,14 @@ object DefaultBacikalService : BacikalService {
         return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
     }
 
-    override fun buildQuestContext(quest: BacikalQuest): BacikalQuestContext {
+    override fun createQuestContext(quest: BacikalQuest): BacikalQuestContext {
         return when (questContext) {
             "coroutines" -> CoroutinesQuestContext(quest)
             "kether" -> KetherQuestContext(quest)
-            else -> throw IllegalArgumentException("Unknown context: $questContext")
+            else -> {
+                warning("Unknown context: $questContext, use kether context.")
+                KetherQuestContext(quest)
+            }
         }
     }
 

@@ -14,10 +14,18 @@ class ArgumentSeed<T>(val seed: BacikalSeed<T>, val prefix: Array<out String>, v
     override val isAccepted: Boolean
         get() = seed.isAccepted
 
-    fun accept(prefix: String, reader: BacikalReader) {
+    /**
+     * @return 若前缀匹配则返回 true
+     * */
+    fun accept(prefix: String, reader: BacikalReader): Boolean {
+        if (isAccepted) {
+            return false
+        }
         if (prefix in this.prefix) {
             seed.accept(reader)
+            return true
         }
+        return false
     }
 
     override fun accept(reader: BacikalReader) {

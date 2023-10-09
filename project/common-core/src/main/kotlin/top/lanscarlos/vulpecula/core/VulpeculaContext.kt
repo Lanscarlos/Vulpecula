@@ -6,6 +6,7 @@ import taboolib.common.platform.function.console
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
+import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.core.utils.timing
 import java.util.function.Supplier
 
@@ -20,6 +21,10 @@ object VulpeculaContext {
 
     @Config
     lateinit var config: Configuration
+        private set
+
+    @Config("class-aliases.yml")
+    lateinit var classAliases: Configuration
         private set
 
     val reloadable = linkedMapOf<String, Supplier<String?>>()
@@ -54,7 +59,28 @@ object VulpeculaContext {
         }
     }
 
+    /**
+     * 注册可重载模块
+     * */
     fun registerReloadable(name: String, reloadable: Supplier<String?>) {
         this.reloadable[name] = reloadable
+    }
+
+    fun getClass(name: String): Class<*>? {
+        val className = if (!name.contains('.')) {
+            classAliases.getString(name) ?: let {
+                console().sendLang("Class-Aliases-Not-Found", name)
+                return null
+            }
+        } else {
+            name
+        }
+
+        return try {
+            Class.forName(className)
+        } catch (ex: Exception) {
+            console().sendLang("Class-Not-Found", className, ex.localizedMessage)
+            null
+        }
     }
 }

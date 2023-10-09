@@ -18,7 +18,7 @@ interface ModularDispatcher : ModularComponent {
     /**
      * 监听的事件类
      * */
-    val listen: String
+    val listen: Class<*>
 
     /**
      * 是否接受已取消的事件

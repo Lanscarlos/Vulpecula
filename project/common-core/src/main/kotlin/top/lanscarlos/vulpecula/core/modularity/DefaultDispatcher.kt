@@ -1,16 +1,26 @@
 package top.lanscarlos.vulpecula.core.modularity
 
+import org.bukkit.event.Event
+import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.common.platform.event.EventPriority
+import taboolib.common.platform.event.ProxyListener
+import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.info
+import taboolib.common.platform.function.registerBukkitListener
+import taboolib.common.platform.function.registerBungeeListener
 import taboolib.common5.Baffle
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.bacikal.bacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 import top.lanscarlos.vulpecula.config.DynamicConfig
+import top.lanscarlos.vulpecula.core.VulpeculaContext
 import top.lanscarlos.vulpecula.modularity.ModularDispatcher
 import top.lanscarlos.vulpecula.modularity.Module
+import java.io.Closeable
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.function.BiConsumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -28,7 +38,10 @@ class DefaultDispatcher(
     override val file: File
         get() = config.file
 
-    override val listen: String by config.readString("$id.listen", "null")
+    override val listen: Class<*> by config.read("$id.listen") { value ->
+        VulpeculaContext.getClass(value.toString())
+            ?: error("Invalid listen class: \"$value\"")
+    }
 
     override val acceptCancelled: Boolean by config.readBoolean("$id.accept-cancelled", false)
 
@@ -88,13 +101,21 @@ class DefaultDispatcher(
         }
     }
 
-    override var isRunning = false
+    override val isRunning: Boolean
+        get() = listener != null
+
+    var listener: ProxyListener? = null
+
     override fun registerListener() {
-        TODO("Not yet implemented")
+        unregisterListener()
+        listener = registerBukkitListener(listen, priority, !acceptCancelled) {
+            call(it as? Event ?: return@registerBukkitListener)
+        }
     }
 
     override fun unregisterListener() {
-        TODO("Not yet implemented")
+        taboolib.common.platform.function.unregisterListener(listener ?: return)
+        listener = null
     }
 
     override fun buildQuest(): BacikalQuest {
@@ -121,5 +142,9 @@ class DefaultDispatcher(
                 }
             }
         }
+    }
+
+    fun call(event: Event) {
+
     }
 }

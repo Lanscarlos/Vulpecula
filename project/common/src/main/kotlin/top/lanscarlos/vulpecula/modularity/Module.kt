@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.modularity
 
+import top.lanscarlos.vulpecula.bacikal.BacikalWorkspace
 import java.io.File
 
 /**
@@ -18,6 +19,8 @@ interface Module {
     val dispatchers: Map<String, ModularDispatcher>
 
     val handlers: Map<String, ModularHandler>
+
+    val workspace: BacikalWorkspace
 
     /**
      * 启用模块

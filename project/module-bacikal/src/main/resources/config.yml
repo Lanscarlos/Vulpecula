@@ -3,6 +3,9 @@
 bacikal:
   # 编译器
   compiler: 'bacikal'
+  # 编译时命名空间
+  compile-namespace:
+    - 'vulpecula'
 
   # 注释匹配规则
   comment-pattern:

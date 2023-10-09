@@ -12,6 +12,8 @@ import java.util.function.Consumer
  */
 interface BacikalService {
 
+    val compileNamespace: List<String>
+
     val questCompiler: BacikalQuestCompiler
 
     fun buildQuest(name: String, func: Consumer<BacikalQuestBuilder>): BacikalQuest
@@ -21,6 +23,6 @@ interface BacikalService {
     /**
      * 创建任务运行时上下文
      * */
-    fun buildQuestContext(quest: BacikalQuest): BacikalQuestContext
+    fun createQuestContext(quest: BacikalQuest): BacikalQuestContext
 
 }

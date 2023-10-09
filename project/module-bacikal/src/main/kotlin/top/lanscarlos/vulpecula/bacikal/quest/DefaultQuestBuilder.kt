@@ -17,7 +17,7 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override var artifactFile: File? = null
 
-    override val namespace = mutableListOf<String>()
+    override val namespace = Bacikal.service.compileNamespace.toMutableList()
 
     override val transfers = linkedMapOf<String, BacikalQuestTransfer>()
 

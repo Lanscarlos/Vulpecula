@@ -241,10 +241,15 @@ class DefaultContext(source: QuestReader) : BacikalContext {
 
         if (arguments.isNotEmpty()) {
             // 读取附加参数
-            while (reader.peekToken().matches(PATTERN_ARGUMENT_PREFIX)) {
+            outer@while (arguments.isNotEmpty() && reader.peekToken().matches(PATTERN_ARGUMENT_PREFIX)) {
                 val prefix = reader.readToken().substring(1)
-                for (it in arguments) {
-                    it.accept(prefix, reader)
+                val iterator = arguments.iterator()
+                inner@while (iterator.hasNext()) {
+                    val it = iterator.next()
+                    if (it.accept(prefix, reader)) {
+                        iterator.remove()
+                        break@inner
+                    }
                 }
             }
 

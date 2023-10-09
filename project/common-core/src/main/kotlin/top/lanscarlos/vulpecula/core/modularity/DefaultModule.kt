@@ -1,12 +1,17 @@
 package top.lanscarlos.vulpecula.core.modularity
 
+import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.FileWatcher
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.bacikal.BacikalScript
+import top.lanscarlos.vulpecula.bacikal.BacikalWorkspace
+import top.lanscarlos.vulpecula.bacikal.DefaultWorkspace
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 import top.lanscarlos.vulpecula.config.DefaultDynamicConfig
 import top.lanscarlos.vulpecula.core.VulpeculaContext
@@ -38,7 +43,10 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
 
     override val handlers = mutableMapOf<String, ModularHandler>()
 
-    val quests = mutableMapOf<String, BacikalQuest>()
+    override val workspace = DefaultWorkspace(File(directory, "build"))
+
+    val quests: MutableMap<String, BacikalScript>
+        get() = workspace.quests
 
     init {
         initHandlers()
@@ -262,6 +270,15 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
                     registry[module.id] = module
                 } else {
                     queue.addAll(file.listFiles() ?: emptyArray())
+                }
+            }
+        }
+
+        @SubscribeEvent
+        fun e(e: PlayerQuitEvent) {
+            registry.values.forEach { module ->
+                module.dispatchers.values.forEach { dispatcher ->
+                    dispatcher.baffle.reset(e.player.uniqueId.toString())
                 }
             }
         }
