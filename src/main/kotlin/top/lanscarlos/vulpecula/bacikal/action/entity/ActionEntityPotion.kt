@@ -5,6 +5,7 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import taboolib.common.platform.function.warning
+import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.bacikal.LiveData
 
 /**
@@ -18,6 +19,10 @@ object ActionEntityPotion : ActionEntity.Resolver {
 
     override val name: Array<String> = arrayOf("potion")
 
+    private val isLegacy by lazy {
+        MinecraftVersion.major <= 4 // version <= 1.12.2
+    }
+
     /**
      * entity potion &entity add &type &time &level
      * entity potion &entity remove &type
@@ -30,8 +35,19 @@ object ActionEntityPotion : ActionEntity.Resolver {
 
         reader.mark()
         return when (reader.nextToken()) {
-            "add", "set" -> {
-                addPotion(reader, source)
+            "add" -> {
+                addPotion(reader, source) { entity, potion ->
+                    entity.addPotionEffect(potion)
+                }
+            }
+            "set" -> {
+                addPotion(reader, source) { entity, potion ->
+                    if (isLegacy && entity.hasPotionEffect(potion.type)) {
+                        // 1.12.2 以下版本需要先移除
+                        entity.removePotionEffect(potion.type)
+                    }
+                    entity.addPotionEffect(potion)
+                }
             }
             "remove", "rm" -> {
                 reader.transfer {
@@ -82,12 +98,14 @@ object ActionEntityPotion : ActionEntity.Resolver {
             }
             else -> {
                 reader.reset()
-                addPotion(reader, source)
+                addPotion(reader, source) { entity, potion ->
+                    entity.addPotionEffect(potion)
+                }
             }
         }
     }
 
-    private fun addPotion(reader: ActionEntity.Reader, source: LiveData<Entity>): ActionEntity.Handler<out Any?> {
+    private fun addPotion(reader: ActionEntity.Reader, source: LiveData<Entity>, func: (LivingEntity, PotionEffect) -> Unit): ActionEntity.Handler<out Any?> {
         return reader.transfer {
             combine(
                 source,
@@ -124,7 +142,8 @@ object ActionEntityPotion : ActionEntity.Resolver {
                     )
                 }
 
-                entity.also { it.addPotionEffect(potion) }
+//                entity.also { it.addPotionEffect(potion) }
+                entity.also { func(it, potion) }
             }
         }
     }
