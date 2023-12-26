@@ -11,8 +11,15 @@ import kotlin.reflect.KProperty
  */
 interface Applicative<T> {
 
+    /**
+     * 取值
+     * */
     fun getValue(): T?
 
+    /**
+     * 取值，如果为 null，返回默认值
+     * @param def 默认值
+     * */
     fun getValue(def: T): T
 
     /**
