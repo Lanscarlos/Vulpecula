@@ -52,6 +52,14 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         return PairSeed(first, second)
     }
 
+    override fun <T, R, S> triple(
+        first: BacikalSeed<T>,
+        second: BacikalSeed<R>,
+        third: BacikalSeed<S>
+    ): BacikalSeed<Triple<T, R, S>> {
+        return TripleSeed(first, second, third)
+    }
+
     override fun <T> expect(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T> {
         return ExpectedSeed(then, expect)
     }
@@ -64,12 +72,12 @@ class DefaultContext(source: QuestReader) : BacikalContext {
         return OptionalSeed(then, expect, def)
     }
 
-    override fun <T> argument(vararg prefix: String, then: BacikalSeed<T>): BacikalSeed<T?> {
-        return ArgumentSeed(nullable(then), prefix, null)
+    override fun <T> addition(vararg prefix: String, then: BacikalSeed<T>): BacikalSeed<T?> {
+        return AdditionSeed(nullable(then), prefix, null)
     }
 
-    override fun <T> argument(vararg prefix: String, then: BacikalSeed<T>, def: T): BacikalSeed<T> {
-        return ArgumentSeed(then, prefix, def)
+    override fun <T> addition(vararg prefix: String, then: BacikalSeed<T>, def: T): BacikalSeed<T> {
+        return AdditionSeed(then, prefix, def)
     }
 
     override fun token(): BacikalSeed<String> {
@@ -223,11 +231,11 @@ class DefaultContext(source: QuestReader) : BacikalContext {
             return
         }
 
-        val arguments = mutableListOf<ArgumentSeed<*>>()
+        val arguments = mutableListOf<AdditionSeed<*>>()
         var breakpoint = 0
 
         for ((index, it) in seed.withIndex()) {
-            if (it is ArgumentSeed<*>) {
+            if (it is AdditionSeed<*>) {
                 arguments.add(it)
             } else if (arguments.isEmpty()) {
                 // 未检测到附加参数，正常解析语句

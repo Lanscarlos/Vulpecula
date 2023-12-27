@@ -11,6 +11,9 @@ import java.util.concurrent.CompletableFuture
  */
 interface BacikalSeed<T> {
 
+    /**
+     * 是否已接收 BacikalReader 并完成解析
+     * */
     val isAccepted: Boolean
 
     fun accept(reader: BacikalReader)

@@ -25,19 +25,45 @@ interface BacikalContext {
      * */
     val reader: BacikalReader
 
+    /**
+     * 可空参数
+     * */
     fun <T> nullable(then: BacikalSeed<T>): BacikalSeed<T?>
 
+    /**
+     * 二元组
+     * */
     fun <T, R> pair(first: BacikalSeed<T>, second: BacikalSeed<R>): BacikalSeed<Pair<T, R>>
 
+    /**
+     * 三元组
+     * */
+    fun <T, R, S> triple(first: BacikalSeed<T>, second: BacikalSeed<R>, third: BacikalSeed<S>): BacikalSeed<Triple<T, R, S>>
+
+    /**
+     * 期望参数
+     * */
     fun <T> expect(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T>
 
+    /**
+     * 可选参数
+     * */
     fun <T> optional(vararg expect: String, then: BacikalSeed<T>): BacikalSeed<T?>
 
+    /**
+     * 可选参数
+     * */
     fun <T> optional(vararg expect: String, then: BacikalSeed<T>, def: T): BacikalSeed<T>
 
-    fun <T> argument(vararg prefix: String, then: BacikalSeed<T>): BacikalSeed<T?>
+    /**
+     * 附加参数
+     * */
+    fun <T> addition(vararg prefix: String, then: BacikalSeed<T>): BacikalSeed<T?>
 
-    fun <T> argument(vararg prefix: String, then: BacikalSeed<T>, def: T): BacikalSeed<T>
+    /**
+     * 附加参数
+     * */
+    fun <T> addition(vararg prefix: String, then: BacikalSeed<T>, def: T): BacikalSeed<T>
 
     fun token(): BacikalSeed<String>
 

@@ -27,14 +27,23 @@ fun <T> bacikalParser(func: BacikalContext.() -> BacikalFruit<T>): ScriptActionP
     }
 }
 
-fun bacikalQuest(name: String, func: BacikalQuestBuilder.() -> Unit): BacikalQuest {
+/**
+ * 构建可执行的任务
+ * */
+fun bacikalQuest(name: String = System.currentTimeMillis().toString(), func: BacikalQuestBuilder.() -> Unit): BacikalQuest {
     return DefaultQuestBuilder(name).also(func).build()
 }
 
+/**
+ * 构建仅含主函数的任务
+ * */
 fun bacikalSimpleQuest(name: String, func: BacikalBlockBuilder.() -> Unit): BacikalQuest {
     return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
 }
 
+/**
+ * 构建任务
+ * */
 fun String.toBacikalQuest(name: String): BacikalQuest {
     return DefaultQuestBuilder(name).also {
         it.appendBlock(name) {
