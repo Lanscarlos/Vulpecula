@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.modularity
 import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
 import taboolib.common5.Baffle
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 
 /**
  * Vulpecula

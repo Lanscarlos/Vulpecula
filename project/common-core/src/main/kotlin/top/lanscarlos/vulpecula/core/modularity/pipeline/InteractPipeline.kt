@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.core.modularity.pipeline
 
-import org.bukkit.event.Event
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
