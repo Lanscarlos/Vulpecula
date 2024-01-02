@@ -18,8 +18,6 @@ interface Module {
 
     val dispatchers: Map<String, ModularDispatcher>
 
-    val handlers: Map<String, ModularHandler>
-
     val workspace: BacikalWorkspace
 
     /**

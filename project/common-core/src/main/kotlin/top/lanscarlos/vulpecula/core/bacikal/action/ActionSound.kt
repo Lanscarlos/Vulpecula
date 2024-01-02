@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.core.bacikal.action
 
 import top.lanscarlos.vulpecula.bacikal.bacikalParser
+import top.lanscarlos.vulpecula.bacikal.parser.BacikalParser
 
 /**
  * Vulpecula
@@ -11,10 +12,11 @@ import top.lanscarlos.vulpecula.bacikal.bacikalParser
  */
 object ActionSound {
 
+    @BacikalParser("sound")
     fun parser() = bacikalParser {
         fructus(
             text(),
-            expect("by", then = pair(float(), float()))
+            optional("by", then = pair(float(), float()), def = 1f to 1f)
         ) { frame, name, (pitch, volume) ->
         }
     }

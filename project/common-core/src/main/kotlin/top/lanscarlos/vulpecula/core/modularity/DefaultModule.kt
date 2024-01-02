@@ -15,7 +15,6 @@ import top.lanscarlos.vulpecula.config.DefaultDynamicConfig
 import top.lanscarlos.vulpecula.core.VulpeculaContext
 import top.lanscarlos.vulpecula.core.utils.timing
 import top.lanscarlos.vulpecula.modularity.ModularDispatcher
-import top.lanscarlos.vulpecula.modularity.ModularHandler
 import top.lanscarlos.vulpecula.modularity.Module
 import java.io.File
 import java.util.function.Consumer
@@ -38,8 +37,6 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
     val automaticReloadHandler by config.readBoolean("automatic-reload.handler", true)
 
     override val dispatchers = mutableMapOf<String, ModularDispatcher>()
-
-    override val handlers = mutableMapOf<String, ModularHandler>()
 
     override val workspace = DefaultWorkspace(File(directory, "build"))
 
@@ -79,42 +76,10 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
                     this.dispatchers[key] = dispatcher
 
                     // 构建任务
-                    quests[dispatcher.id] = dispatcher.buildQuest()
+                    quests[dispatcher.id] = dispatcher.buildQuest() as BacikalScript
 
                     // 注册监听器
                     dispatcher.registerListener()
-                }
-            }
-            "handler" -> {
-                // 所有受影响的调度器
-                val affected = mutableSetOf<String>()
-
-                // 移除旧的处理器
-                val iterator = handlers.iterator()
-                while (iterator.hasNext()) {
-                    val handler = iterator.next().value
-                    if (handler.file == file) {
-                        // 注销监听器
-                        iterator.remove()
-                        affected += handler.bind
-                    }
-                }
-
-                // 加载新的处理器
-                val config = DefaultDynamicConfig(file)
-                for (key in config.readKeys(false)) {
-                    val handler = DefaultHandler(this, key, config)
-                    this.handlers[key] = handler
-
-                    // 将绑定的调度器加入缓存
-                    affected += handler.bind
-                }
-
-                // 构建脚本
-                for (dispatcher in dispatchers.values) {
-                    if (dispatcher.id in affected) {
-                        quests[dispatcher.id] = dispatcher.buildQuest()
-                    }
                 }
             }
         }
@@ -166,10 +131,10 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
 
             // 加载文件
             val config = DefaultDynamicConfig(file)
-            for (key in config.readKeys(false)) {
-                val handler = DefaultHandler(this, key, config)
-                handlers[key] = handler
-            }
+//            for (key in config.readKeys(false)) {
+//                val handler = DefaultHandler(this, key, config)
+//                handlers[key] = handler
+//            }
         }
     }
 
@@ -211,7 +176,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
                 dispatchers[key] = dispatcher
 
                 // 构建任务
-                quests[dispatcher.id] = dispatcher.buildQuest()
+                quests[dispatcher.id] = dispatcher.buildQuest() as BacikalScript
             }
         }
     }
@@ -276,7 +241,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
         fun e(e: PlayerQuitEvent) {
             registry.values.forEach { module ->
                 module.dispatchers.values.forEach { dispatcher ->
-                    dispatcher.baffle.reset(e.player.uniqueId.toString())
+                    dispatcher.baffle?.reset(e.player.uniqueId.toString())
                 }
             }
         }

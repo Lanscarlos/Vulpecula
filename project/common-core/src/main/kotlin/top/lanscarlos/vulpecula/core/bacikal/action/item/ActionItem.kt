@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.core.bacikal.action.item
 
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
+import taboolib.common.platform.Awake
 import top.lanscarlos.vulpecula.bacikal.bacikalParser
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalContext
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalFruit
@@ -16,9 +17,10 @@ import java.util.function.Supplier
  * @author Lanscarlos
  * @since 2023-08-29 10:56
  */
+@Awake(LifeCycle.LOAD)
 object ActionItem : ClassVisitor(-2) {
 
-    val registry = mutableMapOf<String, Resolver>()
+    private val registry = mutableMapOf<String, Resolver>()
 
     interface Resolver {
 

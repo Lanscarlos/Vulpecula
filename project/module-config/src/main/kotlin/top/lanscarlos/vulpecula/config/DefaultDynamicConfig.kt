@@ -25,14 +25,27 @@ class DefaultDynamicConfig(override val file: File, val config: Configuration) :
 
     val sections = linkedMapOf<String, DynamicSection<*>>()
 
+    var onBeforeReload: Runnable? = null
+    var onAfterReload: Runnable? = null
+
     init {
         config.onReload(this)
     }
 
     override fun run() {
+        onBeforeReload?.run()
         sections.values.forEach {
             it.update()
         }
+        onAfterReload?.run()
+    }
+
+    override fun onBeforeReload(runnable: Runnable) {
+        onBeforeReload = runnable
+    }
+
+    override fun onAfterReload(runnable: Runnable) {
+        onAfterReload = runnable
     }
 
     override fun get(path: String): Any? {

@@ -15,6 +15,16 @@ interface DynamicConfig {
     val file: File
 
     /**
+     * 在重置所有节点数据之前执行
+     * */
+    fun onBeforeReload(runnable: Runnable)
+
+    /**
+     * 在重置所有节点数据之后执行
+     * */
+    fun onAfterReload(runnable: Runnable)
+
+    /**
      * 获取数据
      * */
     operator fun get(path: String): Any?

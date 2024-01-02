@@ -21,6 +21,8 @@ interface BacikalQuest {
 
     val source: KetherQuest
 
+    fun createContext(): BacikalQuestContext
+
     fun runActions(func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?>
 }
 

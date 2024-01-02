@@ -15,6 +15,10 @@ class AberrantQuest(override val name: String, override val content: String, val
     override val source: KetherQuest
         get() = error("Quest $name is aberrant with compiling. exception: ${exception.localizedMessage}")
 
+    override fun createContext(): BacikalQuestContext {
+        error("Quest $name is aberrant with compiling. exception: ${exception.localizedMessage}")
+    }
+
     override fun runActions(func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?> {
         error("Quest $name is aberrant with compiling. exception: ${exception.localizedMessage}")
     }

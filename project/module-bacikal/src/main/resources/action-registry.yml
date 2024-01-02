@@ -40,7 +40,16 @@ item:
   switch: '@Item'
   local:
     - 'kether:v-item'
-    - 'vulpecula:item'
+    - 'vulpecula:v-item'
   remote:
     - 'kether:v-item'
-    - 'vulpecula:item'
+    - 'vulpecula:v-item'
+
+script:
+  shared: true
+  local:
+    - 'kether:v-script'
+    - 'vulpecula:v-script'
+  remote:
+    - 'kether:v-script'
+    - 'vulpecula:v-script'
