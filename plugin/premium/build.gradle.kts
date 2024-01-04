@@ -26,7 +26,7 @@ dependencies {
 
 tasks {
     withType<ShadowJar> {
-        archiveBaseName.set("Vulpecula")
+        archiveBaseName.set("Vulpecula-Premium")
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs"))
         append("config.yml")
