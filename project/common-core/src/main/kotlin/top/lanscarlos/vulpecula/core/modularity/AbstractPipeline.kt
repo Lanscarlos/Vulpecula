@@ -7,6 +7,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.modularity.DispatcherPipeline
+import java.lang.reflect.ParameterizedType
 import java.util.function.Supplier
 import kotlin.reflect.KClass
 
@@ -65,8 +66,10 @@ abstract class AbstractPipeline<T : Event>(val config: DynamicConfig) : Dispatch
                 return
             }
             try {
-                val event = clazz.kotlin.supertypes.firstOrNull()?.arguments?.firstOrNull()?.type?.classifier as? KClass<out Event> ?: return
-                register(event.java, clazz as Class<DispatcherPipeline<in Event>>)
+//                val event = clazz.kotlin.supertypes.firstOrNull()?.arguments?.firstOrNull()?.type?.classifier as? KClass<out Event> ?: return
+                val type = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0) ?: return
+                val event = (type as? Class<out Event>) ?: return
+                register(event, clazz as Class<DispatcherPipeline<in Event>>)
             } catch (ignored: Exception) {
             }
         }
