@@ -192,18 +192,6 @@ class DefaultBlockBuilder(override var name: String) : BacikalBlockBuilder {
     }
 
     /**
-     * 将未知的内容扁平化为字符串
-     * */
-    fun Any?.flatBy(separator: CharSequence): String {
-        return when (this) {
-            is String -> this
-            is Array<*> -> this.mapNotNull { it?.toString() }.joinToString(separator = separator)
-            is Collection<*> -> this.mapNotNull { it?.toString() }.joinToString(separator = separator)
-            else -> ""
-        }
-    }
-
-    /**
      * 根据指定的算法格式化内容
      * */
     fun Any.format(algorithm: String = "ke"): String {

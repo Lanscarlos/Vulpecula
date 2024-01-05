@@ -17,7 +17,7 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override var artifactFile: File? = null
 
-    override var eraseComment = true
+    override var eraseComments = true
 
     override var escapeUnicode = true
 
@@ -35,7 +35,7 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override fun build(): BacikalQuest {
 
-        if (eraseComment) {
+        if (eraseComments) {
             appendTransfer(CommentEraser())
         }
         if (escapeUnicode) {

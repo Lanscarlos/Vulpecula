@@ -25,7 +25,7 @@ interface BacikalQuestBuilder {
     /**
      * 是否擦除注释
      * */
-    var eraseComment: Boolean
+    var eraseComments: Boolean
 
     /**
      * 是否转义 Unicode

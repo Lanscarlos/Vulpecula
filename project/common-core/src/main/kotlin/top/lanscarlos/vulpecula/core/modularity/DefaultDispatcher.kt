@@ -11,6 +11,7 @@ import taboolib.common5.FileWatcher
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.bacikal.bacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
+import top.lanscarlos.vulpecula.bacikal.quest.FragmentReplacer
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.bindConfigSection
 import top.lanscarlos.vulpecula.core.VulpeculaContext
@@ -37,29 +38,29 @@ class DefaultDispatcher(
         get() = config.file
 
     @Suppress("UNCHECKED_CAST")
-    override val listen: Class<out Event> by config.read("$id.listen") { value ->
+    override val listen: Class<out Event> by config.read("listen") { value ->
         VulpeculaContext.getClass(value.toString()) as? Class<out Event>
             ?: error("Invalid listen class: \"$value\" at dispatcher \"$id\"")
     }
 
-    override val priority: EventPriority by config.read("$id.priority") { value ->
+    override val priority: EventPriority by config.read("priority") { value ->
         EventPriority.values().firstOrNull { it.name.equals(value?.toString(), true) }
             ?: error("Invalid priority: \"$value\" at dispatcher \"$id\"")
     }
 
-    override val acceptCancelled: Boolean by config.readBoolean("$id.accept-cancelled", false)
+    override val acceptCancelled: Boolean by config.readBoolean("accept-cancelled", false)
 
-    override val namespace: List<String> by config.readStringList("$id.namespace", emptyList())
+    override val namespace: List<String> by config.readStringList("namespace", emptyList())
 
-    override val preprocessing: Any? by config.read("$id.before-handle")
+    override val preprocessing: Any? by config.read("before-handle")
 
-    override val postprocessing: Any? by config.read("$id.after-handle")
+    override val postprocessing: Any? by config.read("after-handle")
 
-    override val handlers: List<String> by config.readStringList("$id.handlers", emptyList())
+    override val handlers: List<String> by config.readStringList("handlers", emptyList())
 
-    override val exceptions: Any? by config.read("$id.exceptions")
+    override val exceptions: Any? by config.read("exceptions")
 
-    override val baffle: Baffle? by config.read("$id.baffle") { value ->
+    override val baffle: Baffle? by config.read("baffle") { value ->
         when (value) {
             is ConfigurationSection -> {
                 when {
@@ -99,12 +100,24 @@ class DefaultDispatcher(
         }
     }
 
-    override val pipelines: List<DispatcherPipeline<in Event>> = AbstractPipeline.generate(listen, this.config)
+    /**
+     * 碎片替换
+     * */
+    private val fragments: Map<String, String> by config.read("fragments") { value ->
+        val section = value as? ConfigurationSection ?: return@read emptyMap()
+        val fragments = mutableMapOf<String, String>()
+
+        for (key in section.getKeys(false)) {
+            fragments[key] = section[key]?.toString() ?: continue
+        }
+
+        fragments
+    }
 
     /**
      * 导出源码文件
      * */
-    private val artifact: File? by config.read("$id.export") { value ->
+    private val artifact: File? by config.read("export") { value ->
         val path = value?.toString() ?: return@read null
         if (path.isEmpty() || path.isBlank()) {
             error("Invalid export path: \"$path\" at dispatcher \"$id\"")
@@ -123,7 +136,13 @@ class DefaultDispatcher(
     /**
      * 自动重载
      * */
-    private val automaticReload: Boolean by config.readBoolean("$id.automatic-reload", true)
+    private val automaticReload: Boolean by config.readBoolean("automatic-reload", true)
+
+    private val eraseComments: Boolean by config.readBoolean("erase-comments", true)
+
+    private val escapeUnicode: Boolean by config.readBoolean("escape-unicode", true)
+
+    override val pipelines: List<DispatcherPipeline<in Event>> = AbstractPipeline.generate(listen, this.config)
 
     private var quest: BacikalQuest
 
@@ -179,6 +198,10 @@ class DefaultDispatcher(
     fun buildQuest(): BacikalQuest {
         return bacikalQuest(id) {
             artifactFile = artifact
+            eraseComments = this@DefaultDispatcher.eraseComments
+            escapeUnicode = this@DefaultDispatcher.escapeUnicode
+            // 添加碎片替换
+            appendTransfer(FragmentReplacer(fragments))
 
             appendMainBlock {
                 if (ACTION_SCRIPT_HEADER != null) {
@@ -196,7 +219,7 @@ class DefaultDispatcher(
     /**
      * 处理事件
      * */
-    fun process(event: Event) {
+    private fun process(event: Event) {
         // 创建脚本上下文环境
         val context = quest.createContext()
 

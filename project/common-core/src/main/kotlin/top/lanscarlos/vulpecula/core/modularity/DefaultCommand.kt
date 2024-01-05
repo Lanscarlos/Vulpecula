@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.bacikal.bacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalBlockBuilder
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.DefaultBlockBuilder
+import top.lanscarlos.vulpecula.bacikal.quest.FragmentReplacer
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.modularity.ModularCommand
 import top.lanscarlos.vulpecula.modularity.Module
@@ -55,14 +56,9 @@ class DefaultCommand(
     override val useParser: Boolean by config.readBoolean("use-parser", false)
 
     /**
-     * 自动重载
-     * */
-    private val automaticReload: Boolean by config.readBoolean("$id.automatic-reload", true)
-
-    /**
      * 指令结构
      * */
-    val structure: Map<String, DefaultCommandBuilder> by config.read("structure") { value ->
+    private val structure: Map<String, DefaultCommandBuilder> by config.read("structure") { value ->
         val section = value as? ConfigurationSection ?: error("Invalid structure at command \"$id\"")
         val nodes = mutableMapOf<String, DefaultCommandBuilder>()
 
@@ -84,7 +80,7 @@ class DefaultCommand(
     /**
      * 公共函数库
      * */
-    val functions: Map<String, BacikalBlockBuilder> by config.read("functions") { value ->
+    private val functions: Map<String, BacikalBlockBuilder> by config.read("functions") { value ->
         val section = value as? ConfigurationSection ?: return@read emptyMap()
         val functions = mutableMapOf<String, BacikalBlockBuilder>()
 
@@ -94,6 +90,48 @@ class DefaultCommand(
 
         functions
     }
+
+    /**
+     * 碎片替换
+     * */
+    private val fragments: Map<String, String> by config.read("fragments") { value ->
+        val section = value as? ConfigurationSection ?: return@read emptyMap()
+        val fragments = mutableMapOf<String, String>()
+
+        for (key in section.getKeys(false)) {
+            fragments[key] = section[key]?.toString() ?: continue
+        }
+
+        fragments
+    }
+
+    /**
+     * 导出源码文件
+     * */
+    private val artifact: File? by config.read("export") { value ->
+        val path = value?.toString() ?: return@read null
+        if (path.isEmpty() || path.isBlank()) {
+            error("Invalid export path: \"$path\" at dispatcher \"$id\"")
+        }
+        val file = when (path[0]) {
+            '.', '/' -> File(file, path.substring(1))
+            '~' -> File(module.directory, path.substring(1))
+            else -> File(file, path)
+        }
+        if (file.isDirectory) {
+            error("Invalid export path: \"$path\" at dispatcher \"$id\", must be a file!")
+        }
+        file
+    }
+
+    /**
+     * 自动重载
+     * */
+    private val automaticReload: Boolean by config.readBoolean("automatic-reload", true)
+
+    private val eraseComments: Boolean by config.readBoolean("erase-comments", true)
+
+    private val escapeUnicode: Boolean by config.readBoolean("escape-unicode", true)
 
     /**
      * 根节点
@@ -107,14 +145,7 @@ class DefaultCommand(
         config.onAfterReload(this)
 
         // 构建脚本
-        quest = bacikalQuest {
-            for ((key, node) in structure) {
-                node.section["execute"]?.let { appendBlock("@$key", it) }
-            }
-            for (function in functions.values) {
-                appendBlock(function)
-            }
-        }
+        quest = buildQuest()
 
         // 构建命令
         root = structure["main"]?.build(-1) as? CommandBase ?: error("Invalid main structure at command \"$id\"")
@@ -131,14 +162,7 @@ class DefaultCommand(
         unregister()
 
         // 构建脚本
-        quest = bacikalQuest {
-            for ((key, node) in structure) {
-                node.section["execute"]?.let { appendBlock("@$key", it) }
-            }
-            for (function in functions.values) {
-                appendBlock(function)
-            }
-        }
+        quest = buildQuest()
 
         // 构建命令
         root = structure["main"]?.build(-1) as? CommandBase ?: error("Invalid main structure at command \"$id\"")
@@ -155,11 +179,31 @@ class DefaultCommand(
         }
     }
 
+    /**
+     * 构建脚本
+     * */
+    private fun buildQuest(): BacikalQuest {
+        return bacikalQuest {
+            artifactFile = artifact
+            eraseComments = this@DefaultCommand.eraseComments
+            escapeUnicode = this@DefaultCommand.escapeUnicode
+            // 添加碎片替换
+            appendTransfer(FragmentReplacer(fragments))
+
+            for ((key, node) in structure) {
+                node.section["execute"]?.let { appendBlock("@$key", it) }
+            }
+            for (function in functions.values) {
+                appendBlock(function)
+            }
+        }
+    }
+
     override fun register() {
         registerCommand(
             // 创建命令结构
             command = CommandStructure(
-                name ?: error("Custom command name undefined."),
+                name,
                 aliases,
                 description,
                 usage,
