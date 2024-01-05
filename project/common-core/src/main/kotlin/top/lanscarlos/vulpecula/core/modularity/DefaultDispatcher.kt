@@ -7,6 +7,7 @@ import taboolib.common.platform.event.ProxyListener
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common.platform.function.registerBukkitListener
 import taboolib.common5.Baffle
+import taboolib.common5.FileWatcher
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.bacikal.bacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
@@ -100,6 +101,9 @@ class DefaultDispatcher(
 
     override val pipelines: List<DispatcherPipeline<in Event>> = AbstractPipeline.generate(listen, this.config)
 
+    /**
+     * 导出源码文件
+     * */
     private val artifact: File? by config.read("$id.export") { value ->
         val path = value?.toString() ?: return@read null
         if (path.isEmpty() || path.isBlank()) {
@@ -116,23 +120,45 @@ class DefaultDispatcher(
         file
     }
 
+    /**
+     * 自动重载
+     * */
+    private val automaticReload: Boolean by config.readBoolean("$id.automatic-reload", true)
+
     private var quest: BacikalQuest
+
+    private var listener: ProxyListener? = null
 
     override val isRunning: Boolean
         get() = listener != null
 
-    private var listener: ProxyListener? = null
-
     init {
         config.onAfterReload(this)
         quest = buildQuest()
+
+        if (automaticReload) {
+            FileWatcher.INSTANCE.addSimpleListener(file) {
+                config.reload()
+            }
+        }
     }
 
     /**
      * 配置文件重载后执行
      * */
     override fun run() {
-        TODO("Not yet implemented")
+        // 重新构建脚本
+        quest = buildQuest()
+
+        // 检查文件自动重载
+        if (automaticReload) {
+            FileWatcher.INSTANCE.addSimpleListener(file) {
+                config.reload()
+            }
+        } else if (FileWatcher.INSTANCE.hasListener(file)) {
+            // 移除自动重载
+            FileWatcher.INSTANCE.removeListener(file)
+        }
     }
 
     override fun registerListener() {
@@ -154,7 +180,7 @@ class DefaultDispatcher(
         return bacikalQuest(id) {
             artifactFile = artifact
 
-            appendBaseBlock {
+            appendMainBlock {
                 if (ACTION_SCRIPT_HEADER != null) {
                     // 如果存在脚本语句, 则添加脚本语句
                     for (handler in handlers) {

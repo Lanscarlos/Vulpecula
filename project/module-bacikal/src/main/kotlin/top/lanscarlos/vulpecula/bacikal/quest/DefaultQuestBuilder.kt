@@ -17,32 +17,40 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override var artifactFile: File? = null
 
+    override var eraseComment = true
+
+    override var escapeUnicode = true
+
     override val namespace = Bacikal.service.compileNamespace.toMutableList()
 
     override val transfers = linkedMapOf<String, BacikalQuestTransfer>()
 
     override var compiler = Bacikal.service.questCompiler
 
+    override var executor = Bacikal.service.questExecutor
+
     val blocks = linkedMapOf<String, BacikalBlockBuilder>()
 
     val source = StringBuilder()
 
-    init {
-        appendTransfer(FragmentReplacer())
-        appendTransfer(CommentEraser())
-        appendTransfer(UnicodeEscalator())
-    }
-
     override fun build(): BacikalQuest {
-        val main = blocks[QuestContext.BASE_BLOCK] ?: throw IllegalArgumentException("Main block not found.")
 
-        // 注入预设命名空间
-        main.namespace += namespace
+        if (eraseComment) {
+            appendTransfer(CommentEraser())
+        }
+        if (escapeUnicode) {
+            appendTransfer(UnicodeEscalator())
+        }
 
         // 构建源码
         for (block in blocks.values) {
             source.append(block.build())
             source.append("\n\n")
+        }
+
+        // 转换
+        for (transfer in transfers.values) {
+            transfer.transfer(source)
         }
 
         // 写入构建文件
@@ -57,15 +65,15 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
         return compiler.compile(name, source.toString(), namespace)
     }
 
-    override fun appendBaseBlock(func: BacikalBlockBuilder.() -> Unit) {
+    override fun appendMainBlock(func: BacikalBlockBuilder.() -> Unit) {
         val block = DefaultBlockBuilder(QuestContext.BASE_BLOCK)
         appendBlock(block)
         block.also(func)
     }
 
-    override fun appendBlock(name: String?, content: String) {
+    override fun appendBlock(name: String?, content: Any) {
         appendBlock(name) {
-            appendLiteral(content)
+            appendContent(content)
         }
     }
 
@@ -83,7 +91,7 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override fun appendBlock(block: BacikalBlockBuilder) {
         if (blocks.containsKey(block.name)) {
-            throw IllegalArgumentException("Block name ${block.name} has already exists.")
+            error("Block name ${block.name} has already exists.")
         }
         blocks[block.name] = block
     }

@@ -15,14 +15,14 @@ class CommentEraser : BacikalQuestTransfer {
     override val name = "comment-eraser"
 
     override fun transfer(source: StringBuilder) {
-        val regex = PATTERN_COMMENT ?: return
+        val regex = REGEX_COMMENT ?: return
         val result = regex.replace(source.extract(), "")
         source.append(result)
     }
 
     companion object {
 
-        val PATTERN_COMMENT by bindConfigSection("bacikal.comment-pattern") { value ->
+        val REGEX_COMMENT by bindConfigSection("bacikal.comment-pattern") { value ->
             when (value) {
                 is String -> value.toRegex()
                 is Array<*> -> value.mapNotNull { it?.toString() }.joinToString(separator = "|").toRegex()

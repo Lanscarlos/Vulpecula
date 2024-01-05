@@ -18,6 +18,11 @@ interface BacikalQuestContext {
     val quest: BacikalQuest
 
     /**
+     * 入口主函数名
+     * */
+    val entry: String
+
+    /**
      * 脚本执行者
      * */
     var sender: ProxyCommandSender?

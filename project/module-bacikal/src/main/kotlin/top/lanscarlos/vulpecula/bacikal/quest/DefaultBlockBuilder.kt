@@ -11,22 +11,39 @@ import taboolib.library.configuration.ConfigurationSection
  */
 class DefaultBlockBuilder(override var name: String) : BacikalBlockBuilder {
 
+    constructor(key: String, content: Any): this(key) {
+        when (content) {
+            is String -> {
+                appendContent(content)
+            }
+            is ConfigurationSection -> {
+                val arguments = when (val value = content["arguments"]) {
+                    is String -> listOf(value)
+                    is List<*> -> value.mapNotNull { it?.toString() }
+                    is Array<*> -> value.mapNotNull { it?.toString() }
+                    else -> emptyList()
+                }
+
+                // 参数转化
+                for ((i, arg) in arguments.withIndex()) {
+                    appendLiteral("set $arg to &arg$i\n")
+                }
+                appendContent(content["content"])
+            }
+        }
+    }
+
     override val namespace = mutableListOf<String>()
 
     override val preprocessor = StringBuilder()
 
     override val postprocessor = StringBuilder()
 
-    override val variables = linkedMapOf<String, StringBuilder>()
-
     override val content = StringBuilder()
 
-    override val condition = StringBuilder()
-
-    override val deny = StringBuilder()
-
-    override val exceptions = linkedMapOf<String, StringBuilder>() // catch -> handle
-
+    /**
+     * 源码缓存
+     * */
     val source = StringBuilder()
 
     override fun build(): String {
@@ -58,84 +75,10 @@ class DefaultBlockBuilder(override var name: String) : BacikalBlockBuilder {
         }
 
         /*
-        * 构建变量
-        * set $key to $value
-        * set $key to {
-        *   ...$value
-        * }
-        * */
-        if (variables.isNotEmpty()) {
-            for (entry in variables) {
-                if (entry.value.contains('\n')) {
-                    // 含有换行
-                    builder.append("set ${entry.key} to {\n")
-                    builder.appendWithIndent(entry.value.toString())
-                    builder.append("}\n")
-                } else {
-                    // 不含有换行
-                    builder.append("set ${entry.key} to ${entry.value}\n")
-                }
-            }
-            builder.append('\n')
-        }
-
-        /*
         * 构建核心语句
         * */
         if (content.isNotEmpty()) {
             builder.append(content.toString())
-        }
-
-        /*
-        * 构建条件体
-        * if {
-        *   ...$condition
-        * } then {
-        *   ...$content
-        * } else {
-        *   ...$deny
-        * }
-        * */
-        if (condition.isNotEmpty()) {
-            val content = builder.extract()
-
-            builder.append("if {\n")
-            builder.appendWithIndent(condition.toString())
-            builder.append("} then {\n")
-            builder.appendWithIndent(content)
-            if (deny.isNotEmpty()) {
-                builder.append("} else {\n")
-                builder.appendWithIndent(deny.toString())
-            }
-            builder.append("}")
-        }
-
-        /*
-        * 构建异常捕捉
-        * try {
-        *   ...$content
-        * } catch with "...$key...|...$key2..." {
-        *   ...$value
-        * }
-        * */
-        if (exceptions.isNotEmpty()) {
-            val content = builder.extract()
-
-            builder.append("try {\n")
-            builder.appendWithIndent(content)
-            builder.append("}\n")
-
-            for (it in exceptions) {
-                if (it.value.isEmpty()) continue
-
-                builder.append(" catch ")
-                if (it.key.isNotEmpty() && it.key != "*") {
-                    builder.append("with \"${it.key}\" ")
-                }
-                builder.append("{\n")
-                builder.appendWithIndent(it.value.toString())
-                builder.append("}")
-            }
         }
 
         /*
@@ -164,22 +107,6 @@ class DefaultBlockBuilder(override var name: String) : BacikalBlockBuilder {
         return builder.toString()
     }
 
-    override fun appendVariables(value: Any?) {
-        when (value) {
-            is ConfigurationSection -> {
-                for (key in value.getKeys(false)) {
-                    variables.computeIfAbsent(key) { StringBuilder() }.appendSection(value[key] ?: continue)
-                }
-            }
-            is Map<*, *> -> {
-                for (entry in value) {
-                    val key = entry.key?.toString() ?: continue
-                    variables.computeIfAbsent(key) { StringBuilder() }.appendSection(entry.value ?: continue)
-                }
-            }
-        }
-    }
-
     override fun appendPreprocessor(value: Any?) {
         if (value == null) return
         preprocessor.appendSection(value)
@@ -203,40 +130,6 @@ class DefaultBlockBuilder(override var name: String) : BacikalBlockBuilder {
      * */
     override fun appendLiteral(value: String) {
         content.append(value)
-    }
-
-    override fun appendCondition(value: Any?) {
-        if (value == null) return
-        condition.appendSection(value)
-    }
-
-    override fun appendDeny(value: Any?) {
-        if (value == null) return
-        deny.appendSection(value)
-    }
-
-    override fun appendExceptions(value: Any?) {
-        when (value) {
-            is String -> exceptions.computeIfAbsent("*") { StringBuilder() }.appendSection(value)
-            is Map<*, *>,
-            is ConfigurationSection -> {
-                // 指定了异常类型
-                val section = if (value is ConfigurationSection) {
-                    value.toMap()
-                } else value as Map<*, *>
-
-                val handle = section["handle"] ?: return
-                val catch = section["catch"]?.flatBy("|") ?: return
-                exceptions.computeIfAbsent(catch) { StringBuilder() }.appendSection(handle)
-            }
-            is List<*> -> {
-                value.mapNotNull { it as? Map<*, *> }.forEach { section ->
-                    val handle = section["handle"] ?: return
-                    val catch = section["catch"]?.flatBy("|") ?: return@forEach
-                    exceptions.computeIfAbsent(catch) { StringBuilder() }.appendSection(handle)
-                }
-            }
-        }
     }
 
     /**

@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.modularity
 
+import taboolib.common.platform.command.PermissionDefault
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.modularity
@@ -38,6 +40,16 @@ interface ModularCommand : ModularComponent {
      * 命令权限消息
      * */
     val permissionMessage: String
+
+    /**
+     * 命令权限默认值
+     * */
+    val permissionDefault: PermissionDefault
+
+    /**
+     * 是否使用新解析器
+     * */
+    val useParser: Boolean
 
     /**
      * 注册命令

@@ -3,6 +3,8 @@
 bacikal:
   # 编译器
   compiler: 'bacikal'
+  # 执行器
+  executor: 'kether'
   # 编译时命名空间
   compile-namespace:
     - 'vulpecula'

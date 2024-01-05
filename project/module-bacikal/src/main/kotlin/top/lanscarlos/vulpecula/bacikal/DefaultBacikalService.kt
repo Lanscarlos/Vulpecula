@@ -30,8 +30,15 @@ object DefaultBacikalService : BacikalService {
         }
     }
 
-    val questContext: String by bindConfigSection("bacikal.context") { value ->
-        value?.toString()?.lowercase() ?: "kether"
+    override val questExecutor: BacikalQuestExecutor by bindConfigSection("bacikal.executor") { value ->
+        when (value) {
+            "kether" -> KetherQuestExecutor
+            "coroutines" -> CoroutinesQuestExecutor
+            else -> {
+                warning("Unknown executor: $value, use kether executor.")
+                KetherQuestExecutor
+            }
+        }
     }
 
     override fun buildQuest(name: String, func: Consumer<BacikalQuestBuilder>): BacikalQuest {
@@ -42,17 +49,6 @@ object DefaultBacikalService : BacikalService {
 
     override fun buildSimpleQuest(name: String, func: Consumer<BacikalBlockBuilder>): BacikalQuest {
         return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
-    }
-
-    override fun createQuestContext(quest: BacikalQuest): BacikalQuestContext {
-        return when (questContext) {
-            "coroutines" -> CoroutinesQuestContext(quest)
-            "kether" -> KetherQuestContext(quest)
-            else -> {
-                warning("Unknown context: $questContext, use kether context.")
-                KetherQuestContext(quest)
-            }
-        }
     }
 
 }

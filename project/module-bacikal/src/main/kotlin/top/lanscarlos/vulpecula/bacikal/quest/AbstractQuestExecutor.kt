@@ -15,51 +15,47 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-08-25 11:24
  */
-abstract class AbstractQuestContext(override val quest: BacikalQuest) : BacikalQuestContext {
+abstract class AbstractQuestExecutor(override val quest: BacikalQuest, override val entry: String) : BacikalQuestContext {
+
+    val context: ScriptContext by lazy { InnerContext() }
 
     override var sender: ProxyCommandSender?
-        get() = source.sender
-        set(value) { source.sender = value }
-
-    val source: ScriptContext by lazy { InnerContext() }
+        get() = context.sender
+        set(value) { context.sender = value }
 
 
     override fun initVariables(variables: Map<String, Any>) {
-        variables.forEach { (key, value) -> source[key] = value }
+        variables.forEach { (key, value) -> context[key] = value }
     }
 
     override fun <T> getVariable(key: String): T? {
-        return source.get<T>(key)
+        return context.get<T>(key)
     }
 
     override fun setVariable(key: String, value: Any?) {
-        source[key] = value
+        context[key] = value
     }
 
     override fun setVariables(vararg key: String, value: Any?) {
-        key.forEach { source[it] = value }
+        key.forEach { context[it] = value }
     }
 
     override fun runActions(): CompletableFuture<Any?> {
-        return source.runActions().exceptionally { ex ->
+        return context.runActions().exceptionally { ex ->
             ex.printKetherErrorMessage(true)
             warning("Quest ${quest.name} run failed: ${ex.localizedMessage}")
         }
     }
 
     override fun terminate() {
-        source.terminate()
+        context.terminate()
     }
 
     abstract fun createRootFrame(context: InnerContext): QuestContext.Frame
 
     inner class InnerContext : ScriptContext(ScriptService, quest.source) {
         override fun createRootFrame(): QuestContext.Frame {
-            return this@AbstractQuestContext.createRootFrame(this)
-        }
-
-        fun superCreateRootFrame(): QuestContext.Frame {
-            return super.createRootFrame()
+            return this@AbstractQuestExecutor.createRootFrame(this)
         }
     }
 }

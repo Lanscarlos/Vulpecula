@@ -21,9 +21,11 @@ interface BacikalQuest {
 
     val source: KetherQuest
 
-    fun createContext(): BacikalQuestContext
+    var executor: BacikalQuestExecutor
 
-    fun runActions(func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?>
+    fun createContext(entry: String = "main"): BacikalQuestContext
+
+    fun runActions(entry: String = "main", func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?>
 }
 
 typealias KetherQuest = Quest

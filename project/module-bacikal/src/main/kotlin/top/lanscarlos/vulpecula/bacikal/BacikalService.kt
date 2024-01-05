@@ -16,13 +16,10 @@ interface BacikalService {
 
     val questCompiler: BacikalQuestCompiler
 
+    val questExecutor: BacikalQuestExecutor
+
     fun buildQuest(name: String, func: Consumer<BacikalQuestBuilder>): BacikalQuest
 
     fun buildSimpleQuest(name: String, func: Consumer<BacikalBlockBuilder>): BacikalQuest
-
-    /**
-     * 创建任务运行时上下文
-     * */
-    fun createQuestContext(quest: BacikalQuest): BacikalQuestContext
 
 }

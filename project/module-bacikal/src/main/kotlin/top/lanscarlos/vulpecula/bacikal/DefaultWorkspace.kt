@@ -48,7 +48,7 @@ class DefaultWorkspace(override val directory: File) : BacikalWorkspace {
 
     override fun runActions(quest: BacikalQuest, func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?> {
         val id = quest.name
-        val context = Bacikal.service.createQuestContext(quest).also(func)
+        val context = Bacikal.service.questExecutor.createContext(quest).also(func)
         runningQuests.computeIfAbsent(id) { mutableListOf() } += context
 
         return context.runActions().thenApply { value ->

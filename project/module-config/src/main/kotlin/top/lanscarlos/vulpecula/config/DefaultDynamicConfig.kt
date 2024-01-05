@@ -40,6 +40,10 @@ class DefaultDynamicConfig(override val file: File, val config: Configuration) :
         onAfterReload?.run()
     }
 
+    override fun reload() {
+        config.reload()
+    }
+
     override fun onBeforeReload(runnable: Runnable) {
         onBeforeReload = runnable
     }

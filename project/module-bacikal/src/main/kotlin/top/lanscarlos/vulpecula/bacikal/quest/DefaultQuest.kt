@@ -12,11 +12,14 @@ import java.util.concurrent.CompletableFuture
  * @since 2023-08-20 22:32
  */
 open class DefaultQuest(override val name: String, override val content: String, override val source: Quest) : BacikalQuest {
-    override fun createContext(): BacikalQuestContext {
-        return Bacikal.service.createQuestContext(this)
+
+    override var executor: BacikalQuestExecutor = Bacikal.service.questExecutor
+
+    override fun createContext(entry: String): BacikalQuestContext {
+        return executor.createContext(this, entry)
     }
 
-    override fun runActions(func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?> {
-        return createContext().apply(func).runActions()
+    override fun runActions(entry: String, func: BacikalQuestContext.() -> Unit): CompletableFuture<Any?> {
+        return createContext(entry).apply(func).runActions()
     }
 }

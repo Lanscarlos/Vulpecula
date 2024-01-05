@@ -22,23 +22,68 @@ interface BacikalQuestBuilder {
      * */
     var artifactFile: File?
 
+    /**
+     * 是否擦除注释
+     * */
+    var eraseComment: Boolean
+
+    /**
+     * 是否转义 Unicode
+     * */
+    var escapeUnicode: Boolean
+
+    /**
+     * 编译时命名空间
+     * */
     val namespace: MutableList<String>
 
+    /**
+     * 转换器
+     * */
     val transfers: MutableMap<String, BacikalQuestTransfer>
 
+    /**
+     * 编译器
+     * */
     var compiler: BacikalQuestCompiler
 
+    /**
+     * 执行器
+     * */
+    var executor: BacikalQuestExecutor
+
+    /**
+     * 构建任务
+     * */
     fun build(): BacikalQuest
 
+    /**
+     * 添加函数块
+     * */
     fun appendBlock(block: BacikalBlockBuilder)
 
-    fun appendBaseBlock(func: BacikalBlockBuilder.() -> Unit)
+    /**
+     * 添加主函数块
+     * */
+    fun appendMainBlock(func: BacikalBlockBuilder.() -> Unit)
 
-    fun appendBlock(name: String? = null, content: String)
+    /**
+     * 添加函数块
+     * */
+    fun appendBlock(name: String? = null, content: Any)
 
+    /**
+     * 添加函数块
+     * */
     fun appendBlock(name: String? = null, func: BacikalBlockBuilder.() -> Unit)
 
+    /**
+     * 添加函数块
+     * */
     fun appendBlock(name: String? = null, func: Consumer<BacikalBlockBuilder>)
 
+    /**
+     * 添加转换器
+     * */
     fun appendTransfer(transfer: BacikalQuestTransfer)
 }

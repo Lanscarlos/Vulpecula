@@ -15,6 +15,11 @@ interface DynamicConfig {
     val file: File
 
     /**
+     * 手动重载配置文件
+     * */
+    fun reload()
+
+    /**
      * 在重置所有节点数据之前执行
      * */
     fun onBeforeReload(runnable: Runnable)
