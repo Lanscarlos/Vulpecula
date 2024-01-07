@@ -69,7 +69,7 @@ canvas-pattern:
 
 # 粒子观察者语句
 # 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
-canvas-viewer:
+canvas-viewers:
   local:
     - 'vulpecula-canvas:viewer'
   remote:

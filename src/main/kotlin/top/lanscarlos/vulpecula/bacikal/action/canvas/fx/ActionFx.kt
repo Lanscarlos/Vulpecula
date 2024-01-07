@@ -39,7 +39,7 @@ object ActionFx : ClassInjector() {
         registerResolver(resolver)
     }
 
-    @BacikalParser("fx")
+    @BacikalParser("canvas-fx")
     fun parser() = bacikal {
         combine(
             LiveData {

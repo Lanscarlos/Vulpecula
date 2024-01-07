@@ -37,7 +37,7 @@ object ActionViewers {
      * viewers to [ player name literal Lanscarlos ]
      *
      * */
-    @BacikalParser("viewers")
+    @BacikalParser("canvas-viewers")
     fun parser() = bacikal {
         combine(
             viewers()

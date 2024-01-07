@@ -132,7 +132,7 @@ class ActionPattern : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser("pattern")
+        @BacikalParser("canvas-pattern")
         fun parser() = ScriptActionParser<Any?> {
             ActionPattern().resolve(this)
         }

@@ -22,7 +22,7 @@ object ActionDuration {
      *
      * duration out 200
      * */
-    @BacikalParser("duration")
+    @BacikalParser("canvas-duration")
     fun parser() = bacikalSwitch {
         case("in") {
             combine(

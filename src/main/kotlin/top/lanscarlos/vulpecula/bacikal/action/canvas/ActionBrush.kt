@@ -17,7 +17,7 @@ import java.awt.Color
 
 object ActionBrush {
 
-    @BacikalParser("brush")
+    @BacikalParser("canvas-brush")
     fun parser() = bacikal {
         combine(
             argument("type", "t", then = text(display = "type")),

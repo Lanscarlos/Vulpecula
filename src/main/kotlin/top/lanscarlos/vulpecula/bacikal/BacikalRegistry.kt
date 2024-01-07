@@ -126,7 +126,7 @@ object BacikalRegistry : ClassInjector() {
             for ((namespace, name) in remote) {
                 connection.call(
                     StandardChannel.REMOTE_ADD_ACTION,
-                    arrayOf(namespace, name, parser)
+                    arrayOf(pluginId, name, namespace)
                 )
             }
         }
