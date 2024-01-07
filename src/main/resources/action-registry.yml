@@ -369,6 +369,7 @@ try-catch:
 
 # Unicode 语句
 unicode:
+  disable: true
   local:
     - 'kether:v-unicode'
     - 'vulpecula:unicode'
