@@ -121,10 +121,7 @@ class ActionEvent : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser(
-            id = "event",
-            aliases = ["event"]
-        )
+        @BacikalParser("event")
         fun parser() = ScriptActionParser<Any?> {
             ActionEvent().resolve(this)
         }

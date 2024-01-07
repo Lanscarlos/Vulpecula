@@ -19,10 +19,7 @@ import java.util.regex.Matcher
  */
 object ActionRegex {
 
-    @BacikalParser(
-        id = "regex",
-        aliases = ["regex"]
-    )
+    @BacikalParser("regex")
     fun parser() = bacikalSwitch {
         case("group") {
             combine(

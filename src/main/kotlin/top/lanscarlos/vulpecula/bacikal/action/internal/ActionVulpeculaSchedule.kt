@@ -15,10 +15,7 @@ import top.lanscarlos.vulpecula.internal.ScheduleTask
  */
 object ActionVulpeculaSchedule {
 
-    @BacikalParser(
-        id = "vulpecula-schedule",
-        aliases = ["vul-schedule"]
-    )
+    @BacikalParser("vulpecula-schedule")
     fun parser() = bacikal {
         resolve(this)
     }

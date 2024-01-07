@@ -37,11 +37,7 @@ object ActionViewers {
      * viewers to [ player name literal Lanscarlos ]
      *
      * */
-    @BacikalParser(
-        id = "viewers",
-        aliases = ["viewers", "viewer"],
-        namespace = "vulpecula-canvas"
-    )
+    @BacikalParser("viewers")
     fun parser() = bacikal {
         combine(
             viewers()

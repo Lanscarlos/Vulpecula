@@ -34,10 +34,7 @@ object ActionInput {
         e.isCancelled = true
     }
 
-    @BacikalParser(
-        id = "input",
-        aliases = ["input"]
-    )
+    @BacikalParser("input")
     fun parser() = bacikal {
         combineOf(
             optional("from", "by", then = text("chat"), def = "chat"),

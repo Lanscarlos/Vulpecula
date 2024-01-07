@@ -22,11 +22,7 @@ import top.lanscarlos.vulpecula.utils.*
  */
 object ActionDraw {
 
-    @BacikalParser(
-        id = "draw",
-        aliases = ["draw"],
-        namespace = "vulpecula-canvas"
-    )
+    @BacikalParser("draw")
     fun parser() = bacikal {
         combine(
             optional("at", then = location()),

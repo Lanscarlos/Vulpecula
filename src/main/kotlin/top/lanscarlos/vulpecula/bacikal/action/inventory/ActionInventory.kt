@@ -93,10 +93,7 @@ class ActionInventory : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser(
-            id = "inventory",
-            aliases = ["inventory", "inv"]
-        )
+        @BacikalParser("inventory")
         fun parser() = ScriptActionParser<Any?> {
             ActionInventory().resolve(this)
         }

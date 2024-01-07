@@ -16,10 +16,7 @@ import java.util.concurrent.CompletableFuture
  */
 object ActionTryCatch {
 
-    @BacikalParser(
-        id = "try-catch",
-        aliases = ["try"]
-    )
+    @BacikalParser("try-catch")
     fun parser() = bacikal {
         combineOf(
             action(),

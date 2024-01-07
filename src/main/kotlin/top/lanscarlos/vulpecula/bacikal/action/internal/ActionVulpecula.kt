@@ -12,10 +12,7 @@ import top.lanscarlos.vulpecula.bacikal.bacikal
  */
 object ActionVulpecula {
 
-    @BacikalParser(
-        id = "vulpecula",
-        aliases = ["vulpecula", "vul"]
-    )
+    @BacikalParser("vulpecula")
     fun parser() = bacikal {
         when (val next = this.nextToken()) {
             "dispatcher" -> ActionVulpeculaDispatcher.resolve(this)

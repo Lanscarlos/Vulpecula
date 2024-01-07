@@ -22,10 +22,7 @@ import java.io.File
  */
 object ActionUnicode {
 
-    @BacikalParser(
-        id = "unicode",
-        aliases = ["unicode"]
-    )
+    @BacikalParser("unicode")
     fun parser() = bacikal {
         combine(
             text(display = "source text")

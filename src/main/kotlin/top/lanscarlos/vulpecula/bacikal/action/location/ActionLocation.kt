@@ -130,10 +130,7 @@ class ActionLocation : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser(
-            id = "location",
-            aliases = ["location", "loc"]
-        )
+        @BacikalParser("location")
         fun parser() = ScriptActionParser<Any?> {
             ActionLocation().resolve(this)
         }

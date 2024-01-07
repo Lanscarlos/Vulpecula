@@ -18,10 +18,7 @@ object ActionParticles {
      * particles play at &loc -x -xx
      *
      * */
-    @BacikalParser(
-        id = "particles",
-        aliases = ["particles"]
-    )
+    @BacikalParser("particles")
     fun parser() = bacikalSwitch {
         case("play") {
             combine(

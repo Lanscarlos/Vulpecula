@@ -13,7 +13,7 @@ import kotlin.math.*
  */
 object ActionMaths {
 
-    @BacikalParser(id = "pow", aliases = ["pow"])
+    @BacikalParser("pow")
     fun powParser() = bacikal {
         combine(
             double(),
@@ -21,56 +21,56 @@ object ActionMaths {
         ) { base, power -> base.pow(power) }
     }
 
-    @BacikalParser(id = "sqrt", aliases = ["sqrt"])
+    @BacikalParser("sqrt")
     fun sqrtParser() = bacikal {
         combine(
             double()
         ) { base -> sqrt(base) }
     }
 
-    @BacikalParser(id = "ceil", aliases = ["ceil"])
+    @BacikalParser("ceil")
     fun ceilParser() = bacikal {
         combine(
             double()
         ) { base -> ceil(base) }
     }
 
-    @BacikalParser(id = "ln", aliases = ["ln"])
+    @BacikalParser("ln")
     fun lnParser() = bacikal {
         combine(
             double()
         ) { base -> ln(base) }
     }
 
-    @BacikalParser(id = "lg", aliases = ["lg"])
+    @BacikalParser("lg")
     fun lgParser() = bacikal {
         combine(
             double()
         ) { base -> log10(base) }
     }
 
-    @BacikalParser(id = "radian", aliases = ["radian", "rad"])
+    @BacikalParser("radian")
     fun radianParser() = bacikal {
         combine(
             double()
         ) { base -> Math.toRadians(base) }
     }
 
-    @BacikalParser(id = "sin", aliases = ["sin"])
+    @BacikalParser("sin")
     fun sinParser() = bacikal {
         combine(
             double()
         ) { base -> sin(base) }
     }
 
-    @BacikalParser(id = "cos", aliases = ["cos"])
+    @BacikalParser("cos")
     fun cosParser() = bacikal {
         combine(
             double()
         ) { base -> cos(base) }
     }
 
-    @BacikalParser(id = "tan", aliases = ["tan"])
+    @BacikalParser("tan")
     fun tanParser() = bacikal {
         combine(
             double()

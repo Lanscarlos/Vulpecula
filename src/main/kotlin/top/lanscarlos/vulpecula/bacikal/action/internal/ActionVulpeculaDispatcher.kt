@@ -15,10 +15,7 @@ import top.lanscarlos.vulpecula.internal.EventDispatcher
  */
 object ActionVulpeculaDispatcher {
 
-    @BacikalParser(
-        id = "vulpecula-dispatcher",
-        aliases = ["vul-dispatcher"]
-    )
+    @BacikalParser("vulpecula-dispatcher")
     fun parser() = bacikal {
         resolve(this)
     }

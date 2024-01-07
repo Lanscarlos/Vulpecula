@@ -39,11 +39,7 @@ object ActionFx : ClassInjector() {
         registerResolver(resolver)
     }
 
-    @BacikalParser(
-        id = "fx",
-        aliases = ["fx"],
-        namespace = "vulpecula-canvas"
-    )
+    @BacikalParser("fx")
     fun parser() = bacikal {
         combine(
             LiveData {

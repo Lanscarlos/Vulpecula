@@ -73,10 +73,7 @@ class ActionIllusion : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser(
-            id = "illusion",
-            aliases = ["illusion"]
-        )
+        @BacikalParser("illusion")
         fun parser() = ScriptActionParser<Any?> {
             ActionIllusion().resolve(this)
         }

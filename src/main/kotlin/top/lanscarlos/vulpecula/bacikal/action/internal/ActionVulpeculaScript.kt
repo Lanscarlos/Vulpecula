@@ -14,10 +14,7 @@ import java.util.concurrent.CompletableFuture
  */
 object ActionVulpeculaScript {
 
-    @BacikalParser(
-        id = "vulpecula-script",
-        aliases = ["vul-script", "script"]
-    )
+    @BacikalParser("vulpecula-script")
     fun parser() = bacikal {
         resolve(this)
     }

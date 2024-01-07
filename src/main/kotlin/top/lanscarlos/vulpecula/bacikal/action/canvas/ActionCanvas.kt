@@ -28,10 +28,7 @@ object ActionCanvas {
     const val VARIABLE_VIEWERS = "@CanvasViewers"
     const val VARIABLE_PATTERNS = "@CanvasPatterns"
 
-    @BacikalParser(
-        id = "canvas",
-        aliases = ["canvas"],
-    )
+    @BacikalParser("canvas")
     fun parser() = bacikal {
         // 添加内部命名空间
         addNamespace(NAMESPACE_EXTEND)

@@ -158,10 +158,7 @@ class ActionTarget : QuestAction<Any?>() {
             }
         }
 
-        @BacikalParser(
-            id = "target",
-            aliases = ["target"]
-        )
+        @BacikalParser("target")
         fun parser() = ScriptActionParser<Any?> {
             ActionTarget().resolve(this)
         }

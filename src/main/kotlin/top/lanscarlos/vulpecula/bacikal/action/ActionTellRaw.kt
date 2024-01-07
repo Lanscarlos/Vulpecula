@@ -18,10 +18,7 @@ object ActionTellRaw {
     /**
      * tell-raw &message
      * */
-    @BacikalParser(
-        id = "tell-raw",
-        aliases = ["tell-raw"]
-    )
+    @BacikalParser("tell-raw")
     fun tellRawParser() = bacikal {
         combine(
             text()
@@ -34,10 +31,7 @@ object ActionTellRaw {
      * tell &message
      * tell raw &message
      * */
-    @BacikalParser(
-        id = "tell",
-        aliases = ["tell"]
-    )
+    @BacikalParser("tell")
     fun tellParser() = bacikal {
         combine(
             LiveData.readerOf { !this.expectToken("raw") },

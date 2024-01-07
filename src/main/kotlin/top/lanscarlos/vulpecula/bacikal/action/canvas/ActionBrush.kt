@@ -17,11 +17,7 @@ import java.awt.Color
 
 object ActionBrush {
 
-    @BacikalParser(
-        id = "brush",
-        aliases = ["brush", "pen"],
-        namespace = "vulpecula-canvas"
-    )
+    @BacikalParser("brush")
     fun parser() = bacikal {
         combine(
             argument("type", "t", then = text(display = "type")),

@@ -18,10 +18,7 @@ import top.lanscarlos.vulpecula.bacikal.bacikal
  */
 object ActionSound {
 
-    @BacikalParser(
-        id = "sound",
-        aliases = ["sound"]
-    )
+    @BacikalParser("sound")
     fun parser() = bacikal {
         combine(
             text(display = "sound resource"),

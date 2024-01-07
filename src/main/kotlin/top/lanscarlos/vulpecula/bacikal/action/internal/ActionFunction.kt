@@ -15,11 +15,7 @@ object ActionFunction {
      * func xxx
      * func xxx with [ arg0 arg1 ]
      * */
-    @BacikalParser(
-        id = "func",
-        aliases = ["func"],
-        namespace = "vulpecula-script"
-    )
+    @BacikalParser("function-call")
     fun parser() = bacikal {
         combineOf(
             text(),

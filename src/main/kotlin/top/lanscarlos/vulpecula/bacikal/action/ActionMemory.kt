@@ -24,10 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object ActionMemory {
 
-    @BacikalParser(
-        id = "memory",
-        aliases = ["memory"]
-    )
+    @BacikalParser("memory")
     fun parser() = bacikal {
         combine(
             text("key"),

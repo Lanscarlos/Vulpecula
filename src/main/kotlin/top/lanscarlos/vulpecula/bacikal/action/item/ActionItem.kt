@@ -120,10 +120,7 @@ class ActionItem : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser(
-            id = "item",
-            aliases = ["item"]
-        )
+        @BacikalParser("item")
         fun parser() = ScriptActionParser<Any?> {
             ActionItem().resolve(this)
         }

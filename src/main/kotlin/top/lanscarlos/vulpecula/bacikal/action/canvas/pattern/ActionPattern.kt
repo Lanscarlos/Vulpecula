@@ -132,11 +132,7 @@ class ActionPattern : QuestAction<Any?>() {
             registerResolver(resolver)
         }
 
-        @BacikalParser(
-            id = "pattern",
-            aliases = ["pattern"],
-            namespace = "vulpecula-canvas"
-        )
+        @BacikalParser("pattern")
         fun parser() = ScriptActionParser<Any?> {
             ActionPattern().resolve(this)
         }

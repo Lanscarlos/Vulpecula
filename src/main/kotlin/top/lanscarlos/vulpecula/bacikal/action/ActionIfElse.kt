@@ -26,10 +26,7 @@ object ActionIfElse {
      * if* {...} {symbol} {...} then {...}
      * if* {...} and/or {...} then {...}
      * */
-    @BacikalParser(
-        id = "if-else",
-        aliases = ["if"]
-    )
+    @BacikalParser("if-else")
     fun parser() = bacikal {
         combineOf(
             LiveData {

@@ -1,0 +1,438 @@
+
+# 请注意
+# 改动此文件后需要重启才能加载
+
+
+# 粒子画板语句
+canvas:
+  # 是否禁用语句
+  disable: false
+  # 本地注册信息 [ 命名空间:语句名 ]
+  # 为了防止冲突，注册到 kether 命名空间中的语句默认加上了 v- 前缀
+  local:
+    - 'kether:v-canvas'
+    - 'vulpecula:canvas'
+  # 远程注册信息 [ 命名空间:语句名 ] 不填则默认为私有语句
+  remote:
+    - 'kether:v-canvas'
+    - 'vulpecula:canvas'
+
+
+# 粒子画板语句：画笔
+# 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
+canvas-brush:
+  local:
+    - 'vulpecula-canvas:brush'
+    - 'vulpecula-canvas:pencil'
+    - 'vulpecula-canvas:pen'
+  remote:
+    - 'vulpecula-canvas:brush'
+    - 'vulpecula-canvas:pencil'
+    - 'vulpecula-canvas:pen'
+
+
+# 粒子绘画语句
+# 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
+canvas-draw:
+  local:
+    - 'vulpecula-canvas:draw'
+  remote:
+    - 'vulpecula-canvas:draw'
+
+
+# 粒子时序语句
+# 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
+canvas-duration:
+  local:
+    - 'vulpecula-canvas:duration'
+  remote:
+    - 'vulpecula-canvas:duration'
+
+
+# 粒子函数语句
+# 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
+canvas-fx:
+  local:
+    - 'vulpecula-canvas:fx'
+  remote:
+    - 'vulpecula-canvas:fx'
+
+
+# 粒子图案语句
+# 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
+canvas-pattern:
+  local:
+    - 'vulpecula-canvas:pattern'
+  remote:
+    - 'vulpecula-canvas:pattern'
+
+
+# 粒子观察者语句
+# 此语句属于 Canvas 的内部语句, 请勿擅自修改命名空间
+canvas-viewer:
+  local:
+    - 'vulpecula-canvas:viewer'
+  remote:
+    - 'vulpecula-canvas:viewer'
+
+
+# 向上取整语句
+ceil:
+  local:
+    - 'kether:v-ceil'
+    - 'vulpecula:ceil'
+  remote:
+    - 'kether:v-ceil'
+    - 'vulpecula:ceil'
+
+
+# 范围限制语句
+coerce:
+  local:
+    - 'kether:v-coerce'
+    - 'vulpecula:coerce'
+  remote:
+    - 'kether:v-coerce'
+    - 'vulpecula:coerce'
+
+
+# 余弦语句
+cos:
+  local:
+    - 'kether:v-cos'
+    - 'vulpecula:cos'
+  remote:
+    - 'kether:v-cos'
+    - 'vulpecula:cos'
+
+
+# 事件语句
+event:
+  local:
+    - 'kether:v-event'
+    - 'vulpecula:event'
+  remote:
+    - 'kether:v-event'
+    - 'vulpecula:event'
+
+
+# 实体语句
+entity:
+  local:
+    - 'kether:v-entity'
+    - 'vulpecula:entity'
+  remote:
+    - 'kether:v-entity'
+    - 'vulpecula:entity'
+
+
+# 向下取整语句
+floor:
+  local:
+    - 'kether:v-floor'
+    - 'vulpecula:floor'
+  remote:
+    - 'kether:v-floor'
+    - 'vulpecula:floor'
+
+
+# 函数调用语句
+function-call:
+  local:
+    - 'vulpecula-script:func'
+
+
+# 条件语句
+if-else:
+  local:
+    - 'kether:v-if'
+    - 'kether:if*'
+    - 'vulpecula:if*'
+  remote:
+    - 'kether:v-if'
+    - 'kether:if*'
+    - 'vulpecula:if*'
+
+
+# 幻觉语句
+illusion:
+  local:
+    - 'kether:v-illusion'
+    - 'vulpecula:illusion'
+  remote:
+    - 'kether:v-illusion'
+    - 'vulpecula:illusion'
+
+
+# 输入语句
+input:
+  local:
+    - 'kether:v-input'
+    - 'vulpecula:input'
+  remote:
+    - 'kether:v-input'
+    - 'vulpecula:input'
+
+
+# 背包语句
+# 为了不与 Chemdah 的背包语句冲突, 注册到 vulpecula 命名空间中的语句默认加上了 * 后缀
+inventory:
+  local:
+    - 'kether:v-inventory'
+    - 'kether:v-inv'
+    - 'vulpecula:inventory*'
+    - 'vulpecula:inv*'
+  remote:
+    - 'kether:v-inventory'
+    - 'kether:v-inv'
+    - 'vulpecula:inventory*'
+    - 'vulpecula:inv*'
+
+
+# 物品语句
+item:
+  local:
+    - 'kether:v-item'
+    - 'vulpecula:item'
+  remote:
+    - 'kether:v-item'
+    - 'vulpecula:item'
+
+
+# 对数语句 (底数为 10)
+lg:
+  local:
+    - 'kether:v-lg'
+    - 'vulpecula:lg'
+  remote:
+    - 'kether:v-lg'
+    - 'vulpecula:lg'
+
+
+# 对数语句 (底数为 e)
+ln:
+  local:
+    - 'kether:v-ln'
+    - 'vulpecula:ln'
+  remote:
+    - 'kether:v-ln'
+    - 'vulpecula:ln'
+
+
+# 坐标语句
+location:
+  local:
+    - 'kether:v-location'
+    - 'kether:v-loc'
+    - 'vulpecula:location*'
+    - 'vulpecula:loc*'
+  remote:
+    - 'kether:v-location'
+    - 'kether:v-loc'
+    - 'vulpecula:location*'
+    - 'vulpecula:loc*'
+
+
+# 数据存储语句
+memory:
+  local:
+    - 'kether:v-memory'
+    - 'vulpecula:memory'
+  remote:
+    - 'kether:v-memory'
+    - 'vulpecula:memory'
+
+
+# 粒子语句
+particles:
+  local:
+    - 'kether:v-particles'
+    - 'vulpecula:particles'
+  remote:
+    - 'kether:v-particles'
+    - 'vulpecula:particles'
+
+
+# 幂运算语句
+pow:
+  local:
+    - 'kether:v-pow'
+    - 'vulpecula:pow'
+  remote:
+    - 'kether:v-pow'
+    - 'vulpecula:pow'
+
+
+# 弧度语句
+radian:
+  local:
+    - 'kether:v-radian'
+    - 'kether:v-rad'
+    - 'vulpecula:radian'
+    - 'vulpecula:rad'
+  remote:
+    - 'kether:v-radian'
+    - 'kether:v-rad'
+    - 'vulpecula:radian'
+    - 'vulpecula:rad'
+
+
+# 正则表达式语句
+regex:
+  local:
+    - 'kether:v-regex'
+    - 'vulpecula:regex'
+  remote:
+    - 'kether:v-regex'
+    - 'vulpecula:regex'
+
+
+# 正弦语句
+sin:
+  local:
+    - 'kether:v-sin'
+    - 'vulpecula:sin'
+  remote:
+    - 'kether:v-sin'
+    - 'vulpecula:sin'
+
+
+# 音效语句
+sound:
+  local:
+    - 'kether:v-sound'
+    - 'vulpecula:sound'
+  remote:
+    - 'kether:v-sound'
+    - 'vulpecula:sound'
+
+
+# 平方根语句
+sqrt:
+  local:
+    - 'kether:v-sqrt'
+    - 'vulpecula:sqrt'
+  remote:
+    - 'kether:v-sqrt'
+    - 'vulpecula:sqrt'
+
+
+# 正切语句
+tan:
+  local:
+    - 'kether:v-tan'
+    - 'vulpecula:tan'
+  remote:
+    - 'kether:v-tan'
+    - 'vulpecula:tan'
+
+
+# 目标语句
+target:
+  local:
+    - 'kether:v-target'
+    - 'vulpecula:target'
+  remote:
+    - 'kether:v-target'
+    - 'vulpecula:target'
+
+
+# tell 语句
+tell:
+  local:
+    - 'kether:v-tell'
+    - 'vulpecula:tell*'
+  remote:
+    - 'kether:v-tell'
+    - 'vulpecula:tell*'
+
+
+# tell-raw 语句
+tell-raw:
+  local:
+    - 'kether:v-tellraw'
+    - 'kether:v-tell-raw'
+    - 'vulpecula:tellraw'
+    - 'vulpecula:tell-raw'
+  remote:
+    - 'kether:v-tellraw'
+    - 'kether:v-tell-raw'
+    - 'vulpecula:tellraw'
+    - 'vulpecula:tell-raw'
+
+
+# 异常处理语句
+try-catch:
+  local:
+    - 'vulpecula:try'
+
+
+# Unicode 语句
+unicode:
+  local:
+    - 'kether:v-unicode'
+    - 'vulpecula:unicode'
+  remote:
+    - 'kether:v-unicode'
+    - 'vulpecula:unicode'
+
+
+# 向量语句
+vector:
+  local:
+    - 'kether:v-vector'
+    - 'kether:v-vec'
+    - 'vulpecula:vector'
+    - 'vulpecula:vec'
+  remote:
+    - 'kether:v-vector'
+    - 'kether:v-vec'
+    - 'vulpecula:vector'
+    - 'vulpecula:vec'
+
+
+# 小狐狸语句
+vulpecula:
+  local:
+    - 'kether:vulpecula'
+    - 'kether:vul'
+  remote:
+    - 'kether:vulpecula'
+    - 'kether:vul'
+
+
+# 小狐狸调度语句
+vulpecula-dispatcher:
+  local:
+    - 'kether:v-dispatcher'
+    - 'kether:vul-dispatcher'
+    - 'vulpecula:dispatcher'
+  remote:
+    - 'kether:vul-dispatcher'
+    - 'kether:v-dispatcher'
+    - 'vulpecula:dispatcher'
+
+
+# 小狐狸日程语句
+vulpecula-schedule:
+  local:
+    - 'kether:v-schedule'
+    - 'kether:vul-schedule'
+    - 'vulpecula:schedule'
+  remote:
+    - 'kether:v-schedule'
+    - 'kether:vul-schedule'
+    - 'vulpecula:schedule'
+
+
+# 小狐狸脚本语句
+vulpecula-script:
+  local:
+    - 'kether:v-script'
+    - 'kether:vul-script'
+    - 'vulpecula:script'
+  remote:
+    - 'kether:v-script'
+    - 'kether:vul-script'
+    - 'vulpecula:script'
+

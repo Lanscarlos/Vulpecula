@@ -22,11 +22,7 @@ object ActionDuration {
      *
      * duration out 200
      * */
-    @BacikalParser(
-        id = "duration",
-        aliases = ["duration"],
-        namespace = "vulpecula-canvas"
-    )
+    @BacikalParser("duration")
     fun parser() = bacikalSwitch {
         case("in") {
             combine(
