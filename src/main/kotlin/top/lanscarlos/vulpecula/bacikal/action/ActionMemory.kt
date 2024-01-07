@@ -6,8 +6,10 @@ import net.luckperms.api.node.types.MetaNode
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.metadata.Metadatable
 import taboolib.common.platform.ProxyPlayer
 import taboolib.module.kether.ScriptFrame
+import taboolib.platform.util.getMetaFirstOrNull
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.utils.playerOrNull
@@ -68,6 +70,10 @@ object ActionMemory {
      * */
     fun getMemory(frame: ScriptFrame, key: String, unique: Any?, storage: String? = null): Any? {
         when (storage?.lowercase()) {
+            "metadata" -> {
+                val entity = unique as? Metadatable ?: error("The entity is not Metadatable.")
+                return entity.getMetaFirstOrNull(key)
+            }
             "luckperms", "lp" -> {
                 val api = luckPermsAPI ?: error("No LuckPerms plugin service found.")
                 val user = when (unique) {
