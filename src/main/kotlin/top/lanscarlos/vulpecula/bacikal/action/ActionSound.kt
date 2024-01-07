@@ -29,9 +29,7 @@ object ActionSound {
             optional("at", then = location()),
             optional("-global", "global", then = LiveData.point(true), def = false),
             optional("to", then = player())
-        ) { resource, meta, center, global, player ->
-            val volume = meta.first
-            val pitch = meta.second
+        ) { resource, (volume, pitch), center, global, player ->
 
             if (player != null) {
                 playSound(adaptPlayer(player), resource, volume, pitch, center)
