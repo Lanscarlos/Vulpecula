@@ -1,7 +1,7 @@
 val taboolib_version: String by project
 
 plugins {
-    id("io.izzel.taboolib") version "1.50"
+    id("io.izzel.taboolib") version "1.56"
 }
 
 taboolib {
@@ -10,7 +10,7 @@ taboolib {
         contributors {
             name("Lanscarlos")
         }
-        desc("A Kether Script Extension System for TabooLib")
+        desc("A Kether Multifaceted Extension System for TabooLib.")
         dependencies {
             name("Adyeshach").optional(true)
             name("Chemdah").optional(true)
