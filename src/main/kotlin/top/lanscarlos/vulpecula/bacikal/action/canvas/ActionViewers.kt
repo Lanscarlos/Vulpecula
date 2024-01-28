@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.*
@@ -54,7 +55,7 @@ object ActionViewers {
                 while (!this.expectToken("]")) {
                     cache += this.readAction()
                 }
-            } else if (this.peekToken() == "*") {
+            } else if (this.expectToken("*")) {
                 cache += "*"
             } else {
                 cache += this.readAction()

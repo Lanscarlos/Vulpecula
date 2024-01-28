@@ -30,6 +30,7 @@ import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.liveVector
 import top.lanscarlos.vulpecula.bacikal.LiveData.Companion.readerOf
 import top.lanscarlos.vulpecula.bacikal.action.ActionBlock
 import java.awt.Color
+import java.util.ArrayList
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -59,8 +60,8 @@ open class BacikalReader(private val source: QuestReader) {
     * QuestReader 操作
     * */
 
-    fun namespace(): MutableList<String> {
-        return source.getProperty<MutableList<String>>("namespace")!!
+    fun namespace(): ArrayList<String> {
+        return source.getProperty<ArrayList<String>>("namespace")!!
     }
 
     fun addNamespace(namespace: String) {
