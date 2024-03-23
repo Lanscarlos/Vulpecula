@@ -31,6 +31,7 @@ tasks {
         destinationDirectory.set(file("${rootDir}/build/libs"))
         append("config.yml")
         append("lang/zh_CN.yml")
+        append("kether.yml")
         exclude("META-INF/maven/**")
         exclude("META-INF/tf/**")
         exclude("module-info.java")
