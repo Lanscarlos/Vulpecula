@@ -11,7 +11,7 @@ import taboolib.common5.FileWatcher
 import taboolib.module.lang.asLangText
 import top.lanscarlos.vulpecula.bacikal.BacikalScript
 import top.lanscarlos.vulpecula.bacikal.DefaultWorkspace
-import top.lanscarlos.vulpecula.config.DefaultDynamicConfig
+import top.lanscarlos.vulpecula.config.YamlDynamicConfig
 import top.lanscarlos.vulpecula.core.VulpeculaContext
 import top.lanscarlos.vulpecula.core.utils.timing
 import top.lanscarlos.vulpecula.modularity.ModularDispatcher
@@ -30,7 +30,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
 
     override val id: String = root.toPath().relativize(directory.toPath()).toString().replace(File.separatorChar, '.')
 
-    val config = DefaultDynamicConfig(File(directory, "module.yml"))
+    val config = YamlDynamicConfig(File(directory, "module.yml"))
 
     val automaticReloadDispatcher by config.readBoolean("automatic-reload.dispatcher", true)
 
@@ -70,7 +70,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
                 }
 
                 // 加载新的调度器
-                val config = DefaultDynamicConfig(file)
+                val config = YamlDynamicConfig(file)
                 for (key in config.readKeys(false)) {
                     val dispatcher = DefaultDispatcher(this, key, config)
                     this.dispatchers[key] = dispatcher
@@ -130,7 +130,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
             }
 
             // 加载文件
-            val config = DefaultDynamicConfig(file)
+            val config = YamlDynamicConfig(file)
 //            for (key in config.readKeys(false)) {
 //                val handler = DefaultHandler(this, key, config)
 //                handlers[key] = handler
@@ -170,7 +170,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
             }
 
             // 加载文件
-            val config = DefaultDynamicConfig(file)
+            val config = YamlDynamicConfig(file)
             for (key in config.readKeys(false)) {
                 val dispatcher = DefaultDispatcher(this, key, config)
                 dispatchers[key] = dispatcher

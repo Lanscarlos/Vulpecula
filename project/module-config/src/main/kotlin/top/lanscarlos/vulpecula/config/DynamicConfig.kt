@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.config
 
 import java.io.File
+import java.nio.file.Path
 import java.util.function.Function
 
 /**
@@ -13,6 +14,11 @@ import java.util.function.Function
 interface DynamicConfig {
 
     val file: File
+
+    /**
+     * 相对于 Vulpecula 插件目录的相对路径
+     * */
+    val path: Path
 
     /**
      * 手动重载配置文件
@@ -28,6 +34,11 @@ interface DynamicConfig {
      * 在重置所有节点数据之后执行
      * */
     fun onAfterReload(runnable: Runnable)
+
+    /**
+     * 获取节点所在的行号
+     * */
+    fun indexOf(path: String): Int
 
     /**
      * 获取数据
