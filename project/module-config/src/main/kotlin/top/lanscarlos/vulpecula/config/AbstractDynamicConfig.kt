@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.config
 
+import taboolib.common.platform.function.getDataFolder
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeBoolean
@@ -10,6 +11,7 @@ import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShort
 import top.lanscarlos.vulpecula.applicative.StringListApplicative.Companion.applicativeStringList
 import java.io.File
+import java.nio.file.Path
 import java.util.function.Function
 
 /**
@@ -19,9 +21,11 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2023-08-25 00:30
  */
-class DefaultDynamicConfig(override val file: File, val config: Configuration) : DynamicConfig, Runnable {
+abstract class AbstractDynamicConfig(override val file: File, val config: Configuration) : DynamicConfig, Runnable {
 
-    constructor(file: File) : this(file, Configuration.loadFromFile(file))
+    override val path: Path by lazy {
+        file.toPath().relativize(getDataFolder().toPath())
+    }
 
     val sections = linkedMapOf<String, DynamicSection<*>>()
 
