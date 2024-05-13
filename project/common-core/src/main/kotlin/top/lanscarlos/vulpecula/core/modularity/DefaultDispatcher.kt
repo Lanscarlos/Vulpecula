@@ -10,7 +10,6 @@ import taboolib.common5.Baffle
 import taboolib.common5.FileWatcher
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.bacikal.Bacikal
-import top.lanscarlos.vulpecula.bacikal.bacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.AnalysisQuestCompiler
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.FragmentReplacer

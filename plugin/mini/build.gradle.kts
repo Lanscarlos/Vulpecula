@@ -6,7 +6,7 @@ taboolib {
 
 dependencies {
     implementation(project(":project:common"))
-    implementation(project(":project:common-action"))
+    implementation(project(":project:common-command"))
     implementation(project(":project:module-applicative"))
     implementation(project(":project:module-bacikal"))
     implementation(project(":project:module-config"))
