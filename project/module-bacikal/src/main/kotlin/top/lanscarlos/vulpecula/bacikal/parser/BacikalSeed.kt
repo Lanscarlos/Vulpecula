@@ -16,6 +16,11 @@ interface BacikalSeed<T> {
      * */
     val isAccepted: Boolean
 
+    /**
+     * 从 BacikalReader 中解析数据
+     *
+     * @return 若未接受则返回 null
+     * */
     fun accept(reader: BacikalReader)
 
     fun accept(frame: BacikalFrame): CompletableFuture<T>

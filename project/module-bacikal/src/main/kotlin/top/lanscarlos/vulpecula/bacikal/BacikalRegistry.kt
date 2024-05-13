@@ -4,6 +4,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.taboolibPath
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.warning
@@ -16,12 +17,13 @@ import taboolib.module.configuration.Configuration
 import taboolib.module.kether.Kether
 import taboolib.module.kether.ScriptActionParser
 import taboolib.module.kether.StandardChannel
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalContext
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalParser
-import top.lanscarlos.vulpecula.bacikal.parser.DefaultContext
+import top.lanscarlos.vulpecula.bacikal.parser.*
 import top.lanscarlos.vulpecula.bacikal.property.BacikalGenericProperty
 import top.lanscarlos.vulpecula.bacikal.property.BacikalProperty
+import java.io.File
+import java.net.URLClassLoader
 import java.util.function.Supplier
+import java.util.jar.JarFile
 
 /**
  * Vulpecula
@@ -56,6 +58,54 @@ object BacikalRegistry : ClassVisitor(-1) {
     override fun visitStart(clazz: Class<*>, instance: Supplier<*>?) {
 //        registerAction(clazz)
         registerProperty(clazz, instance)
+    }
+
+    /**
+     * 外置语句注册
+     *
+     * @param file 外置语句 Jar 包体
+     * */
+    @Suppress("UNCHECKED_CAST")
+    fun registerAction(file: File) {
+        if (!file.exists() || !file.isFile || !file.canRead()) {
+            warning("Action file \"${file.name}\" is not valid.")
+            return
+        }
+        val classLoader = URLClassLoader(arrayOf(file.toURI().toURL()), this::class.java.classLoader)
+
+        // 读取 Jar 包体内所有 class 字节码文件
+        val classList = mutableListOf<Class<*>>()
+        val entries = JarFile(file).entries()
+        while (entries.hasMoreElements()) {
+            val entry = entries.nextElement()
+            if (!entry.name.endsWith(".class")) {
+                continue
+            }
+            val className = entry.name.substring(0, entry.name.length - 6).replace("/", ".")
+            try {
+                classList.add(classLoader.loadClass(className))
+            } catch (ex: Exception) {
+                warning("Action class \"$className\" is not valid.")
+            }
+        }
+
+        // 遍历所有 class 对象
+        for (clazz in classList) {
+            if (!clazz.isAnnotationPresent(BacikalParser::class.java)) {
+                continue
+            }
+
+            // 加载解析器
+            val annotation = clazz.getAnnotation(BacikalParser::class.java)
+            val id = annotation.id
+
+            if (BacikalActionParser::class.java.isAssignableFrom(clazz)) {
+
+            }
+
+            val parser = clazz.getDeclaredConstructor().newInstance() as BacikalActionParser
+            registerAction(id, parser)
+        }
     }
 
     /**

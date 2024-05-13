@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-08-21 17:43
  */
-class OptionalSeed<T>(val seed: BacikalSeed<T>, val expect: Array<out String>, val def: T) : BacikalSeed<T> {
+class OptionalSeed<T>(val seed: BacikalSeed<T>, val expect: Array<out String>) : BacikalSeed<T> {
 
     override val isAccepted: Boolean
         get() = seed.isAccepted
@@ -24,7 +24,7 @@ class OptionalSeed<T>(val seed: BacikalSeed<T>, val expect: Array<out String>, v
         return if (isAccepted) {
             seed.accept(frame)
         } else {
-            CompletableFuture.completedFuture(def)
+            CompletableFuture.completedFuture(null)
         }
     }
 }
