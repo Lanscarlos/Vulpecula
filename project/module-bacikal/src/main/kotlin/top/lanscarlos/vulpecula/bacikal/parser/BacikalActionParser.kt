@@ -64,7 +64,7 @@ abstract class BacikalActionParser : QuestActionParser {
     private val methodDefault = this::class.java.declaredMethods.find { it.name == "resolve\$default" }
 
     /**
-     * 结构树
+     * 获取结构树
      * */
     private val structure = methodStandard.parameters.map { parameter ->
         val isNullable = parameter.getAnnotation(org.jetbrains.annotations.Nullable::class.java) != null

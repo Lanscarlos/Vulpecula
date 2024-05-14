@@ -21,9 +21,7 @@ import top.lanscarlos.vulpecula.bacikal.parser.*
 import top.lanscarlos.vulpecula.bacikal.property.BacikalGenericProperty
 import top.lanscarlos.vulpecula.bacikal.property.BacikalProperty
 import java.io.File
-import java.net.URLClassLoader
 import java.util.function.Supplier
-import java.util.jar.JarFile
 
 /**
  * Vulpecula
@@ -74,31 +72,52 @@ object BacikalRegistry : ClassVisitor(-1) {
         ClassAppender.addPath(file.toPath(), false, false)
         val classes = file.toURI().toURL().getClasses().values
 
-        info("classes: ${classes.size}")
+        val headers = mutableMapOf<String, BacikalComplexActionParser>()
+        val bodies = mutableMapOf<String, ArrayList<Pair<String, BacikalActionParser>>>()
 
         // 遍历所有 class 对象
         for (clazz in classes) {
-            info("Registering action \"${clazz.name}\" from file \"${file.name}\"")
-            if (!clazz.isAnnotationPresent(BacikalParser::class.java)) {
+            if (clazz.name.contains("taboolib")) {
+                // 排除 taboolib 库
                 continue
             }
+            when {
+                clazz.isAnnotationPresent(BacikalParserBody::class.java) -> {
+                    if (!BacikalActionParser::class.java.isAssignableFrom(clazz)) {
+                        warning("Action body class \"${clazz.name}\" must be a subclass of \"BacikalActionParser\".")
+                        continue
+                    }
+                    val annotation = clazz.getAnnotation(BacikalParserBody::class.java)
+                    val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
+                        ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                    bodies.computeIfAbsent(annotation.bind) { ArrayList() } += annotation.id to parser
+                }
+                clazz.isAnnotationPresent(BacikalParser::class.java) -> {
+                    // 加载解析器
+                    val annotation = clazz.getAnnotation(BacikalParser::class.java)
+                    val id = annotation.id
 
-            // 加载解析器
-            val annotation = clazz.getAnnotation(BacikalParser::class.java)
-            val id = annotation.id
-
-            if (BacikalActionParser::class.java.isAssignableFrom(clazz)) {
-                val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
-                    ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
-                registerAction(id, parser)
-            } else if (BacikalComplexActionParser::class.java.isAssignableFrom(clazz)) {
-                val parser = clazz.getInstance(true)?.get() as? BacikalComplexActionParser
-                    ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
-                parser.setup()
-                registerAction(id, parser)
-            } else {
-                error("Action \"$id\" must be a subclass of \"BacikalActionParser\" or \"BacikalComplexActionParser\".")
+                    if (BacikalComplexActionParser::class.java.isAssignableFrom(clazz)) {
+                        val parser = clazz.getInstance(true)?.get() as? BacikalComplexActionParser
+                            ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                        headers[id] = parser
+                    } else if (BacikalActionParser::class.java.isAssignableFrom(clazz)) {
+                        val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
+                            ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                        registerAction(id, parser)
+                    } else {
+                        error("Action class \"${clazz.name}\" must be a subclass of \"BacikalActionParser\" or \"BacikalComplexActionParser\".")
+                    }
+                }
             }
+        }
+
+        // 遍历所有复合解析器
+        for ((id, header) in headers) {
+            for ((name, body) in bodies[id] ?: continue) {
+                header.registerAction(name, body)
+            }
+            registerAction(id, header)
         }
     }
 
