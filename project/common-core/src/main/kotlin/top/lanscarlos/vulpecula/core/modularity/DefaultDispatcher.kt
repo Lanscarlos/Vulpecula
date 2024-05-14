@@ -216,7 +216,7 @@ class DefaultDispatcher(
                 appendPostprocessor(postprocessing)
             }
 
-            it.compiler = AnalysisQuestCompiler(config)
+//            it.compiler = AnalysisQuestCompiler(config)
         }
     }
 
