@@ -17,15 +17,15 @@ import top.lanscarlos.vulpecula.bacikal.toBacikalQuest
  * @author Lanscarlos
  * @since 2023-08-25 12:36
  */
-@CommandHeader(
-    name = "vulpecula",
-    aliases = ["vul"],
-    permission = "vulpecula.command.internal",
-    permissionDefault = PermissionDefault.OP
-)
+//@CommandHeader(
+//    name = "vulpecula",
+//    aliases = ["vul"],
+//    permission = "vulpecula.command.internal",
+//    permissionDefault = PermissionDefault.OP
+//)
 object VulpeculaCommand {
 
-    @CommandBody
+//    @CommandBody
     val eval = subCommand {
         dynamic {
             execute<ProxyCommandSender> { sender, _, content ->
