@@ -8,6 +8,7 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestActionParser
+import taboolib.library.kether.QuestContext
 import taboolib.library.kether.QuestReader
 import top.lanscarlos.vulpecula.applicative.AbstractApplicative
 import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
@@ -25,11 +26,9 @@ import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShort
 import top.lanscarlos.vulpecula.applicative.VectorApplicative.Companion.applicativeVector
 import java.awt.Color
+import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.findAnnotation
 
 /**
  * Vulpecula
@@ -40,9 +39,12 @@ import kotlin.reflect.full.findAnnotation
  */
 abstract class BacikalActionParser : QuestActionParser {
 
-    abstract val name: String
-
-    abstract val author: Array<String>
+    companion object {
+        const val MODIFIER_NONE = 0
+        const val MODIFIER_EXPECTED = 1
+        const val MODIFIER_OPTIONAL = 2
+        const val MODIFIER_ADDITIONAL = 4
+    }
 
     annotation class Expected(val prefix: Array<String>)
 
@@ -50,209 +52,52 @@ abstract class BacikalActionParser : QuestActionParser {
 
     annotation class Additional(val prefix: Array<String>)
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Any?> resolve(reader: QuestReader): QuestAction<T> {
-        val method = this::class.declaredFunctions.find { it.name == "resolve" && it.returnType.classifier != QuestAction::class }
-            ?: error("Cannot find resolve method in ${this::class.java.name}")
+    /**
+     * 获取标准函数
+     * */
+    private val methodStandard = this::class.java.declaredMethods.find { it.name == "resolve" && it.returnType != QuestAction::class.java }
+        ?: error("Cannot find resolve method in ${this::class.java.name}")
 
-        val seeds = LinkedHashMap<KParameter, BacikalSeed<*>>()
-        for (parameter in method.parameters) {
-            if (parameter.name == null) {
-                // 主参数
-                seeds[parameter] = object : BacikalSeed<BacikalActionParser> {
-                    override val isAccepted: Boolean = true
-                    override fun accept(reader: BacikalReader) {}
-                    override fun accept(frame: BacikalFrame): CompletableFuture<BacikalActionParser> {
-                        return CompletableFuture.completedFuture(this@BacikalActionParser)
-                    }
-                }
-                continue
-            }
+    /**
+     * 获取模板函数
+     * */
+    private val methodDefault = this::class.java.declaredMethods.find { it.name == "resolve\$default" }
 
-            // 生成种子
-            val seed = when (parameter.type.classifier) {
-                Boolean::class -> booleanSeed()
-                Short::class -> shortSeed()
-                Int::class -> intSeed()
-                Long::class -> longSeed()
-                Float::class -> floatSeed()
-                Double::class -> doubleSeed()
-                String::class -> stringSeed()
-                List::class -> listSeed()
-                Color::class -> colorSeed()
-                Entity::class -> entitySeed()
-                Player::class -> playerSeed()
-                Inventory::class -> inventorySeed()
-                ItemStack::class -> itemStackSeed()
-                Location::class -> locationSeed()
-                Vector::class -> vectorSeed()
-                else -> error("Unsupported type ${parameter.type}")
-            }
-
-            // 包装种子
-            val expected = parameter.findAnnotation<Expected>()
-            val optional = parameter.findAnnotation<Optional>()
-            val additional = parameter.findAnnotation<Additional>()
-            seeds[parameter] = when {
-                expected != null -> ExpectedSeed(seed, expected.prefix)
-                optional != null -> OptionalSeed(seed, optional.prefix)
-                additional != null -> AdditionalSeed(seed, additional.prefix)
-                else -> seed
-            }
+    /**
+     * 结构树
+     * */
+    private val structure = methodStandard.parameters.map { parameter ->
+        val isNullable = parameter.getAnnotation(org.jetbrains.annotations.Nullable::class.java) != null
+        val expected = parameter.getAnnotation(Expected::class.java)
+        val optional = parameter.getAnnotation(Optional::class.java)
+        val additional = parameter.getAnnotation(Additional::class.java)
+        when {
+            expected != null -> Node(parameter.type, isNullable, false, MODIFIER_EXPECTED, expected.prefix)
+            optional != null -> Node(parameter.type, isNullable, true, MODIFIER_OPTIONAL, optional.prefix)
+            additional != null -> Node(parameter.type, isNullable, true, MODIFIER_ADDITIONAL, additional.prefix)
+            else -> Node(parameter.type, isNullable, false, MODIFIER_NONE, arrayOf())
         }
+    }
+
+    /**
+     * 是否使用了 CompletableFuture
+     * */
+    private val usingFuture = methodStandard.returnType == CompletableFuture::class.java
+
+    override fun <T : Any?> resolve(reader: QuestReader): QuestAction<T> {
+        // 生成种子
+        val seeds = structure.map { it.buildSeed() }
 
         // 激活种子
-        germinate(DefaultReader(reader), seeds.values.toList())
+        germinate(DefaultReader(reader), seeds)
 
-        return BacikalFruit { frame ->
-            // 生成种子队列
-            val queue = seeds.mapValues { it.value.accept(frame) }
-
-            // 处理种子队列
-            process(queue).thenCompose { value ->
-                // 生成参数
-                val params = value.filter { it.value == null && it.key.isOptional }
-                val result = method.callBy(params)
-
-                if (method.returnType.classifier == CompletableFuture::class) {
-                    // 返回值类型为 CompletableFuture
-                    result as CompletableFuture<Any?>
-                } else {
-                    CompletableFuture.completedFuture(result)
-                }
-            }.thenApply {
-                it as T
-            }
-        }
+        // 返回动作
+        return Action(seeds)
     }
 
-    private fun booleanSeed(): BacikalSeed<Boolean?> {
-        return object : AbstractSeed<Boolean?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Boolean? {
-                return value?.applicativeBoolean()?.getValue()
-            }
-        }
-    }
-
-    private fun shortSeed(): BacikalSeed<Short?> {
-        return object : AbstractSeed<Short?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Short? {
-                return value?.applicativeShort()?.getValue()
-            }
-        }
-    }
-
-    private fun intSeed(): BacikalSeed<Int?> {
-        return object : AbstractSeed<Int?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Int? {
-                return value?.applicativeInt()?.getValue()
-            }
-        }
-    }
-
-    private fun longSeed(): BacikalSeed<Long?> {
-        return object : AbstractSeed<Long?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Long? {
-                return value?.applicativeLong()?.getValue()
-            }
-        }
-    }
-
-    private fun floatSeed(): BacikalSeed<Float?> {
-        return object : AbstractSeed<Float?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Float? {
-                return value?.applicativeFloat()?.getValue()
-            }
-        }
-    }
-
-    private fun doubleSeed(): BacikalSeed<Double?> {
-        return object : AbstractSeed<Double?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Double? {
-                return value?.applicativeDouble()?.getValue()
-            }
-        }
-    }
-
-    private fun stringSeed(): BacikalSeed<String?> {
-        return object : AbstractSeed<String?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): String? {
-                return value?.toString()
-            }
-        }
-    }
-
-    private fun listSeed(): BacikalSeed<List<String>?> {
-        return object : AbstractSeed<List<String>?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): List<String>? {
-                if (value == null) {
-                    return null
-                }
-                return object : AbstractApplicative<String>(value) {
-                    override fun transfer(source: Any, def: String?): String {
-                        return source.toString()
-                    }
-                }.collection().getValue()?.toList()
-            }
-        }
-    }
-
-    private fun colorSeed(): BacikalSeed<Color?> {
-        return object : AbstractSeed<Color?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Color? {
-                return value?.applicativeColor()?.getValue()
-            }
-        }
-    }
-
-    private fun entitySeed(): BacikalSeed<Entity?> {
-        return object : AbstractSeed<Entity?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Entity? {
-                return value?.applicativeEntity()?.getValue()
-            }
-        }
-    }
-
-    private fun playerSeed(): BacikalSeed<Player?> {
-        return object : AbstractSeed<Player?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Player? {
-                return value?.applicativePlayer()?.getValue()
-            }
-        }
-    }
-
-    private fun inventorySeed(): BacikalSeed<Inventory?> {
-        return object : AbstractSeed<Inventory?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Inventory? {
-                return value?.applicativeInventory()?.getValue()
-            }
-        }
-    }
-
-    private fun itemStackSeed(): BacikalSeed<ItemStack?> {
-        return object : AbstractSeed<ItemStack?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): ItemStack? {
-                return value?.applicativeItemStack()?.getValue()
-            }
-        }
-    }
-
-    private fun locationSeed(): BacikalSeed<Location?> {
-        return object : AbstractSeed<Location?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Location? {
-                return value?.applicativeLocation()?.getValue()
-            }
-        }
-    }
-
-    private fun vectorSeed(): BacikalSeed<Vector?> {
-        return object : AbstractSeed<Vector?>() {
-            override fun resolve(frame: BacikalFrame, value: Any?): Vector? {
-                return value?.applicativeVector()?.getValue()
-            }
-        }
-    }
-
+    /**
+     * 激活种子
+     * */
     private fun germinate(reader: BacikalReader, seeds: List<BacikalSeed<*>>) {
         if (seeds.isEmpty()) {
             return
@@ -276,10 +121,10 @@ abstract class BacikalActionParser : QuestActionParser {
 
         if (arguments.isNotEmpty()) {
             // 读取附加参数
-            outer@while (arguments.isNotEmpty() && reader.peekToken().matches(DefaultContext.PATTERN_ARGUMENT_PREFIX)) {
+            outer@ while (arguments.isNotEmpty() && reader.peekToken().matches(DefaultContext.PATTERN_ARGUMENT_PREFIX)) {
                 val prefix = reader.readToken().substring(1)
                 val iterator = arguments.iterator()
-                inner@while (iterator.hasNext()) {
+                inner@ while (iterator.hasNext()) {
                     val it = iterator.next()
                     if (it.accept(prefix, reader)) {
                         iterator.remove()
@@ -300,47 +145,321 @@ abstract class BacikalActionParser : QuestActionParser {
         // 没有附加参数时，所有语句都已被读取，此时不应该有剩余语句
     }
 
-    private fun process(queue: Map<KParameter, CompletableFuture<*>>): CompletableFuture<Map<KParameter, Any?>> {
-        val result = CompletableFuture<Map<KParameter, Any?>>()
+    /**
+     * 处理 CompletableFuture 队列
+     * */
+    private fun process(queue: List<CompletableFuture<*>>): CompletableFuture<List<Any?>> {
+        val result = CompletableFuture<List<Any?>>()
 
         if (queue.isEmpty()) {
             // 队列为空
-            result.complete(emptyMap())
+            result.complete(listOf())
         } else if (queue.size == 1) {
             // 队列仅有一个
-            val future = queue.entries.first()
-            if (future.value.isDone) {
-                val value = future.value.getNow(null)
-                result.complete(mapOf(future.key to value))
+            val future = queue.first()
+            if (future.isDone) {
+                result.complete(listOf(future.getNow(null)))
             } else {
-                future.value.thenAccept { result.complete(mapOf(future.key to it)) }
+                future.thenAccept { result.complete(listOf(it)) }
             }
         } else {
             // 队列有多个
             val counter = AtomicInteger(0)
-            for (entry in queue) {
-                if (entry.value.isDone) {
+            for (it in queue) {
+                if (it.isDone) {
                     val count = counter.incrementAndGet()
 
                     // 判断 futures 是否全部执行完毕
                     if (!result.isDone && count >= queue.size) {
-                        result.complete(queue.mapValues { it.value.getNow(null) })
+                        result.complete(queue.map { it.getNow(null) })
                         return result
                     }
                 } else {
-                    entry.value.thenRun {
+                    it.thenRun {
                         val count = counter.incrementAndGet()
 
                         // 判断 futures 是否全部执行完毕
                         if (!result.isDone && count >= queue.size) {
-                            result.complete(queue.mapValues { it.value.getNow(null) })
+                            result.complete(queue.map { it.getNow(null) })
                         }
                     }
                 }
             }
         }
-
         return result
+    }
+
+    /**
+     * 执行函数
+     * */
+    fun invoke(parameters: List<Any?>): Any? {
+        if (parameters.size != this@BacikalActionParser.structure.size) {
+            error("wrong number of arguments: ${parameters.size}/${this@BacikalActionParser.structure.size}")
+        }
+        if (methodDefault != null) {
+            var mask = 0
+            val params = parameters.mapIndexed { index, value ->
+                val node = structure[index]
+                if (value == null) {
+                    // 空值处理
+                    if (node.isOptional) {
+                        // 计算掩码 采用默认值
+                        mask = mask or (1 shl index)
+                    } else if (!node.isNullable) {
+                        // 非空
+                        error("missing required argument at index: $index")
+                    }
+                }
+                value ?: when (this@BacikalActionParser.structure[index].type) {
+                    Boolean::class.java -> false
+                    Short::class.java -> 0.toShort()
+                    Int::class.java -> 0
+                    Long::class.java -> 0L
+                    Float::class.java -> 0.0f
+                    Double::class.java -> 0.0
+                    else -> null
+                }
+            }
+            try {
+                return methodDefault.invoke(null, this@BacikalActionParser, *params.toTypedArray(), mask, null)
+            } catch (e: Exception) {
+                if (e is InvocationTargetException) {
+                    e.targetException.printStackTrace()
+                } else {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            val params = parameters.mapIndexed { index, value ->
+                val node = structure[index]
+                if (value == null && !node.isNullable) {
+                    // 非空
+                    error("missing required argument at index: $index")
+                }
+                value ?: when (this@BacikalActionParser.structure[index].type) {
+                    Boolean::class.java -> false
+                    Short::class.java -> 0.toShort()
+                    Int::class.java -> 0
+                    Long::class.java -> 0L
+                    Float::class.java -> 0.0f
+                    Double::class.java -> 0.0
+                    else -> null
+                }
+            }
+            try {
+                return methodStandard.invoke(this@BacikalActionParser, *params.toTypedArray())
+            } catch (e: Exception) {
+                if (e is InvocationTargetException) {
+                    e.targetException.printStackTrace()
+                } else {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return null
+    }
+
+    private class Node(val type: Class<*>, val isNullable: Boolean, val isOptional: Boolean, val modifier: Int, val prefix: Array<String>) {
+
+        fun buildSeed(): BacikalSeed<*> {
+            val seed = buildSeed(type)
+            return when (modifier) {
+                MODIFIER_EXPECTED -> ExpectedSeed(seed, prefix)
+                MODIFIER_OPTIONAL -> OptionalSeed(seed, prefix)
+                MODIFIER_ADDITIONAL -> AdditionalSeed(seed, prefix)
+                else -> seed
+            }
+        }
+
+        private fun buildSeed(type: Class<*>): BacikalSeed<*> {
+            return when (type) {
+                Boolean::class.java -> BooleanSeed()
+                Short::class.java -> ShortSeed()
+                Int::class.java -> IntSeed()
+                Long::class.java -> LongSeed()
+                Float::class.java -> FloatSeed()
+                Double::class.java -> DoubleSeed()
+                String::class.java -> StringSeed()
+                List::class.java -> ListSeed()
+                Color::class.java -> ColorSeed()
+                Entity::class.java -> EntitySeed()
+                Player::class.java -> PlayerSeed()
+                Inventory::class.java -> InventorySeed()
+                ItemStack::class.java -> ItemStackSeed()
+                Location::class.java -> LocationSeed()
+                Vector::class.java -> VectorSeed()
+                Pair::class.java -> {
+                    val first = type.typeParameters[0].genericDeclaration as Class<*>
+                    val second = type.typeParameters[1].genericDeclaration as Class<*>
+                    PairSeed(buildSeed(first), buildSeed(second))
+                }
+                Triple::class.java -> {
+                    val first = type.typeParameters[0].genericDeclaration as Class<*>
+                    val second = type.typeParameters[1].genericDeclaration as Class<*>
+                    val third = type.typeParameters[2].genericDeclaration as Class<*>
+                    TripleSeed(buildSeed(first), buildSeed(second), buildSeed(third))
+                }
+                else -> error("Unsupported type ${type.name}")
+            }
+        }
+    }
+
+    private inner class Action<T>(val seeds: List<BacikalSeed<*>>) : QuestAction<T>() {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun process(arg0: QuestContext.Frame): CompletableFuture<T> {
+            val frame = DefaultFrame(arg0)
+            val queue = seeds.map { it.accept(frame) }
+
+            return if (usingFuture) {
+                process(queue).thenCompose { parameters ->
+                    invoke(parameters) as CompletableFuture<T>
+                }
+            } else {
+                process(queue).thenApply { parameters ->
+                    invoke(parameters) as T
+                }
+            }
+        }
+
+    }
+
+    private class PairSeed<S1, S2>(val first: BacikalSeed<S1>, val second: BacikalSeed<S2>) : BacikalSeed<Pair<S1, S2>?> {
+
+        override val isAccepted: Boolean
+            get() = first.isAccepted && second.isAccepted
+
+        override fun accept(reader: BacikalReader) {
+            first.accept(reader)
+            second.accept(reader)
+        }
+
+        override fun accept(frame: BacikalFrame): CompletableFuture<Pair<S1, S2>?> {
+            return first.accept(frame).thenCompose { s1 ->
+                second.accept(frame).thenApply { s2 ->
+                    s1 to s2
+                }
+            }
+        }
+    }
+
+    private class TripleSeed<S1, S2, S3>(val first: BacikalSeed<S1>, val second: BacikalSeed<S2>, val third: BacikalSeed<S3>) : BacikalSeed<Triple<S1, S2, S3>?> {
+
+        override val isAccepted: Boolean
+            get() = first.isAccepted && second.isAccepted && third.isAccepted
+
+        override fun accept(reader: BacikalReader) {
+            first.accept(reader)
+            second.accept(reader)
+            third.accept(reader)
+        }
+
+        override fun accept(frame: BacikalFrame): CompletableFuture<Triple<S1, S2, S3>?> {
+            return first.accept(frame).thenCompose { s1 ->
+                second.accept(frame).thenCompose { s2 ->
+                    third.accept(frame).thenApply { s3 ->
+                        Triple(s1, s2, s3)
+                    }
+                }
+            }
+        }
+    }
+
+    private class BooleanSeed : AbstractSeed<Boolean?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Boolean? {
+            return value?.applicativeBoolean()?.getValue()
+        }
+    }
+
+    private class ShortSeed : AbstractSeed<Short?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Short? {
+            return value?.applicativeShort()?.getValue()
+        }
+    }
+
+    private class IntSeed : AbstractSeed<Int?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Int? {
+            return value?.applicativeInt()?.getValue()
+        }
+    }
+
+    private class LongSeed : AbstractSeed<Long?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Long? {
+            return value?.applicativeLong()?.getValue()
+        }
+    }
+
+    private class FloatSeed : AbstractSeed<Float?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Float? {
+            return value?.applicativeFloat()?.getValue()
+        }
+    }
+
+    private class DoubleSeed : AbstractSeed<Double?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Double? {
+            return value?.applicativeDouble()?.getValue()
+        }
+    }
+
+    private class StringSeed : AbstractSeed<String?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): String? {
+            return value?.toString()
+        }
+    }
+
+    private class ListSeed : AbstractSeed<List<String>?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): List<String>? {
+            if (value == null) {
+                return null
+            }
+            return object : AbstractApplicative<String>(value) {
+                override fun transfer(source: Any, def: String?): String {
+                    return source.toString()
+                }
+            }.collection().getValue()?.toList()
+        }
+    }
+
+    private class ColorSeed : AbstractSeed<Color?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Color? {
+            return value?.applicativeColor()?.getValue()
+        }
+    }
+
+    private class EntitySeed : AbstractSeed<Entity?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Entity? {
+            return value?.applicativeEntity()?.getValue()
+        }
+    }
+
+    private class PlayerSeed : AbstractSeed<Player?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Player? {
+            return value?.applicativePlayer()?.getValue()
+        }
+    }
+
+    private class InventorySeed : AbstractSeed<Inventory?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Inventory? {
+            return value?.applicativeInventory()?.getValue()
+        }
+    }
+
+    private class ItemStackSeed : AbstractSeed<ItemStack?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): ItemStack? {
+            return value?.applicativeItemStack()?.getValue()
+        }
+    }
+
+    private class LocationSeed : AbstractSeed<Location?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Location? {
+            return value?.applicativeLocation()?.getValue()
+        }
+    }
+
+    private class VectorSeed : AbstractSeed<Vector?>() {
+        override fun resolve(frame: BacikalFrame, value: Any?): Vector? {
+            return value?.applicativeVector()?.getValue()
+        }
     }
 
 }

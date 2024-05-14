@@ -1,13 +1,13 @@
 package top.lanscarlos.vulpecula.bacikal
 
+import taboolib.common.ClassAppender
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
+import taboolib.common.io.getClasses
+import taboolib.common.io.getInstance
 import taboolib.common.io.taboolibPath
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.getOpenContainers
-import taboolib.common.platform.function.pluginId
-import taboolib.common.platform.function.warning
+import taboolib.common.platform.function.*
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestActionParser
 import taboolib.library.kether.QuestReader
@@ -65,32 +65,20 @@ object BacikalRegistry : ClassVisitor(-1) {
      *
      * @param file 外置语句 Jar 包体
      * */
-    @Suppress("UNCHECKED_CAST")
     fun registerAction(file: File) {
         if (!file.exists() || !file.isFile || !file.canRead()) {
             warning("Action file \"${file.name}\" is not valid.")
             return
         }
-        val classLoader = URLClassLoader(arrayOf(file.toURI().toURL()), this::class.java.classLoader)
 
-        // 读取 Jar 包体内所有 class 字节码文件
-        val classList = mutableListOf<Class<*>>()
-        val entries = JarFile(file).entries()
-        while (entries.hasMoreElements()) {
-            val entry = entries.nextElement()
-            if (!entry.name.endsWith(".class")) {
-                continue
-            }
-            val className = entry.name.substring(0, entry.name.length - 6).replace("/", ".")
-            try {
-                classList.add(classLoader.loadClass(className))
-            } catch (ex: Exception) {
-                warning("Action class \"$className\" is not valid.")
-            }
-        }
+        ClassAppender.addPath(file.toPath(), false, false)
+        val classes = file.toURI().toURL().getClasses().values
+
+        info("classes: ${classes.size}")
 
         // 遍历所有 class 对象
-        for (clazz in classList) {
+        for (clazz in classes) {
+            info("Registering action \"${clazz.name}\" from file \"${file.name}\"")
             if (!clazz.isAnnotationPresent(BacikalParser::class.java)) {
                 continue
             }
@@ -100,11 +88,17 @@ object BacikalRegistry : ClassVisitor(-1) {
             val id = annotation.id
 
             if (BacikalActionParser::class.java.isAssignableFrom(clazz)) {
-
+                val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
+                    ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                registerAction(id, parser)
+            } else if (BacikalComplexActionParser::class.java.isAssignableFrom(clazz)) {
+                val parser = clazz.getInstance(true)?.get() as? BacikalComplexActionParser
+                    ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                parser.setup()
+                registerAction(id, parser)
+            } else {
+                error("Action \"$id\" must be a subclass of \"BacikalActionParser\" or \"BacikalComplexActionParser\".")
             }
-
-            val parser = clazz.getDeclaredConstructor().newInstance() as BacikalActionParser
-            registerAction(id, parser)
         }
     }
 
@@ -174,6 +168,8 @@ object BacikalRegistry : ClassVisitor(-1) {
      * */
     fun registerAction(id: String, parser: QuestActionParser) {
 
+        info("Registering action \"$id\"")
+
         if (actionRegistry[id] == null) {
             // 配置文件中不存在该语句
             warning("Action \"$id\" was not register in action-registry.yml")
@@ -182,6 +178,7 @@ object BacikalRegistry : ClassVisitor(-1) {
 
         if (actionRegistry.getBoolean("$id.disable", false)) {
             // 该语句已被禁用
+            info("Action \"$id\" is disabled.")
             return
         }
 
