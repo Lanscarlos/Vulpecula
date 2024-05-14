@@ -1,7 +1,6 @@
 rootProject.name="Vulpecula"
 include("plugin")
 include("project:common")
-include("project:common-command")
 include("project:common-core")
 include("project:common-legacy")
 include("project:extension-anser")
@@ -12,3 +11,6 @@ include("project:module-volatile")
 include("project:platform-bukkit")
 include("plugin:premium")
 include("plugin:mini")
+include("action")
+include("action:item")
+findProject(":action:item")?.name = "item"
