@@ -35,12 +35,6 @@ tasks {
             project(":project:platform-bukkit")
         )
 
-        // 打包子项目源码
-        for (subproject in subprojects) {
-            from(subproject.sourceSets["main"].java)
-            from(subproject.sourceSets["main"].kotlin)
-        }
-
         // 打包并合并子项目资源
         val workspace = File(buildDir, "workspace")
         if (workspace.exists()) {
@@ -56,6 +50,15 @@ tasks {
             }
             artifact.appendBytes(file.readBytes())
         }
-        from(workspace)
+        from(workspace) {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+
+        // 打包子项目源码
+        for (subproject in subprojects) {
+            from(subproject.sourceSets["main"].output) {
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            }
+        }
     }
 }
