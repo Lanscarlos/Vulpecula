@@ -27,7 +27,6 @@ tasks {
 
         val subprojects = listOf(
             project(":project:common"),
-            project(":project:common-core"),
             project(":project:module-applicative"),
             project(":project:module-bacikal"),
             project(":project:module-config"),

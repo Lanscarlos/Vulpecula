@@ -10,16 +10,12 @@ import taboolib.common5.Baffle
 import taboolib.common5.FileWatcher
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.bacikal.Bacikal
-import top.lanscarlos.vulpecula.bacikal.quest.AnalysisQuestCompiler
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuest
 import top.lanscarlos.vulpecula.bacikal.quest.FragmentReplacer
 import top.lanscarlos.vulpecula.config.DynamicConfig
 import top.lanscarlos.vulpecula.config.bindConfigSection
-import top.lanscarlos.vulpecula.core.VulpeculaContext
+import top.lanscarlos.vulpecula.core.ClassAliases
 import top.lanscarlos.vulpecula.core.modularity.pipeline.AbstractPipeline
-import top.lanscarlos.vulpecula.modularity.DispatcherPipeline
-import top.lanscarlos.vulpecula.modularity.ModularDispatcher
-import top.lanscarlos.vulpecula.modularity.Module
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -41,7 +37,7 @@ class DefaultDispatcher(
 
     @Suppress("UNCHECKED_CAST")
     override val listen: Class<out Event> by config.read("listen") { value ->
-        VulpeculaContext.getClass(value.toString()) as? Class<out Event>
+        ClassAliases.getClass(value.toString()) as? Class<out Event>
             ?: error("Invalid listen class: \"$value\" at dispatcher \"$id\"")
     }
 

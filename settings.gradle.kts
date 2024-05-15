@@ -11,4 +11,3 @@ include("project:platform-bukkit")
 include("plugin:premium")
 include("plugin:mini")
 include("action:item")
-findProject(":action:item")?.name = "item"

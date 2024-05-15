@@ -13,6 +13,8 @@ import java.util.function.Supplier
  * Vulpecula
  * top.lanscarlos.vulpecula.command
  *
+ * Vulpecula 主命令
+ *
  * @author Lanscarlos
  * @since 2024-05-14 15:16
  */

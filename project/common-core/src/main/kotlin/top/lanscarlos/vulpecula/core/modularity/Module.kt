@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.modularity
+package top.lanscarlos.vulpecula.core.modularity
 
 import top.lanscarlos.vulpecula.bacikal.BacikalWorkspace
 import java.io.File

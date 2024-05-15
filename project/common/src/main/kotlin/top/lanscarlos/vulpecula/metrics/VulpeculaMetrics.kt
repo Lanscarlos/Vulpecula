@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.core
+package top.lanscarlos.vulpecula.metrics
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
@@ -9,6 +9,8 @@ import taboolib.platform.BukkitPlugin
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula
+ *
+ * 数据统计
  *
  * @author Lanscarlos
  * @since 2023-08-14 17:27

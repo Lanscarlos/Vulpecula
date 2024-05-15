@@ -4,7 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.function.console
-import top.lanscarlos.vulpecula.core.VulpeculaContext
+import top.lanscarlos.vulpecula.core.ClassAliases
 
 /**
  * Vulpecula
@@ -17,7 +17,7 @@ object VulpeculaReloadCommand {
 
     val executor: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val messages = VulpeculaContext.reload()
+            val messages = ClassAliases.reload()
             if (sender is ProxyPlayer) {
                 messages.forEach { sender.sendMessage(it) }
             }
@@ -26,7 +26,7 @@ object VulpeculaReloadCommand {
 
         dynamic("modules") {
             execute<ProxyCommandSender> { sender, _, modules ->
-                val messages = VulpeculaContext.reload(*modules.split(' ').toTypedArray())
+                val messages = ClassAliases.reload(*modules.split(' ').toTypedArray())
                 if (sender is ProxyPlayer) {
                     messages.forEach { sender.sendMessage(it) }
                 }

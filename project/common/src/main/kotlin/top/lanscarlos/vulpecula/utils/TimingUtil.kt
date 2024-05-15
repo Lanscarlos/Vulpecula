@@ -1,19 +1,27 @@
-package top.lanscarlos.vulpecula.core.utils
+package top.lanscarlos.vulpecula.utils
 
 import taboolib.common5.Coerce
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.core.utils
+ * top.lanscarlos.vulpecula.utils
  *
  * @author Lanscarlos
- * @since 2023-08-27 12:20
+ * @since 2024-05-15 10:06
  */
 
+/**
+ * 开始计时
+ * */
 fun timing(): Long {
     return System.nanoTime()
 }
 
+/**
+ * 结束计时
+ *
+ * @return 毫秒数
+ * */
 fun timing(start: Long): Double {
     return Coerce.format((System.nanoTime() - start).div(1000000.0))
 }

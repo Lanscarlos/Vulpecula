@@ -9,13 +9,11 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common5.FileWatcher
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.Vulpecula
 import top.lanscarlos.vulpecula.bacikal.BacikalScript
 import top.lanscarlos.vulpecula.bacikal.DefaultWorkspace
 import top.lanscarlos.vulpecula.config.YamlDynamicConfig
-import top.lanscarlos.vulpecula.core.VulpeculaContext
-import top.lanscarlos.vulpecula.core.utils.timing
-import top.lanscarlos.vulpecula.modularity.ModularDispatcher
-import top.lanscarlos.vulpecula.modularity.Module
+import top.lanscarlos.vulpecula.utils.timing
 import java.io.File
 import java.util.function.Consumer
 
@@ -192,7 +190,7 @@ class DefaultModule(override val directory: File) : Module, Consumer<Pair<File, 
 
         @Awake(LifeCycle.LOAD)
         fun onLoad() {
-            VulpeculaContext.registerReloadable("module") {
+            Vulpecula.registerReloadable("module") {
                 try {
                     val start = timing()
                     load()

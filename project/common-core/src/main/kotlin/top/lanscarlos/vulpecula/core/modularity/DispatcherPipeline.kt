@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.modularity
+package top.lanscarlos.vulpecula.core.modularity
 
 import org.bukkit.event.Event
 
