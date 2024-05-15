@@ -37,9 +37,6 @@ tasks {
 
         // 打包并合并子项目资源
         val workspace = File(buildDir, "workspace")
-        if (workspace.exists()) {
-            workspace.deleteRecursively()
-        }
         val resources = files(*subprojects.map { it.sourceSets["main"].resources }.toTypedArray())
         val artifacts = mutableMapOf<String, File>()
         for (file in resources) {
