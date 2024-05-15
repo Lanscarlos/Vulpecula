@@ -8,9 +8,7 @@ import taboolib.common.io.getInstance
 import taboolib.common.io.taboolibPath
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.*
-import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestActionParser
-import taboolib.library.kether.QuestReader
 import taboolib.library.reflex.ClassMethod
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
@@ -33,6 +31,8 @@ import java.util.function.Supplier
 @Awake(LifeCycle.LOAD)
 object BacikalRegistry : ClassVisitor(-1) {
 
+    override fun getLifeCycle() = LifeCycle.LOAD
+
     @Config("action-registry.yml")
     lateinit var actionRegistry: Configuration
         private set
@@ -41,12 +41,18 @@ object BacikalRegistry : ClassVisitor(-1) {
     lateinit var propertyRegistry: Configuration
         private set
 
-    override fun getLifeCycle() = LifeCycle.LOAD
+    private val headers = mutableMapOf<String, BacikalComplexActionParser>()
+
+    private val bodies = mutableMapOf<String, ArrayList<Pair<String, BacikalActionParser>>>()
 
     /**
      * 访问函数
      * */
     override fun visit(method: ClassMethod, clazz: Class<*>, instance: Supplier<*>?) {
+        if (clazz.name.contains("taboolib")) {
+            // 排除 taboolib 库
+            return
+        }
         registerAction(method, instance)
     }
 
@@ -54,8 +60,23 @@ object BacikalRegistry : ClassVisitor(-1) {
      * 访问类
      * */
     override fun visitStart(clazz: Class<*>, instance: Supplier<*>?) {
-//        registerAction(clazz)
+        if (clazz.name.contains("taboolib")) {
+            // 排除 taboolib 库
+            return
+        }
+        info("Registering class \"${clazz.name}\"...")
+        registerAction(clazz)
         registerProperty(clazz, instance)
+    }
+
+    @Awake(LifeCycle.ENABLE)
+    fun onEnable() {
+        for ((id, header) in headers) {
+            for ((name, body) in bodies[id] ?: continue) {
+                header.registerAction(name, body)
+            }
+            registerAction(id, header)
+        }
     }
 
     /**
@@ -72,44 +93,9 @@ object BacikalRegistry : ClassVisitor(-1) {
         ClassAppender.addPath(file.toPath(), false, false)
         val classes = file.toURI().toURL().getClasses().values
 
-        val headers = mutableMapOf<String, BacikalComplexActionParser>()
-        val bodies = mutableMapOf<String, ArrayList<Pair<String, BacikalActionParser>>>()
-
         // 遍历所有 class 对象
         for (clazz in classes) {
-            if (clazz.name.contains("taboolib")) {
-                // 排除 taboolib 库
-                continue
-            }
-            when {
-                clazz.isAnnotationPresent(BacikalParserBody::class.java) -> {
-                    if (!BacikalActionParser::class.java.isAssignableFrom(clazz)) {
-                        warning("Action body class \"${clazz.name}\" must be a subclass of \"BacikalActionParser\".")
-                        continue
-                    }
-                    val annotation = clazz.getAnnotation(BacikalParserBody::class.java)
-                    val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
-                        ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
-                    bodies.computeIfAbsent(annotation.bind) { ArrayList() } += annotation.id to parser
-                }
-                clazz.isAnnotationPresent(BacikalParser::class.java) -> {
-                    // 加载解析器
-                    val annotation = clazz.getAnnotation(BacikalParser::class.java)
-                    val id = annotation.id
-
-                    if (BacikalComplexActionParser::class.java.isAssignableFrom(clazz)) {
-                        val parser = clazz.getInstance(true)?.get() as? BacikalComplexActionParser
-                            ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
-                        headers[id] = parser
-                    } else if (BacikalActionParser::class.java.isAssignableFrom(clazz)) {
-                        val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
-                            ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
-                        registerAction(id, parser)
-                    } else {
-                        error("Action class \"${clazz.name}\" must be a subclass of \"BacikalActionParser\" or \"BacikalComplexActionParser\".")
-                    }
-                }
-            }
+            registerAction(clazz)
         }
 
         // 遍历所有复合解析器
@@ -147,39 +133,37 @@ object BacikalRegistry : ClassVisitor(-1) {
     /**
      * 类式语句注册
      * */
-    @Suppress("UNCHECKED_CAST")
-    @Deprecated("Deprecated")
     fun registerAction(clazz: Class<*>) {
-        if (!clazz.isAnnotationPresent(BacikalParser::class.java)) {
-            return
-        }
+        when {
+            clazz.isAnnotationPresent(BacikalParserBody::class.java) -> {
+                // 解析体
+                if (!BacikalActionParser::class.java.isAssignableFrom(clazz)) {
+                    warning("Action body class \"${clazz.name}\" must be a subclass of \"BacikalActionParser\".")
+                    return
+                }
+                val annotation = clazz.getAnnotation(BacikalParserBody::class.java)
+                val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
+                    ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                bodies.computeIfAbsent(annotation.bind) { ArrayList() } += annotation.id to parser
+            }
+            clazz.isAnnotationPresent(BacikalParser::class.java) -> {
+                // 解析头
+                val annotation = clazz.getAnnotation(BacikalParser::class.java)
+                val id = annotation.id
 
-        // 限定类型
-        if (!QuestAction::class.java.isAssignableFrom(clazz)) {
-            return
-        }
-
-        // 加载注解
-        val annotation = clazz.getAnnotation(BacikalParser::class.java)
-        val id = annotation.id
-
-        // 获取构造器
-        val constructor = try {
-            clazz.getDeclaredConstructor(BacikalContext::class.java)
-        } catch (ex: NoSuchMethodException) {
-            warning("Action \"${clazz.name}\" must have a constructor with a parameter of type \"BacikalContext\"")
-            return
-        }
-
-        // 获取解析器
-        val parser = object : QuestActionParser {
-            override fun <T> resolve(reader: QuestReader): QuestAction<T>? {
-                return constructor.newInstance(DefaultContext(reader)) as? QuestAction<T>
+                if (BacikalComplexActionParser::class.java.isAssignableFrom(clazz)) {
+                    val parser = clazz.getInstance(true)?.get() as? BacikalComplexActionParser
+                        ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                    headers[id] = parser
+                } else if (BacikalActionParser::class.java.isAssignableFrom(clazz)) {
+                    val parser = clazz.getInstance(true)?.get() as? BacikalActionParser
+                        ?: error("Action class \"${clazz.name}\" must have a empty constructor.")
+                    registerAction(id, parser)
+                } else {
+                    error("Action class \"${clazz.name}\" must be a subclass of \"BacikalActionParser\" or \"BacikalComplexActionParser\".")
+                }
             }
         }
-
-        // 注册语句
-        registerAction(id, parser)
     }
 
     /**
