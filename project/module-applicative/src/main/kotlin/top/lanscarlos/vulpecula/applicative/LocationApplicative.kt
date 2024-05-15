@@ -13,28 +13,34 @@ import taboolib.platform.util.toProxyLocation
  * @author Lanscarlos
  * @since 2023-08-21 15:03
  */
-class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
+object LocationApplicative : AbstractApplicative<Location>() {
 
-    override fun transfer(source: Any, def: Location?): Location? {
-        return when (source) {
-            is Location -> source
-            is org.bukkit.Location -> source.toProxyLocation()
-            is ProxyPlayer -> source.location
-            is Entity -> source.location.toProxyLocation()
+    val REGEX_XYZ = "-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?".toRegex()
+
+    val REGEX_WORLD_XYZ = "^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex()
+
+    val REGEX_RELATIVE = "^(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?)\$".toRegex()
+
+    override fun transfer(instance: Any, def: Location?): Location? {
+        return when (instance) {
+            is Location -> instance
+            is org.bukkit.Location -> instance.toProxyLocation()
+            is ProxyPlayer -> instance.location
+            is Entity -> instance.location.toProxyLocation()
             is Vector -> Location(
                 def?.world,
-                source.x,
-                source.y,
-                source.z,
+                instance.x,
+                instance.y,
+                instance.z,
                 def?.yaw ?: 0.0f,
                 def?.pitch ?: 0.0f
             )
 
             is org.bukkit.util.Vector -> Location(
                 def?.world,
-                source.x,
-                source.y,
-                source.z,
+                instance.x,
+                instance.y,
+                instance.z,
                 def?.yaw ?: 0.0f,
                 def?.pitch ?: 0.0f
             )
@@ -42,7 +48,7 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
             is String -> {
 
                 // 匹配相对坐标 Example: 1,~,~+3.5
-                PATTERN_RELATIVE.matchEntire(source)?.groupValues?.let { groupValues ->
+                REGEX_RELATIVE.matchEntire(instance)?.groupValues?.let { groupValues ->
                     return Location(
                         def?.world,
                         parseRelative(groupValues[1], def?.x ?: 0.0),
@@ -53,12 +59,12 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
 
                 when {
 
-                    source.matches(PATTERN_XYZ) -> {
+                    instance.matches(REGEX_XYZ) -> {
                         /*
                         * x,y,z
                         * x,y,z,yaw,pitch
                         * */
-                        val demand = source.split(",")
+                        val demand = instance.split(",")
                         Location(
                             def?.world,
                             demand[0].toDouble(),
@@ -69,12 +75,12 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
                         )
                     }
 
-                    source.matches(PATTERN_WORLD_XYZ) -> {
+                    instance.matches(REGEX_WORLD_XYZ) -> {
                         /*
                         * world,x,y,z
                         * world,x,y,z,yaw,pitch
                         * */
-                        val demand = source.split(",")
+                        val demand = instance.split(",")
                         Location(
                             demand[0],
                             demand[1].toDouble(),
@@ -93,25 +99,43 @@ class LocationApplicative(source: Any) : AbstractApplicative<Location>(source) {
         }
     }
 
-    fun parseRelative(source: String, def: Double): Double {
+    override fun readProperty(instance: Location, key: String): Any? {
+        return when (key) {
+            "x" -> instance.x
+            "y" -> instance.y
+            "z" -> instance.z
+            "yaw" -> instance.yaw
+            "pitch" -> instance.pitch
+            "world" -> instance.world
+            "blockX" -> instance.blockX
+            "blockY" -> instance.blockY
+            "blockZ" -> instance.blockZ
+            "length" -> instance.length()
+            "lengthSquared" -> instance.lengthSquared()
+            "direction" -> instance.direction
+            "zero" -> instance.zero()
+            "clone" -> instance.clone()
+            else -> failedByGetPropertyNotSupported(instance, key)
+        }
+    }
+
+    override fun writeProperty(instance: Location, key: String, value: Any?) {
+        when (key) {
+            "x" -> instance.x = value.applicativeDouble()
+            "y" -> instance.y = value.applicativeDouble()
+            "z" -> instance.z = value.applicativeDouble()
+            "yaw" -> instance.yaw = value.applicativeFloat()
+            "pitch" -> instance.pitch = value.applicativeFloat()
+            "direction" -> instance.direction = value.applicativeVector()
+            else -> failedBySetPropertyNotSupported(instance, key)
+        }
+    }
+
+    private fun parseRelative(source: String, def: Double): Double {
         return if (source[0] == '~') {
             def + (source.substring(1).toDoubleOrNull() ?: 0.0)
         } else {
             source.toDoubleOrNull() ?: 0.0
         }
-    }
-
-    companion object {
-
-        val PATTERN_XYZ =
-            "-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?".toRegex()
-
-        val PATTERN_WORLD_XYZ =
-            "^[A-Za-z0-9_\\- \\u4e00-\\u9fa5]+,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?\$".toRegex()
-
-        val PATTERN_RELATIVE =
-            "^(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?)\$".toRegex()
-
-        fun Any.applicativeLocation() = LocationApplicative(this)
     }
 }

@@ -13,23 +13,26 @@ import taboolib.common.platform.ProxyPlayer
  * @author Lanscarlos
  * @since 2023-08-21 15:13
  */
-class InventoryApplicative(source: Any) : AbstractApplicative<Inventory>(source) {
+object InventoryApplicative : AbstractApplicative<Inventory>() {
 
-    override fun transfer(source: Any, def: Inventory?): Inventory? {
-        return when (source) {
-            is Inventory -> source
-            is HumanEntity -> source.inventory
-            is ProxyPlayer -> source.castSafely<Player>()?.inventory
+    override fun transfer(instance: Any, def: Inventory?): Inventory? {
+        return when (instance) {
+            is Inventory -> instance
+            is HumanEntity -> instance.inventory
+            is ProxyPlayer -> instance.castSafely<Player>()?.inventory
             is String -> {
-                Bukkit.getPlayerExact(source)?.inventory
+                Bukkit.getPlayerExact(instance)?.inventory
             }
 
             else -> def
         }
     }
 
-    companion object {
+    override fun readProperty(instance: Inventory, key: String): Any? {
+        failedByGetPropertyNotSupported(instance, key)
+    }
 
-        fun Any.applicativeInventory() = InventoryApplicative(this)
+    override fun writeProperty(instance: Inventory, key: String, value: Any?) {
+        failedBySetPropertyNotSupported(instance, key)
     }
 }

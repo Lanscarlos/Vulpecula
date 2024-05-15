@@ -9,20 +9,24 @@ import java.awt.Color
  * @author Lanscarlos
  * @since 2023-08-21 14:57
  */
-class ColorApplicative(source: Any) : AbstractApplicative<Color>(source) {
+object ColorApplicative : AbstractApplicative<Color>() {
 
-    override fun transfer(source: Any, def: Color?): Color? {
-        return when (source) {
-            is Color -> source
-            is org.bukkit.Color -> Color(source.red, source.green, source.blue)
+    val REGEX_HEX = "^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex()
+
+    val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
+
+    override fun transfer(instance: Any, def: Color?): Color? {
+        return when (instance) {
+            is Color -> instance
+            is org.bukkit.Color -> Color(instance.red, instance.green, instance.blue)
             is String -> {
                 when {
-                    source.startsWith('#') && source.matches(PATTERN_HEX) -> {
+                    instance.startsWith('#') && instance.matches(REGEX_HEX) -> {
                         // hex
-                        Color.decode(source)
+                        Color.decode(instance)
                     }
-                    source.matches(PATTERN_RGB) -> {
-                        val demand = source.split("-").map { it.toInt().coerceIn(0, 255) }
+                    instance.matches(REGEX_RGB) -> {
+                        val demand = instance.split("-").map { it.toInt().coerceIn(0, 255) }
                         if (demand.size == 4) {
                             // r-g-b-a
                             Color(demand[0], demand[1], demand[2], demand[3])
@@ -31,7 +35,7 @@ class ColorApplicative(source: Any) : AbstractApplicative<Color>(source) {
                         }
                     }
                     else -> {
-                        val rgb = source.toIntOrNull() ?: return def
+                        val rgb = instance.toIntOrNull() ?: return def
                         Color(rgb)
                     }
                 }
@@ -41,11 +45,18 @@ class ColorApplicative(source: Any) : AbstractApplicative<Color>(source) {
         }
     }
 
-    companion object {
+    override fun readProperty(instance: Color, key: String): Any {
+        return when (key) {
+            "red" -> instance.red
+            "green" -> instance.green
+            "blue" -> instance.blue
+            "alpha" -> instance.alpha
+            "rgb" -> instance.rgb
+            else -> failedByGetPropertyNotSupported(instance, key)
+        }
+    }
 
-        val PATTERN_HEX = "^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex()
-        val PATTERN_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
-
-        fun Any.applicativeColor() = ColorApplicative(this)
+    override fun writeProperty(instance: Color, key: String, value: Any?) {
+        failedBySetPropertyNotSupported(instance, key)
     }
 }

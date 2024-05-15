@@ -12,20 +12,23 @@ import taboolib.common.platform.ProxyPlayer
  * @author Lanscarlos
  * @since 2023-08-21 15:10
  */
-class EntityApplicative(source: Any) : AbstractApplicative<Entity>(source) {
+object EntityApplicative : AbstractApplicative<Entity>() {
 
-    override fun transfer(source: Any, def: Entity?): Entity? {
-        return when (source) {
-            is Entity -> source
-            is OfflinePlayer -> source.player
-            is ProxyPlayer -> source.castSafely()
-            is String -> Bukkit.getPlayerExact(source)
+    override fun transfer(instance: Any, def: Entity?): Entity? {
+        return when (instance) {
+            is Entity -> instance
+            is OfflinePlayer -> instance.player
+            is ProxyPlayer -> instance.castSafely()
+            is String -> Bukkit.getPlayerExact(instance)
             else -> def
         }
     }
 
-    companion object {
+    override fun readProperty(instance: Entity, key: String): Any? {
+        failedByGetPropertyNotSupported(instance, key)
+    }
 
-        fun Any.applicativeEntity() = EntityApplicative(this)
+    override fun writeProperty(instance: Entity, key: String, value: Any?) {
+        failedBySetPropertyNotSupported(instance, key)
     }
 }
