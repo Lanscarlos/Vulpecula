@@ -157,28 +157,28 @@ fun Any?.applicativeIntList(def: List<Int> = emptyList()): List<Int> {
     if (this == null) {
         return def
     }
-    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
-    return applicative?.apply(this, def)?.mapIndexed { index, it ->
+    val applicative = ApplicativeRegistry.getApplicative(List::class.java) ?: ListApplicative
+    return applicative.apply(this, def).mapIndexed { index, it ->
         it.applicativeInt(def.getOrNull(index) ?: 0)
-    } ?: def
+    }
 }
 
 fun Any?.applicativeStringList(def: List<String> = emptyList()): List<String> {
     if (this == null) {
         return def
     }
-    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
-    return applicative?.apply(this, def)?.mapIndexed { index, it ->
+    val applicative = ApplicativeRegistry.getApplicative(List::class.java) ?: ListApplicative
+    return applicative.apply(this, def).mapIndexed { index, it ->
         it?.toString() ?: def.getOrNull(index) ?: "null"
-    } ?: def
+    }
 }
 
 fun Any?.applicativePlayerList(def: List<Player> = emptyList()): List<Player> {
     if (this == null) {
         return def
     }
-    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
-    return applicative?.apply(this, def)?.mapIndexedNotNull { index, it ->
+    val applicative = ApplicativeRegistry.getApplicative(List::class.java) ?: ListApplicative
+    return applicative.apply(this, def).mapIndexedNotNull { index, it ->
         it.applicativePlayer(def.getOrNull(index))
-    } ?: def
+    }
 }

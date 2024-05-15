@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.applicative
 
-import org.bukkit.event.Event
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
@@ -60,7 +59,6 @@ object ApplicativeRegistry : ClassVisitor(-4) {
         registry[clazz] = applicative
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun visitStart(clazz: Class<*>, instance: Supplier<*>?) {
         if (clazz.name.contains("taboolib")) {
             // 排除 taboolib 库
