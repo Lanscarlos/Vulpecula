@@ -73,8 +73,6 @@ interface BacikalContext {
 
     fun boolean(def: Boolean? = null, warning: String = "No boolean selected."): BacikalSeed<Boolean>
 
-    fun short(def: Short? = null, warning: String = "No short selected."): BacikalSeed<Short>
-
     fun int(def: Int? = null, warning: String = "No int selected."): BacikalSeed<Int>
 
     fun long(def: Long? = null, warning: String = "No long selected."): BacikalSeed<Long>

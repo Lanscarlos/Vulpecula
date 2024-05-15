@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.property
 
 import taboolib.common.OpenResult
+import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.ScriptProperty
 import taboolib.module.kether.action.ActionProperty
 

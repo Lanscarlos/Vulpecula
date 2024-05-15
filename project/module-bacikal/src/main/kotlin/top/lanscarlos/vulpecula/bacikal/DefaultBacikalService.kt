@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.common.platform.function.warning
-import top.lanscarlos.vulpecula.applicative.StringListApplicative.Companion.applicativeStringList
+import top.lanscarlos.vulpecula.applicative.applicativeStringList
 import top.lanscarlos.vulpecula.bacikal.quest.*
 import top.lanscarlos.vulpecula.config.bindConfigSection
 import java.util.concurrent.CompletableFuture
@@ -17,7 +17,7 @@ import java.util.function.Consumer
 object DefaultBacikalService : BacikalService {
 
     override val compileNamespace: List<String> by bindConfigSection("bacikal.compile-namespace") { value ->
-        value?.applicativeStringList()?.getValue() ?: emptyList()
+        value?.applicativeStringList() ?: emptyList()
     }
 
     override val questCompiler: BacikalQuestCompiler by bindConfigSection("bacikal.compiler") { value ->

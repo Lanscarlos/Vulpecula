@@ -2,14 +2,7 @@ package top.lanscarlos.vulpecula.config
 
 import taboolib.common.platform.function.getDataFolder
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeBoolean
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeDouble
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeFloat
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShort
-import top.lanscarlos.vulpecula.applicative.StringListApplicative.Companion.applicativeStringList
+import top.lanscarlos.vulpecula.applicative.*
 import java.io.File
 import java.nio.file.Path
 import java.util.function.Function
@@ -87,27 +80,23 @@ abstract class AbstractDynamicConfig(override val file: File, val config: Config
     }
 
     override fun readBoolean(path: String, def: Boolean): DynamicSection<Boolean> {
-        return read(path) { it?.applicativeBoolean()?.getValue() ?: def }
-    }
-
-    override fun readShort(path: String, def: Short): DynamicSection<Short> {
-        return read(path) { it?.applicativeShort()?.getValue() ?: def }
+        return read(path) { it?.applicativeBoolean() ?: def }
     }
 
     override fun readInt(path: String, def: Int): DynamicSection<Int> {
-        return read(path) { it?.applicativeInt()?.getValue() ?: def }
+        return read(path) { it?.applicativeInt() ?: def }
     }
 
     override fun readLong(path: String, def: Long): DynamicSection<Long> {
-        return read(path) { it?.applicativeLong()?.getValue() ?: def }
+        return read(path) { it?.applicativeLong() ?: def }
     }
 
     override fun readFloat(path: String, def: Float): DynamicSection<Float> {
-        return read(path) { it?.applicativeFloat()?.getValue() ?: def }
+        return read(path) { it?.applicativeFloat() ?: def }
     }
 
     override fun readDouble(path: String, def: Double): DynamicSection<Double> {
-        return read(path) { it?.applicativeDouble()?.getValue() ?: def }
+        return read(path) { it?.applicativeDouble() ?: def }
     }
 
     override fun readString(path: String): DynamicSection<String?> {
@@ -119,11 +108,11 @@ abstract class AbstractDynamicConfig(override val file: File, val config: Config
     }
 
     override fun readIntList(path: String, def: List<Int>): DynamicSection<List<Int>> {
-        return read(path) { it?.applicativeInt()?.collection()?.getValue()?.toList() ?: def }
+        return read(path) { it?.applicativeIntList() ?: def }
     }
 
     override fun readStringList(path: String, def: List<String>): DynamicSection<List<String>> {
-        return read(path) { it?.applicativeStringList()?.getValue() ?: def }
+        return read(path) { it?.applicativeStringList() ?: def }
     }
 
 }

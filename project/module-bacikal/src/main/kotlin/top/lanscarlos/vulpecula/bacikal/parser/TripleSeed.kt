@@ -10,11 +10,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2023-12-27 15:22
  */
-class TripleSeed<T, R, S>(
-    val first: BacikalSeed<T>,
-    val second: BacikalSeed<R>,
-    val third: BacikalSeed<S>
-) : BacikalSeed<Triple<T, R, S>> {
+class TripleSeed<T, R, S>(val first: BacikalSeed<T>, val second: BacikalSeed<R>, val third: BacikalSeed<S>) : BacikalSeed<Triple<T, R, S>> {
 
     override val isAccepted: Boolean
         get() = first.isAccepted && second.isAccepted && third.isAccepted

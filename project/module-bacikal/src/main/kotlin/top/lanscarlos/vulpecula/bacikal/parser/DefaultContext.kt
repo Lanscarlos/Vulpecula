@@ -8,22 +8,7 @@ import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.applicative.AbstractApplicative
-import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
-import top.lanscarlos.vulpecula.applicative.ColorApplicative.Companion.applicativeColor
-import top.lanscarlos.vulpecula.applicative.EntityApplicative.Companion.applicativeEntity
-import top.lanscarlos.vulpecula.applicative.InventoryApplicative.Companion.applicativeInventory
-import top.lanscarlos.vulpecula.applicative.ItemStackApplicative.Companion.applicativeItemStack
-import top.lanscarlos.vulpecula.applicative.LocationApplicative.Companion.applicativeLocation
-import top.lanscarlos.vulpecula.applicative.PlayerApplicative.Companion.applicativePlayer
-import top.lanscarlos.vulpecula.applicative.PlayerListApplicative.Companion.applicativePlayerList
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeBoolean
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeDouble
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeFloat
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShort
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
-import top.lanscarlos.vulpecula.applicative.VectorApplicative.Companion.applicativeVector
+import top.lanscarlos.vulpecula.applicative.*
 import top.lanscarlos.vulpecula.bacikal.Maturation
 import top.lanscarlos.vulpecula.bacikal.combineFuture
 import java.awt.Color
@@ -118,37 +103,31 @@ class DefaultContext(source: QuestReader) : BacikalContext {
 
     override fun boolean(def: Boolean?, warning: String): BacikalSeed<Boolean> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeBoolean().getValue()
-        }
-    }
-
-    override fun short(def: Short?, warning: String): BacikalSeed<Short> {
-        return buildSeed(def, warning) { _, source ->
-            source.applicativeShort().getValue()
+            source.applicativeBoolean()
         }
     }
 
     override fun int(def: Int?, warning: String): BacikalSeed<Int> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeInt().getValue()
+            source.applicativeInt()
         }
     }
 
     override fun long(def: Long?, warning: String): BacikalSeed<Long> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeLong().getValue()
+            source.applicativeLong()
         }
     }
 
     override fun float(def: Float?, warning: String): BacikalSeed<Float> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeFloat().getValue()
+            source.applicativeFloat()
         }
     }
 
     override fun double(def: Double?, warning: String): BacikalSeed<Double> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeDouble().getValue()
+            source.applicativeDouble()
         }
     }
 
@@ -160,59 +139,55 @@ class DefaultContext(source: QuestReader) : BacikalContext {
 
     override fun multiline(def: List<String>?, warning: String): BacikalSeed<List<String>> {
         return buildSeed(def, warning) { _, source ->
-            object : AbstractApplicative<String>(source) {
-                override fun transfer(source: Any, def: String?): String {
-                    return source.toString()
-                }
-            }.collection().getValue()?.toList()
+            source.applicativeStringList()
         }
     }
 
     override fun color(def: Color?, warning: String): BacikalSeed<Color> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeColor().getValue()
+            source.applicativeColor()
         }
     }
 
     override fun entity(def: Entity?, warning: String): BacikalSeed<Entity> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeEntity().getValue()
+            source.applicativeEntity()
         }
     }
 
     override fun inventory(def: Inventory?, warning: String): BacikalSeed<Inventory> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeInventory().getValue()
+            source.applicativeInventory()
         }
     }
 
     override fun item(def: ItemStack?, warning: String): BacikalSeed<ItemStack> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeItemStack().getValue()
+            source.applicativeItemStack()
         }
     }
 
     override fun location(def: Location?, warning: String): BacikalSeed<Location> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeLocation().getValue()
+            source.applicativeLocation()
         }
     }
 
     override fun player(def: Player?, warning: String): BacikalSeed<Player> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativePlayer().getValue()
+            source.applicativePlayer()
         }
     }
 
     override fun playerList(def: List<Player>?, warning: String): BacikalSeed<List<Player>> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativePlayerList().getValue()
+            source.applicativePlayerList()
         }
     }
 
     override fun vector(def: Vector?, warning: String): BacikalSeed<Vector> {
         return buildSeed(def, warning) { _, source ->
-            source.applicativeVector().getValue()
+            source.applicativeVector()
         }
     }
 

@@ -1,9 +1,11 @@
 package top.lanscarlos.vulpecula.applicative
 
+import org.bukkit.event.Event
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
+import java.lang.reflect.ParameterizedType
 import java.util.function.Supplier
 
 /**
@@ -58,6 +60,7 @@ object ApplicativeRegistry : ClassVisitor(-4) {
         registry[clazz] = applicative
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun visitStart(clazz: Class<*>, instance: Supplier<*>?) {
         if (clazz.name.contains("taboolib")) {
             // 排除 taboolib 库
@@ -79,7 +82,14 @@ object ApplicativeRegistry : ClassVisitor(-4) {
             return
         }
 
-        registerApplicative(clazz, applicative)
+        // 获取泛型类型
+        val type = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0) as? Class<*> ?: let {
+            warning("Property \"${clazz.name}\" must have a generic type.")
+            return
+        }
+
+        // 注册
+        registerApplicative(type, applicative)
     }
 
 }

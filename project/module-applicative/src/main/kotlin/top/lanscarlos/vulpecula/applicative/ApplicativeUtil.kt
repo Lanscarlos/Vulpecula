@@ -1,5 +1,10 @@
 package top.lanscarlos.vulpecula.applicative
 
+import org.bukkit.Material
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
+import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemStack
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import java.awt.Color
@@ -77,14 +82,6 @@ fun Any?.applicativeDouble(def: Double = 0.0): Double {
     return applicative.apply(this) ?: def
 }
 
-fun Any?.applicativeStringList(def: List<String> = emptyList()): List<String> {
-    if (this == null) {
-        return def
-    }
-    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
-    return applicative?.apply(this, def)?.map { it.toString() } ?: StringListApplicative.apply(this, def)
-}
-
 /**
  * 将对象转换为 java.awt.Color
  *
@@ -122,4 +119,66 @@ fun Any?.applicativeLocation(def: Location = Location(null, 0.0, 0.0, 0.0)): Loc
     }
     val applicative = ApplicativeRegistry.getApplicative(Location::class.java) ?: LocationApplicative
     return applicative.apply(this, def)
+}
+
+fun Any?.applicativeItemStack(def: ItemStack = ItemStack(Material.STONE)): ItemStack {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(ItemStack::class.java) ?: ItemStackApplicative
+    return applicative.apply(this, def)
+}
+
+fun Any?.applicativeEntity(def: Entity? = null): Entity? {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(Entity::class.java) ?: EntityApplicative
+    return applicative.apply(this, def ?: return null)
+}
+
+fun Any?.applicativePlayer(def: Player? = null): Player? {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(Player::class.java) ?: PlayerApplicative
+    return applicative.apply(this, def ?: return null)
+}
+
+fun Any?.applicativeInventory(def: Inventory? = null): Inventory? {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(Inventory::class.java) ?: InventoryApplicative
+    return applicative.apply(this, def ?: return null)
+}
+
+fun Any?.applicativeIntList(def: List<Int> = emptyList()): List<Int> {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
+    return applicative?.apply(this, def)?.mapIndexed { index, it ->
+        it.applicativeInt(def.getOrNull(index) ?: 0)
+    } ?: def
+}
+
+fun Any?.applicativeStringList(def: List<String> = emptyList()): List<String> {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
+    return applicative?.apply(this, def)?.mapIndexed { index, it ->
+        it?.toString() ?: def.getOrNull(index) ?: "null"
+    } ?: def
+}
+
+fun Any?.applicativePlayerList(def: List<Player> = emptyList()): List<Player> {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicative(List::class.java)
+    return applicative?.apply(this, def)?.mapIndexedNotNull { index, it ->
+        it.applicativePlayer(def.getOrNull(index))
+    } ?: def
 }

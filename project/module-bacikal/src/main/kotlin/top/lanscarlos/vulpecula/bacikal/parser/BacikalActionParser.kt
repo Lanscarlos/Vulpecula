@@ -10,21 +10,7 @@ import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestActionParser
 import taboolib.library.kether.QuestContext
 import taboolib.library.kether.QuestReader
-import top.lanscarlos.vulpecula.applicative.AbstractApplicative
-import top.lanscarlos.vulpecula.applicative.CollectionApplicative.Companion.collection
-import top.lanscarlos.vulpecula.applicative.ColorApplicative.Companion.applicativeColor
-import top.lanscarlos.vulpecula.applicative.EntityApplicative.Companion.applicativeEntity
-import top.lanscarlos.vulpecula.applicative.InventoryApplicative.Companion.applicativeInventory
-import top.lanscarlos.vulpecula.applicative.ItemStackApplicative.Companion.applicativeItemStack
-import top.lanscarlos.vulpecula.applicative.LocationApplicative.Companion.applicativeLocation
-import top.lanscarlos.vulpecula.applicative.PlayerApplicative.Companion.applicativePlayer
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeBoolean
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeDouble
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeFloat
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeLong
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeShort
-import top.lanscarlos.vulpecula.applicative.VectorApplicative.Companion.applicativeVector
+import top.lanscarlos.vulpecula.applicative.*
 import java.awt.Color
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.CompletableFuture
@@ -274,7 +260,6 @@ abstract class BacikalActionParser : QuestActionParser {
         private fun buildSeed(type: Class<*>): BacikalSeed<*> {
             return when (type) {
                 Boolean::class.java -> BooleanSeed()
-                Short::class.java -> ShortSeed()
                 Int::class.java -> IntSeed()
                 Long::class.java -> LongSeed()
                 Float::class.java -> FloatSeed()
@@ -324,80 +309,33 @@ abstract class BacikalActionParser : QuestActionParser {
 
     }
 
-    private class PairSeed<S1, S2>(val first: BacikalSeed<S1>, val second: BacikalSeed<S2>) : BacikalSeed<Pair<S1, S2>?> {
-
-        override val isAccepted: Boolean
-            get() = first.isAccepted && second.isAccepted
-
-        override fun accept(reader: BacikalReader) {
-            first.accept(reader)
-            second.accept(reader)
-        }
-
-        override fun accept(frame: BacikalFrame): CompletableFuture<Pair<S1, S2>?> {
-            return first.accept(frame).thenCompose { s1 ->
-                second.accept(frame).thenApply { s2 ->
-                    s1 to s2
-                }
-            }
-        }
-    }
-
-    private class TripleSeed<S1, S2, S3>(val first: BacikalSeed<S1>, val second: BacikalSeed<S2>, val third: BacikalSeed<S3>) : BacikalSeed<Triple<S1, S2, S3>?> {
-
-        override val isAccepted: Boolean
-            get() = first.isAccepted && second.isAccepted && third.isAccepted
-
-        override fun accept(reader: BacikalReader) {
-            first.accept(reader)
-            second.accept(reader)
-            third.accept(reader)
-        }
-
-        override fun accept(frame: BacikalFrame): CompletableFuture<Triple<S1, S2, S3>?> {
-            return first.accept(frame).thenCompose { s1 ->
-                second.accept(frame).thenCompose { s2 ->
-                    third.accept(frame).thenApply { s3 ->
-                        Triple(s1, s2, s3)
-                    }
-                }
-            }
-        }
-    }
-
     private class BooleanSeed : AbstractSeed<Boolean?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Boolean? {
-            return value?.applicativeBoolean()?.getValue()
-        }
-    }
-
-    private class ShortSeed : AbstractSeed<Short?>() {
-        override fun resolve(frame: BacikalFrame, value: Any?): Short? {
-            return value?.applicativeShort()?.getValue()
+            return value?.applicativeBoolean()
         }
     }
 
     private class IntSeed : AbstractSeed<Int?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Int? {
-            return value?.applicativeInt()?.getValue()
+            return value?.applicativeInt()
         }
     }
 
     private class LongSeed : AbstractSeed<Long?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Long? {
-            return value?.applicativeLong()?.getValue()
+            return value?.applicativeLong()
         }
     }
 
     private class FloatSeed : AbstractSeed<Float?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Float? {
-            return value?.applicativeFloat()?.getValue()
+            return value?.applicativeFloat()
         }
     }
 
     private class DoubleSeed : AbstractSeed<Double?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Double? {
-            return value?.applicativeDouble()?.getValue()
+            return value?.applicativeDouble()
         }
     }
 
@@ -409,56 +347,49 @@ abstract class BacikalActionParser : QuestActionParser {
 
     private class ListSeed : AbstractSeed<List<String>?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): List<String>? {
-            if (value == null) {
-                return null
-            }
-            return object : AbstractApplicative<String>(value) {
-                override fun transfer(source: Any, def: String?): String {
-                    return source.toString()
-                }
-            }.collection().getValue()?.toList()
+            return value?.applicativeStringList()
         }
     }
 
     private class ColorSeed : AbstractSeed<Color?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Color? {
-            return value?.applicativeColor()?.getValue()
+            return value?.applicativeColor()
         }
     }
 
     private class EntitySeed : AbstractSeed<Entity?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Entity? {
-            return value?.applicativeEntity()?.getValue()
+            return value?.applicativeEntity()
         }
     }
 
     private class PlayerSeed : AbstractSeed<Player?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Player? {
-            return value?.applicativePlayer()?.getValue()
+            return value?.applicativePlayer()
         }
     }
 
     private class InventorySeed : AbstractSeed<Inventory?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Inventory? {
-            return value?.applicativeInventory()?.getValue()
+            return value?.applicativeInventory()
         }
     }
 
     private class ItemStackSeed : AbstractSeed<ItemStack?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): ItemStack? {
-            return value?.applicativeItemStack()?.getValue()
+            return value?.applicativeItemStack()
         }
     }
 
     private class LocationSeed : AbstractSeed<Location?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Location? {
-            return value?.applicativeLocation()?.getValue()
+            return value?.applicativeLocation()
         }
     }
 
     private class VectorSeed : AbstractSeed<Vector?>() {
         override fun resolve(frame: BacikalFrame, value: Any?): Vector? {
-            return value?.applicativeVector()?.getValue()
+            return value?.applicativeVector()
         }
     }
 

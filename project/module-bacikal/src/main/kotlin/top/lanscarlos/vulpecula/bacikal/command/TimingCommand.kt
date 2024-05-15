@@ -7,7 +7,7 @@ import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submit
 import taboolib.common5.format
 import taboolib.module.kether.printKetherErrorMessage
-import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
+import top.lanscarlos.vulpecula.applicative.applicativeInt
 import top.lanscarlos.vulpecula.bacikal.toBacikalQuest
 import top.lanscarlos.vulpecula.config.bindConfigSection
 import java.util.concurrent.CompletableFuture
@@ -25,7 +25,7 @@ object TimingCommand {
      * 重复次数
      * */
     private val repeat: Int by bindConfigSection("command-timing-repeat") {
-        it?.applicativeInt()?.getValue() ?: 10000
+        it?.applicativeInt() ?: 10000
     }
 
     @CommandBody

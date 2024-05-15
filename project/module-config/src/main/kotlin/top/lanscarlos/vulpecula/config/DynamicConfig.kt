@@ -68,8 +68,6 @@ interface DynamicConfig {
 
     fun readBoolean(path: String, def: Boolean): DynamicSection<Boolean>
 
-    fun readShort(path: String, def: Short): DynamicSection<Short>
-
     fun readInt(path: String, def: Int): DynamicSection<Int>
 
     fun readLong(path: String, def: Long): DynamicSection<Long>

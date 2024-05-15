@@ -7,20 +7,18 @@ package top.lanscarlos.vulpecula.applicative
  * @author Lanscarlos
  * @since 2024-05-15 11:15
  */
-abstract class ListApplicative<T> : AbstractApplicative<List<T>>() {
+object ListApplicative : AbstractApplicative<List<Any?>>() {
 
-    abstract fun mapping(instance: Any?): T
-
-    override fun transfer(instance: Any, def: List<T>?): List<T>? {
+    override fun transfer(instance: Any, def: List<Any?>?): List<Any?>? {
         return when (instance) {
-            is Array<*> -> instance.map(::mapping)
-            is Collection<*> -> instance.map(::mapping)
-            is Map<*, *> -> instance.map(::mapping)
+            is Array<*> -> instance.toList()
+            is Collection<*> -> instance.toList()
+            is Map<*, *> -> instance.toList()
             else -> def
         }
     }
 
-    override fun readProperty(instance: List<T>, key: String): Any? {
+    override fun readProperty(instance: List<Any?>, key: String): Any? {
         return when (key) {
             "size" -> instance.size
             "isEmpty", "empty" -> instance.isEmpty()
@@ -35,8 +33,7 @@ abstract class ListApplicative<T> : AbstractApplicative<List<T>>() {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun writeProperty(instance: List<T>, key: String, value: Any?) {
+    override fun writeProperty(instance: List<Any?>, key: String, value: Any?) {
         if (instance is MutableList) {
             when (key) {
                 "isEmpty", "empty" -> {
@@ -50,17 +47,17 @@ abstract class ListApplicative<T> : AbstractApplicative<List<T>>() {
                     }
                 }
                 "first" -> {
-                    instance[0] = value as? T ?: failedByInvalidValue(instance, key, value)
+                    instance[0] = value
                 }
                 "last" -> {
-                    instance[instance.lastIndex] = value as? T ?: failedByInvalidValue(instance, key, value)
+                    instance[instance.lastIndex] = value
                 }
                 "random" -> {
-                    instance[(instance.indices).random()] = value as? T ?: failedByInvalidValue(instance, key, value)
+                    instance[(instance.indices).random()] = value
                 }
                 else -> {
                     val index = key.toIntOrNull() ?: failedBySetPropertyNotSupported(instance, key)
-                    instance[index] = value as? T ?: failedByInvalidValue(instance, key, value)
+                    instance[index] = value
                 }
             }
         } else {
