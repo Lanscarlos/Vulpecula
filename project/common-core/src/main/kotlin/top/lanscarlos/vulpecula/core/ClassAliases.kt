@@ -1,9 +1,13 @@
 package top.lanscarlos.vulpecula.core
 
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
+import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import top.lanscarlos.vulpecula.Vulpecula
 
 /**
  * Vulpecula
@@ -17,6 +21,14 @@ object ClassAliases {
     @Config("class-aliases.yml")
     lateinit var classAliases: Configuration
         private set
+
+    @Awake(LifeCycle.ACTIVE)
+    fun onActive() {
+        Vulpecula.registerReloadable("class-aliases") {
+            classAliases.reload()
+            console().asLangText("ClassAliases-Load-Succeeded")
+        }
+    }
 
     fun getClass(name: String): Class<*>? {
         val className = if (!name.contains('.')) {

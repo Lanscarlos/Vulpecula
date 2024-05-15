@@ -6,7 +6,7 @@ import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
 import top.lanscarlos.vulpecula.config.DynamicConfig
-import top.lanscarlos.vulpecula.modularity.DispatcherPipeline
+import top.lanscarlos.vulpecula.core.modularity.DispatcherPipeline
 import java.lang.reflect.ParameterizedType
 import java.util.function.Supplier
 

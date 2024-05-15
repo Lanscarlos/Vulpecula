@@ -1,37 +1,41 @@
-package top.lanscarlos.vulpecula.core.command
+package top.lanscarlos.vulpecula.bacikal.command
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.CommandBody
+import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submit
 import taboolib.common5.format
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.applicative.PrimitiveApplicative.applicativeInt
 import top.lanscarlos.vulpecula.bacikal.toBacikalQuest
 import top.lanscarlos.vulpecula.config.bindConfigSection
-import top.lanscarlos.vulpecula.core.utils.timing
 import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.core.command
+ * top.lanscarlos.vulpecula.bacikal.command
  *
  * @author Lanscarlos
- * @since 2023-08-27 11:46
+ * @since 2024-05-15 10:21
  */
-object VulpeculaTimingCommand {
+object TimingCommand {
 
-    val repeat: Int by bindConfigSection("command-timing-repeat") {
+    /**
+     * 重复次数
+     * */
+    private val repeat: Int by bindConfigSection("command-timing-repeat") {
         it?.applicativeInt()?.getValue() ?: 10000
     }
 
-    val executor: CommandComponent.() -> Unit = {
+    @CommandBody
+    val timing = subCommand {
         dynamic {
             execute<ProxyCommandSender> { sender, _, content ->
                 submit(async = true) {
                     try {
                         val quest = content.toBacikalQuest("vulpecula-eval")
-                        val start = timing()
+                        val start = top.lanscarlos.vulpecula.utils.timing()
                         val memory = timingMemory()
                         val futures = Array<CompletableFuture<*>?>(repeat) { null }
                         repeat(repeat) { index ->
@@ -44,12 +48,12 @@ object VulpeculaTimingCommand {
                             }
                         }
 
-                        val delayRecord = timing(start)
+                        val delayRecord = top.lanscarlos.vulpecula.utils.timing(start)
                         val memoryRecord = timingMemory(memory)
                         for (it in futures) {
                             it?.join()
                         }
-                        val completedRecord = timing(start)
+                        val completedRecord = top.lanscarlos.vulpecula.utils.timing(start)
                         sender.sendMessage(" §5§l‹ ›§r §7启动耗时: §c${delayRecord.format(3)}ms§7; 内存占用: §c${memoryRecord.format(3)}MB§7; 完成耗时: §c${completedRecord.format(3)}ms")
                     } catch (e: Exception) {
                         e.printKetherErrorMessage()

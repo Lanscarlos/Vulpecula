@@ -21,7 +21,7 @@ import java.util.function.Supplier
 @Awake(LifeCycle.LOAD)
 object VulpeculaCommand : ClassVisitor() {
 
-    val components = mutableListOf<SimpleCommandBody>()
+    private val components = mutableListOf<SimpleCommandBody>()
 
     override fun getLifeCycle() = LifeCycle.LOAD
 

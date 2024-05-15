@@ -4,11 +4,8 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
-import taboolib.common.platform.function.adaptCommandSender
 import taboolib.module.chat.colored
 import taboolib.module.kether.*
-import top.lanscarlos.vulpecula.bacikal.bacikalSimpleQuest
-import top.lanscarlos.vulpecula.bacikal.quest.KetherQuestCompiler
 import java.nio.charset.StandardCharsets
 
 /**

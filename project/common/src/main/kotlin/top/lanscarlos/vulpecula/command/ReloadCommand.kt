@@ -1,23 +1,26 @@
-package top.lanscarlos.vulpecula.core.command
+package top.lanscarlos.vulpecula.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.CommandBody
+import taboolib.common.platform.command.subCommand
+import taboolib.common.platform.command.suggest
 import taboolib.common.platform.function.console
-import top.lanscarlos.vulpecula.core.ClassAliases
+import top.lanscarlos.vulpecula.Vulpecula
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.core.command
+ * top.lanscarlos.vulpecula.command
  *
  * @author Lanscarlos
- * @since 2023-08-27 12:26
+ * @since 2024-05-15 10:24
  */
-object VulpeculaReloadCommand {
+object ReloadCommand {
 
-    val executor: CommandComponent.() -> Unit = {
+    @CommandBody
+    val reload = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val messages = ClassAliases.reload()
+            val messages = Vulpecula.reload()
             if (sender is ProxyPlayer) {
                 messages.forEach { sender.sendMessage(it) }
             }
@@ -25,8 +28,11 @@ object VulpeculaReloadCommand {
         }
 
         dynamic("modules") {
+            suggest {
+                Vulpecula.reloadable.map { it.key }
+            }
             execute<ProxyCommandSender> { sender, _, modules ->
-                val messages = ClassAliases.reload(*modules.split(' ').toTypedArray())
+                val messages = Vulpecula.reload(*modules.split(' ').toTypedArray())
                 if (sender is ProxyPlayer) {
                     messages.forEach { sender.sendMessage(it) }
                 }
@@ -34,4 +40,5 @@ object VulpeculaReloadCommand {
             }
         }
     }
+
 }
