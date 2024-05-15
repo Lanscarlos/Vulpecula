@@ -5,14 +5,12 @@ plugins {
     java
     id("io.izzel.taboolib") version "2.0.11"
     id("org.jetbrains.kotlin.jvm") version "1.8.22"
-    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 
 subprojects {
     apply<JavaPlugin>()
     apply(plugin = "io.izzel.taboolib")
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "com.github.johnrengelman.shadow")
 
     taboolib {
         env {
@@ -34,8 +32,14 @@ subprojects {
     }
 
     repositories {
-//        mavenLocal()
-        maven { url = uri("https://repo.spongepowered.org/maven") }
+        maven("https://libraries.minecraft.net")
+        maven("https://repo1.maven.org/maven2")
+        maven("https://maven.aliyun.com/repository/central")
+        maven("https://repo.codemc.io/repository/nms/")
+        maven("http://sacredcraft.cn:8081/repository/releases") {
+            isAllowInsecureProtocol = true
+        }
+        mavenLocal()
         mavenCentral()
     }
 
