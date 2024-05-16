@@ -11,6 +11,6 @@ import top.lanscarlos.vulpecula.bacikal.Bacikal
  */
 interface BacikalQuestCompiler {
 
-    fun compile(name: String, source: String, namespace: List<String> = Bacikal.service.compileNamespace): BacikalQuest
+    fun compile(name: String, source: String, namespace: List<String> = Bacikal.service.defaultCompileNamespace): BacikalQuest
 
 }

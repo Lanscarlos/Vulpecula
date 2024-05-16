@@ -9,9 +9,10 @@ bacikal:
   compiler: 'bacikal'
   # 执行器
   executor: 'kether'
-  # 编译时命名空间
-  compile-namespace:
+  # 默认编译命名空间
+  default-compile-namespace:
     - 'vulpecula'
+    - 'kether'
 
   # 注释匹配规则
   comment-pattern:

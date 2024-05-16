@@ -16,7 +16,7 @@ import java.util.function.Consumer
  */
 object DefaultBacikalService : BacikalService {
 
-    override val compileNamespace: List<String> by bindConfigSection("bacikal.compile-namespace") { value ->
+    override val defaultCompileNamespace: List<String> by bindConfigSection("bacikal.default-compile-namespace") { value ->
         value?.applicativeStringList() ?: emptyList()
     }
 

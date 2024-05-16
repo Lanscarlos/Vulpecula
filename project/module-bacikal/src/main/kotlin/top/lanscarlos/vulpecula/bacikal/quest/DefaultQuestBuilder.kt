@@ -21,7 +21,7 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override var escapeUnicode = true
 
-    override val namespace = Bacikal.service.compileNamespace.toMutableList()
+    override val namespace = Bacikal.service.defaultCompileNamespace.toMutableList()
 
     override val transfers = mutableListOf<BacikalQuestTransfer>()
 

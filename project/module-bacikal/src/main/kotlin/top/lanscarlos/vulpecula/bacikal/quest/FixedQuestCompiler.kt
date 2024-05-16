@@ -21,18 +21,13 @@ import java.util.*
 object FixedQuestCompiler : BacikalQuestCompiler {
 
     override fun compile(name: String, source: String, namespace: List<String>): BacikalQuest {
-        return try {
-            val quest = InnerLoader().load(
-                ScriptService,
-                "bacikal_$name",
-                source.toByteArray(StandardCharsets.UTF_8),
-                listOf("vulpecula", *namespace.toTypedArray())
-            )
-            DefaultQuest(name, source, quest)
-        } catch (ex: Exception) {
-            ex.printKetherErrorMessage(true)
-            AberrantQuest(name, source, ex)
-        }
+        val quest = InnerLoader().load(
+            ScriptService,
+            "bacikal_$name",
+            source.toByteArray(StandardCharsets.UTF_8),
+            listOf("vulpecula", *namespace.toTypedArray())
+        )
+        return DefaultQuest(quest)
     }
 
     /**

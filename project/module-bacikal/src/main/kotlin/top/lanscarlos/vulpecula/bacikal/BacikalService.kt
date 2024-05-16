@@ -13,7 +13,10 @@ import java.util.function.Consumer
  */
 interface BacikalService {
 
-    val compileNamespace: List<String>
+    /**
+     * 默认编译命名空间
+     * */
+    val defaultCompileNamespace: List<String>
 
     val questCompiler: BacikalQuestCompiler
 
