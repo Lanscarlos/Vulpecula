@@ -12,11 +12,13 @@ taboolib {
             UNIVERSAL,
             DATABASE,
             EFFECT,
+            NMS,
             NMS_UTIL,
             KETHER,
             UI,
             METRICS,
-            BUKKIT_ALL
+            BUKKIT_ALL,
+            EXPANSION_JAVASCRIPT
         )
     }
     version {
