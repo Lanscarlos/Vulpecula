@@ -201,16 +201,16 @@ class DefaultDispatcher(
             // 添加碎片替换
             it.appendTransfer(FragmentReplacer(fragments))
 
-            it.appendMainBlock {
-                if (ACTION_SCRIPT_HEADER != null) {
-                    // 如果存在脚本语句, 则添加脚本语句
-                    for (handler in handlers) {
-                        appendLiteral("$ACTION_SCRIPT_HEADER run $handler")
-                    }
-                }
-                appendPreprocessor(preprocessing)
-                appendPostprocessor(postprocessing)
-            }
+//            it.appendMainBlock {
+//                if (ACTION_SCRIPT_HEADER != null) {
+//                    // 如果存在脚本语句, 则添加脚本语句
+//                    for (handler in handlers) {
+//                        appendLiteral("$ACTION_SCRIPT_HEADER run $handler")
+//                    }
+//                }
+//                appendPreprocessor(preprocessing)
+//                appendPostprocessor(postprocessing)
+//            }
 
 //            it.compiler = AnalysisQuestCompiler(config)
         }
@@ -221,7 +221,7 @@ class DefaultDispatcher(
      * */
     private fun process(event: Event) {
         // 创建脚本上下文环境
-        val context = quest.createContext()
+//        val context = quest.createContext()
 
         // 流水线处理
         for (pipeline in pipelines) {
@@ -235,24 +235,24 @@ class DefaultDispatcher(
 
             // 预设变量
             for (variable in pipeline.variables(event)) {
-                context.setVariable(variable.key, variable.value)
+//                context.setVariable(variable.key, variable.value)
             }
         }
 
         // 获取玩家对象
-        val player = context.getVariable<Player>(AbstractPipeline.VARIABLE_PLAYER)
+//        val player = context.getVariable<Player>(AbstractPipeline.VARIABLE_PLAYER)
 
         // 阻断检查
         baffle?.let { baffle ->
-            val key = player?.name ?: event.eventName
-            if (!baffle.hasNext(key)) return
+//            val key = player?.name ?: event.eventName
+//            if (!baffle.hasNext(key)) return
         }
 
         // 设置脚本执行者
-        context.sender = player?.let { adaptCommandSender(it) }
+//        context.sender = player?.let { adaptCommandSender(it) }
 
         // 执行脚本
-        context.runActions()
+//        context.runActions()
     }
 
     companion object {

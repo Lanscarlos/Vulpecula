@@ -188,29 +188,29 @@ class DefaultCommandComponent(val context: DefaultCommand, val id: String, val s
         val quest = context.quest
 
         component.execute<T> { sender, context, argument ->
-            quest.runActions("@$id") {
-                this.sender = adaptCommandSender(sender)
-                setVariable("@Context", context)
-                setVariables("@Arg", "argument", "arg", value = argument)
-                if (sender is Player) {
-                    setVariable("@Player", sender)
-                    setVariable("player", sender)
-                }
-
-                // 防止根命令获取空参数
-                try {
-                    val cache = context.args()
-                    for ((i, arg) in cache.withIndex()) {
-                        setVariable("arg$i", arg)
-                        if (i > index && i <= comments.size + index) {
-                            setVariable(comments[i - index - 1], value = arg)
-                        }
-                    }
-                    setVariables("@Args", "args", value = cache)
-                } catch (ignored: Exception) {
-                    setVariables("@Args", "args", value = emptyArray<String>())
-                }
-            }
+//            quest.runActions("@$id") {
+//                this.sender = adaptCommandSender(sender)
+//                setVariable("@Context", context)
+//                setVariables("@Arg", "argument", "arg", value = argument)
+//                if (sender is Player) {
+//                    setVariable("@Player", sender)
+//                    setVariable("player", sender)
+//                }
+//
+//                // 防止根命令获取空参数
+//                try {
+//                    val cache = context.args()
+//                    for ((i, arg) in cache.withIndex()) {
+//                        setVariable("arg$i", arg)
+//                        if (i > index && i <= comments.size + index) {
+//                            setVariable(comments[i - index - 1], value = arg)
+//                        }
+//                    }
+//                    setVariables("@Args", "args", value = cache)
+//                } catch (ignored: Exception) {
+//                    setVariables("@Args", "args", value = emptyArray<String>())
+//                }
+//            }
         }
     }
 

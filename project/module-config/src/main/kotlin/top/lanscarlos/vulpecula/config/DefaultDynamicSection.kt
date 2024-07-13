@@ -10,25 +10,30 @@ import java.util.function.Function
  * @since 2023-08-25 00:31
  */
 class DefaultDynamicSection<T>(
-    override val parent: DynamicConfig,
+    override val config: DynamicConfig,
     override val path: String,
     val transfer: Function<Any?, T>
 ) : DynamicSection<T> {
 
+    override val position: Int by lazy {
+        config.indexOf(path)
+    }
+
     var innerValue: T? = null
+
     var isInitialized = false
 
     @Suppress("UNCHECKED_CAST")
     override fun getValue(): T {
         if (!isInitialized) {
-            innerValue = transfer.apply(parent[path])
+            innerValue = transfer.apply(config[path])
             isInitialized = true
         }
         return innerValue as T
     }
 
     override fun update() {
-        innerValue = transfer.apply(parent[path])
+        innerValue = transfer.apply(config[path])
         isInitialized = true
     }
 }

@@ -14,13 +14,14 @@ class YamlDynamicConfig(file: File, config: Configuration) : AbstractDynamicConf
 
     constructor(file: File) : this(file, Configuration.loadFromFile(file))
 
+    val content by lazy { file.readLines(charset = Charsets.UTF_16) }
+
     override fun indexOf(path: String): Int {
         if (path.isEmpty() || !file.exists()) {
             return -1
         }
 
         return try {
-            val content = file.readLines()
             val target = path.split('.').toMutableList()
             var line = 0
             var layer = 0

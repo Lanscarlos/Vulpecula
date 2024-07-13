@@ -12,6 +12,7 @@ import java.util.*
  */
 enum class BacikalError {
 
+    SYMBOL_NOT_OPENED, // 符号未打开
     SYMBOL_NOT_CLOSED, // 符号未闭合
     UNKNOWN_ACTION; // 未知语句
 

@@ -1,4 +1,0 @@
-
-bacikal-error:
-  symbol-not-closed: 'Unmatched closing symbol "{0}" (line: {1}), last symbol is "{2}" (line: {3}) at "{4}"'
-  unknown-action: 'Unknown action {0} (line: {1}) at "{2}"'

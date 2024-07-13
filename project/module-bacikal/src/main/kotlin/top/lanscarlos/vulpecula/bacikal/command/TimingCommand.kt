@@ -8,7 +8,7 @@ import taboolib.common.platform.function.submit
 import taboolib.common5.format
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.applicative.applicativeInt
-import top.lanscarlos.vulpecula.bacikal.toBacikalQuest
+import top.lanscarlos.vulpecula.bacikal.Bacikal.toBacikalQuest
 import top.lanscarlos.vulpecula.config.bindConfigSection
 import java.util.concurrent.CompletableFuture
 
@@ -38,15 +38,15 @@ object TimingCommand {
                         val start = top.lanscarlos.vulpecula.utils.timing()
                         val memory = timingMemory()
                         val futures = Array<CompletableFuture<*>?>(repeat) { null }
-                        repeat(repeat) { index ->
-                            futures[index] = quest.runActions {
-                                this.sender = sender
-                                sender.castSafely<Player>()?.let { player ->
-                                    setVariable("player", player)
-                                    setVariable("hand", player.equipment?.itemInMainHand)
-                                }
-                            }
-                        }
+//                        repeat(repeat) { index ->
+//                            futures[index] = quest.runActions {
+//                                this.sender = sender
+//                                sender.castSafely<Player>()?.let { player ->
+//                                    setVariable("player", player)
+//                                    setVariable("hand", player.equipment?.itemInMainHand)
+//                                }
+//                            }
+//                        }
 
                         val delayRecord = top.lanscarlos.vulpecula.utils.timing(start)
                         val memoryRecord = timingMemory(memory)

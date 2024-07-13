@@ -1,0 +1,5 @@
+
+bacikal-error:
+  symbol-not-opened: "Missing opening symbol: {0}\n        at {1}:\n{2} <--"
+  symbol-not-closed: "Missing closing symbol: {0}\n        at {1}:\n{2} <--\nIt is actually symbol: {3}\n        at {4}:\n{5} <--"
+  unknown-action: 'Unknown action {0} (line: {1}) at "{2}"'

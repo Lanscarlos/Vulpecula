@@ -13,6 +13,13 @@ import java.util.function.Function
  * @since 2023-08-25 00:50
  */
 
+/**
+ * 读取文件
+ */
+fun File.toDynamicConfig(): DynamicConfig {
+    return YamlDynamicConfig(this)
+}
+
 fun <T> bindConfigSection(path: String, bind: String = "config.yml", transfer: Function<Any?, T>): DynamicSection<T> {
     val configFile = ConfigLoader.files[bind] ?: error("Config $bind not found.")
     return YamlDynamicConfig(configFile.file, configFile.configuration).read(path, transfer)

@@ -17,7 +17,7 @@ import java.util.function.Function
 abstract class AbstractDynamicConfig(override val file: File, val config: Configuration) : DynamicConfig, Runnable {
 
     override val path: Path by lazy {
-        file.toPath().relativize(getDataFolder().toPath())
+        getDataFolder().toPath().relativize(file.toPath())
     }
 
     val sections = linkedMapOf<String, DynamicSection<*>>()

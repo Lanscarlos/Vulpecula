@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
+import taboolib.common.platform.function.info
 import taboolib.library.kether.*
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.kether.Kether
@@ -10,6 +11,7 @@ import taboolib.module.kether.action.ActionProperty
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.bacikal.Bacikal
 import top.lanscarlos.vulpecula.bacikal.BacikalError
+import top.lanscarlos.vulpecula.config.DynamicSection
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 
@@ -20,24 +22,37 @@ import java.nio.file.Path
  * @author Lanscarlos
  * @since 2024-03-22 13:07
  */
-class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompiler {
+class AnalysisQuestCompiler(val mapped: List<Pair<IntRange, DynamicSection<*>>>) : BacikalQuestCompiler {
 
     override fun compile(name: String, source: String, namespace: List<String>): BacikalQuest {
-        return try {
-            if (Bacikal.analysisSymbolClosure) {
-                analysisSymbolClosure(name)
-            }
-            val quest = InnerLoader().load(
-                ScriptService,
-                "bacikal_$name",
-                source.toByteArray(StandardCharsets.UTF_8),
-                listOf("vulpecula", *namespace.toTypedArray())
-            )
-            DefaultQuest(name, source, quest)
-        } catch (ex: Exception) {
-            ex.printKetherErrorMessage(true)
-            AberrantQuest(name, source, ex)
+        if (Bacikal.analysisSymbolClosure) {
+            analysisSymbolClosure(source)
         }
+        val quest = InnerLoader().load(
+            ScriptService,
+            "bacikal_$name",
+            source.toByteArray(StandardCharsets.UTF_8),
+            listOf("vulpecula", *namespace.toTypedArray())
+        )
+        return DefaultQuest(quest)
+    }
+
+    private fun getPosition(line: Int): String {
+        val section = mapped.firstOrNull { line in it.first } ?: return "Unknown position."
+        val position = line + section.first.first
+        return "${section.second.path}(${section.second.config.path}:$position)"
+    }
+
+    private fun getRelativeContent(text: String, line: Int, size: Int = 3): String {
+        val lines = text.split("\n")
+        val start = (line - size).coerceAtLeast(0)
+        val end = line.coerceAtMost(lines.size)
+        return lines.subList(start, end).joinToString("\n")
+    }
+
+    private fun symbolNotClosed(char: Char, line: Int, expected: Pair<Char, Int>, content: String): LocalizedException {
+        info("Symbol not closed: $char, $line, ${expected.first}, ${expected.second}")
+        return BacikalError.SYMBOL_NOT_CLOSED.create(expected.first, getPosition(expected.second), getRelativeContent(content, expected.second), char, getPosition(line), getRelativeContent(content, line))
     }
 
     /**
@@ -48,7 +63,7 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
         val stack = mutableListOf<Pair<Char, Int>>()
         var cnt = 0
         var index = 0
-        var line = offset
+        var line = 0
         while (index < input.length) {
             when (val char = input[index]) {
                 '\n' -> {
@@ -69,18 +84,18 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
                     if (stack.lastOrNull()?.first == '\'' || stack.lastOrNull()?.first == '\"') {
                         continue
                     }
-                    val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_CLOSED.create('}', line, "null", -1, path)
+                    val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_OPENED.create('}', getPosition(line), getRelativeContent(input, line))
                     if (cache.first != '{') {
-                        throw BacikalError.SYMBOL_NOT_CLOSED.create('}', line, cache.first, cache.second, path)
+                        throw symbolNotClosed(char, line, cache, input)
                     }
                 }
                 ']' -> {
                     if (stack.lastOrNull()?.first == '\'' || stack.lastOrNull()?.first == '\"') {
                         continue
                     }
-                    val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_CLOSED.create(']', line, "null", -1, path)
+                    val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_OPENED.create(']', getPosition(line), getRelativeContent(input, line))
                     if (cache.first != '[') {
-                        throw BacikalError.SYMBOL_NOT_CLOSED.create(']', line, cache.first, cache.second, path)
+                        throw symbolNotClosed(char, line, cache, input)
                     }
                 }
                 '\'' -> {
@@ -89,9 +104,9 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
                     }
                     // 单引号处理
                     if (stack.lastOrNull()?.first == '\'') {
-                        val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_CLOSED.create('\'', line, "null", -1, path)
+                        val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_OPENED.create('\'', getPosition(line), getRelativeContent(input, line))
                         if (cache.first != '\'') {
-                            throw BacikalError.SYMBOL_NOT_CLOSED.create('\'', line, cache.first, cache.second, path)
+                            throw symbolNotClosed(char, line, cache, input)
                         }
                     } else {
                         stack.add(char to line)
@@ -111,14 +126,18 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
                         // 闭合
                         if (met == cnt) {
                             // 恰好闭合
-                            val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_CLOSED.create('\"', line, "null", -1, path)
+                            val cache = stack.removeLastOrNull() ?: throw BacikalError.SYMBOL_NOT_OPENED.create('\"', getPosition(line), getRelativeContent(input, line))
                             if (cache.first != '\"') {
-                                throw BacikalError.SYMBOL_NOT_CLOSED.create('\"', line, cache.first, cache.second, path)
+                                throw symbolNotClosed(char, line, cache, input)
                             }
                         } else if (met > cnt) {
                             // 闭合符号数量更多
                             val cache = stack.removeLastOrNull()
-                            throw BacikalError.SYMBOL_NOT_CLOSED.create('\"', line, cache?.first ?: "null", cache?.second ?: -1, path)
+                            if (cache == null) {
+                                throw BacikalError.SYMBOL_NOT_OPENED.create('\"', getPosition(line), getRelativeContent(input, line))
+                            } else {
+                                throw symbolNotClosed(char, line, cache, input)
+                            }
                         }
                     } else {
                         // 开合
@@ -163,6 +182,9 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
         val line: Int
             get() = ruler.count { it <= index } + 1
 
+        val position: String
+            get() = "${mapped.firstOrNull { line in it.first }?.second?.path}:$line"
+
         init {
             ruler = mutableListOf()
             for ((i, char) in content.withIndex()) {
@@ -183,8 +205,7 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
 
         override fun <T : Any?> wrap(action: QuestAction<T>?): ParsedAction<T> {
             val wrapped = super.wrap(action)
-            wrapped.properties["path"] = path
-            wrapped.properties["line"] = line
+            wrapped.properties["position"] = position
             return wrapped
         }
 
@@ -233,7 +254,7 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
                             val propertyKey = token.substring(i + 1, token.length - 1)
                             return wrap(ActionProperty.Get(wrap(ActionLiteral<Any>(element, true)), propertyKey)) as ParsedAction<T>
                         }
-                        throw BacikalError.UNKNOWN_ACTION.create(element, line, path)
+                        throw BacikalError.UNKNOWN_ACTION.create(element, position)
                     } else {
                         val optional = service.registry.getParser(token, namespace)
                         if (optional.isPresent) {
@@ -241,7 +262,7 @@ class AnalysisQuestCompiler(val path: Path, val offset: Int) : BacikalQuestCompi
                         } else if (Kether.isAllowToleranceParser) {
                             return wrap(ActionLiteral(token, true))
                         }
-                        throw BacikalError.UNKNOWN_ACTION.create(token, line, path)
+                        throw BacikalError.UNKNOWN_ACTION.create(token, position)
                     }
                 }
             }

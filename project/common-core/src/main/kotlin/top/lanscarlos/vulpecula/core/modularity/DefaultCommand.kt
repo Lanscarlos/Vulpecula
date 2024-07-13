@@ -188,12 +188,12 @@ class DefaultCommand(
             // 添加碎片替换
             appendTransfer(FragmentReplacer(fragments))
 
-            for ((key, node) in structure) {
-                node.section["execute"]?.let { appendBlock("@$key", it) }
-            }
-            for (function in functions.values) {
-                appendBlock(function)
-            }
+//            for ((key, node) in structure) {
+//                node.section["execute"]?.let { appendBlock("@$key", it) }
+//            }
+//            for (function in functions.values) {
+//                appendBlock(function)
+//            }
         }
     }
 

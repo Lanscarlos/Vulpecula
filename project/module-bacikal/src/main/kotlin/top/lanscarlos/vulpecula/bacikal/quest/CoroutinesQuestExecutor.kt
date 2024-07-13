@@ -51,7 +51,7 @@ object CoroutinesQuestExecutor : BacikalQuestExecutor {
             var current: Int = -1
 
             init {
-                quest.source.getBlock(QuestContext.BASE_BLOCK).ifPresent(this::setNext)
+                quest.getBlock(QuestContext.BASE_BLOCK).ifPresent(this::setNext)
             }
 
             override fun name(): String {
@@ -66,7 +66,7 @@ object CoroutinesQuestExecutor : BacikalQuestExecutor {
                 current = block?.indexOf(action) ?: -1
 
                 if (current == -1) {
-                    block = quest.source.blockOf(action).orElse(null)
+                    block = quest.blockOf(action).orElse(null)
                     current = block?.indexOf(action) ?: -1
                 }
             }

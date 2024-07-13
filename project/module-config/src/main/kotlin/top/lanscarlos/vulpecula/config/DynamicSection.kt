@@ -11,12 +11,20 @@ import kotlin.reflect.KProperty
  */
 interface DynamicSection<T> {
 
-    val parent: DynamicConfig
+    /**
+     * 源配置
+     * */
+    val config: DynamicConfig
 
     /**
      * 路径
      * */
     val path: String
+
+    /**
+     * 所在文件的行号
+     * */
+    val position: Int
 
     /**
      * 获取数据
@@ -28,6 +36,9 @@ interface DynamicSection<T> {
      * */
     fun update()
 
+    /**
+     * 兼容代理属性
+     * */
     operator fun getValue(source: Any?, property: KProperty<*>): T {
         return getValue()
     }

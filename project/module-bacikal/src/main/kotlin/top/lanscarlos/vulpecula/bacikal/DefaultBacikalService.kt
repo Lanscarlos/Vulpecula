@@ -48,10 +48,6 @@ object DefaultBacikalService : BacikalService {
         return builder.build()
     }
 
-    override fun buildSimpleQuest(name: String, func: Consumer<BacikalBlockBuilder>): BacikalQuest {
-        return DefaultQuestBuilder(name).also { it.appendBlock(name, func) }.build()
-    }
-
     override fun executeQuest(quest: BacikalQuest): CompletableFuture<*> {
         TODO("Not yet implemented")
     }

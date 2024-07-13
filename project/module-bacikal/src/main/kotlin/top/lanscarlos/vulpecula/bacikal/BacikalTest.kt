@@ -20,6 +20,8 @@ object BacikalTest {
         info("BacikalTest onTest...")
         BacikalRegistry.registerAction(File(getDataFolder(), "item-3.0.0.jar"))
         info("BacikalTest onTest... x2")
+
+
     }
 
 }

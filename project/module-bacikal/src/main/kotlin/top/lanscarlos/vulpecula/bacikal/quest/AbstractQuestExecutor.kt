@@ -43,7 +43,7 @@ abstract class AbstractQuestExecutor(override val quest: BacikalQuest, override 
     override fun runActions(): CompletableFuture<Any?> {
         return context.runActions().exceptionally { ex ->
             ex.printKetherErrorMessage(true)
-            warning("Quest ${quest.name} run failed: ${ex.localizedMessage}")
+            warning("Quest ${quest.id} run failed: ${ex.localizedMessage}")
         }
     }
 
@@ -53,7 +53,7 @@ abstract class AbstractQuestExecutor(override val quest: BacikalQuest, override 
 
     abstract fun createRootFrame(context: InnerContext): QuestContext.Frame
 
-    inner class InnerContext : ScriptContext(ScriptService, quest.source) {
+    inner class InnerContext : ScriptContext(ScriptService, quest) {
         override fun createRootFrame(): QuestContext.Frame {
             return this@AbstractQuestExecutor.createRootFrame(this)
         }

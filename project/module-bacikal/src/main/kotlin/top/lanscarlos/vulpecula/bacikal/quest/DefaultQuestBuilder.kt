@@ -1,7 +1,11 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
+import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.warning
+import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.kether.QuestContext
 import top.lanscarlos.vulpecula.bacikal.Bacikal
+import top.lanscarlos.vulpecula.config.DynamicSection
 import java.io.File
 import java.util.*
 import java.util.function.Consumer
@@ -15,8 +19,6 @@ import java.util.function.Consumer
  */
 class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
-    override var artifactFile: File? = null
-
     override var eraseComments = true
 
     override var escapeUnicode = true
@@ -25,15 +27,33 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
 
     override val transfers = mutableListOf<BacikalQuestTransfer>()
 
-    override var compiler = Bacikal.service.questCompiler
+    override var artifactFile: File? = null
 
-    override var executor = Bacikal.service.questExecutor
+    val functions = linkedMapOf<String, MutableList<Any>>()
 
-    val blocks = linkedMapOf<String, BacikalBlockBuilder>()
+    override fun appendTransfer(transfer: BacikalQuestTransfer) {
+        transfers += transfer
+    }
 
-    val source = StringBuilder()
+    override fun appendContent(content: String) {
+        appendContent("main", content)
+    }
+
+    override fun appendContent(name: String, content: String) {
+        functions.computeIfAbsent(name) { mutableListOf() }.add(content)
+    }
+
+    override fun appendContent(section: DynamicSection<*>) {
+        appendContent("main", section)
+    }
+
+    override fun appendContent(name: String, section: DynamicSection<*>) {
+        functions.computeIfAbsent(name) { mutableListOf() }.add(section)
+    }
 
     override fun build(): BacikalQuest {
+        // 行号源码映射
+        val mapped = mutableListOf<Pair<IntRange, DynamicSection<*>>>()
 
         if (eraseComments) {
             appendTransfer(CommentEraser)
@@ -43,9 +63,36 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
         }
 
         // 构建源码
-        for (block in blocks.values) {
-            source.append(block.build())
-            source.append("\n\n")
+        var line = 0
+        val source = StringBuilder()
+        for ((name, sections) in functions) {
+
+            source.append("def $name = {\n")
+            line += 1
+
+            // 构建函数体
+            for (section in sections) {
+                val content = when (section) {
+                    is String -> section
+                    is DynamicSection<*> -> {
+                        section.getValue()?.toString() ?: "null"
+                    }
+                    else -> {
+                        warning("Unknown section type: ${section.javaClass.name}")
+                        section.toString()
+                    }
+                }
+                source.append(content)
+                source.append('\n')
+                val size = content.split('\n').size
+                if (section is DynamicSection<*>) {
+                    mapped += (line until line + size) to section
+                }
+                line += size
+            }
+
+            source.append("}\n\n")
+            line += 2
         }
 
         // 转换
@@ -53,50 +100,9 @@ class DefaultQuestBuilder(override var name: String) : BacikalQuestBuilder {
             transfer.transfer(source)
         }
 
-        // 写入构建文件
-        artifactFile?.let {
-            try {
-                it.writeText(source.toString())
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
+        val artifact = File(getDataFolder(), "output.ks")
+        artifact.writeText(source.toString())
 
-        return compiler.compile(name, source.toString(), namespace)
-    }
-
-    override fun appendMainBlock(func: BacikalBlockBuilder.() -> Unit) {
-        val block = DefaultBlockBuilder(QuestContext.BASE_BLOCK)
-        appendBlock(block)
-        block.also(func)
-    }
-
-    override fun appendBlock(name: String?, content: Any) {
-        appendBlock(name) {
-            appendContent(content)
-        }
-    }
-
-    override fun appendBlock(name: String?, func: BacikalBlockBuilder.() -> Unit) {
-        val block = DefaultBlockBuilder(name ?: UUID.randomUUID().toString())
-        appendBlock(block)
-        block.also(func)
-    }
-
-    override fun appendBlock(name: String?, func: Consumer<BacikalBlockBuilder>) {
-        val block = DefaultBlockBuilder(name ?: UUID.randomUUID().toString())
-        appendBlock(block)
-        func.accept(block)
-    }
-
-    override fun appendBlock(block: BacikalBlockBuilder) {
-        if (blocks.containsKey(block.name)) {
-            error("Block name ${block.name} has already exists.")
-        }
-        blocks[block.name] = block
-    }
-
-    override fun appendTransfer(transfer: BacikalQuestTransfer) {
-        transfers += transfer
+        return AnalysisQuestCompiler(mapped).compile(name, source.toString(), namespace)
     }
 }
