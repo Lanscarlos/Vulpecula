@@ -19,8 +19,15 @@ import taboolib.module.lang.sendLang
  * 若发送者是玩家，则同时向控制台发送
  * */
 fun CommandSender.sendSyncLang(node: String, vararg args: Any) {
+    if (this !is Player && Debug.level == Debug.OFF) {
+        // 当前指令执行者为控制台 且 关闭调试，则不发送信息
+        return
+    }
+
     adaptCommandSender(this).sendLang(node, *args)
-    if (this is Player) console().sendLang(node, *args)
+    if (this is Player) {
+        console().sendLang(node, *args)
+    }
 }
 
 /**
@@ -28,6 +35,11 @@ fun CommandSender.sendSyncLang(node: String, vararg args: Any) {
  * 仅发送于控制台
  * */
 fun CommandSender.sendSyncLang(silent: Boolean, node: String, vararg args: Any) {
+    if (this !is Player && Debug.level == Debug.OFF) {
+        // 当前指令执行者为控制台 且 关闭调试，则不发送信息
+        return
+    }
+
     if (silent) {
         console().sendLang(node, *args)
     } else {
