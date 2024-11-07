@@ -34,6 +34,8 @@ object ActionItemColor : ActionItem.Resolver {
     }
 
     private fun Color.toBukkit(): org.bukkit.Color {
-        return org.bukkit.Color.fromRGB(this.rgb)
+        // 去除 alpha 通道
+        val rgb = this.rgb and 0x00FFFFFF
+        return org.bukkit.Color.fromRGB(rgb)
     }
 }
