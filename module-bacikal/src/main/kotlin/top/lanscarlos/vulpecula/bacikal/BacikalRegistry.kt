@@ -6,6 +6,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
+import taboolib.common.platform.function.warning
 import taboolib.library.kether.QuestActionParser
 import taboolib.library.reflex.ClassMethod
 import taboolib.library.reflex.ReflexClass
@@ -13,6 +14,9 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
+import top.lanscarlos.vulpecula.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionParser
+import top.lanscarlos.vulpecula.bacikal.parser.BacikalComplexActionParser
 import java.util.function.Supplier
 
 /**
@@ -23,19 +27,67 @@ import java.util.function.Supplier
  * @since 2024-11-20 16:33
  */
 @Awake(LifeCycle.LOAD)
-object BacikalRegistry : ClassVisitor(-1) {
+object BacikalRegistry : ClassVisitor(-1) { // TODO 优先级太低, 可能会被原生 Kether 覆盖
 
-    override fun visitStart(clazz: ReflexClass) {
+    @Config("bacikal-registry.conf")
+    lateinit var registry: Configuration
+        private set
+
+    val headers = mutableMapOf<String, BacikalComplexActionParser>()
+
+    override fun visitStart(owner: ReflexClass) {
+        if (!owner.hasInterface(BacikalActionResolver::class.java)) {
+            return
+        }
+        registerAction(owner)
     }
 
-    fun registerAction(method: ClassMethod, instance: Supplier<*>?) {
+    /**
+     * 类式语句注册
+     */
+    fun registerAction(owner: ReflexClass) {
+        if (!owner.hasInterface(BacikalActionResolver::class.java)) {
+            error("BacikalRegistry#registerAction >> Cannot register class ${owner.name} without BacikalActionResolver interface.")
+        }
+        val resolver = (owner.getInstance() ?: owner.newInstance()) as? BacikalActionResolver
+            ?: error("BacikalRegistry#registerAction >> Cannot create instance of ${owner.name}")
+
+        val parser = BacikalActionParser(owner.toClass())
+
+        if (resolver.bind != null) {
+            // 绑定主体
+            val header = headers.computeIfAbsent(resolver.bind!!) { BacikalComplexActionParser(it) }
+            header.registerAction(resolver.id, parser)
+        } else {
+            registerAction(resolver.id, parser)
+        }
     }
 
     /**
      * 注册语句
      */
     fun registerAction(id: String, parser: QuestActionParser) {
+        // 读取本地注册信息
+        val local = registry.getStringList("action.$id.local").mapNotNull {
+            val cache = it.split(":")
+            if (cache.size != 2) {
+                warning("Action \"$id\" local message \"$it\" is not valid.")
+                return@mapNotNull null
+            }
+            cache[0] to cache[1]
+        }
 
+        // 读取远程注册信息
+        val remote = registry.getStringList("action.$id.remote").mapNotNull {
+            val cache = it.split(":")
+            if (cache.size != 2) {
+                warning("Action \"$id\" remote message \"$it\" is not valid.")
+                return@mapNotNull null
+            }
+            cache[0] to cache[1]
+        }
+
+        registerAction(id, parser, local, remote)
     }
 
     /**

@@ -9,12 +9,14 @@ package top.lanscarlos.vulpecula.bacikal
  */
 interface BacikalActionResolver {
 
-    annotation class Action(val id: String)
+    /**
+     * 语句 ID
+     */
+    val id: String
 
-    annotation class Expected(val prefix: Array<String>)
-
-    annotation class Optional(val prefix: Array<String>)
-
-    annotation class Additional(val prefix: Array<String>)
+    /**
+     * 绑定主体, 若为空则不绑定
+     */
+    val bind: String?
 
 }
