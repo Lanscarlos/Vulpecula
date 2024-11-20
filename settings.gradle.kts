@@ -1,4 +1,8 @@
 rootProject.name="Vulpecula"
+include("module-action-item")
+include("module-applicative")
+include("module-bacikal")
+include("module-wireshark")
 include("project:common")
 include("project:common-core")
 include("project:common-legacy")
@@ -11,4 +15,3 @@ include("project:platform-bukkit")
 include("plugin:premium")
 include("plugin:mini")
 include("action:item")
-include("module-wireshark")

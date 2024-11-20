@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.bacikal.parser.BacikalParserBody
  */
 @BacikalParserBody("test", "item")
 object ActionItemTest : BacikalActionParser() {
+
     fun resolve(
         name: String,
         @Optional(["amt"]) amount: Int = 32
@@ -20,4 +21,5 @@ object ActionItemTest : BacikalActionParser() {
         info("running item $name and $amount.")
         return "item $name $amount"
     }
+
 }
