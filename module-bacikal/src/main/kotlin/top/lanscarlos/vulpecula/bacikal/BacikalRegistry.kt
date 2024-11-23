@@ -8,16 +8,14 @@ import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.QuestActionParser
-import taboolib.library.reflex.ClassMethod
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
-import top.lanscarlos.vulpecula.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionParser
+import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionResolver
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalComplexActionParser
-import java.util.function.Supplier
 
 /**
  * Vulpecula
@@ -27,7 +25,7 @@ import java.util.function.Supplier
  * @since 2024-11-20 16:33
  */
 @Awake(LifeCycle.LOAD)
-object BacikalRegistry : ClassVisitor(-1) { // TODO 优先级太低, 可能会被原生 Kether 覆盖
+object BacikalRegistry : ClassVisitor(1) {
 
     @Config("bacikal-registry.conf")
     lateinit var registry: Configuration
@@ -49,7 +47,7 @@ object BacikalRegistry : ClassVisitor(-1) { // TODO 优先级太低, 可能会�
         if (!owner.hasInterface(BacikalActionResolver::class.java)) {
             error("BacikalRegistry#registerAction >> Cannot register class ${owner.name} without BacikalActionResolver interface.")
         }
-        val resolver = (owner.getInstance() ?: owner.newInstance()) as? BacikalActionResolver
+        val resolver = (findInstance(owner) ?: owner.newInstance()) as? BacikalActionResolver
             ?: error("BacikalRegistry#registerAction >> Cannot create instance of ${owner.name}")
 
         val parser = BacikalActionParser(owner.toClass())

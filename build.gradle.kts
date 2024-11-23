@@ -15,7 +15,15 @@ subprojects {
     taboolib {
         env {
             // 安装模块
-            install(Basic, Bukkit, BukkitUtil, BukkitNMSUtil, Kether, CommandHelper)
+            install(
+                Basic,
+                Bukkit,
+                BukkitUtil,
+                BukkitNMSUtil,
+                Kether,
+                Metrics,
+                CommandHelper
+            )
         }
         version {
             taboolib = "6.2.0-beta31"

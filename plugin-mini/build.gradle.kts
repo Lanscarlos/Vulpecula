@@ -26,8 +26,10 @@ tasks {
         destinationDirectory.set(file("${rootDir}/build/libs"))
 
         val subprojects = listOf(
+            project(":common-core"),
+            project(":module-applicative"),
             project(":module-bacikal"),
-            project(":project:common"),
+//            project(":project:common"),
 //            project(":project:module-applicative"),
 //            project(":project:module-bacikal"),
 //            project(":project:module-config"),

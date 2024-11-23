@@ -1,8 +1,8 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.bacikal.parser
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.bacikal.parser
  *
  * @author Lanscarlos
  * @since 2024-11-20 10:41

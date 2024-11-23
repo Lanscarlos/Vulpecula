@@ -5,12 +5,12 @@ import taboolib.library.kether.*
 import top.lanscarlos.vulpecula.applicative.Applicative
 import top.lanscarlos.vulpecula.applicative.BooleanApplicative
 import top.lanscarlos.vulpecula.applicative.IntApplicative
-import top.lanscarlos.vulpecula.bacikal.BacikalActionResolver
 import top.lanscarlos.vulpecula.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.bacikal.annotation.Optional
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -253,7 +253,10 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
         override fun process(source: QuestContext.Frame): CompletableFuture<T> {
             val frame = DefaultFrame(source)
             val queue = actions.map { it.execute(frame) }
-            val parameters = process(queue)
+            val parameters = process(actions, frame).exceptionally { ex ->
+                ex.printStackTrace()
+                throw ex
+            }
             return if (useFutureReturn) {
                 parameters.thenCompose {
                     invoke(mask, it.toTypedArray()) as CompletableFuture<T>
@@ -267,21 +270,35 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
 
     }
 
-    private fun process(queue: List<CompletableFuture<*>>): CompletableFuture<List<Any?>> {
+    private fun process(queue: Array<BacikalAction<*>>, frame: BacikalFrame): CompletableFuture<out List<Any?>> {
         if (queue.isEmpty()) {
             return CompletableFuture.completedFuture(emptyList())
         }
 
         if (queue.size == 1) {
-            val future = queue[0]
-            if (future.isDone) {
-                return CompletableFuture.completedFuture(listOf(future.getNow(null)))
+            val action = queue[0]
+            val future = action.execute(frame)
+            return future.handle { result, ex ->
+                if (ex != null) {
+                    // 中断队列
+                    throw ex
+                }
+                listOf(result)
             }
-            return future.thenApply { listOf(it) }
         }
 
-        return CompletableFuture.allOf(*queue.toTypedArray()).thenApply {
-            queue.map(CompletableFuture<*>::join)
+        // 构建顺序执行链
+        return queue.fold(CompletableFuture.completedFuture<LinkedList<Any?>>(LinkedList())) { acc, action ->
+            acc.thenCompose { results ->
+                action.execute(frame).handle { result, ex ->
+                    if (ex != null) {
+                        // 中断队列
+                        throw ex
+                    }
+                    results.add(result)
+                    results
+                }
+            }
         }
     }
 
