@@ -74,17 +74,6 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         standardFunction = owner.declaredMethods.find { it.name == "resolve" }!!
         defaultFunction = owner.declaredMethods.find { it.name == "resolve\$default" }
 
-        // 使用 kotlinx-metadata 解析元信息
-//        val metadata = owner.getAnnotation(Metadata::class.java)
-//        val kmClass = (KotlinClassMetadata.read(metadata) as? KotlinClassMetadata.Class)?.toKmClass()!!
-//        val kmFunction = kmClass.functions.find { it.name == standardFunction.name }!!
-//        val kmParameters = kmFunction.valueParameters
-//
-//        // 使用 ProtoBuf 解析元信息
-//        val (jnResolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(metadata.data1, metadata.data2)
-//        val pbFunction = pbClass.functionList.find { jnResolver.getString(it.name) == "resolve" }!!
-//        val pbParameters = pbFunction.valueParameterList
-
         // 使用 Reflex 解析参数
         val rClass = ReflexClass.of(owner, AnalyseMode.ASM_ONLY)
         val rMethod = rClass.structure.methods.find { it.name == "resolve" }!!
@@ -122,8 +111,7 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         if (defaultFunction != null && mask != 0) {
             // 参数缺省
             try {
-                info("BacikalActionParser#execute >> Invoke default function. parameters: ${parameters.joinToString()}")
-                return defaultFunction.invoke(instance, this@BacikalActionParser, *parameters, mask, null)
+                return defaultFunction.invoke(instance, instance, *parameters, mask, null)
             } catch (e: Exception) {
                 if (e is InvocationTargetException) {
                     e.targetException.printStackTrace()
@@ -377,7 +365,6 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
             Long::class.java -> 0L
             Float::class.java -> 0.0f
             Double::class.java -> 0.0
-            String::class.java -> "null"
             else -> null
         }
 
