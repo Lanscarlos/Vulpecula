@@ -201,6 +201,9 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
         }
 
         fun parse(reader: BacikalReader): BacikalAction<*> {
+            if (type == BacikalFrame::class.java) {
+                return FrameAction
+            }
             val action: ParsedAction<*> = when (modifier) {
                 MODIFIER_NONE -> {
                     reader.readAction()
@@ -252,7 +255,6 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
         @Suppress("UNCHECKED_CAST")
         override fun process(source: QuestContext.Frame): CompletableFuture<T> {
             val frame = DefaultFrame(source)
-            val queue = actions.map { it.execute(frame) }
             val parameters = process(actions, frame).exceptionally { ex ->
                 ex.printStackTrace()
                 throw ex
@@ -308,6 +310,15 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
     object UninitializedAction : BacikalAction<Unit> {
         override fun execute(frame: BacikalFrame): CompletableFuture<Unit> {
             return CompletableFuture.completedFuture(Unit)
+        }
+    }
+
+    /**
+     * 帧对象提供
+     * */
+    object FrameAction : BacikalAction<BacikalFrame> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<BacikalFrame> {
+            return CompletableFuture.completedFuture(frame)
         }
     }
 
