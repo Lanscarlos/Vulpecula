@@ -18,6 +18,9 @@ taboolib {
             name("LuckPerms").optional(true)
         }
     }
+//    relocate("kotlin.", "kotlin2021.")
+//    relocate("top.lanscarlos.", "top.aiurlanta.")
+    relocate("kotlinx.metadata.", "kotlinx.metadata060.")
 }
 
 tasks {

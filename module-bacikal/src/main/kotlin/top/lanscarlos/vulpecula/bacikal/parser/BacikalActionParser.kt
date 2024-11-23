@@ -1,5 +1,8 @@
 package top.lanscarlos.vulpecula.bacikal.parser
 
+import kotlinx.metadata.internal.metadata.ProtoBuf
+import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmNameResolver
+import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.function.info
 import taboolib.common.reflect.hasAnnotation
@@ -24,12 +27,12 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2024-11-20 11:11
  */
-//@RuntimeDependency(
-//    "!org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0",
-//    test = "!kotlinx.metadata.jvm.KotlinClassMetadata",
-//    relocate = ["!kotlin.", "!kotlin2021.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
-//    transitive = false
-//)
+@RuntimeDependency(
+    "!org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0",
+    test = "!kotlinx.metadata.jvm.KotlinClassMetadata",
+    relocate = ["!kotlin.", "!kotlin2021.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
+    transitive = false
+)
 class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) : QuestActionParser {
 
     companion object {
@@ -74,14 +77,32 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         standardFunction = owner.declaredMethods.find { it.name == "resolve" }!!
         defaultFunction = owner.declaredMethods.find { it.name == "resolve\$default" }
 
+        // 使用 kotlinx-metadata 解析元信息
+//        val metadata = owner.getAnnotation(Metadata::class.java)
+//        val kmClass = (KotlinClassMetadata.read(metadata) as? KotlinClassMetadata.Class)?.toKmClass()!!
+//        val kmFunction = kmClass.functions.find { it.name == standardFunction.name }!!
+//        val kmParameters = kmFunction.valueParameters
+
         // 使用 Reflex 解析参数
         val rClass = ReflexClass.of(owner, AnalyseMode.ASM_ONLY)
         val rMethod = rClass.structure.methods.find { it.name == "resolve" }!!
         val rParameters = rMethod.parameter
 
+        for (annotation in rClass.structure.annotations) {
+            info("BacikalActionParser#init >> Reflex Annotation: ${annotation.source.name}")
+        }
+
+        // 使用 ProtoBuf 解析元信息
+        val metadata = rClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!
+        val data1 = metadata.list<String>("d1").toTypedArray()
+        val data2 = metadata.list<String>("d2").toTypedArray()
+        val (jnResolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1, data2)
+        val pbFunction = pbClass.functionList.find { jnResolver.getString(it.name) == "resolve" }!!
+        val pbParameters = pbFunction.valueParameterList
+
         // 解析参数
         parameters = standardFunction.parameters.mapIndexed { index, parameter ->
-            Parameter(index, parameter, rParameters[index])
+            Parameter(index, parameter, rParameters[index], pbParameters[index], jnResolver)
         }
 
         // 检查返回值
@@ -195,7 +216,9 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         return QuestActionResolver(actions)
     }
 
-    inner class Parameter(val index: Int, source: java.lang.reflect.Parameter, reflex: LazyAnnotatedClass) {
+    inner class Parameter(val index: Int, source: java.lang.reflect.Parameter, reflex: LazyAnnotatedClass, pbParameter: ProtoBuf.ValueParameter, pbResolver: JvmNameResolver) {
+
+        val name: String = pbResolver.getString(pbParameter.name)
 
         val type: Class<*> = source.type
 
@@ -206,7 +229,7 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         val modifier: Int
 
         init {
-            info("Parameter index=$index; type=${type.simpleName}; nullable=$isNullable")
+            info("Parameter index=$index; name=$name; type=${type.simpleName}; nullable=$isNullable")
             prefix = when {
                 source.hasAnnotation(Expected::class.java) -> {
                     modifier = MODIFIER_EXPECTED

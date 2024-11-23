@@ -39,6 +39,12 @@ object BacikalRegistry : ClassVisitor(1) {
             return
         }
         info("Registering action ${owner.name}")
+        for (annotation in owner.structure.annotations) {
+            info("    - Reflex Annotation: ${annotation.source.name}")
+        }
+        for (annotation in owner.toClass().annotations) {
+            info("    - Java Annotation: ${annotation.annotationClass.qualifiedName}")
+        }
         registerAction(owner)
     }
 
