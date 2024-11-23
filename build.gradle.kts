@@ -1,5 +1,4 @@
 import io.izzel.taboolib.gradle.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
@@ -58,6 +57,10 @@ subprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib"))
+    }
+
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.add("-parameters")
     }
 
     gradle.buildFinished {

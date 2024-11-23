@@ -13,6 +13,7 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
+import top.lanscarlos.vulpecula.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionResolver
 import top.lanscarlos.vulpecula.bacikal.parser.BacikalComplexActionParser
@@ -34,10 +35,18 @@ object BacikalRegistry : ClassVisitor(1) {
     val headers = mutableMapOf<String, BacikalComplexActionParser>()
 
     override fun visitStart(owner: ReflexClass) {
-        if (!owner.hasInterface(BacikalActionResolver::class.java)) {
+        if (!owner.hasAnnotation(BacikalParser::class.java)) {
             return
         }
+        info("Registering action ${owner.name}")
         registerAction(owner)
+    }
+
+    @Awake(LifeCycle.ENABLE)
+    fun onEnable() {
+        for ((id, parser) in headers) {
+            registerAction(id, parser)
+        }
     }
 
     /**
@@ -50,7 +59,7 @@ object BacikalRegistry : ClassVisitor(1) {
         val resolver = (findInstance(owner) ?: owner.newInstance()) as? BacikalActionResolver
             ?: error("BacikalRegistry#registerAction >> Cannot create instance of ${owner.name}")
 
-        val parser = BacikalActionParser(owner.toClass())
+        val parser = BacikalActionParser(owner.toClass(), resolver)
 
         if (resolver.bind != null) {
             // 绑定主体
@@ -66,7 +75,7 @@ object BacikalRegistry : ClassVisitor(1) {
      */
     fun registerAction(id: String, parser: QuestActionParser) {
         // 读取本地注册信息
-        val local = registry.getStringList("action.$id.local").mapNotNull {
+        val local = registry.getStringList("actions.$id.local").mapNotNull {
             val cache = it.split(":")
             if (cache.size != 2) {
                 warning("Action \"$id\" local message \"$it\" is not valid.")
@@ -76,7 +85,7 @@ object BacikalRegistry : ClassVisitor(1) {
         }
 
         // 读取远程注册信息
-        val remote = registry.getStringList("action.$id.remote").mapNotNull {
+        val remote = registry.getStringList("actions.$id.remote").mapNotNull {
             val cache = it.split(":")
             if (cache.size != 2) {
                 warning("Action \"$id\" remote message \"$it\" is not valid.")

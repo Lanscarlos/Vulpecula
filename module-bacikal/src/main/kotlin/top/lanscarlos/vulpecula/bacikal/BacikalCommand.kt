@@ -23,7 +23,7 @@ object BacikalCommand {
              execute<ProxyCommandSender> { sender, _, content ->
                  try {
                      val source = if (!content.startsWith("def")) "def main = { $content }" else content
-                     val quest = BacikalQuestCompiler.compile("eval", source, emptyList())
+                     val quest = BacikalQuestCompiler.compile(source, "eval", emptyList())
                      BacikalQuestExecutor.execute(quest, sender, emptyMap()).handle { result, ex ->
                          if (ex != null) {
                              info("handle capture.")

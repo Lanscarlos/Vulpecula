@@ -1,5 +1,6 @@
 
 taboolib {
+    subproject = false
     description {
         name(rootProject.name)
         contributors {
@@ -27,8 +28,10 @@ tasks {
 
         val subprojects = listOf(
             project(":common-core"),
+            project(":extension-action-item"),
             project(":module-applicative"),
             project(":module-bacikal"),
+            project(":module-item"),
 //            project(":project:common"),
 //            project(":project:module-applicative"),
 //            project(":project:module-bacikal"),

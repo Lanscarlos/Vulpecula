@@ -1,10 +1,14 @@
 package top.lanscarlos.vulpecula.bacikal.parser
 
+import taboolib.common.env.RuntimeDependency
+import taboolib.common.platform.function.info
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
+import taboolib.library.reflex.AnalyseMode
+import taboolib.library.reflex.LazyAnnotatedClass
+import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.applicative.Applicative
-import top.lanscarlos.vulpecula.applicative.BooleanApplicative
-import top.lanscarlos.vulpecula.applicative.IntApplicative
+import top.lanscarlos.vulpecula.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.bacikal.annotation.Optional
@@ -20,7 +24,13 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2024-11-20 11:11
  */
-class BacikalActionParser(owner: Class<*>) : QuestActionParser {
+//@RuntimeDependency(
+//    "!org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0",
+//    test = "!kotlinx.metadata.jvm.KotlinClassMetadata",
+//    relocate = ["!kotlin.", "!kotlin2021.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
+//    transitive = false
+//)
+class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) : QuestActionParser {
 
     companion object {
         const val MODIFIER_NONE = 0
@@ -64,10 +74,28 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
         standardFunction = owner.declaredMethods.find { it.name == "resolve" }!!
         defaultFunction = owner.declaredMethods.find { it.name == "resolve\$default" }
 
-        // 解析参数
-        parameters = standardFunction.parameters.mapIndexed(::Parameter)
+        // 使用 kotlinx-metadata 解析元信息
+//        val metadata = owner.getAnnotation(Metadata::class.java)
+//        val kmClass = (KotlinClassMetadata.read(metadata) as? KotlinClassMetadata.Class)?.toKmClass()!!
+//        val kmFunction = kmClass.functions.find { it.name == standardFunction.name }!!
+//        val kmParameters = kmFunction.valueParameters
+//
+//        // 使用 ProtoBuf 解析元信息
+//        val (jnResolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(metadata.data1, metadata.data2)
+//        val pbFunction = pbClass.functionList.find { jnResolver.getString(it.name) == "resolve" }!!
+//        val pbParameters = pbFunction.valueParameterList
 
-        //
+        // 使用 Reflex 解析参数
+        val rClass = ReflexClass.of(owner, AnalyseMode.ASM_ONLY)
+        val rMethod = rClass.structure.methods.find { it.name == "resolve" }!!
+        val rParameters = rMethod.parameter
+
+        // 解析参数
+        parameters = standardFunction.parameters.mapIndexed { index, parameter ->
+            Parameter(index, parameter, rParameters[index])
+        }
+
+        // 检查返回值
         useFutureReturn = standardFunction.returnType == CompletableFuture::class.java
     }
 
@@ -80,21 +108,22 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
     fun invoke(mask: Int, parameters: Array<Any?>): Any? {
         if (parameters.size != this.parameters.size) {
             // 参数数量不匹配
-            error("BacikalActionParser#execute >> Parameter count mismatch.")
+            error("BacikalActionParser#invoke >> Parameter count mismatch.")
         }
 
         // 检查参数非空性
         for (index in parameters.indices) {
             if (parameters[index] == null && !this.parameters[index].isNullable) {
                 // 参数非空性检查失败
-                error("BacikalActionParser#execute >> Parameter ${this.parameters[index].type.name} at index $index is not nullable.")
+                error("BacikalActionParser#invoke >> Parameter ${this.parameters[index].type.name} at index $index is not nullable.")
             }
         }
 
         if (defaultFunction != null && mask != 0) {
             // 参数缺省
             try {
-                return defaultFunction.invoke(null, this@BacikalActionParser, *parameters, mask, null)
+                info("BacikalActionParser#execute >> Invoke default function. parameters: ${parameters.joinToString()}")
+                return defaultFunction.invoke(instance, this@BacikalActionParser, *parameters, mask, null)
             } catch (e: Exception) {
                 if (e is InvocationTargetException) {
                     e.targetException.printStackTrace()
@@ -107,7 +136,8 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
 
         // 无参数缺省
         try {
-            return standardFunction.invoke(null, *parameters)
+            info("BacikalActionParser#execute >> Invoke standard function. parameters: ${parameters.joinToString()}")
+            return standardFunction.invoke(instance, *parameters)
         } catch (e: Exception) {
             if (e is InvocationTargetException) {
                 e.targetException.printStackTrace()
@@ -152,8 +182,16 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
             val regex = "-\\D+".toRegex()
             while (reader.peekToken().matches(regex)) {
                 val prefix = reader.readToken().substring(1)
+                info("BacikalActionParser#resolve >> Additional parameter found. $prefix >> ${reader.peekToken()}")
                 val (index, parameter) = additional[prefix] ?: error("BacikalActionParser#resolve >> Unknown additional parameter $prefix")
                 actions[index] = parameter.parse(reader)
+            }
+
+            // 将未初始化的参数替换为缺省值
+            for (i in actions.indices) {
+                if (actions[i] is UninitializedAction) {
+                    actions[i] = DefaultAction(i, parameters[i].type)
+                }
             }
 
             // 读取剩余非附加参数
@@ -169,17 +207,18 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
         return QuestActionResolver(actions)
     }
 
-    class Parameter(val index: Int, source: java.lang.reflect.Parameter) {
+    inner class Parameter(val index: Int, source: java.lang.reflect.Parameter, reflex: LazyAnnotatedClass) {
 
         val type: Class<*> = source.type
 
-        val isNullable: Boolean = source.hasAnnotation(org.jetbrains.annotations.Nullable::class.java)
+        val isNullable: Boolean = reflex.isAnnotationPresent(org.jetbrains.annotations.Nullable::class.java)
 
         val prefix: Array<String>
 
         val modifier: Int
 
         init {
+            info("Parameter index=$index; type=${type.simpleName}; nullable=$isNullable")
             prefix = when {
                 source.hasAnnotation(Expected::class.java) -> {
                     modifier = MODIFIER_EXPECTED
@@ -217,26 +256,24 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
                 MODIFIER_OPTIONAL -> {
                     if (!reader.hasToken(*prefix)) {
                         // 缺省参数
+                        info("BacikalActionParser\$Parameter#accept >> Default parameter $index")
                         return DefaultAction(index, type)
                     }
                     reader.readAction()
                 }
                 MODIFIER_ADDITIONAL -> {
-                    if (!reader.hasToken(*prefix)) {
-                        // 缺省参数
-                        return DefaultAction(index, type)
-                    }
+                    // 附加参数前面前缀在本函数调用前已经验证过了
                     reader.readAction()
                 }
                 else -> error("BacikalActionParser\$Parameter#accept >> Unsupported modifier $modifier")
             }
 
-            val applicative = when (type) {
-                Boolean::class.java -> BooleanApplicative
-                Int::class.java -> IntApplicative
-                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name}")
-            }
-
+//            val applicative = when (type) {
+//                Boolean::class.java -> BooleanApplicative
+//                Int::class.java -> IntApplicative
+//                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name}")
+//            }
+            val applicative = ApplicativeRegistry.getApplicative(type) ?: error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name}")
             return ApplicativeAction(action, applicative)
         }
 
@@ -340,6 +377,7 @@ class BacikalActionParser(owner: Class<*>) : QuestActionParser {
             Long::class.java -> 0L
             Float::class.java -> 0.0f
             Double::class.java -> 0.0
+            String::class.java -> "null"
             else -> null
         }
 
