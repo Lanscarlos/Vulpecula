@@ -1,14 +1,12 @@
 package top.lanscarlos.vulpecula.bacikal.parser
 
-import kotlinx.metadata.internal.metadata.ProtoBuf
-import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmNameResolver
+import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.function.info
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
 import taboolib.library.reflex.AnalyseMode
-import taboolib.library.reflex.LazyAnnotatedClass
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.applicative.Applicative
 import top.lanscarlos.vulpecula.applicative.ApplicativeRegistry
@@ -88,21 +86,21 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         val rMethod = rClass.structure.methods.find { it.name == "resolve" }!!
         val rParameters = rMethod.parameter
 
-        for (annotation in rClass.structure.annotations) {
-            info("BacikalActionParser#init >> Reflex Annotation: ${annotation.source.name}")
-        }
-
         // 使用 ProtoBuf 解析元信息
         val metadata = rClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!
         val data1 = metadata.list<String>("d1").toTypedArray()
         val data2 = metadata.list<String>("d2").toTypedArray()
-        val (jnResolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1, data2)
-        val pbFunction = pbClass.functionList.find { jnResolver.getString(it.name) == "resolve" }!!
+        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1, data2)
+        val pbFunction = pbClass.functionList.find { resolver.getString(it.name) == "resolve" }!!
         val pbParameters = pbFunction.valueParameterList
+
 
         // 解析参数
         parameters = standardFunction.parameters.mapIndexed { index, parameter ->
-            Parameter(index, parameter, rParameters[index], pbParameters[index], jnResolver)
+            val name = resolver.getString(pbParameters[index].name)
+            val isNullable = rParameters[index].isAnnotationPresent(org.jetbrains.annotations.Nullable::class.java)
+            val hasDefaultValue = Flag.ValueParameter.DECLARES_DEFAULT_VALUE.invoke(pbParameters[index].flags)
+            Parameter(index, name, isNullable, hasDefaultValue, parameter)
         }
 
         // 检查返回值
@@ -216,20 +214,16 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         return QuestActionResolver(actions)
     }
 
-    inner class Parameter(val index: Int, source: java.lang.reflect.Parameter, reflex: LazyAnnotatedClass, pbParameter: ProtoBuf.ValueParameter, pbResolver: JvmNameResolver) {
-
-        val name: String = pbResolver.getString(pbParameter.name)
+    inner class Parameter(val index: Int, val name: String, val isNullable: Boolean, val hasDefaultValue: Boolean, source: java.lang.reflect.Parameter) {
 
         val type: Class<*> = source.type
-
-        val isNullable: Boolean = reflex.isAnnotationPresent(org.jetbrains.annotations.Nullable::class.java)
 
         val prefix: Array<String>
 
         val modifier: Int
 
         init {
-            info("Parameter index=$index; name=$name; type=${type.simpleName}; nullable=$isNullable")
+            info("Parameter index=$index; name=$name; type=${type.simpleName}; nullable=$isNullable; hasDefaultValue=$hasDefaultValue")
             prefix = when {
                 source.hasAnnotation(Expected::class.java) -> {
                     modifier = MODIFIER_EXPECTED
@@ -267,7 +261,6 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
                 MODIFIER_OPTIONAL -> {
                     if (!reader.hasToken(*prefix)) {
                         // 缺省参数
-                        info("BacikalActionParser\$Parameter#accept >> Default parameter $index")
                         return DefaultAction(index, type)
                     }
                     reader.readAction()
@@ -276,7 +269,7 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
                     // 附加参数前面前缀在本函数调用前已经验证过了
                     reader.readAction()
                 }
-                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported modifier $modifier")
+                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported modifier $modifier for parameter $name of action ${instance.id}")
             }
 
 //            val applicative = when (type) {
@@ -284,7 +277,7 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
 //                Int::class.java -> IntApplicative
 //                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name}")
 //            }
-            val applicative = ApplicativeRegistry.getApplicative(type) ?: error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name}")
+            val applicative = ApplicativeRegistry.getApplicative(type) ?: error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name} for parameter $name of action ${instance.id}")
             return ApplicativeAction(action, applicative)
         }
 
