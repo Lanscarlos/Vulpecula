@@ -75,12 +75,6 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
         standardFunction = owner.declaredMethods.find { it.name == "resolve" }!!
         defaultFunction = owner.declaredMethods.find { it.name == "resolve\$default" }
 
-        // 使用 kotlinx-metadata 解析元信息
-//        val metadata = owner.getAnnotation(Metadata::class.java)
-//        val kmClass = (KotlinClassMetadata.read(metadata) as? KotlinClassMetadata.Class)?.toKmClass()!!
-//        val kmFunction = kmClass.functions.find { it.name == standardFunction.name }!!
-//        val kmParameters = kmFunction.valueParameters
-
         // 使用 Reflex 解析参数
         val rClass = ReflexClass.of(owner, AnalyseMode.ASM_ONLY)
         val rMethod = rClass.structure.methods.find { it.name == "resolve" }!!
