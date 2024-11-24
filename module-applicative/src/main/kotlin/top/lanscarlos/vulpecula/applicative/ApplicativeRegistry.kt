@@ -6,7 +6,6 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
 import java.lang.reflect.ParameterizedType
-import java.util.function.Supplier
 
 /**
  * Vulpecula
@@ -81,9 +80,13 @@ object ApplicativeRegistry : ClassVisitor(-4) {
         }
 
         // 获取泛型类型
-        val type = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0) as? Class<*> ?: let {
-            warning("Property \"${clazz.name}\" must have a generic type.")
-            return
+        val type = when (val it = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
+            is Class<*> -> it
+            is ParameterizedType -> it.rawType as Class<*>
+            else -> {
+                warning("Property \"${clazz.name}\" must have a generic type.")
+                return
+            }
         }
 
         // 注册
