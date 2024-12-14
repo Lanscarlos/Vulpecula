@@ -59,8 +59,8 @@ subprojects {
         compileOnly(kotlin("stdlib"))
     }
 
-    tasks.withType<JavaCompile> {
-        options.compilerArgs.add("-parameters")
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     }
 
     gradle.buildFinished {
