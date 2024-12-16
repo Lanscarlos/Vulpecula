@@ -23,13 +23,6 @@ interface LiveData<T> {
     fun getValue(def: T): T
 
     /**
-     * 兼容代理属性
-     * */
-    operator fun getValue(parent: Any?, property: KProperty<*>): T? {
-        return getValue()
-    }
-
-    /**
      * 读取属性
      *
      * @param key 属性名, 递归获取属性使用 . 分隔
@@ -38,8 +31,10 @@ interface LiveData<T> {
     operator fun get(key: String): Any?
 
     /**
-     * 设置属性
+     * 兼容代理属性
      * */
-    operator fun set(key: String, value: Any?)
+    operator fun getValue(parent: Any?, property: KProperty<*>): T? {
+        return getValue()
+    }
 
 }

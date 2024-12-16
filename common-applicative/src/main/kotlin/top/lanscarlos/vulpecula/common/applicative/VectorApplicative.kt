@@ -17,7 +17,7 @@ object VectorApplicative : AbstractApplicative<Vector>() {
 
     val REGEX_XYZ = "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()
 
-    override fun transfer(instance: Any, def: Vector?): Vector? {
+    override fun apply(instance: Any): Vector? {
         return when (instance) {
             is Vector -> instance
             is org.bukkit.util.Vector -> Vector(instance.x, instance.y, instance.z)
@@ -40,10 +40,10 @@ object VectorApplicative : AbstractApplicative<Vector>() {
                         Vector(demand[0], demand[1], demand[2])
                     }
 
-                    else -> def
+                    else -> null
                 }
             }
-            else -> def
+            else -> null
         }
     }
 

@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.common.applicative
 
+import taboolib.common.platform.function.warning
 import java.awt.Color
 
 /**
@@ -15,7 +16,7 @@ object ColorApplicative : AbstractApplicative<Color>() {
 
     val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
 
-    override fun transfer(instance: Any, def: Color?): Color? {
+    override fun apply(instance: Any): Color? {
         return when (instance) {
             is Color -> instance
             is org.bukkit.Color -> Color(instance.red, instance.green, instance.blue)
@@ -31,17 +32,19 @@ object ColorApplicative : AbstractApplicative<Color>() {
                             // r-g-b-a
                             Color(demand[0], demand[1], demand[2], demand[3])
                         } else {
-                            Color(demand[0], demand[1], demand[2], def?.alpha ?: 255)
+                            Color(demand[0], demand[1], demand[2])
                         }
                     }
                     else -> {
-                        val rgb = instance.toIntOrNull() ?: return def
+                        val rgb = instance.toIntOrNull() ?: let {
+                            warning("ColorApplicative#apply >> Instance cannot transform to rgb color. $instance")
+                            return null
+                        }
                         Color(rgb)
                     }
                 }
             }
-
-            else -> def
+            else -> null
         }
     }
 

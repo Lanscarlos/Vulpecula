@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.common.applicative
 
+import org.bukkit.Bukkit
 import taboolib.common.util.Location
 import org.bukkit.entity.Entity
 import taboolib.common.platform.ProxyPlayer
@@ -21,39 +22,32 @@ object LocationApplicative : AbstractApplicative<Location>() {
 
     val REGEX_RELATIVE = "^(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?)\$".toRegex()
 
-    override fun transfer(instance: Any, def: Location?): Location? {
+    override fun apply(instance: Any): Location? {
         return when (instance) {
             is Location -> instance
             is org.bukkit.Location -> instance.toProxyLocation()
             is ProxyPlayer -> instance.location
             is Entity -> instance.location.toProxyLocation()
             is Vector -> Location(
-                def?.world,
+                Bukkit.getWorlds().first().name,
                 instance.x,
                 instance.y,
-                instance.z,
-                def?.yaw ?: 0.0f,
-                def?.pitch ?: 0.0f
+                instance.z
             )
-
             is org.bukkit.util.Vector -> Location(
-                def?.world,
+                Bukkit.getWorlds().first().name,
                 instance.x,
                 instance.y,
-                instance.z,
-                def?.yaw ?: 0.0f,
-                def?.pitch ?: 0.0f
+                instance.z
             )
-
             is String -> {
-
                 // 匹配相对坐标 Example: 1,~,~+3.5
                 REGEX_RELATIVE.matchEntire(instance)?.groupValues?.let { groupValues ->
                     return Location(
-                        def?.world,
-                        parseRelative(groupValues[1], def?.x ?: 0.0),
-                        parseRelative(groupValues[2], def?.y ?: 0.0),
-                        parseRelative(groupValues[3], def?.z ?: 0.0),
+                        Bukkit.getWorlds().first().name,
+                        parseRelative(groupValues[1]),
+                        parseRelative(groupValues[2]),
+                        parseRelative(groupValues[3])
                     )
                 }
 
@@ -66,7 +60,7 @@ object LocationApplicative : AbstractApplicative<Location>() {
                         * */
                         val demand = instance.split(",")
                         Location(
-                            def?.world,
+                            Bukkit.getWorlds().first().name,
                             demand[0].toDouble(),
                             demand[1].toDouble(),
                             demand[2].toDouble(),
@@ -91,11 +85,11 @@ object LocationApplicative : AbstractApplicative<Location>() {
                         )
                     }
 
-                    else -> def
+                    else -> null
                 }
             }
 
-            else -> def
+            else -> null
         }
     }
 
@@ -131,9 +125,9 @@ object LocationApplicative : AbstractApplicative<Location>() {
         }
     }
 
-    private fun parseRelative(source: String, def: Double): Double {
+    private fun parseRelative(source: String): Double {
         return if (source[0] == '~') {
-            def + (source.substring(1).toDoubleOrNull() ?: 0.0)
+            0.0 + (source.substring(1).toDoubleOrNull() ?: 0.0)
         } else {
             source.toDoubleOrNull() ?: 0.0
         }

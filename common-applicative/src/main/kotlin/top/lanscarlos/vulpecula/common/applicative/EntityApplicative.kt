@@ -14,13 +14,13 @@ import taboolib.common.platform.ProxyPlayer
  */
 object EntityApplicative : AbstractApplicative<Entity>() {
 
-    override fun transfer(instance: Any, def: Entity?): Entity? {
+    override fun apply(instance: Any): Entity? {
         return when (instance) {
             is Entity -> instance
             is OfflinePlayer -> instance.player
             is ProxyPlayer -> instance.castSafely()
             is String -> Bukkit.getPlayerExact(instance)
-            else -> def
+            else -> null
         }
     }
 

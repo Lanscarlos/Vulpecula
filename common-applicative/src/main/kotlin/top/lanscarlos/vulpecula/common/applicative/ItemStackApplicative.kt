@@ -4,6 +4,7 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Item
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import taboolib.common.platform.function.warning
 import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
 import kotlin.jvm.optionals.getOrNull
@@ -17,17 +18,22 @@ import kotlin.jvm.optionals.getOrNull
  */
 object ItemStackApplicative : AbstractApplicative<ItemStack>() {
 
-    override fun transfer(instance: Any, def: ItemStack?): ItemStack? {
+    override fun apply(instance: Any): ItemStack? {
         return when (instance) {
             is ItemStack -> instance
             is Item -> instance.itemStack
             is String -> {
                 val material = XMaterial.matchXMaterial(instance.uppercase()).let { mat ->
-                    if (mat.isPresent) mat.get() else return def
+                    if (mat.isPresent) {
+                        mat.get()
+                    } else {
+                        warning("ItemStackApplicative#apply >> Instance cannot transform to material. $instance")
+                        return null
+                    }
                 }
                 buildItem(material)
             }
-            else -> def
+            else -> null
         }
     }
 

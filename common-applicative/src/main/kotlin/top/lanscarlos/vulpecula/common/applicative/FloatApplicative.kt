@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object FloatApplicative : AbstractApplicative<Float>() {
 
-    override fun transfer(instance: Any, def: Float?): Float? {
+    override fun apply(instance: Any): Float? {
         return when (instance) {
             is Float -> instance
             is Number -> instance.toFloat()
             is String -> instance.toFloatOrNull()
-            else -> def
+            else -> null
         }
     }
 

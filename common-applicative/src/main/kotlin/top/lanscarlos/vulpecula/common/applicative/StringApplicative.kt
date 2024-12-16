@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object StringApplicative : AbstractApplicative<String>() {
 
-    override fun transfer(instance: Any, def: String?): String {
+    override fun apply(instance: Any): String {
         return instance.toString()
     }
 

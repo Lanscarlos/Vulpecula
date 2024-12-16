@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object LongApplicative : AbstractApplicative<Long>() {
 
-    override fun transfer(instance: Any, def: Long?): Long? {
+    override fun apply(instance: Any): Long? {
         return when (instance) {
             is Long -> instance
             is Number -> instance.toLong()
             is String -> instance.toLongOrNull()
-            else -> def
+            else -> null
         }
     }
 

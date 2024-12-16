@@ -10,19 +10,12 @@ package top.lanscarlos.vulpecula.common.applicative
 interface Applicative<T> {
 
     /**
-     * 转换为目标类型
+     * 转换为目标类型, 果转换失败则返回 null
      * */
     fun apply(instance: Any): T?
 
     /**
-     * 转换为目标类型, 如果转换失败则返回默认值
-     *
-     * @param def 默认值
-     * */
-    fun apply(instance: Any, def: T): T
-
-    /**
-     * 转换为目标类型
+     * 强制转换为目标类型
      * */
     fun applyUnsafe(instance: Any): T
 

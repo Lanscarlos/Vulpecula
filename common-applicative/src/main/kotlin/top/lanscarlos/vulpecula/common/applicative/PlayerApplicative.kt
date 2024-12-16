@@ -16,13 +16,13 @@ import taboolib.platform.util.toBukkitLocation
  */
 object PlayerApplicative : AbstractApplicative<Player>() {
 
-    override fun transfer(instance: Any, def: Player?): Player? {
+    override fun apply(instance: Any): Player? {
         return when (instance) {
             is Player -> instance
             is OfflinePlayer -> instance.player
             is ProxyPlayer -> instance.castSafely()
             is String -> Bukkit.getPlayerExact(instance)
-            else -> def
+            else -> null
         }
     }
 

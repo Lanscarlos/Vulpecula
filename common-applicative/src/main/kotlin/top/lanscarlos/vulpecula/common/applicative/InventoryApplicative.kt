@@ -15,7 +15,7 @@ import taboolib.common.platform.ProxyPlayer
  */
 object InventoryApplicative : AbstractApplicative<Inventory>() {
 
-    override fun transfer(instance: Any, def: Inventory?): Inventory? {
+    override fun apply(instance: Any): Inventory? {
         return when (instance) {
             is Inventory -> instance
             is HumanEntity -> instance.inventory
@@ -23,8 +23,7 @@ object InventoryApplicative : AbstractApplicative<Inventory>() {
             is String -> {
                 Bukkit.getPlayerExact(instance)?.inventory
             }
-
-            else -> def
+            else -> null
         }
     }
 

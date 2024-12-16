@@ -10,11 +10,6 @@ package top.lanscarlos.vulpecula.common.applicative
 abstract class AbstractApplicative<T: Any> : Applicative<T> {
 
     /**
-     * 转换规则
-     * */
-    abstract fun transfer(instance: Any, def: T?): T?
-
-    /**
      * 读取属性
      *
      * @throws IllegalStateException 如果属性不存在
@@ -27,14 +22,6 @@ abstract class AbstractApplicative<T: Any> : Applicative<T> {
      * @throws IllegalStateException 如果属性不存在
      * */
     abstract fun writeProperty(instance: T, key: String, value: Any?)
-
-    override fun apply(instance: Any): T? {
-        return transfer(instance, null)
-    }
-
-    override fun apply(instance: Any, def: T): T {
-        return transfer(instance, def) ?: def
-    }
 
     override fun applyUnsafe(instance: Any): T {
         return apply(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance.javaClass.name} to ${this::class.java.name}.")
