@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object IntApplicative : AbstractApplicative<Int>() {
 
-    override fun apply(instance: Any): Int? {
+    override fun apply(instance: Any?): Int? {
         return when (instance) {
             is Int -> instance
             is Number -> instance.toInt()

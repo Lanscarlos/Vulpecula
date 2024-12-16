@@ -14,7 +14,7 @@ import taboolib.common.platform.ProxyPlayer
  */
 object EntityApplicative : AbstractApplicative<Entity>() {
 
-    override fun apply(instance: Any): Entity? {
+    override fun apply(instance: Any?): Entity? {
         return when (instance) {
             is Entity -> instance
             is OfflinePlayer -> instance.player

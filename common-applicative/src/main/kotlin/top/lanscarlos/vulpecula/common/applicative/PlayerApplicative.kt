@@ -16,7 +16,7 @@ import taboolib.platform.util.toBukkitLocation
  */
 object PlayerApplicative : AbstractApplicative<Player>() {
 
-    override fun apply(instance: Any): Player? {
+    override fun apply(instance: Any?): Player? {
         return when (instance) {
             is Player -> instance
             is OfflinePlayer -> instance.player

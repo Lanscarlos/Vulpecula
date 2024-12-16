@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object FloatApplicative : AbstractApplicative<Float>() {
 
-    override fun apply(instance: Any): Float? {
+    override fun apply(instance: Any?): Float? {
         return when (instance) {
             is Float -> instance
             is Number -> instance.toFloat()

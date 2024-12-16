@@ -16,7 +16,7 @@ object ColorApplicative : AbstractApplicative<Color>() {
 
     val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
 
-    override fun apply(instance: Any): Color? {
+    override fun apply(instance: Any?): Color? {
         return when (instance) {
             is Color -> instance
             is org.bukkit.Color -> Color(instance.red, instance.green, instance.blue)

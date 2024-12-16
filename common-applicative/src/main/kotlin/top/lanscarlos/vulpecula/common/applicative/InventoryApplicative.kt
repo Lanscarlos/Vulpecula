@@ -15,7 +15,7 @@ import taboolib.common.platform.ProxyPlayer
  */
 object InventoryApplicative : AbstractApplicative<Inventory>() {
 
-    override fun apply(instance: Any): Inventory? {
+    override fun apply(instance: Any?): Inventory? {
         return when (instance) {
             is Inventory -> instance
             is HumanEntity -> instance.inventory

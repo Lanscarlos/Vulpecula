@@ -12,7 +12,7 @@ interface Applicative<T> {
     /**
      * 转换为目标类型, 果转换失败则返回 null
      * */
-    fun apply(instance: Any): T?
+    fun apply(instance: Any?): T?
 
     /**
      * 强制转换为目标类型

@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object BooleanApplicative : AbstractApplicative<Boolean>() {
 
-    override fun apply(instance: Any): Boolean? {
+    override fun apply(instance: Any?): Boolean? {
         return when (instance) {
             is Boolean -> instance
             "true", "yes" -> true
