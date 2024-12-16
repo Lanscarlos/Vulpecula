@@ -23,8 +23,8 @@ abstract class AbstractApplicative<T: Any> : Applicative<T> {
      * */
     abstract fun writeProperty(instance: T, key: String, value: Any?)
 
-    override fun applyUnsafe(instance: Any): T {
-        return apply(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance.javaClass.name} to ${this::class.java.name}.")
+    override fun applyUnsafe(instance: Any?): T {
+        return apply(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
     }
 
     override fun accept(instance: Any): LiveData<T> {

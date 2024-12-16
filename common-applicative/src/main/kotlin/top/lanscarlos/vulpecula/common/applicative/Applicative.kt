@@ -17,7 +17,7 @@ interface Applicative<T> {
     /**
      * 强制转换为目标类型
      * */
-    fun applyUnsafe(instance: Any): T
+    fun applyUnsafe(instance: Any?): T
 
     /**
      * 接收实例并转换为对应的 LiveData
