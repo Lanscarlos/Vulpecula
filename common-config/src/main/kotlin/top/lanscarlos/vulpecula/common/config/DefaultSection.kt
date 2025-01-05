@@ -1,45 +1,37 @@
 package top.lanscarlos.vulpecula.common.config
 
-import top.lanscarlos.vulpecula.common.applicative.Applicative
+import taboolib.library.configuration.ConfigurationSection
+import java.util.function.Function
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.common.config
  *
  * @author Lanscarlos
- * @since 2024-12-16 01:48
+ * @since 2025-01-05 14:39
  */
-class DefaultSection<T>(override val config: DynamicConfig, override val path: String, val applicative: Applicative<T>, val defaultValue: T?) : DynamicSection<T> {
+open class DefaultSection(val root: ConfigurationSection) : AbstractConfigSection() {
 
-    private var value: T? = null
+    val sections = mutableMapOf<String, ConfigNode<*>>()
 
-    var isInitialized = false
-
-    @Suppress("UNCHECKED_CAST")
-    override fun getValue(): T {
-        if (!isInitialized) {
-            val rawValue = config.get(path)
-            if (rawValue == null) {
-                value = defaultValue ?: error("DefaultSection#getValue >> Property $path not found")
-                return value as T
-            }
-            value = if (defaultValue != null) {
-                applicative.apply(rawValue, defaultValue)
-            } else {
-                applicative.apply(rawValue)
-            }
-            isInitialized = true
-        }
-        return value as T
+    override fun contains(key: String): Boolean {
+        return root.contains(key)
     }
 
-    override fun update() {
-        val rawValue = config.get(path) ?: return
-        value = if (defaultValue != null) {
-            applicative.apply(rawValue, defaultValue)
-        } else {
-            applicative.apply(rawValue)
-        }
+    override fun get(key: String): Any? {
+        return root[key]
+    }
+
+    override fun set(key: String, value: Any?) {
+        root[key] = value
+    }
+
+    override fun remove(key: String) {
+        root[key] = null
+    }
+
+    override fun <T> read(key: String, transfer: Function<Any?, T>): ConfigNode<T> {
+        return DefaultNode(this, key, transfer).also { sections[key] = it }
     }
 
 }

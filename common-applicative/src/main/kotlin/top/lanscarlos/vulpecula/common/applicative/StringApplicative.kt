@@ -9,8 +9,8 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object StringApplicative : AbstractApplicative<String>() {
 
-    override fun apply(instance: Any?): String {
-        return instance.toString()
+    override fun apply(instance: Any?): String? {
+        return instance?.toString()
     }
 
     override fun readProperty(instance: String, key: String): Any? {

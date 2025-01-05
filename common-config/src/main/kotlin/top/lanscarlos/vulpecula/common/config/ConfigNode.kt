@@ -9,12 +9,7 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2024-12-16 01:42
  */
-interface DynamicSection<T> {
-
-    /**
-     * 源配置
-     * */
-    val config: DynamicConfig
+interface ConfigNode<T> {
 
     /**
      * 路径
