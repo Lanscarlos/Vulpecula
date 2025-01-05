@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.item
+package top.lanscarlos.vulpecula.module.item
 
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.entity.EntityInLevelCallback

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.item
+package top.lanscarlos.vulpecula.module.item
 
 import org.bukkit.entity.Item
 import taboolib.module.nms.nmsProxy
@@ -14,6 +14,6 @@ interface VolatileAPI {
 
     fun registerItemDespawnHandler(entity: Item)
 
-    companion object : VolatileAPI by nmsProxy("top.lanscarlos.vulpecula.item.DefaultVolatileAPI")
+    companion object : VolatileAPI by nmsProxy("top.lanscarlos.vulpecula.module.item.DefaultVolatileAPI")
 
 }

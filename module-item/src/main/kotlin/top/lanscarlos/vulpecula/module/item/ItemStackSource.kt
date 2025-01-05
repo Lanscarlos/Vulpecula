@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.item
+package top.lanscarlos.vulpecula.module.item
 
 import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.function.warning

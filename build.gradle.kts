@@ -1,4 +1,12 @@
 import io.izzel.taboolib.gradle.*
+import io.izzel.taboolib.gradle.Basic
+import io.izzel.taboolib.gradle.Bukkit
+import io.izzel.taboolib.gradle.BukkitUI
+import io.izzel.taboolib.gradle.BukkitUtil
+import io.izzel.taboolib.gradle.MinecraftChat
+import io.izzel.taboolib.gradle.CommandHelper
+import io.izzel.taboolib.gradle.I18n
+import io.izzel.taboolib.gradle.Kether
 
 plugins {
     java
@@ -14,15 +22,16 @@ subprojects {
     taboolib {
         env {
             // 安装模块
-            install(
-                Basic,
-                Bukkit,
-                BukkitUtil,
-                BukkitNMSUtil,
-                Kether,
-                Metrics,
-                CommandHelper
-            )
+            install(Basic)
+            install(Bukkit)
+            install(BukkitUI)
+            install(BukkitUtil)
+            install(BukkitNMSUtil)
+            install(CommandHelper)
+            install(I18n)
+            install(Metrics)
+            install(MinecraftChat)
+            install(Kether)
         }
         version {
             taboolib = "6.2.0"

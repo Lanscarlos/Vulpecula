@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.item
+package top.lanscarlos.vulpecula.module.item
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent

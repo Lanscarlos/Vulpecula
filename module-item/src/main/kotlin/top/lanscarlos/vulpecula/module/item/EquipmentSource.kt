@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.item
+package top.lanscarlos.vulpecula.module.item
 
 import org.bukkit.Material
 import org.bukkit.entity.LivingEntity

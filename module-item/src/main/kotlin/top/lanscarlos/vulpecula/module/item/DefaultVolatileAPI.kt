@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.item
+package top.lanscarlos.vulpecula.module.item
 
 import net.minecraft.world.level.entity.EntityInLevelCallback
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
@@ -19,7 +19,7 @@ class DefaultVolatileAPI : VolatileAPI {
     override fun registerItemDespawnHandler(entity: Item) {
         val handle = (entity as CraftEntity).handle
         val levelCallback = handle.getProperty<EntityInLevelCallback?>("levelCallback", findToParent = true, remap = true)!!
-        val proxy = nmsProxy<EntityInLevelCallback>("top.lanscarlos.vulpecula.item.DefaultEntityInLevelCallback", levelCallback, entity)
+        val proxy = nmsProxy<EntityInLevelCallback>("top.lanscarlos.vulpecula.module.item.DefaultEntityInLevelCallback", levelCallback, entity)
         submit {
             // 使用 submit 覆写才能生效
             handle.setLevelCallback(proxy)
