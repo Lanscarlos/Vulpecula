@@ -164,6 +164,54 @@ abstract class AbstractConfigSection : ConfigSection {
         return read(key) { StringApplicative.apply(it) ?: defaultValue }
     }
 
+    override fun readIntList(key: String): ConfigNode<List<Int>> {
+        return readList(key, IntApplicative::applyUnsafe)
+    }
+
+    override fun readIntList(key: String, defaultValue: List<Int>): ConfigNode<List<Int>> {
+        return readList(key, defaultValue, IntApplicative::applyUnsafe)
+    }
+
+    override fun readLongList(key: String): ConfigNode<List<Long>> {
+        return readList(key, LongApplicative::applyUnsafe)
+    }
+
+    override fun readLongList(key: String, defaultValue: List<Long>): ConfigNode<List<Long>> {
+        return readList(key, defaultValue, LongApplicative::applyUnsafe)
+    }
+
+    override fun readFloatList(key: String): ConfigNode<List<Float>> {
+        return readList(key, FloatApplicative::applyUnsafe)
+    }
+
+    override fun readFloatList(key: String, defaultValue: List<Float>): ConfigNode<List<Float>> {
+        return readList(key, defaultValue, FloatApplicative::applyUnsafe)
+    }
+
+    override fun readDoubleList(key: String): ConfigNode<List<Double>> {
+        return readList(key, DoubleApplicative::applyUnsafe)
+    }
+
+    override fun readDoubleList(key: String, defaultValue: List<Double>): ConfigNode<List<Double>> {
+        return readList(key, defaultValue, DoubleApplicative::applyUnsafe)
+    }
+
+    override fun readStringList(key: String): ConfigNode<List<String>> {
+        return readList(key, StringApplicative::applyUnsafe)
+    }
+
+    override fun readStringList(key: String, defaultValue: List<String>): ConfigNode<List<String>> {
+        return readList(key, defaultValue, StringApplicative::applyUnsafe)
+    }
+
+    override fun readList(key: String): ConfigNode<List<*>> {
+        return read(key) { it?.let(ListApplicative::apply) ?: emptyList<Any?>() }
+    }
+
+    override fun readList(key: String, defaultValue: List<*>): ConfigNode<List<*>> {
+        return read(key) { it?.let(ListApplicative::apply) ?: defaultValue }
+    }
+
     override fun <T> readList(key: String, transfer: Function<Any?, T>): ConfigNode<List<T>> {
         return read(key) { it?.let(ListApplicative::apply)?.map(transfer::apply) ?: emptyList() }
     }
