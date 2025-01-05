@@ -2,7 +2,7 @@ import io.izzel.taboolib.gradle.*
 
 plugins {
     java
-    id("io.izzel.taboolib") version "2.0.19"
+    id("io.izzel.taboolib") version "2.0.22"
     id("org.jetbrains.kotlin.jvm") version "2.0.21"
 }
 
@@ -25,7 +25,7 @@ subprojects {
             )
         }
         version {
-            taboolib = "6.2.0-beta31"
+            taboolib = "6.2.0"
         }
         description {
             name(rootProject.name)
