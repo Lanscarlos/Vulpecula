@@ -32,7 +32,7 @@ tasks {
             project(":common-core"),
             project(":extension-action-item"),
             project(":module-bacikal"),
-            project(":module-item"),
+//            project(":module-item"),
 //            project(":project:common"),
 //            project(":project:module-applicative"),
 //            project(":project:module-bacikal"),
