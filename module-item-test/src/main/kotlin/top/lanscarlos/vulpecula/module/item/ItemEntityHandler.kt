@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.item
 
-import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
-import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
+//import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
+//import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
 import org.bukkit.entity.Item
 import org.bukkit.event.entity.EntitySpawnEvent
 import taboolib.common.platform.event.SubscribeEvent
@@ -23,14 +23,14 @@ object ItemEntityHandler {
 //        VolatileAPI.registerItemDespawnHandler(item)
 //    }
 
-    @SubscribeEvent
-    fun e(e: PlayerArmorChangeEvent) {
-        info("PlayerArmorChangeEvent >> ${e.player.name}; slot=${e.slotType.name}; old=${e.oldItem}; new=${e.newItem}")
-    }
+//    @SubscribeEvent
+//    fun e(e: PlayerArmorChangeEvent) {
+//        info("PlayerArmorChangeEvent >> ${e.player.name}; slot=${e.slotType.name}; old=${e.oldItem}; new=${e.newItem}")
+//    }
 
-    @SubscribeEvent
-    fun e(e: EntityRemoveFromWorldEvent) {
-        info("EntityRemoveFromWorldEvent >> ${e.entity.type.name}; slot=${e.world.name}")
-    }
+//    @SubscribeEvent
+//    fun e(e: EntityRemoveFromWorldEvent) {
+//        info("EntityRemoveFromWorldEvent >> ${e.entity.type.name}; slot=${e.world.name}")
+//    }
 
 }
