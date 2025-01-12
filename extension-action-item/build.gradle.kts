@@ -16,8 +16,6 @@ taboolib {
             name("DISABLE")
         }
     }
-
-    relocate("lanscarlos", "aiurlanta")
 }
 
 dependencies {
