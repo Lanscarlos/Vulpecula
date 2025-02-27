@@ -19,14 +19,16 @@ object ApplicativeRegistry : ClassVisitor(-4) {
 
     override fun getLifeCycle(): LifeCycle = LifeCycle.LOAD
 
-    val registry = mutableMapOf<Class<*>, Applicative<*>>()
+    val related = linkedMapOf<Class<*>, RelatedApplicative<*>>() // 缓存相关联的 Applicative
+
+    val registry = mutableMapOf<Class<*>, Applicative<*>>() // 注册的 Applicative
 
     /**
      * 获取对应的 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
-    fun <T> getApplicative(clazz: Class<T>): Applicative<T>? {
-        return registry[clazz] as? Applicative<T>
+    fun <T: Any> getApplicative(clazz: Class<T>): Applicative<T> {
+        return registry[clazz] as? Applicative<T> ?: error("Applicative for \"${clazz.name}\" not found.")
     }
 
     /**
@@ -35,27 +37,33 @@ object ApplicativeRegistry : ClassVisitor(-4) {
      * @return 相关联的所有 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
-    fun <T> getRelatedApplicative(clazz: Class<T>): List<Applicative<in T>> {
-        return registry.filterKeys {
-            it.isAssignableFrom(clazz)
-        }.map {
-            it.key to it.value
-        }.sortedWith { a, b ->
-            when {
-                a.first == clazz -> -1
-                b.first == clazz -> 1
-                a.first.isAssignableFrom(b.first) -> 1
-                else -> -1
+    fun <T: Any> getRelatedApplicative(clazz: Class<T>): Applicative<T> {
+        return related.computeIfAbsent(clazz) { key ->
+            val relatedApplicatives = registry.filterKeys {
+                it.isAssignableFrom(key)
+            }.map {
+                it.key to it.value
+            }.sortedWith { a, b ->
+                when {
+                    a.first == key -> -1
+                    b.first == key -> 1
+                    a.first.isAssignableFrom(b.first) -> 1
+                    else -> -1
+                }
+            }.map {
+                it.second as Applicative<in T>
             }
-        }.map {
-            it.second as Applicative<in T>
-        }
+            RelatedApplicative(getApplicative(clazz)!!, relatedApplicatives)
+        } as Applicative<T>
     }
 
     /**
      * 注册 Applicative
      * */
     fun registerApplicative(clazz: Class<*>, applicative: Applicative<*>) {
+        if (registry.containsKey(clazz)) {
+            warning("Applicative for \"${clazz.name}\" already exists. It will be replaced.")
+        }
         registry[clazz] = applicative
     }
 

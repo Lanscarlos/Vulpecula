@@ -76,7 +76,7 @@ object PlayerApplicative : AbstractApplicative<Player>() {
             "isSprinting" -> instance.isSprinting = value.applicativeBoolean()
             "isSleepingIgnored" -> instance.isSleepingIgnored = value.applicativeBoolean()
             "bedSpawnLocation" -> instance.bedSpawnLocation = value.applicativeLocation().toBukkitLocation()
-            "gameMode" -> instance.gameMode = GameMode.values().find { it.name == value.toString() } ?: failedByInvalidValue(instance, key, value)
+            "gameMode" -> instance.gameMode = GameMode.entries.find { it.name == value.toString() } ?: failedByInvalidValue(instance, key, value)
             "expCooldown" -> instance.expCooldown = value.applicativeInt()
             "exp" -> instance.exp = value.applicativeFloat()
             "level" -> instance.level = value.applicativeInt()
