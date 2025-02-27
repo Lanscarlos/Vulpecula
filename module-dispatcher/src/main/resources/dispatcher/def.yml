@@ -1,0 +1,26 @@
+
+# 事件监听器可以用来监听游戏内的各种事件, 并触发对应的脚本, 修改事件的行为.
+
+# 监听器 ID
+id: "default-listener"
+
+# 监听对象
+# 这里选取玩家交互事件为例
+event: "org.bukkit.event.player.PlayerInteractEvent"
+
+# 事件优先级 [可选]
+# 可用值: LOWEST, LOW, NORMAL, HIGH, HIGHEST, MONITOR
+# 优先级越高, 事件监听器越早被调用
+# 默认为 NORMAL
+priority: "NORMAL"
+
+# 是否忽略已取消的事件 [可选]
+# 如果处理事件时, 事件已经被取消, 那么会忽略该事件
+# 默认为 false
+ignore-cancelled: false
+
+hand: ""
+
+# 事件过滤器配置
+# 设置的过滤选项需要全部满足才会触发脚本
+filter: []
