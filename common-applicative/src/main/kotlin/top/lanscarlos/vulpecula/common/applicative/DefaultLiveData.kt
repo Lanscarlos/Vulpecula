@@ -7,7 +7,7 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-05-15 17:25
  */
-class DefaultLiveData<T>(val source: Any, val applicative: Applicative<T>) : MutableLiveData<T> {
+class DefaultLiveData<T: Any>(val source: Any, val applicative: Applicative<T>) : MutableLiveData<T> {
 
     /**
      * 缓存值

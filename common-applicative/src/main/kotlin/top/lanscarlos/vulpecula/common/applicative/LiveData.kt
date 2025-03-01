@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2024-05-15 17:30
  */
-interface LiveData<T> {
+interface LiveData<T: Any> {
 
     /**
      * 取值
