@@ -17,7 +17,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
      * 关联的 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
-    val relatedApplicatives: List<Applicative<in T>> = ApplicativeRegistry.registry.filter {
+    private val relatedApplicatives: List<Applicative<in T>> = ApplicativeRegistry.registry.filter {
         it.value != this && it.key.isAssignableFrom(clazz)
     }.map {
         it.key to it.value
@@ -31,6 +31,11 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
     }.map {
         it.second as Applicative<in T>
     }
+
+    /**
+     * 缓存的关联属性, 获取属性过程中，如果调用了关联 Applicative, 那么就记录缓存
+     * */
+    private val relatedCache: HashMap<String, Applicative<in T>> = linkedMapOf()
 
     /**
      * 读取属性
@@ -133,6 +138,10 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
      * @throws IllegalStateException 如果属性不存在
      * */
     protected fun readProperty(instance: T, key: String, strict: Boolean, reflect: Boolean): Any? {
+        if (relatedCache.containsKey(key)) {
+            // 缓存中存在
+            return relatedCache[key]!!.getProperty(instance, key, strict, reflect)
+        }
         try {
             return readProperty(instance, key.toCamelCase())
         } catch (ignored: Exception) {
@@ -149,7 +158,9 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
             // 当前类不存在该属性, 从关联父类检索
             for (applicative in relatedApplicatives) {
                 try {
-                    return applicative.getProperty(instance, key, strict, reflect)
+                    val result = applicative.getProperty(instance, key, strict, false)
+                    relatedCache[key] = applicative
+                    return result
                 } catch (ignored: Exception) {
                 }
             }
@@ -164,6 +175,11 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
     }
 
     fun writeProperty(instance: T, key: String, value: Any?, strict: Boolean, reflect: Boolean) {
+        if (relatedCache.containsKey(key)) {
+            // 缓存中存在
+            relatedCache[key]!!.setProperty(instance, key, value, strict, reflect)
+            return
+        }
         try {
             writeProperty(instance, key.toCamelCase(), value)
         } catch (ignored: Exception) {
@@ -180,7 +196,8 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
             // 当前类不存在该属性, 从关联父类检索
             for (applicative in relatedApplicatives) {
                 try {
-                    applicative.setProperty(instance, key, value, strict, reflect)
+                    applicative.setProperty(instance, key, value, strict, false)
+                    relatedCache[key] = applicative
                     return
                 } catch (ignored: Exception) {
                 }
