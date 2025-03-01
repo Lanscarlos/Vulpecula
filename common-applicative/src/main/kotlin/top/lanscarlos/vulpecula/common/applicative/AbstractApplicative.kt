@@ -137,7 +137,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
      * @param key 属性名, 不支持递归
      * @throws IllegalStateException 如果属性不存在
      * */
-    protected fun readProperty(instance: T, key: String, strict: Boolean, reflect: Boolean): Any? {
+    private fun readProperty(instance: T, key: String, strict: Boolean, reflect: Boolean): Any? {
         if (relatedCache.containsKey(key)) {
             // 缓存中存在
             return relatedCache[key]!!.getProperty(instance, key, strict, reflect)
@@ -174,7 +174,13 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
         return null
     }
 
-    fun writeProperty(instance: T, key: String, value: Any?, strict: Boolean, reflect: Boolean) {
+    /**
+     * 写入属性
+     *
+     * @param key 属性名, 不支持递归
+     * @throws IllegalStateException 如果属性不存在
+     * */
+    private fun writeProperty(instance: T, key: String, value: Any?, strict: Boolean, reflect: Boolean) {
         if (relatedCache.containsKey(key)) {
             // 缓存中存在
             relatedCache[key]!!.setProperty(instance, key, value, strict, reflect)
@@ -212,6 +218,9 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
         }
     }
 
+    /**
+     * 驼峰命名处理
+     * */
     private fun String.toCamelCase(): String {
         return buildString {
             var upper = false
@@ -237,4 +246,5 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
     fun failedByInvalidValue(instance: Any, key: String, value: Any?): Nothing {
         error("Cannot set property in ${instance.javaClass.name}[$key]. Invalid value: $value::${value?.javaClass?.name}")
     }
+
 }
