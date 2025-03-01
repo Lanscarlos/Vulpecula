@@ -37,7 +37,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
         }
     }
 
-    @SuppressWarnings("deprecation")
+    @Suppress("DEPRECATION")
     override fun readProperty(instance: ItemStack, key: String): Any? {
         return when (key) {
             "type" -> instance.type.name
@@ -58,7 +58,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
         }
     }
 
-    @SuppressWarnings("deprecation")
+    @Suppress("DEPRECATION")
     override fun writeProperty(instance: ItemStack, key: String, value: Any?) {
         when (key) {
             "type" -> {
