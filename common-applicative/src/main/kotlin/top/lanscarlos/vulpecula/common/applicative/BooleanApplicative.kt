@@ -7,9 +7,9 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-05-15 20:44
  */
-object BooleanApplicative : AbstractApplicative<Boolean>() {
+object BooleanApplicative : AbstractApplicative<Boolean>(Boolean::class.java) {
 
-    override fun apply(instance: Any?): Boolean? {
+    override fun convert(instance: Any?): Boolean? {
         return when (instance) {
             is Boolean -> instance
             "true", "yes" -> true

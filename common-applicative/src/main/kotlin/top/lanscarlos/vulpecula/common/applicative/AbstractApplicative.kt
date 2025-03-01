@@ -1,6 +1,8 @@
 package top.lanscarlos.vulpecula.common.applicative
 
 import taboolib.common.platform.function.warning
+import taboolib.library.reflex.Reflex.Companion.getProperty
+import taboolib.library.reflex.Reflex.Companion.setProperty
 
 /**
  * Vulpecula
@@ -9,7 +11,7 @@ import taboolib.common.platform.function.warning
  * @author Lanscarlos
  * @since 2023-08-21 13:57
  */
-abstract class AbstractApplicative<T: Any>(val clazz: Class<T>) : Applicative<T> {
+abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
 
     /**
      * 关联的 Applicative
@@ -44,11 +46,11 @@ abstract class AbstractApplicative<T: Any>(val clazz: Class<T>) : Applicative<T>
      * */
     protected abstract fun writeProperty(instance: T, key: String, value: Any?)
 
-    override fun applyUnsafe(instance: Any?): T {
-        return apply(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
+    override fun convertUnsafe(instance: Any?): T {
+        return convert(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
     }
 
-    override fun accept(instance: Any): LiveData<T> {
+    override fun convertLive(instance: Any): LiveData<T> {
         return DefaultLiveData(instance, this)
     }
 
@@ -135,7 +137,13 @@ abstract class AbstractApplicative<T: Any>(val clazz: Class<T>) : Applicative<T>
             return readProperty(instance, key.toCamelCase())
         } catch (ignored: Exception) {
             if (reflect) {
-                // TODO 反射查找
+                // 反射查找
+                return try {
+                    instance.getProperty<Any?>(key)
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    null
+                }
             }
 
             // 当前类不存在该属性, 从关联父类检索
@@ -160,7 +168,13 @@ abstract class AbstractApplicative<T: Any>(val clazz: Class<T>) : Applicative<T>
             writeProperty(instance, key.toCamelCase(), value)
         } catch (ignored: Exception) {
             if (reflect) {
-                // TODO 反射查找
+                // 反射查找
+                try {
+                    instance.setProperty(key, value)
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
+                return
             }
 
             // 当前类不存在该属性, 从关联父类检索

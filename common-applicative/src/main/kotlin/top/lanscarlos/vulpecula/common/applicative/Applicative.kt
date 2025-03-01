@@ -11,18 +11,25 @@ interface Applicative<T: Any> {
 
     /**
      * 转换为目标类型, 果转换失败则返回 null
+     *
+     * @param instance 实例
+     * @return 转换后的实例
      * */
-    fun apply(instance: Any?): T?
+    fun convert(instance: Any?): T?
 
     /**
      * 强制转换为目标类型
+     *
+     * @param instance 实例
+     * @return 转换后的实例
+     * @throws IllegalStateException 如果转换失败
      * */
-    fun applyUnsafe(instance: Any?): T
+    fun convertUnsafe(instance: Any?): T
 
     /**
      * 接收实例并转换为对应的 LiveData
      * */
-    fun accept(instance: Any): LiveData<T>
+    fun convertLive(instance: Any): LiveData<T>
 
     /**
      * 获取属性

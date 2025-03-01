@@ -14,7 +14,7 @@ import taboolib.platform.util.toProxyLocation
  * @author Lanscarlos
  * @since 2023-08-21 15:03
  */
-object LocationApplicative : AbstractApplicative<Location>() {
+object LocationApplicative : AbstractApplicative<Location>(Location::class.java) {
 
     val REGEX_XYZ = "-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?(,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?)?".toRegex()
 
@@ -22,7 +22,7 @@ object LocationApplicative : AbstractApplicative<Location>() {
 
     val REGEX_RELATIVE = "^(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?)\$".toRegex()
 
-    override fun apply(instance: Any?): Location? {
+    override fun convert(instance: Any?): Location? {
         return when (instance) {
             is Location -> instance
             is org.bukkit.Location -> instance.toProxyLocation()

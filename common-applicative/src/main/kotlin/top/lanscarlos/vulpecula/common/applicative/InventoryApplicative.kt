@@ -13,9 +13,9 @@ import taboolib.common.platform.ProxyPlayer
  * @author Lanscarlos
  * @since 2023-08-21 15:13
  */
-object InventoryApplicative : AbstractApplicative<Inventory>() {
+object InventoryApplicative : AbstractApplicative<Inventory>(Inventory::class.java) {
 
-    override fun apply(instance: Any?): Inventory? {
+    override fun convert(instance: Any?): Inventory? {
         return when (instance) {
             is Inventory -> instance
             is HumanEntity -> instance.inventory

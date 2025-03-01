@@ -7,9 +7,9 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-11-23 15:44
  */
-object StringApplicative : AbstractApplicative<String>() {
+object StringApplicative : AbstractApplicative<String>(String::class.java) {
 
-    override fun apply(instance: Any?): String? {
+    override fun convert(instance: Any?): String? {
         return instance?.toString()
     }
 

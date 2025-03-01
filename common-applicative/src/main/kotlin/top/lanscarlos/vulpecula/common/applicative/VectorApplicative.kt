@@ -11,13 +11,13 @@ import taboolib.platform.util.toProxyLocation
  * @author Lanscarlos
  * @since 2023-08-21 14:18
  */
-object VectorApplicative : AbstractApplicative<Vector>() {
+object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
 
     val REGEX_NUMBER = "-?\\d+(\\.\\d+)?".toRegex()
 
     val REGEX_XYZ = "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()
 
-    override fun apply(instance: Any?): Vector? {
+    override fun convert(instance: Any?): Vector? {
         return when (instance) {
             is Vector -> instance
             is org.bukkit.util.Vector -> Vector(instance.x, instance.y, instance.z)

@@ -10,13 +10,13 @@ import java.awt.Color
  * @author Lanscarlos
  * @since 2023-08-21 14:57
  */
-object ColorApplicative : AbstractApplicative<Color>() {
+object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
 
     val REGEX_HEX = "^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex()
 
     val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
 
-    override fun apply(instance: Any?): Color? {
+    override fun convert(instance: Any?): Color? {
         return when (instance) {
             is Color -> instance
             is org.bukkit.Color -> Color(instance.red, instance.green, instance.blue)

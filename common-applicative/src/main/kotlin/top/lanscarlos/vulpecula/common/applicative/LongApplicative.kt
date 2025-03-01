@@ -7,9 +7,9 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-05-15 21:09
  */
-object LongApplicative : AbstractApplicative<Long>() {
+object LongApplicative : AbstractApplicative<Long>(Long::class.java) {
 
-    override fun apply(instance: Any?): Long? {
+    override fun convert(instance: Any?): Long? {
         return when (instance) {
             is Long -> instance
             is Number -> instance.toLong()

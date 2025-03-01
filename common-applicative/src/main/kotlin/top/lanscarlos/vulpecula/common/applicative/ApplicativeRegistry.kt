@@ -11,6 +11,8 @@ import java.lang.reflect.ParameterizedType
  * Vulpecula
  * top.lanscarlos.vulpecula.common.applicative
  *
+ * 注册表, 自动检索并注册 Applicative
+ *
  * @author Lanscarlos
  * @since 2024-05-15 12:42
  */
@@ -18,8 +20,6 @@ import java.lang.reflect.ParameterizedType
 object ApplicativeRegistry : ClassVisitor(-4) {
 
     override fun getLifeCycle(): LifeCycle = LifeCycle.LOAD
-
-    val related = linkedMapOf<Class<*>, RelatedApplicative<*>>() // 缓存相关联的 Applicative
 
     val registry = mutableMapOf<Class<*>, Applicative<*>>() // 注册的 Applicative
 
@@ -29,32 +29,6 @@ object ApplicativeRegistry : ClassVisitor(-4) {
     @Suppress("UNCHECKED_CAST")
     fun <T: Any> getApplicative(clazz: Class<T>): Applicative<T> {
         return registry[clazz] as? Applicative<T> ?: error("Applicative for \"${clazz.name}\" not found.")
-    }
-
-    /**
-     * 获取相关联的 Applicative, 按照继承关系远近排序, 优先选择最近的父类
-     *
-     * @return 相关联的所有 Applicative
-     * */
-    @Suppress("UNCHECKED_CAST")
-    fun <T: Any> getRelatedApplicative(clazz: Class<T>): Applicative<T> {
-        return related.computeIfAbsent(clazz) { key ->
-            val relatedApplicatives = registry.filterKeys {
-                it.isAssignableFrom(key)
-            }.map {
-                it.key to it.value
-            }.sortedWith { a, b ->
-                when {
-                    a.first == key -> -1
-                    b.first == key -> 1
-                    a.first.isAssignableFrom(b.first) -> 1
-                    else -> -1
-                }
-            }.map {
-                it.second as Applicative<in T>
-            }
-            RelatedApplicative(getApplicative(clazz)!!, relatedApplicatives)
-        } as Applicative<T>
     }
 
     /**

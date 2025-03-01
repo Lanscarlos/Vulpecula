@@ -21,14 +21,14 @@ class DefaultLiveData<T>(val source: Any, val applicative: Applicative<T>) : Mut
 
     override fun getValue(): T? {
         if (!isInitialized) {
-            value = applicative.apply(source)
+            value = applicative.convert(source)
         }
         return value
     }
 
     override fun getValue(def: T): T {
         if (!isInitialized) {
-            value = applicative.apply(source)
+            value = applicative.convert(source)
         }
         return value ?: def
     }

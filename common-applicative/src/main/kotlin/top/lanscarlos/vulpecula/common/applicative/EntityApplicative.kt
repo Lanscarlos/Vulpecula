@@ -12,9 +12,9 @@ import taboolib.common.platform.ProxyPlayer
  * @author Lanscarlos
  * @since 2023-08-21 15:10
  */
-object EntityApplicative : AbstractApplicative<Entity>() {
+object EntityApplicative : AbstractApplicative<Entity>(Entity::class.java) {
 
-    override fun apply(instance: Any?): Entity? {
+    override fun convert(instance: Any?): Entity? {
         return when (instance) {
             is Entity -> instance
             is OfflinePlayer -> instance.player

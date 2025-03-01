@@ -7,9 +7,9 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-05-15 20:59
  */
-object IntApplicative : AbstractApplicative<Int>() {
+object IntApplicative : AbstractApplicative<Int>(Int::class.java) {
 
-    override fun apply(instance: Any?): Int? {
+    override fun convert(instance: Any?): Int? {
         return when (instance) {
             is Int -> instance
             is Number -> instance.toInt()
