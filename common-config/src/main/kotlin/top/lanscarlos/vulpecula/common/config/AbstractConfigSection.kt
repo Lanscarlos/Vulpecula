@@ -61,7 +61,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun getIntList(key: String): List<Int>? {
-        return getList(key, IntApplicative::convertUnsafe)
+        return getList(key, IntApplicative::convertOrThrow)
     }
 
     override fun getIntList(key: String, defaultValue: List<Int>): List<Int> {
@@ -69,7 +69,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun getLongList(key: String): List<Long>? {
-        return getList(key, LongApplicative::convertUnsafe)
+        return getList(key, LongApplicative::convertOrThrow)
     }
 
     override fun getLongList(key: String, defaultValue: List<Long>): List<Long> {
@@ -77,7 +77,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun getFloatList(key: String): List<Float>? {
-        return getList(key, FloatApplicative::convertUnsafe)
+        return getList(key, FloatApplicative::convertOrThrow)
     }
 
     override fun getFloatList(key: String, defaultValue: List<Float>): List<Float> {
@@ -85,7 +85,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun getDoubleList(key: String): List<Double>? {
-        return getList(key, DoubleApplicative::convertUnsafe)
+        return getList(key, DoubleApplicative::convertOrThrow)
     }
 
     override fun getDoubleList(key: String, defaultValue: List<Double>): List<Double> {
@@ -93,7 +93,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun getStringList(key: String): List<String>? {
-        return getList(key, StringApplicative::convertUnsafe)
+        return getList(key, StringApplicative::convertOrThrow)
     }
 
     override fun getStringList(key: String, defaultValue: List<String>): List<String> {
@@ -125,7 +125,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun readInt(key: String): ConfigNode<Int> {
-        return read(key, IntApplicative::convertUnsafe)
+        return read(key, IntApplicative::convertOrThrow)
     }
 
     override fun readInt(key: String, defaultValue: Int): ConfigNode<Int> {
@@ -133,7 +133,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun readLong(key: String): ConfigNode<Long> {
-        return read(key, LongApplicative::convertUnsafe)
+        return read(key, LongApplicative::convertOrThrow)
     }
 
     override fun readLong(key: String, defaultValue: Long): ConfigNode<Long> {
@@ -141,7 +141,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun readFloat(key: String): ConfigNode<Float> {
-        return read(key, FloatApplicative::convertUnsafe)
+        return read(key, FloatApplicative::convertOrThrow)
     }
 
     override fun readFloat(key: String, defaultValue: Float): ConfigNode<Float> {
@@ -149,7 +149,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun readDouble(key: String): ConfigNode<Double> {
-        return read(key, DoubleApplicative::convertUnsafe)
+        return read(key, DoubleApplicative::convertOrThrow)
     }
 
     override fun readDouble(key: String, defaultValue: Double): ConfigNode<Double> {
@@ -157,7 +157,7 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun readString(key: String): ConfigNode<String> {
-        return read(key, StringApplicative::convertUnsafe)
+        return read(key, StringApplicative::convertOrThrow)
     }
 
     override fun readString(key: String, defaultValue: String): ConfigNode<String> {
@@ -165,43 +165,43 @@ abstract class AbstractConfigSection : ConfigSection {
     }
 
     override fun readIntList(key: String): ConfigNode<List<Int>> {
-        return readList(key, IntApplicative::convertUnsafe)
+        return readList(key, IntApplicative::convertOrThrow)
     }
 
     override fun readIntList(key: String, defaultValue: List<Int>): ConfigNode<List<Int>> {
-        return readList(key, defaultValue, IntApplicative::convertUnsafe)
+        return readList(key, defaultValue, IntApplicative::convertOrThrow)
     }
 
     override fun readLongList(key: String): ConfigNode<List<Long>> {
-        return readList(key, LongApplicative::convertUnsafe)
+        return readList(key, LongApplicative::convertOrThrow)
     }
 
     override fun readLongList(key: String, defaultValue: List<Long>): ConfigNode<List<Long>> {
-        return readList(key, defaultValue, LongApplicative::convertUnsafe)
+        return readList(key, defaultValue, LongApplicative::convertOrThrow)
     }
 
     override fun readFloatList(key: String): ConfigNode<List<Float>> {
-        return readList(key, FloatApplicative::convertUnsafe)
+        return readList(key, FloatApplicative::convertOrThrow)
     }
 
     override fun readFloatList(key: String, defaultValue: List<Float>): ConfigNode<List<Float>> {
-        return readList(key, defaultValue, FloatApplicative::convertUnsafe)
+        return readList(key, defaultValue, FloatApplicative::convertOrThrow)
     }
 
     override fun readDoubleList(key: String): ConfigNode<List<Double>> {
-        return readList(key, DoubleApplicative::convertUnsafe)
+        return readList(key, DoubleApplicative::convertOrThrow)
     }
 
     override fun readDoubleList(key: String, defaultValue: List<Double>): ConfigNode<List<Double>> {
-        return readList(key, defaultValue, DoubleApplicative::convertUnsafe)
+        return readList(key, defaultValue, DoubleApplicative::convertOrThrow)
     }
 
     override fun readStringList(key: String): ConfigNode<List<String>> {
-        return readList(key, StringApplicative::convertUnsafe)
+        return readList(key, StringApplicative::convertOrThrow)
     }
 
     override fun readStringList(key: String, defaultValue: List<String>): ConfigNode<List<String>> {
-        return readList(key, defaultValue, StringApplicative::convertUnsafe)
+        return readList(key, defaultValue, StringApplicative::convertOrThrow)
     }
 
     override fun readList(key: String): ConfigNode<List<*>> {

@@ -46,7 +46,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
      * */
     protected abstract fun writeProperty(instance: T, key: String, value: Any?)
 
-    override fun convertUnsafe(instance: Any?): T {
+    override fun convertOrThrow(instance: Any?): T {
         return convert(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
     }
 

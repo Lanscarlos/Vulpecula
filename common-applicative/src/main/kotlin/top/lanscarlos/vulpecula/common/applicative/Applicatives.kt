@@ -27,9 +27,9 @@ object Applicatives {
      * @return 转换后的实例
      * @throws IllegalStateException 如果转换失败
      * */
-    inline fun <reified T: Any> convertUnsafe(instance: Any?): T {
+    inline fun <reified T: Any> convertOrThrow(instance: Any?): T {
         val applicative = ApplicativeRegistry.getApplicative(T::class.java)
-        return applicative.convertUnsafe(instance)
+        return applicative.convertOrThrow(instance)
     }
 
     /**

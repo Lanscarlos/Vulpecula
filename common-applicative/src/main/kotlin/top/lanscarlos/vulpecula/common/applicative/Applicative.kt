@@ -24,7 +24,7 @@ interface Applicative<T: Any> {
      * @return 转换后的实例
      * @throws IllegalStateException 如果转换失败
      * */
-    fun convertUnsafe(instance: Any?): T
+    fun convertOrThrow(instance: Any?): T
 
     /**
      * 接收实例并转换为对应的 LiveData

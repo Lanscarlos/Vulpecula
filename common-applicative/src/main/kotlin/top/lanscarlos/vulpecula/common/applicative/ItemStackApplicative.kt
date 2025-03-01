@@ -80,7 +80,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
                 }
             }
             "flags" -> {
-                val flag = ItemFlag.values().find { it.name == value.toString() } ?: failedByInvalidValue(instance, key, value)
+                val flag = ItemFlag.entries.find { it.name == value.toString() } ?: failedByInvalidValue(instance, key, value)
                 instance.itemMeta?.addItemFlags(flag)
             }
             "unbreakable" -> instance.itemMeta?.isUnbreakable = value.applicativeBoolean()
