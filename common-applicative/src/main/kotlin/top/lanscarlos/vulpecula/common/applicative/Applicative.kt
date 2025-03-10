@@ -7,7 +7,7 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2023-08-21 13:55
  */
-interface Applicative<T: Any> {
+interface Applicative<T> {
 
     /**
      * 转换为目标类型, 果转换失败则返回 null

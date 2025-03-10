@@ -11,7 +11,7 @@ import taboolib.library.reflex.Reflex.Companion.setProperty
  * @author Lanscarlos
  * @since 2023-08-21 13:57
  */
-abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
+abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
 
     /**
      * 关联的 Applicative
@@ -70,7 +70,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
         val path = key.toCamelCase().split('.')
         if (path.size < 2) {
             // 检查路径是否有效
-            error("Invalid path: $key at ${instance::class.java.name}")
+            error("Invalid path: $key at ${instance?.let { it::class.java.name }}")
         }
 
         var index = 0
@@ -80,7 +80,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
                 // 中间属性为空
                 if (strict) {
                     val name = buildString { for (i in 0 until index) append("${path[i]}.") }
-                    error("${instance::class.java.name}[$key] read failed. ${instance::class.java.simpleName}[$name] is null.")
+                    error("${instance?.let { it::class.java.name }}[$key] read failed. ${instance?.let { it::class.java.simpleName }}[$name] is null.")
                 }
                 return null
             }
@@ -101,7 +101,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
         val path = key.toCamelCase().split('.')
         if (path.size < 2) {
             // 检查路径是否有效
-            error("Invalid path: $key at ${instance::class.java.name}")
+            error("Invalid path: $key at ${instance?.let { it::class.java.name }}")
         }
 
         var index = 0
@@ -111,7 +111,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
                 // 中间属性为空
                 if (strict) {
                     val name = buildString { for (i in 0 until index) append("${path[i]}.") }
-                    error("${instance::class.java.name}[$key] read failed. ${instance::class.java.simpleName}[$name] is null.")
+                    error("${instance?.let { it::class.java.name }}[$key] read failed. ${instance?.let { it::class.java.simpleName }}[$name] is null.")
                 }
                 return
             }
@@ -123,7 +123,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
             // 中间属性为空
             if (strict) {
                 val name = buildString { for (i in 0 until index) append("${path[i]}.") }
-                error("${instance::class.java.name}[$key] read failed. ${instance::class.java.simpleName}[$name] is null.")
+                error("${instance?.let { it::class.java.name }}[$key] read failed. ${instance?.let { it::class.java.simpleName }}[$name] is null.")
             }
             return
         }
@@ -148,7 +148,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
             if (reflect) {
                 // 反射查找
                 return try {
-                    instance.getProperty<Any?>(key)
+                    instance!!.getProperty<Any?>(key)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     null
@@ -192,7 +192,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
             if (reflect) {
                 // 反射查找
                 try {
-                    instance.setProperty(key, value)
+                    instance!!.setProperty(key, value)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                 }
@@ -214,7 +214,7 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
                 // 严格模式下抛出异常
                 failedBySetPropertyNotSupported(instance, key)
             }
-            warning("Cannot set property in ${instance.javaClass.name}[$key]. Not supported yet.")
+            warning("Cannot set property in ${instance?.let { it::class.java.name }}[$key]. Not supported yet.")
         }
     }
 
@@ -235,16 +235,16 @@ abstract class AbstractApplicative<T: Any>(clazz: Class<T>) : Applicative<T> {
         }
     }
 
-    fun failedByGetPropertyNotSupported(instance: Any, key: String): Nothing {
-        error("Cannot get property in ${instance.javaClass.name}[$key]. Not supported yet.")
+    fun failedByGetPropertyNotSupported(instance: Any?, key: String): Nothing {
+        error("Cannot get property in ${instance?.javaClass?.name}[$key]. Not supported yet.")
     }
 
-    fun failedBySetPropertyNotSupported(instance: Any, key: String): Nothing {
-        error("Cannot set property in ${instance.javaClass.name}[$key]. Not supported yet.")
+    fun failedBySetPropertyNotSupported(instance: Any?, key: String): Nothing {
+        error("Cannot set property in ${instance?.javaClass?.name}[$key]. Not supported yet.")
     }
 
-    fun failedByInvalidValue(instance: Any, key: String, value: Any?): Nothing {
-        error("Cannot set property in ${instance.javaClass.name}[$key]. Invalid value: $value::${value?.javaClass?.name}")
+    fun failedByInvalidValue(instance: Any?, key: String, value: Any?): Nothing {
+        error("Cannot set property in ${instance?.javaClass?.name}[$key]. Invalid value: $value::${value?.javaClass?.name}")
     }
 
 }
