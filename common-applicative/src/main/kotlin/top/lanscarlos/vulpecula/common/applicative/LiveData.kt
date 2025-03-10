@@ -9,32 +9,26 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2024-05-15 17:30
  */
-interface LiveData<T: Any> {
+interface LiveData<T> {
 
     /**
-     * 取值
+     * 取值, 如果为空则抛出异常
      * */
-    fun getValue(): T?
+    fun getValue(): T
 
     /**
-     * 取值，如果为 null，返回默认值
-     * @param def 默认值
+     * 取值, 如果为空则返回 null
      * */
-    fun getValue(def: T): T
+    fun getValueOrNull(): T?
 
     /**
-     * 读取属性
-     *
-     * @param key 属性名, 递归获取属性使用 . 分隔
-     * @throws IllegalStateException 如果属性不存在
+     * 更新数据源
      * */
-    operator fun get(key: String): Any?
+    fun update(source: Any?)
 
     /**
      * 兼容代理属性
      * */
-    operator fun getValue(parent: Any?, property: KProperty<*>): T? {
-        return getValue()
-    }
+    operator fun getValue(parent: Any?, property: KProperty<*>): T
 
 }

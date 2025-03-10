@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative
 
+import kotlin.reflect.KProperty
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.common.applicative
@@ -7,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-05-15 17:25
  */
-class DefaultLiveData<T: Any>(val source: Any, val applicative: Applicative<T>) : MutableLiveData<T> {
+class DefaultLiveData<T>(private var source: Any?, val applicative: Applicative<T>) : LiveData<T> {
 
     /**
      * 缓存值
@@ -19,27 +21,26 @@ class DefaultLiveData<T: Any>(val source: Any, val applicative: Applicative<T>) 
      * */
     private var isInitialized = false
 
-    override fun getValue(): T? {
+    override fun getValue(): T {
+        return getValueOrNull() ?: error("Value is null.")
+    }
+
+    override fun getValueOrNull(): T? {
         if (!isInitialized) {
+            // 初始化
             value = applicative.convert(source)
+            isInitialized = true
         }
         return value
     }
 
-    override fun getValue(def: T): T {
-        if (!isInitialized) {
-            value = applicative.convert(source)
-        }
-        return value ?: def
+    override fun update(source: Any?) {
+        this.source = source
+        isInitialized = false
     }
 
-    override fun get(key: String): Any? {
-        val instance = getValue() ?: return null
-        return applicative.getProperty(instance, key)
+    override fun getValue(parent: Any?, property: KProperty<*>): T {
+        return getValue()
     }
 
-    override fun set(key: String, value: Any?) {
-        val instance = getValue() ?: return
-        applicative.setProperty(instance, key, value)
-    }
 }
