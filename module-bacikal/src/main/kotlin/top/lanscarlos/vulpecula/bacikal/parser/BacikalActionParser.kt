@@ -8,8 +8,8 @@ import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.applicative.Applicative
-import top.lanscarlos.vulpecula.applicative.ApplicativeRegistry
+import top.lanscarlos.vulpecula.common.applicative.Applicative
+import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.bacikal.annotation.Optional
@@ -384,9 +384,9 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
     }
 
     // 转变参数
-    class ApplicativeAction<T>(val source: ParsedAction<*>, val applicative: Applicative<T>) : BacikalAction<T> {
+    class ApplicativeAction<T: Any>(val source: ParsedAction<*>, val applicative: Applicative<T>) : BacikalAction<T> {
         override fun execute(frame: BacikalFrame): CompletableFuture<T> {
-            return frame.runAction(source).thenApply(applicative::apply)
+            return frame.runAction(source).thenApply(applicative::convertOrNull)
         }
     }
 
