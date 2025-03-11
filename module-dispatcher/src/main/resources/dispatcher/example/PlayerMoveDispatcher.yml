@@ -1,0 +1,27 @@
+# 监听事件
+listen-event: 'org.bukkit.event.player.PlayerMoveEvent'
+# 监听优先级
+listen-priority: '...'
+
+# 规则
+rule:
+  # 是否监听已取消的事件
+  listen-cancelled: false
+  # 触发优先级
+  trigger-priority: 1
+  # 是否监听视角的变化
+  listen-view-change: true
+  # 最小监听距离
+  min-distance: 0.01
+
+# 过滤器
+filter:
+  # 条件检查
+    condition-check:
+        # 条件
+        condition:
+        - '...'
+        # 条件类型
+        condition-type: '...'
+        # 条件检查类型
+        check-type: '...'
