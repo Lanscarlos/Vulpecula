@@ -24,8 +24,8 @@ class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>)
         return getValue()
     }
 
-    override fun update(source: Any?) {
-        this.source.update(source)
+    override fun update() {
+        this.source.update()
     }
 
 }
