@@ -11,81 +11,81 @@ import java.util.function.Function
  * @since 2025-03-10 19:04
  */
 
-fun <T> LiveData<T>.convertToBoolean(): LiveData<Boolean> {
+fun <T> LiveData<T>.boolean(): LiveData<Boolean> {
     return ProxyLiveData(this, BooleanApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToBoolean(defaultValue: Boolean): LiveData<Boolean> {
+fun <T> LiveData<T>.boolean(defaultValue: Boolean): LiveData<Boolean> {
     return ProxyLiveData(this) {
         BooleanApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToInt(): LiveData<Int> {
+fun <T> LiveData<T>.int(): LiveData<Int> {
     return ProxyLiveData(this, IntApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToInt(defaultValue: Int): LiveData<Int> {
+fun <T> LiveData<T>.int(defaultValue: Int): LiveData<Int> {
     return ProxyLiveData(this) {
         IntApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToLong(): LiveData<Long> {
+fun <T> LiveData<T>.long(): LiveData<Long> {
     return ProxyLiveData(this, LongApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToLong(defaultValue: Long): LiveData<Long> {
+fun <T> LiveData<T>.long(defaultValue: Long): LiveData<Long> {
     return ProxyLiveData(this) {
         LongApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToFloat(): LiveData<Float> {
+fun <T> LiveData<T>.float(): LiveData<Float> {
     return ProxyLiveData(this, FloatApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToFloat(defaultValue: Float): LiveData<Float> {
+fun <T> LiveData<T>.float(defaultValue: Float): LiveData<Float> {
     return ProxyLiveData(this) {
         FloatApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToDouble(): LiveData<Double> {
+fun <T> LiveData<T>.double(): LiveData<Double> {
     return ProxyLiveData(this, DoubleApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToDouble(defaultValue: Double): LiveData<Double> {
+fun <T> LiveData<T>.double(defaultValue: Double): LiveData<Double> {
     return ProxyLiveData(this) {
         DoubleApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToString(): LiveData<String> {
+fun <T> LiveData<T>.string(): LiveData<String> {
     return ProxyLiveData(this, StringApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToString(defaultValue: String): LiveData<String> {
+fun <T> LiveData<T>.string(defaultValue: String): LiveData<String> {
     return ProxyLiveData(this) {
         StringApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToList(): LiveData<List<*>> {
+fun <T> LiveData<T>.list(): LiveData<List<*>> {
     return ProxyLiveData(this, ListApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToList(defaultValue: List<*>): LiveData<List<*>> {
+fun <T> LiveData<T>.list(defaultValue: List<*>): LiveData<List<*>> {
     return ProxyLiveData(this) {
         ListApplicative.convertOrNull(it) ?: defaultValue
     }
 }
 
-fun <T> LiveData<T>.convertToMap(): LiveData<Map<*, *>> {
+fun <T> LiveData<T>.map(): LiveData<Map<*, *>> {
     return ProxyLiveData(this, MapApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToMap(defaultValue: Map<*, *>): LiveData<Map<*, *>> {
+fun <T> LiveData<T>.map(defaultValue: Map<*, *>): LiveData<Map<*, *>> {
     return ProxyLiveData(this) {
         MapApplicative.convertOrNull(it) ?: defaultValue
     }
@@ -95,9 +95,15 @@ fun <T, R> LiveData<T>.convert(transformer: Function<T, R>): LiveData<R> {
     return ProxyLiveData(this, transformer)
 }
 
-fun <T> LiveData<List<*>>.map(transformer: Function<Any?, T>): LiveData<List<T>> {
+fun <T> LiveData<List<*>>.mapTo(transformer: Function<Any?, T>): LiveData<List<T>> {
     return ProxyLiveData(this) {
         it.map(transformer::apply)
+    }
+}
+
+fun <K, V> LiveData<Map<*, *>>.mapTo(transformer: Function<Map.Entry<Any?, Any?>, Pair<K, V>>): LiveData<Map<K, V>> {
+    return ProxyLiveData(this) {
+        it.entries.associate(transformer::apply)
     }
 }
 
@@ -107,32 +113,26 @@ fun LiveData<Map<*, *>>.normalize(): LiveData<Map<String, Any?>> {
     }
 }
 
-fun <K, V> LiveData<Map<*, *>>.map(transformer: Function<Map.Entry<Any?, Any?>, Pair<K, V>>): LiveData<Map<K, V>> {
-    return ProxyLiveData(this) {
-        it.entries.associate(transformer::apply)
-    }
+fun <T> LiveData<T>.intList(): LiveData<List<Int>> {
+    return list().mapTo(IntApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToIntList(): LiveData<List<Int>> {
-    return convertToList().map(IntApplicative::convertOrThrow)
+fun <T> LiveData<T>.longList(): LiveData<List<Long>> {
+    return list().mapTo(LongApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToLongList(): LiveData<List<Long>> {
-    return convertToList().map(LongApplicative::convertOrThrow)
+fun <T> LiveData<T>.floatList(): LiveData<List<Float>> {
+    return list().mapTo(FloatApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToFloatList(): LiveData<List<Float>> {
-    return convertToList().map(FloatApplicative::convertOrThrow)
+fun <T> LiveData<T>.doubleList(): LiveData<List<Double>> {
+    return list().mapTo(DoubleApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToDoubleList(): LiveData<List<Double>> {
-    return convertToList().map(DoubleApplicative::convertOrThrow)
+fun <T> LiveData<T>.stringList(): LiveData<List<String>> {
+    return list().mapTo(StringApplicative::convertOrThrow)
 }
 
-fun <T> LiveData<T>.convertToStringList(): LiveData<List<String>> {
-    return convertToList().map(StringApplicative::convertOrThrow)
-}
-
-fun <T> LiveData<T>.convertToNormalizeMap(): LiveData<Map<String, Any?>> {
-    return convertToMap().normalize()
+fun <T> LiveData<T>.normalizeMap(): LiveData<Map<String, Any?>> {
+    return map().normalize()
 }
