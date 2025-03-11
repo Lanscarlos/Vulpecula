@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative
 
+import java.util.function.Function
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.common.applicative
@@ -17,7 +19,7 @@ object Applicatives {
      * */
     inline fun <reified T: Any> convert(instance: Any?): T? {
         val applicative = ApplicativeRegistry.getApplicative(T::class.java)
-        return applicative.convert(instance)
+        return applicative.convertOrNull(instance)
     }
 
     /**

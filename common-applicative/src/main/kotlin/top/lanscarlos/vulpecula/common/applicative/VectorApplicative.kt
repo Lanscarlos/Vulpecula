@@ -17,7 +17,7 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
 
     val REGEX_XYZ = "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()
 
-    override fun convert(instance: Any?): Vector? {
+    override fun convertOrNull(instance: Any?): Vector? {
         return when (instance) {
             is Vector -> instance
             is org.bukkit.util.Vector -> Vector(instance.x, instance.y, instance.z)

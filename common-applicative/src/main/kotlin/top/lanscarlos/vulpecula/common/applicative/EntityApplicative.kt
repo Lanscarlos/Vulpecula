@@ -14,7 +14,7 @@ import taboolib.common.platform.ProxyPlayer
  */
 object EntityApplicative : AbstractApplicative<Entity>(Entity::class.java) {
 
-    override fun convert(instance: Any?): Entity? {
+    override fun convertOrNull(instance: Any?): Entity? {
         return when (instance) {
             is Entity -> instance
             is OfflinePlayer -> instance.player

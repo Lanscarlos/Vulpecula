@@ -27,7 +27,7 @@ fun Any?.applicativeBoolean(def: Boolean = false): Boolean {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Boolean::class.java) ?: BooleanApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -40,7 +40,7 @@ fun Any?.applicativeInt(def: Int = 0): Int {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Int::class.java) ?: IntApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -53,7 +53,7 @@ fun Any?.applicativeLong(def: Long = 0L): Long {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Long::class.java) ?: LongApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -66,7 +66,7 @@ fun Any?.applicativeFloat(def: Float = 0.0f): Float {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Float::class.java) ?: FloatApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -79,7 +79,7 @@ fun Any?.applicativeDouble(def: Double = 0.0): Double {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Double::class.java) ?: DoubleApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -92,7 +92,7 @@ fun Any?.applicativeColor(def: Color = Color.WHITE): Color {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Color::class.java) ?: ColorApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -105,7 +105,7 @@ fun Any?.applicativeVector(def: Vector = Vector(0.0, 0.0, 0.0)): Vector {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Vector::class.java) ?: VectorApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 /**
@@ -118,7 +118,7 @@ fun Any?.applicativeLocation(def: Location = Location(null, 0.0, 0.0, 0.0)): Loc
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Location::class.java) ?: LocationApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 fun Any?.applicativeItemStack(def: ItemStack = ItemStack(Material.STONE)): ItemStack {
@@ -126,7 +126,7 @@ fun Any?.applicativeItemStack(def: ItemStack = ItemStack(Material.STONE)): ItemS
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(ItemStack::class.java) ?: ItemStackApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 fun Any?.applicativeEntity(def: Entity? = null): Entity? {
@@ -134,7 +134,7 @@ fun Any?.applicativeEntity(def: Entity? = null): Entity? {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Entity::class.java) ?: EntityApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 fun Any?.applicativePlayer(def: Player? = null): Player? {
@@ -142,7 +142,7 @@ fun Any?.applicativePlayer(def: Player? = null): Player? {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Player::class.java) ?: PlayerApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 fun Any?.applicativeInventory(def: Inventory? = null): Inventory? {
@@ -150,7 +150,7 @@ fun Any?.applicativeInventory(def: Inventory? = null): Inventory? {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(Inventory::class.java) ?: InventoryApplicative
-    return applicative.convert(this) ?: def
+    return applicative.convertOrNull(this) ?: def
 }
 
 fun Any?.applicativeIntList(def: List<Int> = emptyList()): List<Int> {
@@ -158,7 +158,7 @@ fun Any?.applicativeIntList(def: List<Int> = emptyList()): List<Int> {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(List::class.java) ?: ListApplicative
-    return applicative.convert(this)?.mapIndexed { index, it ->
+    return applicative.convertOrNull(this)?.mapIndexed { index, it ->
         it.applicativeInt(def.getOrNull(index) ?: 0)
     } ?: def
 }
@@ -168,7 +168,7 @@ fun Any?.applicativeStringList(def: List<String> = emptyList()): List<String> {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(List::class.java) ?: ListApplicative
-    return applicative.convert(this)?.mapIndexed { index, it ->
+    return applicative.convertOrNull(this)?.mapIndexed { index, it ->
         it?.toString() ?: def.getOrNull(index) ?: "null"
     } ?: def
 }
@@ -178,7 +178,7 @@ fun Any?.applicativePlayerList(def: List<Player> = emptyList()): List<Player> {
         return def
     }
     val applicative = ApplicativeRegistry.getApplicativeOrNull(List::class.java) ?: ListApplicative
-    return applicative.convert(this)?.mapIndexedNotNull { index, it ->
+    return applicative.convertOrNull(this)?.mapIndexedNotNull { index, it ->
         it.applicativePlayer(def.getOrNull(index))
     } ?: def
 }

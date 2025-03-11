@@ -15,7 +15,7 @@ interface Applicative<T> {
      * @param instance 实例
      * @return 转换后的实例
      * */
-    fun convert(instance: Any?): T?
+    fun convertOrNull(instance: Any?): T?
 
     /**
      * 强制转换为目标类型
@@ -25,11 +25,6 @@ interface Applicative<T> {
      * @throws IllegalStateException 如果转换失败
      * */
     fun convertOrThrow(instance: Any?): T
-
-    /**
-     * 接收实例并转换为对应的 LiveData
-     * */
-    fun convertLive(instance: Any): LiveData<T>
 
     /**
      * 获取属性

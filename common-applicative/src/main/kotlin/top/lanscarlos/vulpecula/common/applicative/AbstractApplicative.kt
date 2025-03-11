@@ -52,11 +52,7 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
     protected abstract fun writeProperty(instance: T, key: String, value: Any?)
 
     override fun convertOrThrow(instance: Any?): T {
-        return convert(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
-    }
-
-    override fun convertLive(instance: Any): LiveData<T> {
-        return DefaultLiveData(instance, this)
+        return convertOrNull(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
     }
 
     @Suppress("UNCHECKED_CAST")

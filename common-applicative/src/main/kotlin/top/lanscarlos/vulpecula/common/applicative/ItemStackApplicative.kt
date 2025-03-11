@@ -18,7 +18,7 @@ import kotlin.jvm.optionals.getOrNull
  */
 object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.java) {
 
-    override fun convert(instance: Any?): ItemStack? {
+    override fun convertOrNull(instance: Any?): ItemStack? {
         return when (instance) {
             is ItemStack -> instance
             is Item -> instance.itemStack

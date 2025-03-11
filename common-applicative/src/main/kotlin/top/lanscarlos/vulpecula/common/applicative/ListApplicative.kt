@@ -7,14 +7,14 @@ package top.lanscarlos.vulpecula.common.applicative
  * @author Lanscarlos
  * @since 2024-05-15 11:15
  */
-object ListApplicative : AbstractApplicative<List<Any?>>(List::class.java) {
+object ListApplicative : AbstractApplicative<List<*>>(List::class.java) {
 
-    override fun convert(instance: Any?): List<Any?> {
+    override fun convertOrNull(instance: Any?): List<Any?> {
         return when (instance) {
             is Array<*> -> instance.toList()
             is Collection<*> -> instance.toList()
             is Map<*, *> -> instance.toList()
-            else -> listOf(instance)
+            else -> if (instance != null) listOf(instance) else emptyList()
         }
     }
 

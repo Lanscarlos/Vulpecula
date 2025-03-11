@@ -27,7 +27,7 @@ object ApplicativeRegistry : ClassVisitor(-4) {
      * 获取对应的 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
-    fun <T: Any> getApplicative(clazz: Class<T>): Applicative<T> {
+    fun <T> getApplicative(clazz: Class<T>): Applicative<T> {
         if (!registry.containsKey(clazz)) {
             error("Applicative for \"${clazz.name}\" not found.")
         }
@@ -38,7 +38,7 @@ object ApplicativeRegistry : ClassVisitor(-4) {
      * 获取对应的 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
-    fun <T: Any> getApplicativeOrNull(clazz: Class<T>): Applicative<T>? {
+    fun <T> getApplicativeOrNull(clazz: Class<T>): Applicative<T>? {
         return registry[clazz] as? Applicative<T>
     }
 

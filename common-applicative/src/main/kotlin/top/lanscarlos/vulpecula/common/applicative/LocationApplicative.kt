@@ -22,7 +22,7 @@ object LocationApplicative : AbstractApplicative<Location>(Location::class.java)
 
     val REGEX_RELATIVE = "^(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?),(~?(?:[\\-+]?\\d+(?:\\.\\d+)?)?)\$".toRegex()
 
-    override fun convert(instance: Any?): Location? {
+    override fun convertOrNull(instance: Any?): Location? {
         return when (instance) {
             is Location -> instance
             is org.bukkit.Location -> instance.toProxyLocation()
