@@ -2,6 +2,7 @@ rootProject.name="Vulpecula"
 include("common-applicative")
 include("common-config")
 include("common-core")
+include("common-livedata")
 include("extension-action-item")
 include("module-bacikal")
 include("module-dispatcher")
