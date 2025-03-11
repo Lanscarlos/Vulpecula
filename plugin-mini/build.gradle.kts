@@ -32,6 +32,7 @@ tasks {
             project(":common-core"),
             project(":extension-action-item"),
             project(":module-bacikal"),
+            project(":module-dispatcher"),
 //            project(":module-item"),
 //            project(":project:common"),
 //            project(":project:module-applicative"),

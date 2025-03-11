@@ -5,6 +5,11 @@ import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.entity.ItemDespawnEvent
 import org.bukkit.event.player.PlayerDropItemEvent
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
+import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.command.CommandBody
+import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.info
 import taboolib.module.configuration.Config
@@ -19,9 +24,26 @@ import taboolib.module.configuration.Configuration
  */
 object Vulpecula {
 
-    @Config("config.conf")
-    var config: Configuration? = null
+    @Config("config.yml")
+    lateinit var config: Configuration
         private set
+
+    @CommandBody
+    val test = subCommand {
+        dynamic("key") {
+            exec<ProxyCommandSender> {
+                config.reload()
+                info("config.yml >> ${config.getKeys(true)}")
+                info("map >> ${config.toMap()}")
+                val key = ctx["key"]
+                val value = config[key]
+                val type = value?.javaClass?.name
+                info("key=$key")
+                info("value=$value")
+                info("type=$type")
+            }
+        }
+    }
 
 //    @SubscribeEvent
 //    fun e(e: EntitySpawnEvent) {
