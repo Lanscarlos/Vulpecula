@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object ListApplicative : AbstractApplicative<List<*>>(List::class.java) {
 
-    override fun convertOrNull(instance: Any?): List<Any?> {
+    override fun convertOrNull(instance: Any?): List<Any?>? {
         return when (instance) {
             is Array<*> -> instance.toList()
             is Collection<*> -> instance.toList()
             is Map<*, *> -> instance.toList()
-            else -> if (instance != null) listOf(instance) else emptyList()
+            else -> instance?.let(::listOf)
         }
     }
 

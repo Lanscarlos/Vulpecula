@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object MapApplicative : AbstractApplicative<Map<*, *>>(Map::class.java) {
 
-    override fun convertOrNull(instance: Any?): Map<*, *> {
+    override fun convertOrNull(instance: Any?): Map<*, *>? {
         return when (instance) {
             is Map<*, *> -> instance
             is taboolib.library.configuration.ConfigurationSection -> instance.getValues(false)
             is org.bukkit.configuration.ConfigurationSection -> instance.getValues(false)
-            else -> emptyMap<Any?, Any?>()
+            else -> null
         }
     }
 
