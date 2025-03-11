@@ -12,12 +12,33 @@ import kotlin.reflect.KProperty
  */
 class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>) : LiveData<R> {
 
+    /**
+     * 缓存值
+     * */
+    private var value: R? = null
+
+    /**
+     * 是否已初始化
+     * */
+    private var isInitialized = false
+
+    @Suppress("UNCHECKED_CAST")
     override fun getValue(): R {
-        return transfer.apply(source.getValue())
+        if (!isInitialized) {
+            // 初始化
+            value = transfer.apply(source.getValue())
+            isInitialized = true
+        }
+        return value as R
     }
 
     override fun getValueOrNull(): R? {
-        return source.getValueOrNull()?.let(transfer::apply)
+        if (!isInitialized) {
+            // 初始化
+            value = source.getValueOrNull()?.let(transfer::apply)
+            isInitialized = true
+        }
+        return value
     }
 
     override fun getValue(parent: Any?, property: KProperty<*>): R {
@@ -26,6 +47,7 @@ class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>)
 
     override fun update() {
         this.source.update()
+        isInitialized = false
     }
 
 }
