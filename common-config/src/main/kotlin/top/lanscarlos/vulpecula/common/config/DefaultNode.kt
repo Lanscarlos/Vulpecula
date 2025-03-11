@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.config
 
-import java.util.function.Function
+import top.lanscarlos.vulpecula.common.livedata.DefaultLiveData
 
 /**
  * Vulpecula
@@ -9,27 +9,43 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2024-12-16 01:48
  */
-class DefaultNode<T>(
+class DefaultNode(
     val section: ConfigSection,
-    override val path: String,
-    private val transfer: Function<Any?, T>
-) : ConfigNode<T> {
+    override val keys: Array<out String>,
+) : ConfigNode {
 
-    private var value: T? = null
+    override lateinit var key: String
 
-    private var isInitialized = false
+    override val path: String
+        get() = section.path + "." + key
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getValue(): T {
-        if (!isInitialized) {
-            update()
-            isInitialized = true
+    val liveData = DefaultLiveData(source = ::read, transformer = ::transformer)
+
+    private fun read(): Any? {
+        for (key in keys) {
+            if (!section.contains(key)) {
+                continue
+            }
+            this.key = key
+            return section[key]
         }
-        return value as T
+        return null
+    }
+
+    private fun transformer(value: Any?): Any? {
+        return value
+    }
+
+    override fun getValue(): Any? {
+        return liveData.getValue()
+    }
+
+    override fun getValueOrNull(): Any? {
+        return liveData.getValueOrNull()
     }
 
     override fun update() {
-        value = transfer.apply(section[path])
+        liveData.update()
     }
 
 }

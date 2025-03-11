@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.config
 
-import kotlin.reflect.KProperty
+import top.lanscarlos.vulpecula.common.livedata.LiveData
 
 /**
  * Vulpecula
@@ -9,28 +9,21 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2024-12-16 01:42
  */
-interface ConfigNode<T> {
+interface ConfigNode: LiveData<Any?> {
+
+    /**
+     * 可能的键
+     * */
+    val keys: Array<out String>
+
+    /**
+     * 当前键
+     * */
+    val key: String
 
     /**
      * 路径
      * */
     val path: String
-
-    /**
-     * 获取数据
-     * */
-    fun getValue(): T
-
-    /**
-     * 从配置源中重载数据
-     * */
-    fun update()
-
-    /**
-     * 兼容代理属性
-     * */
-    operator fun getValue(source: Any?, property: KProperty<*>): T {
-        return getValue()
-    }
 
 }

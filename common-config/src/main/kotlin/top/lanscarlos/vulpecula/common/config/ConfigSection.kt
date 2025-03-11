@@ -11,6 +11,8 @@ import java.util.function.Function
  */
 interface ConfigSection {
 
+    val path: String
+
     operator fun contains(key: String): Boolean
 
     operator fun get(key: String): Any?
@@ -71,58 +73,8 @@ interface ConfigSection {
 
     fun <T> getList(key: String, defaultValue: List<T>, transfer: Function<Any?, T>): List<T>
 
-    fun <T> read(key: String, transfer: Function<Any?, T>): ConfigNode<T>
+    fun getSection(key: String): ConfigSection
 
-    fun readBoolean(key: String): ConfigNode<Boolean>
-
-    fun readBoolean(key: String, defaultValue: Boolean): ConfigNode<Boolean>
-
-    fun readInt(key: String): ConfigNode<Int>
-
-    fun readInt(key: String, defaultValue: Int): ConfigNode<Int>
-
-    fun readLong(key: String): ConfigNode<Long>
-
-    fun readLong(key: String, defaultValue: Long): ConfigNode<Long>
-
-    fun readFloat(key: String): ConfigNode<Float>
-
-    fun readFloat(key: String, defaultValue: Float): ConfigNode<Float>
-
-    fun readDouble(key: String): ConfigNode<Double>
-
-    fun readDouble(key: String, defaultValue: Double): ConfigNode<Double>
-
-    fun readString(key: String): ConfigNode<String>
-
-    fun readString(key: String, defaultValue: String): ConfigNode<String>
-
-    fun readIntList(key: String): ConfigNode<List<Int>>
-
-    fun readIntList(key: String, defaultValue: List<Int>): ConfigNode<List<Int>>
-
-    fun readLongList(key: String): ConfigNode<List<Long>>
-
-    fun readLongList(key: String, defaultValue: List<Long>): ConfigNode<List<Long>>
-
-    fun readFloatList(key: String): ConfigNode<List<Float>>
-
-    fun readFloatList(key: String, defaultValue: List<Float>): ConfigNode<List<Float>>
-
-    fun readDoubleList(key: String): ConfigNode<List<Double>>
-
-    fun readDoubleList(key: String, defaultValue: List<Double>): ConfigNode<List<Double>>
-
-    fun readStringList(key: String): ConfigNode<List<String>>
-
-    fun readStringList(key: String, defaultValue: List<String>): ConfigNode<List<String>>
-
-    fun readList(key: String): ConfigNode<List<*>>
-
-    fun readList(key: String, defaultValue: List<*>): ConfigNode<List<*>>
-
-    fun <T> readList(key: String, transfer: Function<Any?, T>): ConfigNode<List<T>>
-
-    fun <T> readList(key: String, defaultValue: List<T>, transfer: Function<Any?, T>): ConfigNode<List<T>>
+    fun read(vararg key: String): ConfigNode
 
 }

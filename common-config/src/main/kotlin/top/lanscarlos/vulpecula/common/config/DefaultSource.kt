@@ -12,7 +12,7 @@ import java.io.Reader
  * @author Lanscarlos
  * @since 2024-12-16 14:29
  */
-class DefaultSource(val configuration: Configuration) : DefaultSection(configuration), ConfigSource, Runnable {
+class DefaultSource(val configuration: Configuration) : DefaultSection(null, configuration), ConfigSource, Runnable {
 
     constructor(file: File) : this(Configuration.loadFromFile(file))
 
@@ -22,12 +22,14 @@ class DefaultSource(val configuration: Configuration) : DefaultSection(configura
 
     constructor(inputStream: InputStream) : this(Configuration.loadFromInputStream(inputStream))
 
+    override val path: String = ""
+
     init {
         configuration.onReload(this)
     }
 
     override fun run() {
-        sections.forEach { (_, node) -> node.update() }
+        nodes.forEach { (_, node) -> node.update() }
     }
 
     override fun reload() {

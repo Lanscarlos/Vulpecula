@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.common.config
 
 import taboolib.library.configuration.ConfigurationSection
-import java.util.function.Function
 
 /**
  * Vulpecula
@@ -10,9 +9,11 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025-01-05 14:39
  */
-open class DefaultSection(val root: ConfigurationSection) : AbstractConfigSection() {
+open class DefaultSection(val parent: ConfigSection?, val root: ConfigurationSection) : AbstractConfigSection() {
 
-    val sections = mutableMapOf<String, ConfigNode<*>>()
+    override val path: String = root.name
+
+    val nodes = mutableMapOf<String, ConfigNode>()
 
     override fun contains(key: String): Boolean {
         return root.contains(key)
@@ -30,8 +31,12 @@ open class DefaultSection(val root: ConfigurationSection) : AbstractConfigSectio
         root[key] = null
     }
 
-    override fun <T> read(key: String, transfer: Function<Any?, T>): ConfigNode<T> {
-        return DefaultNode(this, key, transfer).also { sections[key] = it }
+    override fun getSection(key: String): ConfigSection {
+        return DefaultSection(this, root.getConfigurationSection(key) ?: root.createSection(key))
+    }
+
+    override fun read(vararg key: String): ConfigNode {
+        return DefaultNode(this, key)
     }
 
 }
