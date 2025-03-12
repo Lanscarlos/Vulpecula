@@ -2,11 +2,11 @@ package top.lanscarlos.vulpecula.dispatcher
 
 import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
+import taboolib.common.platform.event.ProxyListener
 import taboolib.common.platform.function.registerBukkitListener
 import taboolib.common.platform.function.unregisterListener
-import java.util.LinkedList
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.function.Consumer
 
 /**
  * Vulpecula
@@ -15,44 +15,78 @@ import java.util.function.Consumer
  * @author Lanscarlos
  * @since 2025-03-09 20:04
  */
-class Listener(val clazz: Class<out Event>, val priority: EventPriority) {
+class Listener(val clazz: Class<out Event>) {
 
-    val uniqueId = clazz.name + priority.name
+    val triggers: LinkedList<Trigger> = LinkedList()
 
-    val handlers = LinkedList<Consumer<in Event>>()
+    val listeners: EnumMap<EventPriority, ProxyListener> = EnumMap(EventPriority::class.java)
 
-    val listener = registerBukkitListener(clazz, priority, false) {
-        accept(it)
-    }
-
-    fun register(consumer: Consumer<in Event>) {
-        handlers += consumer
-    }
-
-    fun accept(event: Event) {
-        for (handler in handlers) {
-            handler.accept(event)
+    private fun accept(priority: EventPriority, event: Event) {
+        for (trigger in triggers) {
+            if (trigger.listenPriority != priority) {
+                continue
+            }
+            trigger.accept(event)
         }
     }
 
+    fun register(trigger: Trigger) {
+        val priority = trigger.listenPriority
+
+        // 添加处理器
+        triggers += trigger
+        // 按优先级排序, 优先级越高越先处理
+        triggers.sortByDescending { it.triggerPriority }
+
+        // 检查并注册监听器
+        listeners.computeIfAbsent(priority) {
+            registerBukkitListener(clazz, priority, false) { event ->
+                accept(priority, event)
+            }
+        }
+    }
+
+    fun unregister(trigger: Trigger) {
+        triggers.remove(trigger)
+
+        // 检查是否还有监听器
+        if (triggers.isEmpty()) {
+            dispose()
+            return
+        }
+
+        // 检查不同优先级是否还有触发器
+        val group = triggers.groupBy { it.listenPriority }
+        for (priority in EventPriority.entries) {
+            if (group.getOrDefault(priority, emptyList()).isNotEmpty()) {
+                continue
+            }
+            // 注销监听器
+            listeners.remove(priority)?.let(::unregisterListener)
+        }
+    }
+
+    /**
+     * 注销监听器
+     * */
     fun dispose() {
-        unregisterListener(listener)
+        for (listener in listeners.values) {
+            unregisterListener(listener)
+        }
+        cache.remove(clazz)
     }
 
     companion object {
 
-        private val listeners = ConcurrentHashMap<String, Listener>()
+        private val cache = ConcurrentHashMap<Class<out Event>, Listener>()
 
-        @Suppress("UNCHECKED_CAST")
-        fun <T: Event> register(clazz: Class<T>, priority: EventPriority, func: Consumer<T>) {
-            val listener = listeners.computeIfAbsent(clazz.name + priority.name) {
-                Listener(clazz, priority)
-            }
-            listener.register(func as Consumer<in Event>)
+        fun <T: Event> register(clazz: Class<T>, trigger: Trigger) {
+            val listener = cache.computeIfAbsent(clazz) { Listener(clazz) }
+            listener.register(trigger)
         }
 
-        fun unregister(clazz: Class<out Event>, priority: EventPriority) {
-            listeners.remove(clazz.name + priority.name)?.dispose()
+        fun unregister(trigger: Trigger) {
+            cache[trigger.listenEvent]?.unregister(trigger)
         }
 
     }
