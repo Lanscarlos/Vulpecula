@@ -4,7 +4,7 @@ taboolib {
 }
 
 dependencies {
-    compileOnly(project(":common-config"))
+    compileOnly(project(":common-config-legacy"))
     compileOnly("ink.ptms.core:v12004:12004:mapped")
 //    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
 
