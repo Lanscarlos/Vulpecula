@@ -1,14 +1,16 @@
 # 监听事件
 listen-event: 'org.bukkit.event.player.PlayerMoveEvent'
 # 监听优先级
-listen-priority: '...'
+listen-priority: 'normal'
+# 是否监听已取消的事件
+listen-cancelled: false
 
 # 规则
 rule:
-  # 是否监听已取消的事件
-  listen-cancelled: false
   # 触发优先级
   trigger-priority: 1
+  # 是否需要玩家
+  require-player: true
   # 是否监听视角的变化
   listen-view-change: true
   # 最小监听距离

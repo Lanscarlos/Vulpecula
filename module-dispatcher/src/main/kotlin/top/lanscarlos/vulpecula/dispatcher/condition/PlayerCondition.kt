@@ -1,13 +1,12 @@
 package top.lanscarlos.vulpecula.dispatcher.condition
 
-import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
 import taboolib.common.util.Vector
 import taboolib.common5.cdouble
-import taboolib.common5.cint
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.dispatcher.Context
 import kotlin.math.max
 import kotlin.math.min
 
@@ -18,7 +17,7 @@ import kotlin.math.min
  * @author Lanscarlos
  * @since 2025-03-10 13:47
  */
-class PlayerCondition(config: ConfigurationSection) : Condition<Player> {
+class PlayerCondition(config: ConfigurationSection) : Condition {
 
     /**
      * 是否是OP
@@ -45,30 +44,32 @@ class PlayerCondition(config: ConfigurationSection) : Condition<Player> {
      * */
     val regionOut by config.read("area-out", "region-out").convert(::parseRegion)
 
-    override fun check(input: Player): Boolean {
+    override fun check(context: Context): Boolean {
+        val player = context.player ?: return false
+
         if (op != null) {
-            if (op!! && !input.isOp) {
+            if (op!! && !player.isOp) {
                 return false
             }
         }
         if (permission != null && permission!!.isNotEmpty()) {
-            if (permission!!.any { !input.hasPermission(it) }) {
+            if (permission!!.any { !player.hasPermission(it) }) {
                 return false
             }
         }
         if (world != null && world!!.isNotEmpty()) {
-            if (!world!!.contains(input.world.name)) {
+            if (!world!!.contains(player.world.name)) {
                 return false
             }
         }
         if (regionIn != null) {
-            val location = input.location
+            val location = player.location
             if (!regionIn!!.contains(location.x, location.y, location.z)) {
                 return false
             }
         }
         if (regionOut != null) {
-            val location = input.location
+            val location = player.location
             if (regionOut!!.contains(location.x, location.y, location.z)) {
                 return false
             }

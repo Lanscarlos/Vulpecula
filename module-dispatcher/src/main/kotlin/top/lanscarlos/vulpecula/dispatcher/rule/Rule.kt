@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.dispatcher.rule
 
 import org.bukkit.event.Event
+import top.lanscarlos.vulpecula.dispatcher.Context
 
 /**
  * Vulpecula
@@ -14,6 +15,6 @@ interface Rule<T: Event> {
     /**
      * 匹配事件
      * */
-    fun matches(event: T): Boolean
+    fun matches(context: Context): Boolean
 
 }

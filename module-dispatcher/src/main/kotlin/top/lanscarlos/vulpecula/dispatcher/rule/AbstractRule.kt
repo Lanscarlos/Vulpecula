@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.dispatcher.rule
 
 import org.bukkit.event.Event
+import taboolib.library.configuration.ConfigurationSection
 
 /**
  * Vulpecula
@@ -9,8 +10,4 @@ import org.bukkit.event.Event
  * @author Lanscarlos
  * @since 2025-03-12 14:14
  */
-class CommonRule(clazz: Class<out Event>) : Rule<Event> {
-    override fun matches(event: Event): Boolean {
-        TODO("Not yet implemented")
-    }
-}
+abstract class AbstractRule<T: Event>(val clazz: Class<out Event>, val config: ConfigurationSection) : Rule<T>

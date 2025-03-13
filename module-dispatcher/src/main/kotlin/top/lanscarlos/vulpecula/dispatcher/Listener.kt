@@ -23,7 +23,7 @@ class Listener(val clazz: Class<out Event>) {
 
     private fun accept(priority: EventPriority, event: Event) {
         for (trigger in triggers) {
-            if (trigger.listenPriority != priority) {
+            if (trigger.priority != priority) {
                 continue
             }
             trigger.accept(event)
@@ -31,12 +31,12 @@ class Listener(val clazz: Class<out Event>) {
     }
 
     fun register(trigger: Trigger) {
-        val priority = trigger.listenPriority
+        val priority = trigger.priority
 
         // 添加处理器
         triggers += trigger
         // 按优先级排序, 优先级越高越先处理
-        triggers.sortByDescending { it.triggerPriority }
+        triggers.sortByDescending { it.weight }
 
         // 检查并注册监听器
         listeners.computeIfAbsent(priority) {
@@ -56,7 +56,7 @@ class Listener(val clazz: Class<out Event>) {
         }
 
         // 检查不同优先级是否还有触发器
-        val group = triggers.groupBy { it.listenPriority }
+        val group = triggers.groupBy { it.priority }
         for (priority in EventPriority.entries) {
             if (group.getOrDefault(priority, emptyList()).isNotEmpty()) {
                 continue
@@ -80,13 +80,23 @@ class Listener(val clazz: Class<out Event>) {
 
         private val cache = ConcurrentHashMap<Class<out Event>, Listener>()
 
-        fun <T: Event> register(clazz: Class<T>, trigger: Trigger) {
-            val listener = cache.computeIfAbsent(clazz) { Listener(clazz) }
+        private val related = ConcurrentHashMap<Trigger, Class<out Event>>()
+
+        fun register(trigger: Trigger) {
+            val listener = cache.computeIfAbsent(trigger.clazz) { Listener(trigger.clazz) }
+            related[trigger] = trigger.clazz
             listener.register(trigger)
         }
 
+        fun update(trigger: Trigger) {
+            val clazz = related[trigger] ?: return
+            cache[clazz]?.unregister(trigger)
+            register(trigger)
+        }
+
         fun unregister(trigger: Trigger) {
-            cache[trigger.listenEvent]?.unregister(trigger)
+            val clazz = related.remove(trigger) ?: return
+            cache[clazz]?.unregister(trigger)
         }
 
     }
