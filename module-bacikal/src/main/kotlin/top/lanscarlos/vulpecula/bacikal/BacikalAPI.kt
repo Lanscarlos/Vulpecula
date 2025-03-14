@@ -33,8 +33,8 @@ object BacikalAPI {
      * @param sender 执行者
      * @param args 参数
      */
-    fun execute(quest: Quest, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
-        return BacikalQuestExecutor.execute(quest, sender, args)
+    fun execute(quest: Quest, name: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
+        return BacikalQuestExecutor.execute(quest, name, sender, args)
     }
 
 }

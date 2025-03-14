@@ -20,22 +20,22 @@ import java.util.concurrent.CompletableFuture
  */
 object BacikalQuestExecutor {
 
-    fun execute(quest: Quest, func: ScriptContext.() -> Unit): CompletableFuture<*> {
-        return QuestExecutorContext(quest).also(func).runActions()
+    fun execute(quest: Quest, name: String, func: (ScriptContext) -> Unit): CompletableFuture<*> {
+        return QuestExecutorContext(quest, name).also(func).runActions()
     }
 
-    fun execute(quest: Quest, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
-        return QuestExecutorContext(quest).also {
+    fun execute(quest: Quest, name: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
+        return execute(quest, name) {
             it.sender = sender
             for (entry in args) {
                 it[entry.key] = entry.value
             }
-        }.runActions()
+        }
     }
 
-    class QuestExecutorContext(quest: Quest) : ScriptContext(ScriptService, quest) {
+    class QuestExecutorContext(quest: Quest, val main: String) : ScriptContext(ScriptService, quest) {
         override fun createRootFrame(): QuestContext.Frame {
-            return QuestExecutorFrame(this)
+            return QuestExecutorFrame(this, main)
         }
     }
 
@@ -43,7 +43,7 @@ object BacikalQuestExecutor {
      * 海螺爹永远是你爹
      * @see taboolib.library.kether.AbstractQuestContext.SimpleNamedFrame
      * */
-    class QuestExecutorFrame(context: ScriptContext) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
+    class QuestExecutorFrame(context: ScriptContext, val name: String) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
 
         var currentblock: Quest.Block? = null
         var nextBlock: Quest.Block? = null
@@ -55,7 +55,7 @@ object BacikalQuestExecutor {
         }
 
         override fun name(): String {
-            return QuestContext.BASE_BLOCK // 入口函数名 main
+            return name // 入口函数名 main
         }
 
         override fun setNext(action: ParsedAction<*>) {
