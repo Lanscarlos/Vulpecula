@@ -29,7 +29,7 @@ object BacikalQuestCompiler {
             ScriptService,
             "bacikal_$name",
             source.toByteArray(StandardCharsets.UTF_8),
-            listOf("vulpecula", *namespace.toTypedArray())
+            listOf("vulpecula", *namespace.toTypedArray()).distinct() // 命名空间去重
         )
     }
 
