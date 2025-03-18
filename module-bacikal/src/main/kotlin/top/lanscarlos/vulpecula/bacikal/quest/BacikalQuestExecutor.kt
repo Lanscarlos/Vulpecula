@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.AbstractQuestContext
 import taboolib.library.kether.ParsedAction
@@ -20,16 +19,28 @@ import java.util.concurrent.CompletableFuture
  */
 object BacikalQuestExecutor {
 
-    fun execute(quest: Quest, name: String, func: (ScriptContext) -> Unit): CompletableFuture<*> {
-        return QuestExecutorContext(quest, name).also(func).runActions()
-    }
-
-    fun execute(quest: Quest, name: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
-        return execute(quest, name) {
+    fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
+        return execute(quest, main) {
             it.sender = sender
             for (entry in args) {
                 it[entry.key] = entry.value
             }
+        }
+    }
+
+    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<*> {
+        val future = QuestExecutorContext(quest, main).also(func).runActions()
+        if (!quest.getBlock("@EXCEPTIONALLY").isPresent) {
+            return future
+        }
+        // 异常处理
+        return future.exceptionally { ex ->
+            QuestExecutorContext(quest, "@EXCEPTIONALLY").also(func).also {
+                it["exception"] = ex
+                it["ex"] = ex
+                it["exception-message"] = ex.message
+                it["ex-message"] = ex.message
+            }.runActions()
         }
     }
 
@@ -43,7 +54,7 @@ object BacikalQuestExecutor {
      * 海螺爹永远是你爹
      * @see taboolib.library.kether.AbstractQuestContext.SimpleNamedFrame
      * */
-    class QuestExecutorFrame(context: ScriptContext, val name: String) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
+    class QuestExecutorFrame(context: ScriptContext, val main: String) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
 
         var currentblock: Quest.Block? = null
         var nextBlock: Quest.Block? = null
@@ -55,7 +66,7 @@ object BacikalQuestExecutor {
         }
 
         override fun name(): String {
-            return name // 入口函数名 main
+            return main // 入口函数名 main
         }
 
         override fun setNext(action: ParsedAction<*>) {
