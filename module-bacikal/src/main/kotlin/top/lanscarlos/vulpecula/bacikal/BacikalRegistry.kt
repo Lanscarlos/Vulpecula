@@ -78,6 +78,9 @@ object BacikalRegistry : ClassVisitor(1) {
 
     /**
      * 注册语句
+     *
+     * @param id 语句ID
+     * @param parser 语句解析器
      */
     fun registerAction(id: String, parser: QuestActionParser) {
         // 读取本地注册信息

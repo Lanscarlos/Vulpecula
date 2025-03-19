@@ -1,10 +1,13 @@
 package top.lanscarlos.vulpecula.bacikal.parser
 
+import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
+import taboolib.common.platform.function.adaptPlayer
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptFrame
+import top.lanscarlos.vulpecula.common.applicative.applicativePlayer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -22,10 +25,10 @@ class DefaultFrame(val source: ScriptFrame) : BacikalFrame {
             (source.context() as? ScriptContext)?.sender = value
         }
 
-    override var senderAsPlayer: ProxyPlayer?
-        get() = sender as? ProxyPlayer
+    override var senderAsPlayer: Player?
+        get() = (sender as? ProxyPlayer)?.castSafely()
         set(value) {
-            sender = value
+            sender = value?.let(::adaptPlayer)
         }
 
     override fun get(key: String): Any? {

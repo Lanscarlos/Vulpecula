@@ -1,23 +1,25 @@
-package top.lanscarlos.vulpecula.bacikal.parser
+package top.lanscarlos.vulpecula.bacikal.quest
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.ProxyPlayer
-import taboolib.library.kether.ParsedAction
 import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.parser
+ * top.lanscarlos.vulpecula.bacikal.quest
  *
  * @author Lanscarlos
- * @since 2023-08-27 22:06
+ * @since 2025-03-18 10:26
  */
-interface BacikalFrame {
+interface BacikalContext {
 
     var sender: ProxyCommandSender?
 
     var senderAsPlayer: Player?
+
+    val breakFlag: Boolean
+
+    val exitFlag: Boolean
 
     operator fun get(key: String): Any?
 
@@ -51,19 +53,18 @@ interface BacikalFrame {
     fun setVariables(vararg key: String, value: Any?)
 
     /**
-     * 创建新的 Frame
+     * 获取变量集合
      * */
-    fun newFrame(name: String): BacikalFrame
+    fun variables(): MutableMap<String, Any>
 
     /**
-     * 创建新的 Frame
+     * 运行脚本
      * */
-    fun newFrame(action: ParsedAction<*>): BacikalFrame
+    fun runActions(): CompletableFuture<*>
 
     /**
-     * 执行动作
-     * @param newFrame 是否创建新的 Frame
+     * 终止运行
      * */
-    fun <T> runAction(action: ParsedAction<T>, newFrame: Boolean = false): CompletableFuture<T>
+    fun terminate()
 
 }
