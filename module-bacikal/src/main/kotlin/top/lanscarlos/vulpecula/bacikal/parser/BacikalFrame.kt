@@ -21,7 +21,7 @@ interface BacikalFrame {
 
     operator fun get(key: String): Any?
 
-    operator fun set(key: String, value: Any?): Any?
+    operator fun set(key: String, value: Any?)
 
     /**
      * 获取变量
@@ -43,7 +43,7 @@ interface BacikalFrame {
      * 设置变量
      * @return 旧值
      * */
-    fun setVariable(key: String, value: Any?): Any?
+    fun setVariable(key: String, value: Any?)
 
     /**
      * 设置多个变量

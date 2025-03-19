@@ -4,8 +4,11 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptPlayer
+import taboolib.library.kether.Quest
 import taboolib.module.kether.ScriptContext
+import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -34,44 +37,78 @@ class DefaultContext(var source: ScriptContext) : BacikalContext {
     override val exitFlag: Boolean
         get() = source.exitStatus == null
 
+    val quest: Quest
+        get() = source.quest
+
+    var onException: LinkedList<Function<Throwable, Any?>> = LinkedList()
+
     override fun get(key: String): Any? {
-        TODO("Not yet implemented")
+        return getVariable(key)
     }
 
-    override fun set(key: String, value: Any?): Any? {
-        TODO("Not yet implemented")
+    override fun set(key: String, value: Any?) {
+        return setVariable(key, value)
     }
 
     override fun <T> getVariable(key: String): T? {
-        TODO("Not yet implemented")
+        return getVariable(key, null)
     }
 
     override fun <T> getVariable(key: String, default: T): T {
-        TODO("Not yet implemented")
+        return source.rootFrame().variables().get<T>(key).orElse(default)
     }
 
     override fun <T> getVariables(vararg key: String): T? {
-        TODO("Not yet implemented")
+        return key.firstNotNullOfOrNull { getVariable<T>(it) }
     }
 
-    override fun setVariable(key: String, value: Any?): Any? {
-        TODO("Not yet implemented")
+    override fun setVariable(key: String, value: Any?) {
+        source.rootFrame().variables().set(key, value)
     }
 
     override fun setVariables(vararg key: String, value: Any?) {
-        TODO("Not yet implemented")
+        key.forEach { setVariable(it, value) }
     }
 
     override fun variables(): MutableMap<String, Any> {
-        TODO("Not yet implemented")
+        return source.rootFrame().variables().toMap()
     }
 
     override fun runActions(): CompletableFuture<*> {
-        TODO("Not yet implemented")
+        var future = source.runActions()
+
+        if (quest.getBlock("@EXCEPTIONALLY").isPresent) {
+            // 异常处理
+            future = future.exceptionallyCompose { ex ->
+                BacikalQuestExecutor.QuestExecutorContext(quest, "@EXCEPTIONALLY").also {
+                    // 传入原始参数
+                    for ((key, value) in variables()) {
+                        it[key] = value
+                    }
+                    it["exception"] = ex
+                    it["ex"] = ex
+                    it["exception-message"] = ex.message
+                    it["ex-message"] = ex.message
+                }.runActions()
+            }
+        }
+
+        // 自定义异常处理
+        if (onException.isNotEmpty()) {
+            for (func in onException) {
+                future = future.exceptionally(func)
+            }
+        }
+
+        return future
     }
 
     override fun terminate() {
-        TODO("Not yet implemented")
+        source.terminate()
+    }
+
+    override fun exceptionally(func: Function<Throwable, Any?>) {
+        onException += func
     }
 
 }

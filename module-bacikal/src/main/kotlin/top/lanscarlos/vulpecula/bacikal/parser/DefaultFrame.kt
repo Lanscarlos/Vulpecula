@@ -7,7 +7,6 @@ import taboolib.common.platform.function.adaptPlayer
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptFrame
-import top.lanscarlos.vulpecula.common.applicative.applicativePlayer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -35,12 +34,12 @@ class DefaultFrame(val source: ScriptFrame) : BacikalFrame {
         return getVariable(key)
     }
 
-    override fun set(key: String, value: Any?): Any? {
+    override fun set(key: String, value: Any?) {
         return setVariable(key, value)
     }
 
     override fun <T> getVariable(key: String): T? {
-        return source.variables().get<T>(key).orElse(null)
+        return getVariable(key, null)
     }
 
     override fun <T> getVariable(key: String, default: T): T {
@@ -51,10 +50,8 @@ class DefaultFrame(val source: ScriptFrame) : BacikalFrame {
         return key.firstNotNullOfOrNull { getVariable<T>(it) }
     }
 
-    override fun setVariable(key: String, value: Any?): Any? {
-        val previousValue = getVariable<Any?>(key)
+    override fun setVariable(key: String, value: Any?) {
         source.variables().set(key, value)
-        return previousValue
     }
 
     override fun setVariables(vararg key: String, value: Any?) {

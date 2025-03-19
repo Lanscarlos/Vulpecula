@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.bacikal.quest
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import java.util.concurrent.CompletableFuture
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -23,7 +24,7 @@ interface BacikalContext {
 
     operator fun get(key: String): Any?
 
-    operator fun set(key: String, value: Any?): Any?
+    operator fun set(key: String, value: Any?)
 
     /**
      * 获取变量
@@ -45,7 +46,7 @@ interface BacikalContext {
      * 设置变量
      * @return 旧值
      * */
-    fun setVariable(key: String, value: Any?): Any?
+    fun setVariable(key: String, value: Any?)
 
     /**
      * 设置多个变量
@@ -66,5 +67,7 @@ interface BacikalContext {
      * 终止运行
      * */
     fun terminate()
+
+    fun exceptionally(func: Function<Throwable, Any?>)
 
 }
