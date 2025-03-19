@@ -27,3 +27,24 @@ filter:
         condition-type: '...'
         # 条件检查类型
         check-type: '...'
+
+# 脚本
+script:
+  # 脚本超时
+  timeout: 5s
+  on-error: ...
+  # 是否异步执行脚本
+  async: false
+  # 是否阻塞并等待脚本运行完毕 (谨慎操作)
+  blocking: true
+  # 预设变量
+  variables:
+    display: 'wcnm'
+  # 编译命名空间
+  namespace: [...]
+  # 前置处理, 会在外部脚本执行前执行
+  preprocess: ...
+  # 后置处理, 会在外部脚本执行后执行
+  postprocess: ...
+  # 链接的外部脚本
+  link: [...]

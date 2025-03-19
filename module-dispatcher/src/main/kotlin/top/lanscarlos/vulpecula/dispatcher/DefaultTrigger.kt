@@ -47,6 +47,12 @@ class DefaultTrigger(val config: Configuration) : Trigger {
 
     val baffle: Condition by config.read("baffle").convert(::parseCondition)
 
+    val timeout: Long by config.read("timeout").long(-1)
+
+    val runAsync: Boolean by config.read("async").boolean(false)
+
+    val runBlocking: Boolean by config.read("blocking").boolean(false)
+
     /**
      * 监听冷却
      * */
