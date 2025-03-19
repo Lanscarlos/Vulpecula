@@ -28,27 +28,8 @@ object BacikalQuestExecutor {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun execute(quest: Quest, main: String, func: (BacikalContext) -> Unit): CompletableFuture<*> {
-        val context: BacikalContext = DefaultContext(QuestExecutorContext(quest, main)).also(func)
-        val future = context.runActions() as CompletableFuture<Any?>
-        if (!quest.getBlock("@EXCEPTIONALLY").isPresent) {
-            return future
-        }
-
-        // 异常处理
-        return future.exceptionallyCompose { ex ->
-            QuestExecutorContext(quest, "@EXCEPTIONALLY").also {
-                // 传入原始参数
-                for ((key, value) in context.variables()) {
-                    it[key] = value
-                }
-                it["exception"] = ex
-                it["ex"] = ex
-                it["exception-message"] = ex.message
-                it["ex-message"] = ex.message
-            }.runActions()
-        }
+    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<*> {
+        return QuestExecutorContext(quest, main).also(func).runActions()
     }
 
     class QuestExecutorContext(quest: Quest, val main: String) : ScriptContext(ScriptService, quest) {
