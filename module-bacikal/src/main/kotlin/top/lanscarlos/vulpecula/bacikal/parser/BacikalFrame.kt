@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.bacikal.parser
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.ProxyPlayer
 import taboolib.library.kether.ParsedAction
 import java.util.concurrent.CompletableFuture
 
