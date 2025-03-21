@@ -7,14 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: validate gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v4
       - name: setup jdk 16.0
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: adopt
-          java-version: 16.0
+          java-version: 16
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
