@@ -83,6 +83,19 @@ fun Any?.applicativeDouble(def: Double = 0.0): Double {
 }
 
 /**
+ * 将对象转换为 String
+ *
+ * @param def 默认值
+ * */
+fun Any?.applicativeString(def: String = "null"): String {
+    if (this == null) {
+        return def
+    }
+    val applicative = ApplicativeRegistry.getApplicativeOrNull(String::class.java) ?: StringApplicative
+    return applicative.convertOrNull(this) ?: def
+}
+
+/**
  * 将对象转换为 java.awt.Color
  *
  * @param def 默认值

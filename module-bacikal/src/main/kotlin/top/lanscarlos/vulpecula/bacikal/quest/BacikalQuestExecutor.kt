@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture
  */
 object BacikalQuestExecutor {
 
-    fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<*> {
+    fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
         return execute(quest, main) {
             it.sender = sender
             for (entry in args) {
@@ -28,7 +28,7 @@ object BacikalQuestExecutor {
         }
     }
 
-    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<*> {
+    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
         return QuestExecutorContext(quest, main).also(func).runActions()
     }
 

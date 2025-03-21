@@ -96,7 +96,7 @@ fun <T> LiveData<T>.listOrNull(): LiveData<List<*>?> {
 }
 
 fun <T> LiveData<T>.list(): LiveData<List<*>> {
-    return ProxyLiveData(this, ListApplicative::convertOrThrow)
+    return list(emptyList<Any?>())
 }
 
 fun <T> LiveData<T>.list(defaultValue: List<*>): LiveData<List<*>> {
@@ -108,7 +108,7 @@ fun <T> LiveData<T>.mapOrNull(): LiveData<Map<*, *>?> {
 }
 
 fun <T> LiveData<T>.map(): LiveData<Map<*, *>> {
-    return ProxyLiveData(this, MapApplicative::convertOrThrow)
+    return map(emptyMap<Any?, Any?>())
 }
 
 fun <T> LiveData<T>.map(defaultValue: Map<*, *>): LiveData<Map<*, *>> {
@@ -177,6 +177,10 @@ fun <T> LiveData<T>.stringListOrNull(): LiveData<List<String>?> {
 
 fun <T> LiveData<T>.stringList(): LiveData<List<String>> {
     return list().mapTo(StringApplicative::convertOrThrow)
+}
+
+fun <T> LiveData<T>.stringList(defaultValue: List<String>): LiveData<List<String>> {
+    return list(defaultValue).mapTo(StringApplicative::convertOrThrow)
 }
 
 fun <T> LiveData<T>.normalizeMap(): LiveData<Map<String, Any?>> {
