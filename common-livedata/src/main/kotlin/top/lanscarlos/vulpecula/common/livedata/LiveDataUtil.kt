@@ -115,18 +115,22 @@ fun <T> LiveData<T>.map(defaultValue: Map<*, *>): LiveData<Map<*, *>> {
     return ProxyLiveData(this) { MapApplicative.convertOrNull(it) ?: defaultValue }
 }
 
+@JvmName("mapToNonNull")
 fun <T> LiveData<List<*>>.mapTo(transformer: Function<Any?, T>): LiveData<List<T>> {
     return ProxyLiveData(this) { it.map(transformer::apply) }
 }
 
+@JvmName("mapToNullable")
 fun <T> LiveData<List<*>?>.mapTo(transformer: Function<Any?, T>): LiveData<List<T>?> {
     return ProxyLiveData(this) { it?.map(transformer::apply) }
 }
 
+@JvmName("mapToNonNull")
 fun <K, V> LiveData<Map<*, *>>.mapTo(transformer: Function<Map.Entry<Any?, Any?>, Pair<K, V>>): LiveData<Map<K, V>> {
     return ProxyLiveData(this) { it.entries.associate(transformer::apply) }
 }
 
+@JvmName("mapToNullable")
 fun <K, V> LiveData<Map<*, *>?>.mapTo(transformer: Function<Map.Entry<Any?, Any?>, Pair<K, V>>): LiveData<Map<K, V>?> {
     return ProxyLiveData(this) { it?.entries?.associate(transformer::apply) }
 }
