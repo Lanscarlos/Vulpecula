@@ -6,7 +6,6 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.bacikal.BacikalAPI
 import top.lanscarlos.vulpecula.common.applicative.MapApplicative
 import top.lanscarlos.vulpecula.common.applicative.StringApplicative
-import top.lanscarlos.vulpecula.common.applicative.applicativeIntList
 import top.lanscarlos.vulpecula.common.applicative.applicativeString
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
@@ -20,7 +19,7 @@ import java.util.concurrent.TimeUnit
  * @author Lanscarlos
  * @since 2025-03-20 15:11
  */
-class YamlScript(val id: String, val config: Configuration) : Script {
+class CompiledScript(val id: String, val config: Configuration) : Script {
 
     val namespace: List<String> by config.read("namespace").stringList()
 
@@ -40,7 +39,7 @@ class YamlScript(val id: String, val config: Configuration) : Script {
 
     private lateinit var quest: Quest
 
-    fun runActions(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
+    override fun runActions(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
         if (::quest.isInitialized.not()) {
             quest = buildQuest()
         }
