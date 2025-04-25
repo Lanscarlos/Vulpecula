@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.module.script
  *
  * @author Lanscarlos
  * @since 2025-03-20 15:12

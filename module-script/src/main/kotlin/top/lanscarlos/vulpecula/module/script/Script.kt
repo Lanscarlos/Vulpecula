@@ -1,11 +1,11 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
 import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.module.script
  *
  * @author Lanscarlos
  * @since 2025-03-19 16:48

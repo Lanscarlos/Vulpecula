@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.script
+package top.lanscarlos.vulpecula.module.script
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.script
+ * top.lanscarlos.vulpecula.module.script
  *
  * @author Lanscarlos
  * @since 2025/4/25 10:00
