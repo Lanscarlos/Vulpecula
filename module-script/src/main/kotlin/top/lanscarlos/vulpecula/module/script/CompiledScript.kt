@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.bacikal.BacikalAPI
+import top.lanscarlos.vulpecula.bacikal.BacikalService
 import top.lanscarlos.vulpecula.common.applicative.MapApplicative
 import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.common.applicative.applicativeString
@@ -43,7 +43,7 @@ class CompiledScript(val id: String, val config: Configuration) : Script {
         if (::quest.isInitialized.not()) {
             quest = buildQuest()
         }
-        var future = BacikalAPI.execute(quest, sender, variables.plus(args))
+        var future = BacikalService.execute(quest, sender, variables.plus(args))
         if (timeout > 0) {
             future = future.orTimeout(timeout, TimeUnit.MILLISECONDS)
         }
@@ -52,7 +52,7 @@ class CompiledScript(val id: String, val config: Configuration) : Script {
             // 匹配异常处理
             val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value ?: throw ex
             // 执行异常处理
-            BacikalAPI.execute(quest, sender, variables.plus(args))
+            BacikalService.execute(quest, sender, variables.plus(args))
         }
     }
 
@@ -88,7 +88,7 @@ class CompiledScript(val id: String, val config: Configuration) : Script {
                 .append("\n}\n")
         }
 
-        return BacikalAPI.compile(builder.toString(), id, namespace)
+        return BacikalService.compile(builder.toString(), id, namespace)
     }
 
     private fun parseStringMap(entry: Map.Entry<Any?, Any?>): Pair<String, String> {
@@ -164,7 +164,7 @@ class CompiledScript(val id: String, val config: Configuration) : Script {
             }
             else -> error("Unsupported exception type: ${value::class.java.name}")
         }
-        return map.mapValues { (key, value) -> BacikalAPI.compile(value, "$id-exception-$key", namespace) }
+        return map.mapValues { (key, value) -> BacikalService.compile(value, "$id-exception-$key", namespace) }
     }
 
 }

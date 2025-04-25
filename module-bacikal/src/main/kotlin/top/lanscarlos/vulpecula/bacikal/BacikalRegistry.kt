@@ -22,13 +22,15 @@ import top.lanscarlos.vulpecula.bacikal.parser.BacikalComplexActionParser
  * Vulpecula
  * top.lanscarlos.vulpecula.bacikal
  *
+ * 注册中心
+ *
  * @author Lanscarlos
  * @since 2024-11-20 16:33
  */
 @Awake(LifeCycle.LOAD)
 object BacikalRegistry : ClassVisitor(1) {
 
-    @Config("bacikal-registry.conf")
+    @Config("bacikal-registry.yml")
     lateinit var registry: Configuration
         private set
 

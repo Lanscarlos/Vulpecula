@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
-import top.lanscarlos.vulpecula.bacikal.BacikalAPI
+import top.lanscarlos.vulpecula.bacikal.BacikalService
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletableFuture
@@ -19,11 +19,11 @@ class NativeScript(val id: String, val file: File) : Script {
     private val quest: Quest
 
     init {
-        quest = BacikalAPI.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
+        quest = BacikalService.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
     }
 
     override fun runActions(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
-        return BacikalAPI.execute(quest, sender, args)
+        return BacikalService.execute(quest, sender, args)
     }
 
 }

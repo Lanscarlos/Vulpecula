@@ -21,40 +21,15 @@ import java.nio.charset.StandardCharsets
 object BacikalQuestCompiler {
 
     fun compile(source: File, namespace: List<String>): Quest {
-        TODO("Not yet implemented.")
+        return compile(source.readText(StandardCharsets.UTF_8), source.name, namespace)
     }
 
     fun compile(source: String, name: String, namespace: List<String>): Quest {
-        return compile(source, name, namespace, "")
-    }
-
-    fun compile(source: String, name: String, namespace: List<String>, onException: String): Quest {
-        val builder = StringBuilder()
-
-        // 添加 main 方法
-        if (!source.startsWith("def")) {
-            builder.append("def main = {\n")
-            builder.append(source)
-            builder.append("\n}\n")
-        } else {
-            builder.append(source)
-        }
-
-        // 异常处理
-        if (onException.isNotBlank()) {
-            if (!onException.startsWith("def")) {
-                builder.append("def @EXCEPTIONALLY = {\n")
-                builder.append(onException)
-                builder.append("\n}\n")
-            } else {
-                builder.append(onException)
-            }
-        }
-
+        val content = if (source.trim().startsWith("def")) source else "def main = { $source }"
         return InnerLoader().load(
             ScriptService,
             "bacikal_$name",
-            builder.toString().toByteArray(StandardCharsets.UTF_8),
+            content.toByteArray(StandardCharsets.UTF_8),
             listOf("vulpecula", *namespace.toTypedArray()).distinct() // 命名空间去重
         )
     }
