@@ -18,7 +18,7 @@ object Configs {
     lateinit var config: Configuration
         private set
 
-    val subscribers = LinkedList<ConfigSubscriber>()
+    val services = LinkedList<ConfigService>()
 
     /**
      * 重载所有配置
@@ -28,18 +28,18 @@ object Configs {
         config.reload()
 
         // 重载所有订阅者
-        for (subscriber in subscribers) {
-            subscriber.reload()
+        for (workspace in services) {
+            workspace.reload()
         }
     }
 
-    fun subscribe(file: File, priority: Int = 8, callback: ConfigSubscriber.Callback) {
-        subscribers += ConfigSubscriber(file, priority, callback)
-        subscribers.sortByDescending { it.priority } // 降序, 确保优先级高的先被重载
+    fun register(id: String, directory: File, priority: Int = 8, callback: ConfigServiceCallback) {
+        services += ConfigService(id, directory, priority, callback)
+        services.sortByDescending { it.priority } // 降序, 确保优先级高的先被重载
     }
 
-    fun unsubscribe(file: File) {
-        subscribers.removeIf { it.file == file }
+    fun unregister(id: String) {
+        services.removeIf { it.id == id }
     }
 
 }

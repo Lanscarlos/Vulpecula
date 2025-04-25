@@ -3,53 +3,48 @@ package top.lanscarlos.vulpecula.common.config
 import taboolib.common.io.digest
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
-import taboolib.module.configuration.Configuration
 import java.io.File
 import java.util.*
-import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.common.config
  *
+ * 配置服务
+ *
  * @author Lanscarlos
- * @since 2025-03-11 13:11
+ * @since 2025/4/25 11:11
  */
-class ConfigSubscriber(val file: File, val priority: Int, val callback: Callback) {
-
-    interface Callback {
-
-        fun onReloadStarted() {}
-
-        fun onFileDeleted(file: File)
-
-        fun onFileCreated(file: File, config: Configuration)
-
-        fun onFileModified(file: File, config: Configuration)
-
-        fun onReloadCompleted(time: Double) {}
-
-        fun onReloadFailed(e: Throwable) {
-            e.printStackTrace()
-        }
-
-    }
+class ConfigService(val id: String, val directory: File, val priority: Int, val callback: ConfigServiceCallback) {
 
     /**
      * 相对路径
      * */
-    val path = getDataFolder().toPath().normalize().relativize(file.toPath().normalize()).toString()
+    val path = getDataFolder().toPath().normalize().relativize(directory.toPath().normalize()).toString()
 
     /**
      * 配置缓存
      * */
-    val cache: HashMap<File, Configuration> = hashMapOf()
+    val cache: HashSet<File> = hashSetOf()
 
     /**
      * 文件哈希指纹
      * */
     val hash = HashMap<File, String>()
 
+    init {
+        require(directory.isDirectory) { "Directory must be a directory" }
+    }
+
+    /**
+     * 初始化载入
+     * */
+    fun init() {}
+
+    /**
+     * 重载
+     * */
     fun reload() {
         try {
             // 调试计时
@@ -60,41 +55,39 @@ class ConfigSubscriber(val file: File, val priority: Int, val callback: Callback
 
             // 获取所有文件
             val queue = LinkedList<File>()
-            val files = hashSetOf<File>()
-            queue += file
+            val loadedFiles = hashSetOf<File>()
+            queue += directory
             while (queue.isNotEmpty()) {
                 val file = queue.poll()
                 if (file.isFile) {
-                    files += file
+                    loadedFiles += file
                     continue
                 }
                 queue.addAll(file.listFiles() ?: continue)
             }
+            val cacheFiles = HashSet(cache)
 
             // 处理被移除的文件
-            for (file in cache.keys.filter { it !in files }) {
+            for (file in cacheFiles - loadedFiles) {
                 cache.remove(file)
-                callback.onFileDeleted(file)
+                callback.onFileDeleted(buildFileId(file), file)
             }
 
             // 处理新增的文件
-            for (file in files.filter { it !in cache }) {
-                val config = Configuration.loadFromFile(file)
-                cache[file] = config
-                callback.onFileCreated(file, config)
+            for (file in loadedFiles - cacheFiles) {
+                cache += file
+                callback.onFileCreated(buildFileId(file), file)
             }
 
             // 处理变动的文件
-            for (file in files.filter { it in cache }) {
+            for (file in loadedFiles intersect cacheFiles) {
                 // 计算哈希指纹
                 val hash = file.digest("SHA-256")
                 // 哈希指纹比对
                 if (hash == this.hash[file]) {
                     continue
                 }
-                val config = cache[file]!!
-                config.reload()
-                callback.onFileModified(file, config)
+                callback.onFileModified(buildFileId(file), file)
                 this.hash[file] = hash
             }
 
@@ -106,6 +99,17 @@ class ConfigSubscriber(val file: File, val priority: Int, val callback: Callback
             // 重载失败
             callback.onReloadFailed(e)
         }
+    }
+
+    /**
+     * 根据文件相对路径获取文件的 Id
+     * 例如： ./Vulpecula/script/example/default.yml -> example.default
+     * */
+    private fun buildFileId(file: File): String {
+        val rootPath = directory.toPath().normalize()
+        val targetPath = file.toPath().normalize()
+        val relativePath = rootPath.relativize(targetPath)
+        return relativePath.toString().replace(File.separatorChar, '.').substringBeforeLast('.')
     }
 
 }
