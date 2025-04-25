@@ -1,10 +1,14 @@
 package top.lanscarlos.vulpecula.script
 
+import org.bukkit.entity.Player
+import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.getDataFolder
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import java.io.File
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -15,22 +19,72 @@ import java.io.File
  */
 object ScriptService {
 
-    val directory: File = File(getDataFolder(), "script")
+    private val directory: File = File(getDataFolder(), "script")
 
     private val scripts: HashMap<String, Script> = hashMapOf()
 
     init {
-        // 注册工作空间
+        // 注册配置服务
         Configs.register(id = "script", directory = directory, priority = 8, callback = Callback)
     }
 
-    fun get(id: String): Script? = scripts[id]
+    /**
+     * 获取脚本
+     *
+     * @param id 脚本 ID
+     * @throws IllegalStateException 脚本不存在
+     * @return 脚本
+     * */
+    fun get(id: String): Script = getOrNull(id) ?: error("Script not found: $id")
 
+    /**
+     * 获取脚本
+     *
+     * @param id 脚本 ID
+     * @return 脚本, 或 null
+     * */
+    fun getOrNull(id: String): Script? = scripts[id]
+
+    /**
+     * 获取所有已注册的脚本 ID
+     * */
     fun keys(): Set<String> = scripts.keys
 
+    /**
+     * 获取所有已注册的脚本
+     * */
     fun values(): Collection<Script> = scripts.values
 
+    /**
+     * 获取所有已注册的脚本键值对
+     * */
     fun entries(): Set<Map.Entry<String, Script>> = scripts.entries
+
+    /**
+     * 运行指定脚本
+     *
+     * @param id 脚本 ID
+     * @param player 玩家
+     * @param args 脚本参数
+     * @throws IllegalStateException 脚本不存在
+     * @return 运行结果
+     * */
+    fun run(id: String, player: Player, args: Map<String, Any>): CompletableFuture<*> {
+        return run(id, adaptPlayer(player), args)
+    }
+
+    /**
+     * 运行指定脚本
+     *
+     * @param id 脚本 ID
+     * @param sender 脚本执行者
+     * @param args 脚本参数
+     * @throws IllegalStateException 脚本不存在
+     * @return 运行结果
+     * */
+    fun run(id: String, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
+        return get(id).runActions(sender, args)
+    }
 
     internal object Callback : ConfigServiceCallback {
 

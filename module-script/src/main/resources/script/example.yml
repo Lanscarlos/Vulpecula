@@ -1,0 +1,30 @@
+# 预设编译命名空间
+namespace: [ 'chemdah' ]
+
+# 预设简单变量
+variables:
+  display: 'wcnm'
+
+# 入口主函数
+main: |-
+  print "你好, 欢迎使用 Vulpecula 脚本!"
+
+# 其他函数
+functions:
+  func-name:
+    args: [ 'xxx', 'xxx' ]
+    content: |-
+      xxx
+
+timeout: 500ms
+on-timeout: |-
+  print "脚本 $name 运行超时!"
+
+exception:
+  - catch: 'NullPointerException'
+    handle: |-
+      print "脚本 $name 运行时出现 NullPointerException 异常"
+
+# 碎片替换
+fragments:
+  name: 'example'
