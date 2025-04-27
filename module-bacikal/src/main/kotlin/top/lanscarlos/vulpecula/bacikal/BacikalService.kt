@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
+import taboolib.module.kether.ScriptContext
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuestCompiler
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuestExecutor
 import java.io.File
@@ -45,7 +46,38 @@ object BacikalService {
      * @param args 参数
      */
     fun execute(quest: Quest, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
-        return BacikalQuestExecutor.execute(quest, "main", sender, args)
+        return execute(quest, "main", sender, args)
+    }
+
+    /**
+     * 执行 Kether 任务
+     *
+     * @param quest 任务
+     * @param main 入口函数
+     * @param sender 执行者
+     * @param args 参数
+     */
+    fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
+        return BacikalQuestExecutor.execute(quest, main, sender, args)
+    }
+
+    /**
+     * 执行 Kether 任务
+     *
+     * @param quest 任务
+     */
+    fun execute(quest: Quest, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
+        return execute(quest, "main", func)
+    }
+
+    /**
+     * 执行 Kether 任务
+     *
+     * @param quest 任务
+     * @param main 入口函数
+     */
+    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
+        return BacikalQuestExecutor.execute(quest, main, func)
     }
 
     /**
@@ -55,8 +87,39 @@ object BacikalService {
      * @param sender 执行者
      * @param args 参数
      */
-    fun execute(quest: Quest, name: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
-        return BacikalQuestExecutor.execute(quest, name, sender, args)
+    fun executeLater(quest: Quest, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
+        return executeLater(quest, "main", sender, args)
+    }
+
+    /**
+     * 执行 Kether 任务
+     *
+     * @param quest 任务
+     * @param main 入口函数
+     * @param sender 执行者
+     * @param args 参数
+     */
+    fun executeLater(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
+        return BacikalQuestExecutor.executeLater(quest, main, sender, args)
+    }
+
+    /**
+     * 执行 Kether 任务
+     *
+     * @param quest 任务
+     */
+    fun executeLater(quest: Quest, func: (ScriptContext) -> Unit): ScriptContext {
+        return executeLater(quest, "main", func)
+    }
+
+    /**
+     * 执行 Kether 任务
+     *
+     * @param quest 任务
+     * @param main 入口函数
+     */
+    fun executeLater(quest: Quest, main: String, func: (ScriptContext) -> Unit): ScriptContext {
+        return BacikalQuestExecutor.executeLater(quest, main, func)
     }
 
 }

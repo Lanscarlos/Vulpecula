@@ -3,13 +3,14 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
+import taboolib.module.kether.ScriptContext
+import taboolib.module.kether.deepVars
 import top.lanscarlos.vulpecula.bacikal.BacikalService
 import top.lanscarlos.vulpecula.common.applicative.MapApplicative
 import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.common.applicative.applicativeString
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 /**
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit
  * @author Lanscarlos
  * @since 2025-03-20 15:11
  */
-class CompiledScript(val id: String, val config: Configuration) : Script {
+class CompiledScript(override val id: String, val config: Configuration) : Script {
 
     val namespace: List<String> by config.read("namespace").stringList()
 
@@ -39,53 +40,71 @@ class CompiledScript(val id: String, val config: Configuration) : Script {
 
     private lateinit var quest: Quest
 
-    override fun runActions(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
+    override fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
         if (::quest.isInitialized.not()) {
             quest = buildQuest()
         }
-        var future = BacikalService.execute(quest, sender, variables.plus(args))
+        val pid = ScriptService.nextPid()
+        val context = BacikalService.executeLater(quest, sender, args)
+        var future = context.runActions()
+        val startTime = System.currentTimeMillis()
+
+        // 注入超时检测
         if (timeout > 0) {
             future = future.orTimeout(timeout, TimeUnit.MILLISECONDS)
         }
-        return future.exceptionallyCompose { ex ->
+
+        future = future.exceptionallyCompose { ex ->
             val exceptionName = ex.javaClass.name
             // 匹配异常处理
             val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value ?: throw ex
             // 执行异常处理
-            BacikalService.execute(quest, sender, variables.plus(args))
+            val exContext = BacikalService.executeLater(quest, sender, args.plus(context.rootFrame().deepVars()))
+            exContext.runActions()
         }
+
+        return DefaultScriptTask(pid, this, context, future, startTime)
     }
 
     private fun buildQuest(): Quest {
         val builder = StringBuilder()
 
         // 构建函数头
-        builder.append("def main = {\n")
+        builder.append("def main = {").append('\n')
+
+        // 构建自定义参数
+        for ((name, value) in variables) {
+            builder.append("set $name to $value").append('\n')
+        }
 
         // 构建函数体
         if (condition.isNotBlank()) {
-            builder.append("if {\n").append(condition).append("\n} then {\n")
-            builder.append(main).append("\n")
+            builder
+                .append("if {").append('\n')
+                .append(condition).append('\n')
+                .append("} then {").append('\n')
+            builder.append(main).append('\n')
             if (deny.isNotBlank()) {
-                builder.append("} else {\n")
-                builder.append(deny).append("\n")
+                builder.append("} else {").append('\n')
+                builder.append(deny).append('\n')
             }
-            builder.append("}\n")
+            builder.append("}").append('\n')
         } else {
-            builder.append(main).append("\n")
+            builder.append(main).append('\n')
         }
 
         // 构建函数尾
-        builder.append("}\n")
+        builder.append("}").append('\n')
 
         // 构建其他函数
         for ((key, value) in functions) {
             builder
-                .append("\ndef ")
+                .append('\n')
+                .append("def ")
                 .append(key)
-                .append(" = {\n")
-                .append(value)
-                .append("\n}\n")
+                .append(" = {").append('\n')
+                .append(value).append('\n')
+                .append("}").append('\n')
         }
 
         return BacikalService.compile(builder.toString(), id, namespace)

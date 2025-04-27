@@ -20,7 +20,15 @@ import java.util.concurrent.CompletableFuture
 object BacikalQuestExecutor {
 
     fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
-        return execute(quest, main) {
+        return executeLater(quest, main, sender, args).runActions()
+    }
+
+    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
+        return executeLater(quest, main, func).runActions()
+    }
+
+    fun executeLater(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
+        return executeLater(quest, main) {
             it.sender = sender
             for (entry in args) {
                 it[entry.key] = entry.value
@@ -28,8 +36,8 @@ object BacikalQuestExecutor {
         }
     }
 
-    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
-        return QuestExecutorContext(quest, main).also(func).runActions()
+    fun executeLater(quest: Quest, main: String, func: (ScriptContext) -> Unit): ScriptContext {
+        return QuestExecutorContext(quest, main).also(func)
     }
 
     class QuestExecutorContext(quest: Quest, val main: String) : ScriptContext(ScriptService, quest) {

@@ -5,15 +5,17 @@ namespace: [ 'chemdah' ]
 variables:
   display: 'wcnm'
 
+# 参数约束与转换
+args:
+  -
+
 # 入口主函数
 main: |-
   print "你好, 欢迎使用 Vulpecula 脚本!"
 
 # 其他函数
 functions:
-  func-name:
-    args: [ 'xxx', 'xxx' ]
-    content: |-
+  func-name: |-
       xxx
 
 timeout: 500ms

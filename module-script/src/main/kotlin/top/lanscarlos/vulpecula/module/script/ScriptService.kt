@@ -4,6 +4,7 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
@@ -22,6 +23,10 @@ object ScriptService {
     private val directory: File = File(getDataFolder(), "script")
 
     private val scripts: HashMap<String, Script> = hashMapOf()
+
+    private val tasks: HashMap<Long, ScriptTask> = hashMapOf()
+
+    private var pid: Long = 0
 
     init {
         // 注册配置服务
@@ -61,6 +66,32 @@ object ScriptService {
     fun entries(): Set<Map.Entry<String, Script>> = scripts.entries
 
     /**
+     * 获取正在运行的任务
+     * @throws IllegalStateException 脚本不存在
+     * */
+    fun getTask(pid: Long): ScriptTask = getTaskOrNull(pid) ?: error("Task not found: $pid")
+
+    /**
+     * 获取正在运行的任务
+     * */
+    fun getTaskOrNull(pid: Long): ScriptTask? = tasks[pid]
+
+    /**
+     * 获取所有正在运行的脚本 ID
+     * */
+    fun getTaskKeys(): Set<Long> = tasks.keys
+
+    /**
+     * 获取所有正在运行的脚本
+     * */
+    fun getTaskValues(): Collection<ScriptTask> = tasks.values
+
+    /**
+     * 获取所有正在运行的脚本键值对
+     * */
+    fun getTaskEntries(): Set<Map.Entry<Long, ScriptTask>> = tasks.entries
+
+    /**
      * 运行指定脚本
      *
      * @param id 脚本 ID
@@ -83,7 +114,47 @@ object ScriptService {
      * @return 运行结果
      * */
     fun run(id: String, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
-        return get(id).runActions(sender, args)
+        val task = get(id).execute(sender, args)
+        if (task.isDone) {
+            return task.future
+        }
+
+        // 记录正在运行的脚本
+        tasks[task.pid] = task
+        (task as DefaultScriptTask).future = task.future.thenApply {
+            tasks.remove(task.pid) ?: warning("Running task $id not found.")
+            return@thenApply it
+        }
+
+        return task.future
+    }
+
+    /**
+     * 终止指定脚本的所有任务
+     *
+     * @param id 脚本 ID
+     * */
+    fun stop(id: String) {
+        val iterator = tasks.iterator()
+        while (iterator.hasNext()) {
+            val (_, task) = iterator.next()
+            if (task.script.id == id) {
+                iterator.remove()
+            }
+        }
+    }
+
+    /**
+     * 终止指定任务
+     *
+     * @param pid 任务 ID
+     * */
+    fun stop(pid: Long) {
+        getTask(pid).terminate()
+    }
+
+    internal fun nextPid(): Long {
+        return ++pid
     }
 
     internal object Callback : ConfigServiceCallback {

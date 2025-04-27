@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -12,6 +11,8 @@ import java.util.concurrent.CompletableFuture
  */
 interface Script {
 
-    fun runActions(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*>
+    val id: String
+
+    fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask
 
 }

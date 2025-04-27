@@ -5,7 +5,6 @@ import taboolib.library.kether.Quest
 import top.lanscarlos.vulpecula.bacikal.BacikalService
 import java.io.File
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -14,16 +13,16 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2025-03-20 15:12
  */
-class NativeScript(val id: String, val file: File) : Script {
+class NativeScript(override val id: String, val file: File) : Script {
 
-    private val quest: Quest
+    private val quest: Quest = BacikalService.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
 
-    init {
-        quest = BacikalService.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
-    }
-
-    override fun runActions(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
-        return BacikalService.execute(quest, sender, args)
+    override fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
+        val pid = ScriptService.nextPid()
+        val startTime = System.currentTimeMillis()
+        val context = BacikalService.executeLater(quest, sender, args)
+        val future = context.runActions()
+        return DefaultScriptTask(pid, this, context, future, startTime)
     }
 
 }
