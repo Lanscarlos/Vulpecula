@@ -1,4 +1,0 @@
-
-taboolib {
-    subproject = true
-}

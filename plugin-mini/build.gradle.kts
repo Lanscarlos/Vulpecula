@@ -34,7 +34,7 @@ tasks {
             project(":common-livedata"),
             project(":module-bacikal"),
             project(":module-script"),
-            project(":project:platform-bukkit"),
+            project(":platform-bukkit"),
         )
 
         // 打包并合并子项目资源
