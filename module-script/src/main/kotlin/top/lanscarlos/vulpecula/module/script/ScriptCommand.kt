@@ -31,27 +31,14 @@ object ScriptCommand {
             dynamic("sender") {
                 execute<ProxyCommandSender> { sender, context, senderName ->
                     val id = context["id"]
-                    val scriptSender = when {
-                        senderName.equals("@NULL", true) -> null
-                        senderName.equals("@SELF", true) -> sender
-                        senderName.equals("@CONSOLE", true) -> console()
-                        else -> onlinePlayers().find { it.name.equals(senderName, true) }
-                            ?: error("No sender found for $senderName.")
-                    }
+                    val scriptSender = senderName.toSender(sender)
                     ScriptService.run(id, scriptSender, emptyMap())
                 }
 
                 dynamic("args") {
                     execute<ProxyCommandSender> { sender, context, value ->
                         val id = context["id"]
-                        val senderName = context["sender"]
-                        val scriptSender = when {
-                            senderName.equals("@NULL", true) -> null
-                            senderName.equals("@SELF", true) -> sender
-                            senderName.equals("@CONSOLE", true) -> console()
-                            else -> onlinePlayers().find { it.name.equals(senderName, true) }
-                                ?: error("No sender found for $senderName.")
-                        }
+                        val scriptSender = context["sender"].toSender(sender)
                         val args = value.split(' ')
                         val wrappedArgs = mutableMapOf<String, Any>()
                         wrappedArgs["args"] = args
@@ -79,6 +66,16 @@ object ScriptCommand {
                     ScriptService.stop(pid.toLong())
                 }
             }
+        }
+    }
+
+    private fun String.toSender(sender: ProxyCommandSender): ProxyCommandSender? {
+        return when {
+            this.equals("@NULL", true) -> null
+            this.equals("@SELF", true) -> sender
+            this.equals("@CONSOLE", true) -> console()
+            else -> onlinePlayers().find { it.name.equals(this, true) }
+                ?: error("No sender found for $this.")
         }
     }
 
