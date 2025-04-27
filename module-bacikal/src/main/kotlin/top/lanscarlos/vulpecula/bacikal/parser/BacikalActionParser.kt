@@ -271,7 +271,7 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
 //                Int::class.java -> IntApplicative
 //                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name}")
 //            }
-            val applicative = ApplicativeRegistry.getApplicative(type) ?: error("BacikalActionParser\$Parameter#accept >> Unsupported parameter type ${type.name} for parameter $name of action ${instance.id}")
+            val applicative = ApplicativeRegistry.getApplicative(type)
             return ApplicativeAction(action, applicative)
         }
 
