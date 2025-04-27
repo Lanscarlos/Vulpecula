@@ -29,18 +29,12 @@ tasks {
 
         val subprojects = listOf(
             project(":common-applicative"),
+            project(":common-config"),
             project(":common-core"),
-            project(":extension-action-item"),
+            project(":common-livedata"),
             project(":module-bacikal"),
-            project(":module-dispatcher"),
-//            project(":module-item"),
-//            project(":project:common"),
-//            project(":project:module-applicative"),
-//            project(":project:module-bacikal"),
-//            project(":project:module-config"),
-//            project(":project:module-volatile"),
+            project(":module-script"),
             project(":project:platform-bukkit"),
-//            project(":module-wireshark")
         )
 
         // 打包并合并子项目资源
