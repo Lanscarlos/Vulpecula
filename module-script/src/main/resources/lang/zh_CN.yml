@@ -1,0 +1,7 @@
+
+# 脚本模块
+
+module-script-service-load-succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个脚本 &8({0} ms)'
+module-script-service-load-failed: |-
+  &8[&3Vul&bpecula&8] &c错误 &8|&7 脚本加载失败！
+  &e[ERROR: script#load]: {0}

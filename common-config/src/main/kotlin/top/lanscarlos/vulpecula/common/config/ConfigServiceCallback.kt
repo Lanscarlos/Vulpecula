@@ -21,10 +21,8 @@ interface ConfigServiceCallback {
 
     fun onReloadStarted() {}
 
-    fun onReloadCompleted(time: Double) {}
+    fun onReloadCompleted(time: Double): String
 
-    fun onReloadFailed(e: Throwable) {
-        e.printStackTrace()
-    }
+    fun onReloadFailed(e: Throwable): String
 
 }

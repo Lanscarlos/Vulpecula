@@ -45,7 +45,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     /**
      * 重载
      * */
-    fun reload() {
+    fun reload(): String {
         try {
             // 调试计时
             val startTime = System.nanoTime()
@@ -94,10 +94,10 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
             // 重载完成
-            callback.onReloadCompleted(time)
+            return callback.onReloadCompleted(time)
         } catch (e: Throwable) {
             // 重载失败
-            callback.onReloadFailed(e)
+            return callback.onReloadFailed(e)
         }
     }
 

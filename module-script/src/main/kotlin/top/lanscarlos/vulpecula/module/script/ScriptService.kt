@@ -3,9 +3,11 @@ package top.lanscarlos.vulpecula.module.script
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
+import taboolib.module.lang.asLangText
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import java.io.File
@@ -184,6 +186,14 @@ object ScriptService {
                 }
                 else -> error("Unknown script type ${script::class.java}")
             }
+        }
+
+        override fun onReloadCompleted(time: Double): String {
+            return console().asLangText("module-script-service-load-succeeded", time)
+        }
+
+        override fun onReloadFailed(e: Throwable): String {
+            return console().asLangText("module-script-service-load-failed", e.localizedMessage)
         }
     }
 
