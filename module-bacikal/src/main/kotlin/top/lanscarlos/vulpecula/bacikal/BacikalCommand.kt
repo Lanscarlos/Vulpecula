@@ -24,7 +24,7 @@ object BacikalCommand {
                  try {
                      val source = if (!content.startsWith("def")) "def main = { $content }" else content
                      val quest = BacikalQuestCompiler.compile(source, "eval", emptyList())
-                     BacikalQuestExecutor.execute(quest, sender, emptyMap()).handle { result, ex ->
+                     BacikalQuestExecutor.execute(quest, "main", sender, emptyMap()).handle { result, ex ->
                          if (ex != null) {
                              info("handle capture.")
                              ex.printKetherErrorMessage()
