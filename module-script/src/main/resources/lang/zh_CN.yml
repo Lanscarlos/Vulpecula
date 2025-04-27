@@ -5,3 +5,6 @@ module-script-service-load-succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功
 module-script-service-load-failed: |-
   &8[&3Vul&bpecula&8] &c错误 &8|&7 脚本加载失败！
   &e[ERROR: script#load]: {0}
+module-script-command-run: '&8[&3Vul&bpecula&8] &a良好 &8|&7 运行脚本 &a{0}&7. 脚本执行者 &a{1}&7, 参数 &a{2}&7'
+module-script-command-stop: '&8[&3Vul&bpecula&8] &a良好 &8|&7 终止脚本 &a{0}&7.'
+module-script-command-stop-task: '&8[&3Vul&bpecula&8] &a良好 &8|&7 终止脚本任务 &a{0}&7.'

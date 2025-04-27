@@ -6,6 +6,7 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
+import taboolib.module.lang.sendLang
 
 /**
  * Vulpecula
@@ -27,12 +28,14 @@ object ScriptCommand {
         dynamic("id") {
             execute<ProxyCommandSender> { sender, _, id ->
                 ScriptService.run(id, sender, emptyMap())
+                sender.sendLang("module-script-command-run", id, sender.name, "[]")
             }
             dynamic("sender") {
                 execute<ProxyCommandSender> { sender, context, senderName ->
                     val id = context["id"]
                     val scriptSender = senderName.toSender(sender)
                     ScriptService.run(id, scriptSender, emptyMap())
+                    sender.sendLang("module-script-command-run", id, scriptSender?.name ?: "null", "[]")
                 }
 
                 dynamic("args") {
@@ -46,6 +49,7 @@ object ScriptCommand {
                             wrappedArgs["arg$index"] = arg
                         }
                         ScriptService.run(id, scriptSender, wrappedArgs)
+                        sender.sendLang("module-script-command-run", id, scriptSender?.name ?: "null", args)
                     }
                 }
             }
@@ -57,6 +61,7 @@ object ScriptCommand {
             dynamic("id") {
                 execute<ProxyCommandSender> { sender, _, id ->
                     ScriptService.stop(id)
+                    sender.sendLang("module-script-command-stop", id)
                 }
             }
         }
@@ -64,6 +69,7 @@ object ScriptCommand {
             dynamic("pid") {
                 execute<ProxyCommandSender> { sender, _, pid ->
                     ScriptService.stop(pid.toLong())
+                    sender.sendLang("module-script-command-stop-task", pid)
                 }
             }
         }
