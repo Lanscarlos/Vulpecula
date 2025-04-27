@@ -47,8 +47,9 @@ object Configs {
         return logs
     }
 
-    fun register(id: String, directory: File, priority: Int = 8, callback: ConfigServiceCallback) {
-        services += ConfigService(id, directory, priority, callback)
+    fun register(service: ConfigService) {
+        require(services.all { it.id != service.id }) { "Duplicate service ${service.id}." }
+        services += service
         services.sortByDescending { it.priority } // 降序, 确保优先级高的先被重载
     }
 

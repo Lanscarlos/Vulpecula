@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets
  * @author Lanscarlos
  * @since 2025-03-20 15:12
  */
-class NativeScript(override val id: String, val file: File) : Script {
+class NativeScript(override val id: String, override val file: File) : Script {
 
     private val quest: Quest = BacikalService.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
 

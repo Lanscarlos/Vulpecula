@@ -8,6 +8,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import java.io.File
@@ -30,9 +31,11 @@ object ScriptService {
 
     private var pid: Long = 0
 
+    private val service: ConfigService = ConfigService(id = "script", directory = directory, priority = 8, callback = Callback)
+
     init {
         // 注册配置服务
-        Configs.register(id = "script", directory = directory, priority = 8, callback = Callback)
+        Configs.register(service)
     }
 
     /**
@@ -153,6 +156,13 @@ object ScriptService {
      * */
     fun stop(pid: Long) {
         getTask(pid).terminate()
+    }
+
+    /**
+     * 重载服务
+     * */
+    fun reload(): String {
+        return service.reload()
     }
 
     internal fun nextPid(): Long {

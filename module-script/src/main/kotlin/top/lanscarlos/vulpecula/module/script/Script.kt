@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
+import java.io.File
 
 /**
  * Vulpecula
@@ -12,6 +13,8 @@ import taboolib.common.platform.ProxyCommandSender
 interface Script {
 
     val id: String
+
+    val file: File
 
     fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask
 

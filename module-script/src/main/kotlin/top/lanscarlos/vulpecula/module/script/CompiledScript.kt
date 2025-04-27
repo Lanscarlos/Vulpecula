@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.common.applicative.applicativeString
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -21,6 +22,9 @@ import java.util.concurrent.TimeUnit
  * @since 2025-03-20 15:11
  */
 class CompiledScript(override val id: String, val config: Configuration) : Script {
+
+    override val file: File
+        get() = config.file!!
 
     val namespace: List<String> by config.read("namespace").stringList()
 

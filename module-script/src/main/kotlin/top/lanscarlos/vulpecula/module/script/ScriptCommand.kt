@@ -6,7 +6,10 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
+import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendLang
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Vulpecula
@@ -21,7 +24,8 @@ object ScriptCommand {
     val script = subCommand {
         literal("run", literal = run)
         literal("stop", literal = stop)
-        literal("view")
+        literal("task", literal = task)
+        literal("reload", literal = reload)
     }
 
     private val run: CommandComponent.() -> Unit = {
@@ -57,21 +61,44 @@ object ScriptCommand {
     }
 
     private val stop: CommandComponent.() -> Unit = {
-        literal("script") {
-            dynamic("id") {
-                execute<ProxyCommandSender> { sender, _, id ->
-                    ScriptService.stop(id)
-                    sender.sendLang("module-script-command-stop", id)
-                }
+        dynamic("id") {
+            execute<ProxyCommandSender> { sender, _, id ->
+                ScriptService.stop(id)
+                sender.sendLang("module-script-command-stop", id)
             }
         }
-        literal("task") {
+    }
+
+    private val task: CommandComponent.() -> Unit = {
+        literal("stop") {
             dynamic("pid") {
                 execute<ProxyCommandSender> { sender, _, pid ->
                     ScriptService.stop(pid.toLong())
-                    sender.sendLang("module-script-command-stop-task", pid)
+                    sender.sendLang("module-script-command-task-stop", pid)
                 }
             }
+        }
+        literal("list") {
+            execute<ProxyCommandSender> { sender, _, _ ->
+                sender.sendLang("module-script-command-task-list-header")
+                for (task in ScriptService.getTaskValues()) {
+                    val pid = task.pid
+                    val script = task.script.id
+                    val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
+                    sender.sendLang("module-script-command-task-list-item", pid, script, startTime)
+                }
+                val footer = sender.asLangText("module-script-command-task-list-footer")
+                if (footer.isNotBlank()) {
+                    sender.sendMessage(footer)
+                }
+            }
+        }
+    }
+
+    private val reload: CommandComponent.() -> Unit = {
+        execute<ProxyCommandSender> { sender, _, _ ->
+            val log = ScriptService.reload()
+            sender.sendMessage(log)
         }
     }
 

@@ -7,4 +7,7 @@ module-script-service-load-failed: |-
   &e[ERROR: script#load]: {0}
 module-script-command-run: '&8[&3Vul&bpecula&8] &a良好 &8|&7 运行脚本 &a{0}&7. 脚本执行者 &a{1}&7, 参数 &a{2}&7'
 module-script-command-stop: '&8[&3Vul&bpecula&8] &a良好 &8|&7 终止脚本 &a{0}&7.'
-module-script-command-stop-task: '&8[&3Vul&bpecula&8] &a良好 &8|&7 终止脚本任务 &a{0}&7.'
+module-script-command-task-stop: '&8[&3Vul&bpecula&8] &a良好 &8|&7 终止脚本任务 &a{0}&7.'
+module-script-command-task-list-header: '&8[&3Vul&bpecula&8] &a良好 &8|&7 当前正在运行的脚本任务:'
+module-script-command-task-list-item: '&7  - PID: &a{0}&7; 脚本: &a{1}&7; 开始时间: &a{2}'
+module-script-command-task-list-footer: ''
