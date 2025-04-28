@@ -19,10 +19,15 @@ interface ConfigServiceCallback {
 
     fun onFileModified(id: String, file: File)
 
-    fun onReloadStarted() {}
+    /**
+     * 当路径不存在时调用
+     * */
+    fun onLoadInit(directory: File)
 
-    fun onReloadCompleted(time: Double): String
+    fun onLoadStarted() {}
 
-    fun onReloadFailed(e: Throwable): String
+    fun onLoadCompleted(time: Double): String
+
+    fun onLoadFailed(e: Throwable): String
 
 }

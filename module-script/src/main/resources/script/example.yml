@@ -6,8 +6,7 @@ variables:
   display: 'wcnm'
 
 # 参数约束与转换
-args:
-  -
+args: []
 
 # 入口主函数
 main: |-

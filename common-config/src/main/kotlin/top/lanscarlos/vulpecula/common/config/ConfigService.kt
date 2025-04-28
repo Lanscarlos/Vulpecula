@@ -33,15 +33,6 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
      * */
     val hash = HashMap<File, String>()
 
-    init {
-        require(directory.isDirectory) { "Directory must be a directory" }
-    }
-
-    /**
-     * 初始化载入
-     * */
-    fun init() {}
-
     /**
      * 重载
      * */
@@ -50,8 +41,12 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 调试计时
             val startTime = System.nanoTime()
 
+            if (!directory.exists()) {
+                callback.onLoadInit(directory)
+            }
+
             // 重载开始
-            callback.onReloadStarted()
+            callback.onLoadStarted()
 
             // 获取所有文件
             val queue = LinkedList<File>()
@@ -60,10 +55,15 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             while (queue.isNotEmpty()) {
                 val file = queue.poll()
                 if (file.isFile) {
+                    if (!file.exists() || file.name.first() == '#') {
+                        // 排除不存在或被注释的文件
+                        continue
+                    }
                     loadedFiles += file
                     continue
                 }
-                queue.addAll(file.listFiles() ?: continue)
+                val files = file.listFiles()?.filter { it.name.first() != '#' } ?: continue
+                queue.addAll(files)
             }
             val cacheFiles = HashSet(cache)
 
@@ -94,10 +94,10 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
             // 重载完成
-            return callback.onReloadCompleted(time)
+            return callback.onLoadCompleted(time)
         } catch (e: Throwable) {
             // 重载失败
-            return callback.onReloadFailed(e)
+            return callback.onLoadFailed(e)
         }
     }
 

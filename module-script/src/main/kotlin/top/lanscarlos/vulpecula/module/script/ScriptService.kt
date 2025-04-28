@@ -2,10 +2,7 @@ package top.lanscarlos.vulpecula.module.script
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.adaptPlayer
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.warning
+import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
 import top.lanscarlos.vulpecula.common.config.ConfigService
@@ -198,11 +195,15 @@ object ScriptService {
             }
         }
 
-        override fun onReloadCompleted(time: Double): String {
-            return console().asLangText("module-script-service-load-succeeded", time)
+        override fun onLoadInit(directory: File) {
+            releaseResourceFolder("script")
         }
 
-        override fun onReloadFailed(e: Throwable): String {
+        override fun onLoadCompleted(time: Double): String {
+            return console().asLangText("module-script-service-load-succeeded", scripts.size, time)
+        }
+
+        override fun onLoadFailed(e: Throwable): String {
             return console().asLangText("module-script-service-load-failed", e.localizedMessage)
         }
     }
