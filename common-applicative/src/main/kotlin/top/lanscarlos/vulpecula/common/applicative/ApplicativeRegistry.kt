@@ -23,7 +23,7 @@ object ApplicativeRegistry : ClassVisitor(-4) {
 
     internal val registry = mutableMapOf<Class<*>, Applicative<*>>() // 注册的 Applicative
 
-    internal val nameMapping = mutableMapOf<String, Applicative<*>>() // 名称映射
+    private val nameMapping = mutableMapOf<String, Applicative<*>>() // 名称映射
 
     /**
      * 获取对应的 Applicative
