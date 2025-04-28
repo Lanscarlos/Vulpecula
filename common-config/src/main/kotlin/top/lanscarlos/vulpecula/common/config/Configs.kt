@@ -5,7 +5,6 @@ import taboolib.common5.Coerce
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
-import java.io.File
 import java.util.LinkedList
 
 /**
@@ -42,7 +41,7 @@ object Configs {
 
         // 重载所有服务
         for (service in services) {
-            logs += service.reload()
+            logs += service.load()
         }
         return logs
     }

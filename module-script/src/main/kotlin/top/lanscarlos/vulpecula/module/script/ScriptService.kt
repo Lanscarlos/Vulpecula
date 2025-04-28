@@ -159,7 +159,7 @@ object ScriptService {
      * 重载服务
      * */
     fun reload(): String {
-        return service.reload()
+        return service.load()
     }
 
     internal fun nextPid(): Long {

@@ -24,7 +24,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     val path = getDataFolder().toPath().normalize().relativize(directory.toPath().normalize()).toString()
 
     /**
-     * 配置缓存
+     * 文件缓存
      * */
     val cache: HashSet<File> = hashSetOf()
 
@@ -34,9 +34,9 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     val hash = HashMap<File, String>()
 
     /**
-     * 重载
+     * 加载配置
      * */
-    fun reload(): String {
+    fun load(): String {
         try {
             // 调试计时
             val startTime = System.nanoTime()
