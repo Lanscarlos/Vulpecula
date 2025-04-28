@@ -21,9 +21,9 @@ object ApplicativeRegistry : ClassVisitor(-4) {
 
     override fun getLifeCycle(): LifeCycle = LifeCycle.LOAD
 
-    val registry = mutableMapOf<Class<*>, Applicative<*>>() // 注册的 Applicative
+    private val registry = mutableMapOf<Class<*>, Applicative<*>>() // 注册的 Applicative
 
-    val nameMapping = mutableMapOf<String, Applicative<*>>() // 名称映射
+    private val nameMapping = mutableMapOf<String, Applicative<*>>() // 名称映射
 
     /**
      * 获取对应的 Applicative
