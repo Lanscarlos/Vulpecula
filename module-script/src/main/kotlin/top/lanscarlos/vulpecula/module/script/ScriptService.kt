@@ -102,6 +102,19 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
+    fun run(id: String, player: Player, args: List<Any?>): CompletableFuture<*> {
+        return run(id, adaptPlayer(player), args)
+    }
+
+    /**
+     * 运行指定脚本
+     *
+     * @param id 脚本 ID
+     * @param player 玩家
+     * @param args 脚本参数
+     * @throws IllegalStateException 脚本不存在
+     * @return 运行结果
+     * */
     fun run(id: String, player: Player, args: Map<String, Any>): CompletableFuture<*> {
         return run(id, adaptPlayer(player), args)
     }
@@ -115,20 +128,40 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
+    fun run(id: String, sender: ProxyCommandSender?, args: List<Any?>): CompletableFuture<*> {
+        val task = get(id).execute(sender, args)
+        track(task)
+        return task.future
+    }
+
+    /**
+     * 运行指定脚本
+     *
+     * @param id 脚本 ID
+     * @param sender 脚本执行者
+     * @param args 脚本参数
+     * @throws IllegalStateException 脚本不存在
+     * @return 运行结果
+     * */
     fun run(id: String, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
         val task = get(id).execute(sender, args)
-        if (task.isDone) {
-            return task.future
-        }
+        track(task)
+        return task.future
+    }
 
-        // 记录正在运行的脚本
+    /**
+     * 追踪运行的脚本
+     * */
+    private fun track(task: ScriptTask) {
+        if (task.isDone) {
+            return
+        }
+        // 追踪正在运行的脚本
         tasks[task.pid] = task
         (task as DefaultScriptTask).future = task.future.thenApply {
-            tasks.remove(task.pid) ?: warning("Running task $id not found.")
+            tasks.remove(task.pid) ?: warning("Running task ${task.pid} not found.")
             return@thenApply it
         }
-
-        return task.future
     }
 
     /**

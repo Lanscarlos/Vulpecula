@@ -1,12 +1,18 @@
 # 预设编译命名空间
 namespace: [ 'chemdah' ]
 
-# 预设简单变量
+# 参数列表
+parameters:
+  - name: 'loc'
+    type: 'location'
+    optional: true
+
+# 返回值转换
+return-conversion: 'location'
+
+# 简单变量预设
 variables:
   display: 'wcnm'
-
-# 参数约束与转换
-args: []
 
 # 入口主函数
 main: |-

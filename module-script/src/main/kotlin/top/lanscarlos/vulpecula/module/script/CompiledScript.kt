@@ -3,12 +3,9 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
-import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.deepVars
 import top.lanscarlos.vulpecula.bacikal.BacikalService
-import top.lanscarlos.vulpecula.common.applicative.MapApplicative
-import top.lanscarlos.vulpecula.common.applicative.StringApplicative
-import top.lanscarlos.vulpecula.common.applicative.applicativeString
+import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import java.io.File
@@ -23,10 +20,14 @@ import java.util.concurrent.TimeUnit
  */
 class CompiledScript(override val id: String, val config: Configuration) : Script {
 
+    data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean)
+
     override val file: File
         get() = config.file!!
 
     val namespace: List<String> by config.read("namespace").stringList()
+
+    val parameters: List<Parameter> by config.read("parameters").mapList().convert(::parseParameters)
 
     val variables: Map<String, String> by config.read("variables").map().mapTo(::parseStringMap)
 
@@ -44,9 +45,48 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     private lateinit var quest: Quest
 
+    override fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask {
+        val wrappedArgs = mutableMapOf<String, Any>()
+        wrappedArgs["args"] = args
+        for ((index, arg) in args.withIndex()) {
+            wrappedArgs["arg$index"] = arg ?: continue
+        }
+
+        // 参数转换
+        for ((index, parameter) in parameters.withIndex()) {
+            val arg = args.getOrNull(index)
+            if (parameter.optional) {
+                val value = arg?.let(parameter.applicative::convertOrNull)
+                wrappedArgs[parameter.name] = value ?: continue
+                continue
+            }
+            require(arg != null) { "Missing argument ${parameter.name} at index $index when run script \"$id\"." }
+            wrappedArgs[parameter.name] = parameter.applicative.convertOrThrow(arg)
+        }
+
+        return run(sender, wrappedArgs)
+    }
+
     override fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
+        // 参数校验
+        val wrappedArgs = HashMap(args)
+        for ((name, applicative, optional) in parameters) {
+            val arg = args[name]
+            if (optional) {
+                val value = arg?.let(applicative::convertOrNull)
+                wrappedArgs[name] = value ?: continue
+                continue
+            }
+            require(arg != null) { "Missing argument $name when run script \"$id\"." }
+            wrappedArgs[name] = applicative.convertOrThrow(arg)
+        }
+
+        return run(sender, args)
+    }
+
+    private fun run(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
         if (::quest.isInitialized.not()) {
-            quest = buildQuest()
+            buildQuest()
         }
         val pid = ScriptService.nextPid()
         val context = BacikalService.executeLater(quest, sender, args)
@@ -70,7 +110,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         return DefaultScriptTask(pid, this, context, future, startTime)
     }
 
-    private fun buildQuest(): Quest {
+    override fun buildQuest() {
         val builder = StringBuilder()
 
         // 构建函数头
@@ -111,7 +151,18 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 .append("}").append('\n')
         }
 
-        return BacikalService.compile(builder.toString(), id, namespace)
+        quest = BacikalService.compile(builder.toString(), id, namespace)
+    }
+
+    private fun parseParameters(source: List<Map<*, *>>): List<Parameter> {
+        val cache = mutableListOf<Parameter>()
+        for (map in source) {
+            val name = map["name"].toString()
+            val applicative: Applicative<Any> = map["type"].toString().lowercase().let(ApplicativeRegistry::getApplicative)
+            val optional = map["optional"].applicativeBoolean(false)
+            cache += Parameter(name, applicative, optional)
+        }
+        return cache
     }
 
     private fun parseStringMap(entry: Map.Entry<Any?, Any?>): Pair<String, String> {

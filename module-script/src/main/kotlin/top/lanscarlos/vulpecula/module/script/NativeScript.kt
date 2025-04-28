@@ -17,6 +17,19 @@ class NativeScript(override val id: String, override val file: File) : Script {
 
     private val quest: Quest = BacikalService.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
 
+    override fun buildQuest() {
+        TODO("Not yet implemented")
+    }
+
+    override fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask {
+        val wrappedArgs = mutableMapOf<String, Any>()
+        wrappedArgs["args"] = args
+        for ((index, arg) in args.withIndex()) {
+            wrappedArgs["arg$index"] = arg ?: continue
+        }
+        return execute(sender, wrappedArgs)
+    }
+
     override fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
         val pid = ScriptService.nextPid()
         val startTime = System.currentTimeMillis()

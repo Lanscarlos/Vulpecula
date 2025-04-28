@@ -47,12 +47,7 @@ object ScriptCommand {
                         val id = context["id"]
                         val scriptSender = context["sender"].toSender(sender)
                         val args = value.split(' ')
-                        val wrappedArgs = mutableMapOf<String, Any>()
-                        wrappedArgs["args"] = args
-                        for ((index, arg) in args.withIndex()) {
-                            wrappedArgs["arg$index"] = arg
-                        }
-                        ScriptService.run(id, scriptSender, wrappedArgs)
+                        ScriptService.run(id, scriptSender, args)
                         sender.sendLang("module-script-command-run", id, scriptSender?.name ?: "null", args)
                     }
                 }
