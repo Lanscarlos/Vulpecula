@@ -1,7 +1,6 @@
 rootProject.name="Vulpecula"
 include("common-applicative")
 include("common-config")
-include("common-config-legacy")
 include("common-core")
 include("common-livedata")
 include("extension-action-item")
