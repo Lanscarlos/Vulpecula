@@ -9,6 +9,8 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object BooleanApplicative : AbstractApplicative<Boolean>(Boolean::class.java) {
 
+    override val aliases: Array<String> = arrayOf("bool")
+
     override fun convertOrNull(instance: Any?): Boolean? {
         return when (instance) {
             is Boolean -> instance

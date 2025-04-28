@@ -9,6 +9,10 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 interface Applicative<T> {
 
+    val name: String
+
+    val aliases: Array<String>
+
     /**
      * 转换为目标类型, 果转换失败则返回 null
      *

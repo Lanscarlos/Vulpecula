@@ -23,15 +23,30 @@ object ApplicativeRegistry : ClassVisitor(-4) {
 
     val registry = mutableMapOf<Class<*>, Applicative<*>>() // 注册的 Applicative
 
+    val nameMapping = mutableMapOf<String, Applicative<*>>() // 名称映射
+
+    /**
+     * 获取对应的 Applicative
+     * */
+    fun <T> getApplicative(name: String): Applicative<T> {
+        require(nameMapping.containsKey(name)) { "Applicative for \"$name\" not found." }
+        return getApplicativeOrNull(name)!!
+    }
+
     /**
      * 获取对应的 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
+    fun <T> getApplicativeOrNull(name: String): Applicative<T>? {
+        return nameMapping[name] as? Applicative<T>
+    }
+
+    /**
+     * 获取对应的 Applicative
+     * */
     fun <T> getApplicative(clazz: Class<T>): Applicative<T> {
-        if (!registry.containsKey(clazz)) {
-            error("Applicative for \"${clazz.name}\" not found.")
-        }
-        return registry[clazz] as Applicative<T>
+        require(registry.containsKey(clazz)) { "Applicative for \"${clazz.name}\" not found." }
+        return getApplicativeOrNull(clazz)!!
     }
 
     /**
@@ -48,6 +63,10 @@ object ApplicativeRegistry : ClassVisitor(-4) {
     fun registerApplicative(clazz: Class<*>, applicative: Applicative<*>) {
         if (registry.containsKey(clazz)) {
             warning("Applicative for \"${clazz.name}\" already exists. It will be replaced.")
+        }
+        nameMapping[applicative.name] = applicative
+        for (alias in applicative.aliases) {
+            nameMapping[alias] = applicative
         }
         registry[clazz] = applicative
     }
