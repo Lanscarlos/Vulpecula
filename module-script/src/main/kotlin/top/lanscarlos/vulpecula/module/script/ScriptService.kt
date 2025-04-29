@@ -94,6 +94,27 @@ object ScriptService {
     fun getTaskEntries(): Set<Map.Entry<Long, ScriptTask>> = tasks.entries
 
     /**
+     * 编译指定内容为脚本, 本次编译不会被记录
+     *
+     * @param source 源码
+     * @return 脚本
+     * */
+    fun compile(source: String): Script {
+        return NativeScript(source)
+    }
+
+    /**
+     * 编译指定内容为脚本, 本次编译不会被记录
+     *
+     * @param source 源码
+     * @param id 脚本 ID
+     * @return 脚本
+     * */
+    fun compile(source: String, id: String): Script {
+        return NativeScript(id, source)
+    }
+
+    /**
      * 运行指定脚本
      *
      * @param id 脚本 ID
@@ -223,6 +244,8 @@ object ScriptService {
                 is CompiledScript -> {
                     // 刷新配置
                     script.config.loadFromFile(file)
+                    // 重新构建脚本任务
+                    script.rebuild()
                 }
                 else -> error("Unknown script type ${script::class.java}")
             }

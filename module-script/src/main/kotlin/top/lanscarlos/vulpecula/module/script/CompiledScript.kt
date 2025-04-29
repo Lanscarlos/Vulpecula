@@ -8,7 +8,6 @@ import top.lanscarlos.vulpecula.bacikal.BacikalService
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -21,9 +20,6 @@ import java.util.concurrent.TimeUnit
 class CompiledScript(override val id: String, val config: Configuration) : Script {
 
     data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean)
-
-    override val file: File
-        get() = config.file!!
 
     val namespace: List<String> by config.read("namespace").stringList()
 
@@ -44,6 +40,10 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
     val exceptions: Map<String, Quest> by config.read("exceptions").convert(::parseException)
 
     private lateinit var quest: Quest
+
+    fun rebuild() {
+        quest = buildQuest()
+    }
 
     override fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()
@@ -110,7 +110,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         return DefaultScriptTask(pid, this, context, future, startTime)
     }
 
-    override fun buildQuest() {
+    private fun buildQuest(): Quest {
         val builder = StringBuilder()
 
         // 构建函数头
@@ -151,7 +151,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 .append("}").append('\n')
         }
 
-        quest = BacikalService.compile(builder.toString(), id, namespace)
+        return BacikalService.compile(builder.toString(), id, namespace)
     }
 
     private fun parseParameters(source: List<Map<*, *>>): List<Parameter> {

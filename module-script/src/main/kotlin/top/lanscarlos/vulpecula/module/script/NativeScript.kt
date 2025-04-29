@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.script
 
+import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import top.lanscarlos.vulpecula.bacikal.BacikalService
@@ -13,13 +14,13 @@ import java.nio.charset.StandardCharsets
  * @author Lanscarlos
  * @since 2025-03-20 15:12
  */
-class NativeScript(override val id: String, override val file: File) : Script {
+class NativeScript(override val id: String, source: String) : Script {
 
-    private val quest: Quest = BacikalService.compile(file.readText(StandardCharsets.UTF_8), id, listOf("vulpecula"))
+    constructor(source: String) : this(source.digest("MD5"), source)
 
-    override fun buildQuest() {
-        TODO("Not yet implemented")
-    }
+    constructor(id: String, file: File) : this(id, file.readText(StandardCharsets.UTF_8))
+
+    private val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
     override fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()

@@ -14,13 +14,6 @@ interface Script {
 
     val id: String
 
-    val file: File
-
-    /**
-     * 构建可执行的脚本任务
-     * */
-    fun buildQuest()
-
     fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask
 
     fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask
