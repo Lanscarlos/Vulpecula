@@ -4,6 +4,8 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
+import taboolib.common.platform.command.suggest
+import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.lang.asLangText
@@ -30,11 +32,14 @@ object ScriptCommand {
 
     private val run: CommandComponent.() -> Unit = {
         dynamic("id") {
+            suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScriptService.run(id, sender, emptyMap())
                 sender.sendLang("module-script-command-run", id, sender.name, "[]")
             }
+
             dynamic("sender") {
+                suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
                 execute<ProxyCommandSender> { sender, context, senderName ->
                     val id = context["id"]
                     val scriptSender = senderName.toSender(sender)
@@ -57,6 +62,7 @@ object ScriptCommand {
 
     private val stop: CommandComponent.() -> Unit = {
         dynamic("id") {
+            suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScriptService.stop(id)
                 sender.sendLang("module-script-command-stop", id)
@@ -67,6 +73,7 @@ object ScriptCommand {
     private val task: CommandComponent.() -> Unit = {
         literal("stop") {
             dynamic("pid") {
+                suggest { ScriptService.getTaskKeys().map { it.toString() } }
                 execute<ProxyCommandSender> { sender, _, pid ->
                     ScriptService.stop(pid.toLong())
                     sender.sendLang("module-script-command-task-stop", pid)

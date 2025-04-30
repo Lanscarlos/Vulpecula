@@ -34,10 +34,14 @@ object Configs {
         val startTime = System.nanoTime()
 
         // 重载主配置
-        config.reload()
-        // 计算耗时, 单位毫秒
-        val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
-        logs += console().asLangText("common-config-main-load-succeeded", time)
+        try {
+            config.reload()
+            // 计算耗时, 单位毫秒
+            val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
+            logs += console().asLangText("common-config-main-load-succeeded", time)
+        } catch (ex: Exception) {
+            logs += console().asLangText("common-config-main-load-failed", ex.localizedMessage)
+        }
 
         // 重载所有服务
         for (service in services) {
