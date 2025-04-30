@@ -26,17 +26,17 @@ object BacikalCommand {
                      val quest = BacikalQuestCompiler.compile(source, "eval", emptyList())
                      BacikalQuestExecutor.execute(quest, "main", sender, emptyMap()).handle { result, ex ->
                          if (ex != null) {
-                             info("handle capture.")
-                             ex.printKetherErrorMessage()
                              sender.sendMessage(" §5§l‹ ›§r §cException: §f${ex.localizedMessage}")
+                             ex.printKetherErrorMessage()
+                             ex.printStackTrace()
                              return@handle
                          }
                          sender.sendMessage(" §5§l‹ ›§r §aResult: §f$result")
                      }
                  } catch (ex: Throwable) {
-                     info("try-catch capture.")
-                     ex.printKetherErrorMessage()
                      sender.sendMessage(" §5§l‹ ›§r §cException: §f${ex.localizedMessage}")
+                     ex.printKetherErrorMessage()
+                     ex.printStackTrace()
                  }
              }
         }
