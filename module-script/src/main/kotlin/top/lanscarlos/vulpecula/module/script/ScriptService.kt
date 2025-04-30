@@ -123,8 +123,8 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, player: Player, args: List<Any?>): CompletableFuture<*> {
-        return run(id, adaptPlayer(player), args)
+    fun run(id: String, player: Player, args: List<Any?>): CompletableFuture<Any?> {
+        return run(get(id), adaptPlayer(player), args)
     }
 
     /**
@@ -136,8 +136,8 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, player: Player, args: Map<String, Any>): CompletableFuture<*> {
-        return run(id, adaptPlayer(player), args)
+    fun run(id: String, player: Player, args: Map<String, Any>): CompletableFuture<Any?> {
+        return run(get(id), adaptPlayer(player), args)
     }
 
     /**
@@ -149,23 +149,47 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, sender: ProxyCommandSender?, args: List<Any?>): CompletableFuture<*> {
-        val task = get(id).execute(sender, args)
+    fun run(id: String, sender: ProxyCommandSender?, args: List<Any?>): CompletableFuture<Any?> {
+        return run(get(id), sender, args)
+    }
+
+    /**
+     * 运行指定脚本
+     *
+     * @param id 脚本 ID
+     * @param sender 脚本执行者
+     * @param args 脚本参数
+     * @throws IllegalStateException 脚本不存在
+     * @return 运行结果
+     * */
+    fun run(id: String, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<Any?> {
+        return run(get(id), sender, args)
+    }
+
+    /**
+     * 运行脚本
+     *
+     * @param script 脚本
+     * @param sender 脚本执行者
+     * @param args 脚本参数
+     * @return 运行结果
+     * */
+    fun run(script: Script, sender: ProxyCommandSender?, args: List<Any?>): CompletableFuture<Any?> {
+        val task = script.execute(sender, args)
         track(task)
         return task.future
     }
 
     /**
-     * 运行指定脚本
+     * 运行脚本
      *
-     * @param id 脚本 ID
+     * @param script 脚本
      * @param sender 脚本执行者
      * @param args 脚本参数
-     * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<*> {
-        val task = get(id).execute(sender, args)
+    fun run(script: Script, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<Any?> {
+        val task = script.execute(sender, args)
         track(task)
         return task.future
     }
@@ -220,7 +244,7 @@ object ScriptService {
         return ++pid
     }
 
-    internal object Callback : ConfigServiceCallback {
+    private object Callback : ConfigServiceCallback {
 
         override fun onFileDeleted(id: String, file: File) {
             scripts.remove(id)
