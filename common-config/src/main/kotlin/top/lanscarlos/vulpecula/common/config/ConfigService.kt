@@ -34,6 +34,14 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     val hash = HashMap<File, String>()
 
     /**
+     * 重置缓存
+     * */
+    fun reset() {
+        cache.clear()
+        hash.clear()
+    }
+
+    /**
      * 加载配置
      * */
     fun load(): String {
@@ -96,7 +104,8 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 重载完成
             return callback.onLoadCompleted(time)
         } catch (e: Throwable) {
-            // 重载失败
+            // 重载失败, 重置缓存
+            reset()
             return callback.onLoadFailed(e)
         }
     }
