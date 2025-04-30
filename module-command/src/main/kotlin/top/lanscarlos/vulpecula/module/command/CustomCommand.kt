@@ -1,6 +1,10 @@
 package top.lanscarlos.vulpecula.module.command
 
-import taboolib.common.platform.command.PermissionDefault
+import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.command.*
+import taboolib.common.platform.command.component.CommandBase
+import taboolib.common.platform.function.registerCommand
+import taboolib.common.platform.function.unregisterCommand
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
@@ -33,11 +37,57 @@ class CustomCommand(val id: String, val config: Configuration) {
 
     val newParser: Boolean by config.read("new-parser").boolean(false)
 
-    val node: Node = buildNode()
+    var root: CommandBase = buildNode().build()
 
-    fun rebuild() {}
+    /**
+     * 注册命令
+     * */
+    fun register() {
+        registerCommand(
+            // 创建命令结构
+            command = CommandStructure(
+                name,
+                aliases,
+                description,
+                usage,
+                permission,
+                permissionMessage,
+                permissionDefault,
+                permissionChildren = emptyMap(),
+                newParser = newParser,
+            ),
+            // 创建执行器
+            executor = object : CommandExecutor {
+                override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): Boolean {
+                    return root.execute(CommandContext(sender, command, name, root, newParser, args))
+                }
+            },
+            // 创建补全器
+            completer = object : CommandCompleter {
+                override fun execute(sender: ProxyCommandSender, command: CommandStructure, name: String, args: Array<String>): List<String>? {
+                    return root.suggest(CommandContext(sender, command, name, root, newParser, args))
+                }
+            },
+            // 传入原始命令构建器
+            commandBuilder = {}
+        )
+    }
 
-    fun buildNode(): Node {
+    /**
+     * 注销命令
+     * */
+    fun unregister() {
+        unregisterCommand(name)
+        aliases.forEach { unregisterCommand(it) }
+    }
+
+    fun rebuild() {
+        unregister()
+        root = buildNode().build()
+        register()
+    }
+
+    fun buildNode(): MainNode {
         // 创建主节点
         val main = MainNode(config.getConfigurationSection("main") ?: Configuration.empty())
         val components = config.getConfigurationSection("components") ?: return main

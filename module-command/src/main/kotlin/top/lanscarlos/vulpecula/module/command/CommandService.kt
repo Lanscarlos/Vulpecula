@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.module.command
 
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFolder
@@ -27,6 +29,14 @@ object CommandService {
 
     init {
         Configs.register(service)
+    }
+
+    @Awake(LifeCycle.ACTIVE)
+    private fun onActive() {
+        // 注册命令
+        for ((_, command) in commands) {
+            command.register()
+        }
     }
 
     /**
