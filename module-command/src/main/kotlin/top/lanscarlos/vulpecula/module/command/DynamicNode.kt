@@ -41,6 +41,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
                     function = strategy::restrict
                 )
             }
+            else -> error("Invalid strategy: ${strategy?.javaClass?.name}.")
         }
 
         if (executor != null) {
@@ -63,7 +64,6 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
             // 启用脚本约束
             return ScriptExecutor(value, chain)
         }
-
 
         return when (value.substring(1).lowercase()) {
             "bool", "boolean" -> BooleanSuggester
