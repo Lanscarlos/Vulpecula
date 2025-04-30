@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.getDataFolder
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.deepVars
@@ -10,7 +9,6 @@ import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import java.io.File
-import java.io.FileOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -156,7 +154,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         }
 
         // 调试输出
-        File(config.file!!.parent, "${config.file!!.nameWithoutExtension}.ks").writeText(builder.toString())
+        File(config.file!!.parent, "#${config.file!!.nameWithoutExtension}.ks").writeText(builder.toString())
 
         return BacikalService.compile(builder.toString(), id, namespace)
     }
