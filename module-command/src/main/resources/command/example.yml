@@ -1,0 +1,20 @@
+
+main:
+  execute: |-
+    print "Hello, World!"
+
+components:
+  script:
+    parent: 'main'
+
+  run:
+    parent: 'script'
+    parameters:
+      - name: 'scriptId'
+        type: 'text'
+        optional: false
+        suggest: |-
+          array [ 1, 2, 3 ]
+
+  script-id:
+    parent: 'run'
