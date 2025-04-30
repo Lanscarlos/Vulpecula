@@ -13,14 +13,14 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2025/4/30 10:19
  */
-class ScriptExecutor(source: String, val chain: List<Node>) : Suggestion, Restriction, Executor {
+class ScriptExecutor(source: String, val chain: List<Node>) : Suggester<Any>, Restrictor<Any>, Executor {
 
     val script = ScriptService.compile(source, "script-executor")
 
-    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String>? {
+    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String> {
         val result = execute(sender, context)
         require(result.isDone)
-        return result.getNow(null)?.applicativeStringList(emptyList())
+        return result.getNow(null).applicativeStringList(emptyList())
     }
 
     override fun <T : ProxyCommandSender> restrict(sender: T, context: CommandContext<T>, argument: String): Boolean {
@@ -31,6 +31,10 @@ class ScriptExecutor(source: String, val chain: List<Node>) : Suggestion, Restri
 
     override fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>, argument: String) {
         execute(sender, context)
+    }
+
+    override fun convert(input: String): Any {
+        return input
     }
 
     private fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>): CompletableFuture<Any?> {
@@ -50,7 +54,7 @@ class ScriptExecutor(source: String, val chain: List<Node>) : Suggestion, Restri
         for ((index, rawArg) in rawArgs.withIndex()) {
             args["arg$index"] = rawArgs
             val node = chain[index] as? DynamicNode ?: continue
-            val arg = node.convert(rawArg)
+            val arg = node.strategy?.convert(rawArg) ?: continue
             args[node.name] = arg
         }
 

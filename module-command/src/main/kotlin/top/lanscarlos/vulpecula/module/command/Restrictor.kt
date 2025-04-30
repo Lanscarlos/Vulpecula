@@ -8,12 +8,10 @@ import taboolib.common.platform.command.CommandContext
  * top.lanscarlos.vulpecula.module.command
  *
  * @author Lanscarlos
- * @since 2025/4/29 14:03
+ * @since 2025/4/29 13:51
  */
-object BooleanSuggestion : Suggestion {
+interface Restrictor<T> : Strategy<T> {
 
-    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String>? {
-        return listOf("true", "false")
-    }
+    fun <S: ProxyCommandSender> restrict(sender: S, context: CommandContext<S>, argument: String): Boolean
 
 }

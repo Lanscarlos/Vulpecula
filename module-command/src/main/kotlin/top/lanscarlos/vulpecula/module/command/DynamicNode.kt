@@ -18,9 +18,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
 
     val uncheck = section["uncheck"].applicativeBoolean(false)
 
-    val suggestion: Suggestion? = section["suggestion"]?.let(::parseSuggestion)
-
-    val restriction: Restriction? = section["restriction"]?.let(::parseRestriction)
+    val strategy: Strategy<out Any>? = section["strategy"]?.let(::parseStrategy)
 
     override fun build(): CommandComponent {
         val component = CommandComponentDynamic(
@@ -29,24 +27,18 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
             optional = optional,
             permission = permission
         )
-        when {
-            suggestion != null && restriction != null -> {
-                // 不允许同时设置 suggestion 和 restriction
-                error("It is not allowed to set both suggestion and restriction.")
-            }
-            suggestion != null -> {
-                // 设置参数建议
+        when (strategy) {
+            is Suggester -> {
                 component.suggestion(
                     bind = senderClass,
                     uncheck = uncheck,
-                    function = suggestion::suggest
+                    function = strategy::suggest
                 )
             }
-            restriction != null -> {
-                // 设置参数约束
+            is Restrictor -> {
                 component.restrict(
                     bind = senderClass,
-                    function = restriction::restrict
+                    function = strategy::restrict
                 )
             }
         }
@@ -63,40 +55,23 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         return component
     }
 
-    fun convert(input: String): Any {
-        TODO()
-    }
-
-    private fun parseRestriction(value: Any): Restriction {
-        require(value is String) { "Restriction content is not a string." }
-        require(value.isNotBlank()) { "Restriction content cannot be blank." }
+    private fun parseStrategy(value: Any): Strategy<out Any> {
+        require(value is String) { "Strategy content is not a string." }
+        require(value.isNotBlank()) { "Strategy content cannot be blank." }
 
         if (value[0] != '@') {
             // 启用脚本约束
             return ScriptExecutor(value, chain)
         }
 
-        return when (value.substring(1).lowercase()) {
-            "int" -> IntRestriction
-            "double" -> DoubleRestriction
-            else -> error("Invalid restriction content: $value")
-        }
-    }
-
-    private fun parseSuggestion(value: Any): Suggestion {
-        require(value is String) { "Suggestion content is not a String." }
-        require(value.isNotBlank()) { "Suggestion content cannot be blank." }
-
-        if (value[0] != '@') {
-            // 启用脚本建议
-            return ScriptExecutor(value, chain)
-        }
 
         return when (value.substring(1).lowercase()) {
-            "bool", "boolean" -> BooleanSuggestion
-            "offline" -> OfflinePlayerSuggestion
-            "player" -> PlayerSuggestion
-            "world" -> WorldSuggestion
+            "bool", "boolean" -> BooleanSuggester
+            "int" -> IntRestrictor
+            "double" -> DoubleRestrictor
+            "offline" -> OfflinePlayerSuggester
+            "player" -> PlayerSuggester
+            "world" -> WorldSuggester
             else -> error("Invalid suggestion content: $value")
         }
     }
