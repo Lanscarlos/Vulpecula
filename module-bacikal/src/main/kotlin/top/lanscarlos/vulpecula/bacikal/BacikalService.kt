@@ -35,7 +35,7 @@ object BacikalService {
      * @param namespace 命名空间
      */
     fun compile(source: String, name: String, namespace: List<String>): Quest {
-        return BacikalQuestCompiler.compile(name, source, namespace)
+        return BacikalQuestCompiler.compile(source, name, namespace)
     }
 
     /**
