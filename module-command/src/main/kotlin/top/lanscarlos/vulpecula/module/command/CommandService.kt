@@ -71,6 +71,7 @@ object CommandService {
         }
 
         override fun onLoadFailed(e: Throwable): String {
+            e.printStackTrace()
             return console().asLangText("module-command-service-load-failed", e.localizedMessage)
         }
 

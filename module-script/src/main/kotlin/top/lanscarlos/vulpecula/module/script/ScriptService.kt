@@ -284,6 +284,7 @@ object ScriptService {
         }
 
         override fun onLoadFailed(e: Throwable): String {
+            e.printStackTrace()
             return console().asLangText("module-script-service-load-failed", e.localizedMessage)
         }
     }
