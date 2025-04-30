@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.getDataFolder
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.deepVars
@@ -8,6 +9,8 @@ import top.lanscarlos.vulpecula.bacikal.BacikalService
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
+import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -22,11 +25,11 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean)
 
-    val namespace: List<String> by config.read("namespace").stringList()
+    val namespace: List<String> by config.read("namespace").stringList(emptyList())
 
     val parameters: List<Parameter> by config.read("parameters").mapList().convert(::parseParameters)
 
-    val variables: Map<String, String> by config.read("variables").map().mapTo(::parseStringMap)
+    val variables: Map<String, String> by config.read("variables").map(emptyMap<Any?, Any?>()).mapTo(::parseStringMap)
 
     val condition: String by config.read("condition").convert(::parseCondition)
 
@@ -34,7 +37,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     val main: String by config.read("main").string()
 
-    val functions: Map<String, String> by config.read("functions").map().mapTo(::parseStringMap)
+    val functions: Map<String, String> by config.read("functions").map(emptyMap<Any?, Any?>()).mapTo(::parseStringMap)
 
     val timeout: Long by config.read("timeout").convert(::parseTimeout)
 
@@ -87,7 +90,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     private fun run(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
         if (::quest.isInitialized.not()) {
-            buildQuest()
+            quest = buildQuest()
         }
         val pid = ScriptService.nextPid()
         val context = BacikalService.executeLater(quest, sender, args)
@@ -151,6 +154,9 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 .append(value).append('\n')
                 .append("}").append('\n')
         }
+
+        // 调试输出
+        File(config.file!!.parent, "${config.file!!.nameWithoutExtension}.ks").writeText(builder.toString())
 
         return BacikalService.compile(builder.toString(), id, namespace)
     }

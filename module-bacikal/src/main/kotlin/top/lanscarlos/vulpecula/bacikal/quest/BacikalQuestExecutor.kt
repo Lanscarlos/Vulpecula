@@ -40,9 +40,9 @@ object BacikalQuestExecutor {
         return QuestExecutorContext(quest, main).also(func)
     }
 
-    class QuestExecutorContext(quest: Quest, val main: String) : ScriptContext(ScriptService, quest) {
+    class QuestExecutorContext(quest: Quest, private val main: String) : ScriptContext(ScriptService, quest) {
         override fun createRootFrame(): QuestContext.Frame {
-            return QuestExecutorFrame(this, main)
+            return QuestExecutorFrame(this@QuestExecutorContext, main)
         }
     }
 
@@ -50,7 +50,7 @@ object BacikalQuestExecutor {
      * 海螺爹永远是你爹
      * @see taboolib.library.kether.AbstractQuestContext.SimpleNamedFrame
      * */
-    class QuestExecutorFrame(context: ScriptContext, val main: String) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
+    class QuestExecutorFrame(context: ScriptContext, private val main: String) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
 
         var currentblock: Quest.Block? = null
         var nextBlock: Quest.Block? = null

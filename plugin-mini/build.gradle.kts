@@ -16,6 +16,7 @@ tasks {
             project(":common-core"),
             project(":common-livedata"),
             project(":module-bacikal"),
+            project(":module-core"),
             project(":module-script"),
             project(":platform-bukkit"),
         )

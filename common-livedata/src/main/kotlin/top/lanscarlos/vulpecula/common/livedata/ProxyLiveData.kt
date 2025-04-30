@@ -41,10 +41,6 @@ class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>)
         return value
     }
 
-    override fun getValue(parent: Any?, property: KProperty<*>): R {
-        return getValue()
-    }
-
     override fun update() {
         this.source.update()
         isInitialized = false

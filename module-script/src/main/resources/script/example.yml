@@ -2,10 +2,7 @@
 namespace: [ 'chemdah' ]
 
 # 参数列表
-parameters:
-  - name: 'loc'
-    type: 'location'
-    optional: true
+parameters: []
 
 # 返回值转换
 return-conversion: 'location'

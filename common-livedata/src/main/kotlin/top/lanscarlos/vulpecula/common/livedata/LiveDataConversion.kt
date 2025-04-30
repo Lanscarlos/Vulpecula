@@ -184,7 +184,7 @@ fun <T> LiveData<T>.stringList(defaultValue: List<String>): LiveData<List<String
 }
 
 fun <T> LiveData<T>.mapList(): LiveData<List<Map<*, *>>> {
-    return list().mapTo(MapApplicative::convertOrThrow)
+    return list(emptyList<Map<*, *>>()).mapTo(MapApplicative::convertOrThrow)
 }
 
 fun <T> LiveData<T>.normalizeMap(): LiveData<Map<String, Any?>> {

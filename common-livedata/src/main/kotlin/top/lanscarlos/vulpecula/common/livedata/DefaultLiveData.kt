@@ -22,8 +22,14 @@ class DefaultLiveData<T>(val source: Supplier<Any?>, val transformer: Function<A
      * */
     private var isInitialized = false
 
+    @Suppress("UNCHECKED_CAST")
     override fun getValue(): T {
-        return getValueOrNull() ?: error("Value is null.")
+        if (!isInitialized) {
+            // 初始化
+            value = transformer.apply(source.get())
+            isInitialized = true
+        }
+        return value as T
     }
 
     override fun getValueOrNull(): T? {
