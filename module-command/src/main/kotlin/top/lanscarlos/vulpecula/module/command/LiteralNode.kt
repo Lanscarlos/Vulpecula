@@ -20,7 +20,9 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
 
     val hidden: Boolean = section["hidden"].applicativeBoolean(false)
 
-    val parameters = section.getMapList("parameters").let(::parseParameters)
+    init {
+        parseParameters(section.getMapList("parameters"), section["execute"])
+    }
 
     override fun build(): CommandComponent {
         val component = CommandComponentLiteral(
@@ -43,12 +45,12 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
         return component
     }
 
-    fun parseParameters(value: List<Map<*, *>>): List<DynamicNode> {
+    private fun parseParameters(value: List<Map<*, *>>, execution: Any?): List<DynamicNode> {
         val list = LinkedList<DynamicNode>()
         var parent: Node = this
         for (section in value) {
             val id = section["name"]!!.toString()
-            val node = DynamicNode(id, parent, section)
+            val node = DynamicNode(id, parent, section.plus("execute" to execution))
             parent.children += node
             parent = node
         }
