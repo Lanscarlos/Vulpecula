@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.AbstractQuestContext
 import taboolib.library.kether.ParsedAction

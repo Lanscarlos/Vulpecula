@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.common.livedata
 
 import java.util.function.Function
-import kotlin.reflect.KProperty
 
 /**
  * Vulpecula
