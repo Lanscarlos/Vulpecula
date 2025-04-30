@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.AbstractQuestContext
 import taboolib.library.kether.ParsedAction
@@ -37,13 +38,12 @@ object BacikalQuestExecutor {
     }
 
     fun executeLater(quest: Quest, main: String, func: (ScriptContext) -> Unit): ScriptContext {
-        return QuestExecutorContext(quest, main).also(func)
-    }
-
-    class QuestExecutorContext(quest: Quest, private val main: String) : ScriptContext(ScriptService, quest) {
-        override fun createRootFrame(): QuestContext.Frame {
-            return QuestExecutorFrame(this@QuestExecutorContext, main)
+        val context = object : ScriptContext(ScriptService, quest) {
+            override fun createRootFrame(): QuestContext.Frame {
+                return QuestExecutorFrame(this, main)
+            }
         }
+        return context.also(func)
     }
 
     /**
