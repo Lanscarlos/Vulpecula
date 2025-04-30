@@ -17,7 +17,7 @@ object BooleanApplicative : AbstractApplicative<Boolean>(Boolean::class.java) {
             "true", "yes" -> true
             "false", "no" -> false
             is Number -> instance.toInt() != 0
-            is String -> instance.toBoolean()
+            is String -> instance.toBooleanStrictOrNull()
             else -> null
         }
     }
