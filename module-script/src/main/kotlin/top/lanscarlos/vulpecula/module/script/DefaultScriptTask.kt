@@ -14,7 +14,7 @@ class DefaultScriptTask(
     override val pid: Long,
     override val script: Script,
     override val context: ScriptContext,
-    override var future: CompletableFuture<*>,
+    override var future: CompletableFuture<Any?>,
     override val startTime: Long
 ) : ScriptTask {
 

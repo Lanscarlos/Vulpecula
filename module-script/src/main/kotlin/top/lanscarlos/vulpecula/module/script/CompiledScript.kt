@@ -8,6 +8,7 @@ import top.lanscarlos.vulpecula.bacikal.BacikalService
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 /**
@@ -90,7 +91,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         }
         val pid = ScriptService.nextPid()
         val context = BacikalService.executeLater(quest, sender, args)
-        var future = context.runActions()
+        var future: CompletableFuture<Any?> = context.runActions()
         val startTime = System.currentTimeMillis()
 
         // 注入超时检测
