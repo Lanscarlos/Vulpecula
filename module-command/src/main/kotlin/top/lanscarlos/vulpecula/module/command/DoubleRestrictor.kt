@@ -17,7 +17,7 @@ object DoubleRestrictor : Restrictor<Double> {
     }
 
     override fun convert(input: String): Double {
-        return input.toIntOrNull() ?: error("Invalid input.")
+        return input.toDoubleOrNull() ?: error("Invalid input.")
     }
 
 }
