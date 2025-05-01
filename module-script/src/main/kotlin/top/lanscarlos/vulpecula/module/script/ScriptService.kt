@@ -1,6 +1,8 @@
 package top.lanscarlos.vulpecula.module.script
 
 import org.bukkit.entity.Player
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
@@ -18,6 +20,7 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2025/4/25 10:00
  */
+@Awake(LifeCycle.LOAD)
 object ScriptService {
 
     private val directory: File = File(getDataFolder(), "script")
@@ -30,8 +33,9 @@ object ScriptService {
 
     private val service: ConfigService = ConfigService(id = "script", directory = directory, priority = 8, callback = Callback)
 
-    init {
-        // 注册配置服务
+    @Awake(LifeCycle.LOAD)
+    fun onEnable() {
+        // 自动注册配置服务
         Configs.register(service)
     }
 

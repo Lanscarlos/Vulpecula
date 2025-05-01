@@ -1,6 +1,9 @@
 package top.lanscarlos.vulpecula.common.config
 
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
 import taboolib.common5.Coerce
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
@@ -21,6 +24,15 @@ object Configs {
         private set
 
     val services = LinkedList<ConfigService>()
+
+    @Awake(LifeCycle.ENABLE)
+    fun onEnable() {
+        // 自动载入所有配置
+        val logs = reload()
+        for (log in logs) {
+            console().sendMessage(log)
+        }
+    }
 
     /**
      * 重载所有配置
