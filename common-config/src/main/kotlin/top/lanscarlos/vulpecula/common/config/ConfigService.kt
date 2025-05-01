@@ -78,12 +78,14 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 处理被移除的文件
             for (file in cacheFiles - loadedFiles) {
                 cache.remove(file)
+                hash.remove(file)
                 callback.onFileDeleted(buildFileId(file), file)
             }
 
             // 处理新增的文件
             for (file in loadedFiles - cacheFiles) {
                 cache += file
+                hash[file] = file.digest("SHA-256")
                 callback.onFileCreated(buildFileId(file), file)
             }
 
