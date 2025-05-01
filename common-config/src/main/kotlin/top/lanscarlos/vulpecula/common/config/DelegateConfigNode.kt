@@ -16,6 +16,9 @@ class DelegateConfigNode(val config: ConfigurationSection, val keys: Array<out S
 
     lateinit var key: String
 
+    override val isInitialized: Boolean
+        get() = liveData.isInitialized
+
     val liveData = DefaultLiveData(source = ::read, transformer = ::transformer)
 
     init {

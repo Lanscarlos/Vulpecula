@@ -11,6 +11,8 @@ import kotlin.reflect.KProperty
  */
 interface LiveData<out T> {
 
+    val isInitialized: Boolean
+
     fun getValue(): T
 
     fun getValueOrNull(): T?

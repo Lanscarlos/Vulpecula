@@ -19,14 +19,14 @@ class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>)
     /**
      * 是否已初始化
      * */
-    private var isInitialized = false
+    override val isInitialized
+        get() = source.isInitialized
 
     @Suppress("UNCHECKED_CAST")
     override fun getValue(): R {
         if (!isInitialized) {
             // 初始化
             value = transfer.apply(source.getValue())
-            isInitialized = true
         }
         return value as R
     }
@@ -35,14 +35,12 @@ class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>)
         if (!isInitialized) {
             // 初始化
             value = source.getValueOrNull()?.let(transfer::apply)
-            isInitialized = true
         }
         return value
     }
 
     override fun update() {
         this.source.update()
-        isInitialized = false
     }
 
 }

@@ -20,7 +20,7 @@ class DefaultLiveData<T>(val source: Supplier<Any?>, val transformer: Function<A
     /**
      * 是否已初始化
      * */
-    private var isInitialized = false
+    override var isInitialized = false
 
     @Suppress("UNCHECKED_CAST")
     override fun getValue(): T {
