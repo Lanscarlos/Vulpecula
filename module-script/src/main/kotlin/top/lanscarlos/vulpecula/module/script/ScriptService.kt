@@ -23,7 +23,6 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025/4/25 10:00
  */
-@Awake(LifeCycle.LOAD)
 object ScriptService {
 
     private val directory: File = File(getDataFolder(), "script")
