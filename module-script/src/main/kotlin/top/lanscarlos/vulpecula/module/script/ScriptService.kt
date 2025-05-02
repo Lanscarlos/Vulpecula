@@ -245,7 +245,8 @@ object ScriptService {
     }
 
     internal fun clearTask(pid: Long) {
-        tasks.remove(pid) ?: warning("Running task $pid not found.")
+//        tasks.remove(pid) ?: warning("Running task $pid not found.")
+        tasks.remove(pid) // 已完成的任务不会被追踪, 因此任务 pid 可能不一定存在
     }
 
     /**

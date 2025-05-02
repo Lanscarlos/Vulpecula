@@ -48,13 +48,15 @@ class NativeScript(override val id: String, source: String) : Script {
         val pid = ScriptService.nextPid()
         val startTime = System.currentTimeMillis()
         val context = BacikalService.executeLater(quest, sender, args)
-        val future = context.runActions().handle { result, ex ->
+        val future = context.runActions().handle { result, e ->
             ScriptService.clearTask(pid)
-            if (ex == null) {
+            if (e == null) {
                 onSucceeded.accept(result)
                 return@handle result
             }
-            return@handle onFailure.apply(ex.cause as BacikalRuntimeException)
+            val ex = e.cause as BacikalRuntimeException
+            ex.printKetherErrorMessage()
+            return@handle onFailure.apply(ex)
         }
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
     }
