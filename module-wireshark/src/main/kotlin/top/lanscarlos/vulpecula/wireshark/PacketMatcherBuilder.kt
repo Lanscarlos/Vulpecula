@@ -9,8 +9,8 @@ package top.lanscarlos.vulpecula.wireshark
  */
 class PacketMatcherBuilder {
 
-    fun build(): PacketMatcher {
-        return object : PacketMatcher {}
-    }
+//    fun build(): PacketMatcher {
+//        return object : PacketMatcher {}
+//    }
 
 }
