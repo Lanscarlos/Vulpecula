@@ -133,10 +133,10 @@ object ScriptService {
         id: String,
         player: Player,
         args: List<Any?>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): CompletableFuture<Any?> {
-        return run(get(id), adaptPlayer(player), args, onSucceeded, onFailure)
+        return run(get(id), adaptPlayer(player), args, onSuccess, onFailure)
     }
 
     /**
@@ -152,10 +152,10 @@ object ScriptService {
         id: String,
         player: Player,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): CompletableFuture<Any?> {
-        return run(get(id), adaptPlayer(player), args, onSucceeded, onFailure)
+        return run(get(id), adaptPlayer(player), args, onSuccess, onFailure)
     }
 
     /**
@@ -171,10 +171,10 @@ object ScriptService {
         id: String,
         sender: ProxyCommandSender?,
         args: List<Any?>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): CompletableFuture<Any?> {
-        return run(get(id), sender, args, onSucceeded, onFailure)
+        return run(get(id), sender, args, onSuccess, onFailure)
     }
 
     /**
@@ -190,10 +190,10 @@ object ScriptService {
         id: String,
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): CompletableFuture<Any?> {
-        return run(get(id), sender, args, onSucceeded, onFailure)
+        return run(get(id), sender, args, onSuccess, onFailure)
     }
 
     /**
@@ -208,10 +208,10 @@ object ScriptService {
         script: Script,
         sender: ProxyCommandSender?,
         args: List<Any?>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): CompletableFuture<Any?> {
-        return script.execute(sender, args, onSucceeded, onFailure).future
+        return script.execute(sender, args, onSuccess, onFailure).future
     }
 
     /**
@@ -226,10 +226,10 @@ object ScriptService {
         script: Script,
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): CompletableFuture<Any?> {
-        return script.execute(sender, args, onSucceeded, onFailure).future
+        return script.execute(sender, args, onSuccess, onFailure).future
     }
 
     /**
@@ -319,12 +319,12 @@ object ScriptService {
         }
 
         override fun onLoadCompleted(time: Double): String {
-            return console().asLangText("module-script-service-load-succeeded", scripts.size, time)
+            return console().asLangText("module-script-service-load-success", scripts.size, time)
         }
 
         override fun onLoadFailed(e: Throwable): String {
             e.printStackTrace()
-            return console().asLangText("module-script-service-load-failed", e.localizedMessage)
+            return console().asLangText("module-script-service-load-failure", e.localizedMessage)
         }
     }
 

@@ -28,7 +28,7 @@ class NativeScript(override val id: String, source: String) : Script {
     override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()
@@ -36,7 +36,7 @@ class NativeScript(override val id: String, source: String) : Script {
         for ((index, arg) in args.withIndex()) {
             wrappedArgs["arg$index"] = arg ?: continue
         }
-        return execute(sender, wrappedArgs, onSucceeded, onFailure)
+        return execute(sender, wrappedArgs, onSuccess, onFailure)
     }
 
     override fun execute(
@@ -55,8 +55,7 @@ class NativeScript(override val id: String, source: String) : Script {
                 return@handle result
             }
             val ex = e.cause as BacikalRuntimeException
-            ex.printKetherErrorMessage()
-            return@handle onFailure.apply(ex)
+            return@handle onFailure.apply(ex).also { ex.printKetherErrorMessage() }
         }
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
     }

@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.info
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.deepVars
@@ -54,7 +53,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
     override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()
@@ -75,7 +74,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             wrappedArgs[parameter.name] = parameter.applicative.convertOrThrow(arg)
         }
 
-        return run(sender, wrappedArgs, onSucceeded, onFailure)
+        return run(sender, wrappedArgs, onSuccess, onFailure)
     }
 
     override fun execute(
@@ -138,8 +137,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 return@handle result
             }
             val ex = e.cause as BacikalRuntimeException
-            ex.printKetherErrorMessage()
-            return@handle onFailure.apply(ex)
+            return@handle onFailure.apply(ex).also { ex.printKetherErrorMessage() }
         }
 
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
