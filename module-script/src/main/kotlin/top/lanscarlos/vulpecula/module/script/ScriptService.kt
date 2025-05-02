@@ -7,11 +7,14 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import java.io.File
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -127,8 +130,14 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, player: Player, args: List<Any?>): CompletableFuture<Any?> {
-        return run(get(id), adaptPlayer(player), args)
+    fun run(
+        id: String,
+        player: Player,
+        args: List<Any?>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
+        return run(get(id), adaptPlayer(player), args, onSucceeded, onFailure)
     }
 
     /**
@@ -140,8 +149,14 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, player: Player, args: Map<String, Any>): CompletableFuture<Any?> {
-        return run(get(id), adaptPlayer(player), args)
+    fun run(
+        id: String,
+        player: Player,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
+        return run(get(id), adaptPlayer(player), args, onSucceeded, onFailure)
     }
 
     /**
@@ -153,8 +168,14 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, sender: ProxyCommandSender?, args: List<Any?>): CompletableFuture<Any?> {
-        return run(get(id), sender, args)
+    fun run(
+        id: String,
+        sender: ProxyCommandSender?,
+        args: List<Any?>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
+        return run(get(id), sender, args, onSucceeded, onFailure)
     }
 
     /**
@@ -166,8 +187,14 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
-    fun run(id: String, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<Any?> {
-        return run(get(id), sender, args)
+    fun run(
+        id: String,
+        sender: ProxyCommandSender?,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
+        return run(get(id), sender, args, onSucceeded, onFailure)
     }
 
     /**
@@ -178,10 +205,14 @@ object ScriptService {
      * @param args 脚本参数
      * @return 运行结果
      * */
-    fun run(script: Script, sender: ProxyCommandSender?, args: List<Any?>): CompletableFuture<Any?> {
-        val task = script.execute(sender, args)
-        track(task)
-        return task.future
+    fun run(
+        script: Script,
+        sender: ProxyCommandSender?,
+        args: List<Any?>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
+        return script.execute(sender, args, onSucceeded, onFailure).future
     }
 
     /**
@@ -192,25 +223,29 @@ object ScriptService {
      * @param args 脚本参数
      * @return 运行结果
      * */
-    fun run(script: Script, sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<Any?> {
-        val task = script.execute(sender, args)
-        track(task)
-        return task.future
+    fun run(
+        script: Script,
+        sender: ProxyCommandSender?,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
+        return script.execute(sender, args, onSucceeded, onFailure).future
     }
 
     /**
      * 追踪运行的脚本
      * */
-    private fun track(task: ScriptTask) {
+    internal fun trackTask(task: ScriptTask) {
         if (task.isDone) {
             return
         }
         // 追踪正在运行的脚本
         tasks[task.pid] = task
-        (task as DefaultScriptTask).future = task.future.thenApply {
-            tasks.remove(task.pid) ?: warning("Running task ${task.pid} not found.")
-            return@thenApply it
-        }
+    }
+
+    internal fun clearTask(pid: Long) {
+        tasks.remove(pid) ?: warning("Running task $pid not found.")
     }
 
     /**

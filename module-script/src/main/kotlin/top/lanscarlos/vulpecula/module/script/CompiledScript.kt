@@ -1,16 +1,20 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.info
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.deepVars
 import top.lanscarlos.vulpecula.bacikal.BacikalService
+import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -47,7 +51,12 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         quest = buildQuest()
     }
 
-    override fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask {
+    override fun execute(
+        sender: ProxyCommandSender?,
+        args: List<Any?>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()
         wrappedArgs["args"] = args
         for ((index, arg) in args.withIndex()) {
@@ -66,10 +75,15 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             wrappedArgs[parameter.name] = parameter.applicative.convertOrThrow(arg)
         }
 
-        return run(sender, wrappedArgs)
+        return run(sender, wrappedArgs, onSucceeded, onFailure)
     }
 
-    override fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
+    override fun execute(
+        sender: ProxyCommandSender?,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask {
         // 参数校验
         val wrappedArgs = HashMap(args)
         for ((name, applicative, optional) in parameters) {
@@ -83,10 +97,15 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             wrappedArgs[name] = applicative.convertOrThrow(arg)
         }
 
-        return run(sender, args)
+        return run(sender, args, onSucceeded, onFailure)
     }
 
-    private fun run(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
+    private fun run(
+        sender: ProxyCommandSender?,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask {
         if (::quest.isInitialized.not()) {
             quest = buildQuest()
         }
@@ -100,16 +119,28 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             future = future.orTimeout(timeout, TimeUnit.MILLISECONDS)
         }
 
-        future = future.exceptionallyCompose { ex ->
-            val exceptionName = ex.javaClass.name
+        future = future.exceptionallyCompose { e ->
+            val ex = e.cause as BacikalRuntimeException
+            val exceptionName = ex.native.javaClass.name
             // 匹配异常处理
-            val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value ?: throw ex
+            val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value
+            if (quest == null) {
+                // 无异常处理
+                throw ex
+            }
             // 执行异常处理
             val exContext = BacikalService.executeLater(quest, sender, args.plus(context.rootFrame().deepVars()))
             exContext.runActions()
+        }.handle { result, ex ->
+            ScriptService.clearTask(pid)
+            if (ex == null) {
+                onSucceeded.accept(result)
+                return@handle result
+            }
+            return@handle onFailure.apply(ex.cause as BacikalRuntimeException)
         }
 
-        return DefaultScriptTask(pid, this, context, future, startTime)
+        return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
     }
 
     private fun buildQuest(): Quest {

@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.AbstractQuestContext
 import taboolib.library.kether.ParsedAction
@@ -102,22 +103,15 @@ object BacikalQuestExecutor {
             }
             this.varTable.initialize(this)
             this.future = process(CompletableFuture.completedFuture(null)).exceptionally { ex ->
-                ex.printKetherErrorMessage()
-                val action = currentAction().orElse(null)
-                val properties = action?.properties
-                warning("Error in action: ${action?.action?.javaClass?.name}; properties: $properties")
-                null
+                val action = currentAction().get()
+                val properties = action.properties
+                throw BacikalRuntimeException(action, properties, ex.cause!!)
             }
             return this.future as CompletableFuture<T>
         }
 
         private fun process(source: CompletableFuture<*>): CompletableFuture<Any?> {
-            var future = source
-            while (future.isDone) {
-                val next = nextAction() ?: return CompletableFuture.completedFuture(future.get())
-                future = next.process(this)
-            }
-            return future.thenCompose { result ->
+            return source.thenCompose { result ->
                 val action = nextAction() ?: return@thenCompose CompletableFuture.completedFuture(result)
                 val task = action.process(this)
                 process(task)

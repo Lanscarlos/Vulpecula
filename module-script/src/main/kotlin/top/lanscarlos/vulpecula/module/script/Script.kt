@@ -1,7 +1,9 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import java.io.File
+import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -14,8 +16,18 @@ interface Script {
 
     val id: String
 
-    fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask
+    fun execute(
+        sender: ProxyCommandSender?,
+        args: List<Any?>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask
 
-    fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask
+    fun execute(
+        sender: ProxyCommandSender?,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask
 
 }

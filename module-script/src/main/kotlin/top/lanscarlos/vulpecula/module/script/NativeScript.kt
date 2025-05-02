@@ -4,8 +4,11 @@ import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import top.lanscarlos.vulpecula.bacikal.BacikalService
+import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -22,21 +25,38 @@ class NativeScript(override val id: String, source: String) : Script {
 
     private val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
-    override fun execute(sender: ProxyCommandSender?, args: List<Any?>): ScriptTask {
+    override fun execute(
+        sender: ProxyCommandSender?,
+        args: List<Any?>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()
         wrappedArgs["args"] = args
         for ((index, arg) in args.withIndex()) {
             wrappedArgs["arg$index"] = arg ?: continue
         }
-        return execute(sender, wrappedArgs)
+        return execute(sender, wrappedArgs, onSucceeded, onFailure)
     }
 
-    override fun execute(sender: ProxyCommandSender?, args: Map<String, Any>): ScriptTask {
+    override fun execute(
+        sender: ProxyCommandSender?,
+        args: Map<String, Any>,
+        onSucceeded: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask {
         val pid = ScriptService.nextPid()
         val startTime = System.currentTimeMillis()
         val context = BacikalService.executeLater(quest, sender, args)
-        val future = context.runActions()
-        return DefaultScriptTask(pid, this, context, future, startTime)
+        val future = context.runActions().handle { result, ex ->
+            ScriptService.clearTask(pid)
+            if (ex == null) {
+                onSucceeded.accept(result)
+                return@handle result
+            }
+            return@handle onFailure.apply(ex.cause as BacikalRuntimeException)
+        }
+        return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
     }
 
 }

@@ -34,8 +34,18 @@ object ScriptCommand {
         dynamic("id") {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScriptService.run(id, sender, emptyMap())
                 sender.sendLang("module-script-command-run", id, sender.name, "[]")
+                ScriptService.run(
+                    id,
+                    sender,
+                    emptyMap(),
+                    onSucceeded = {
+                        sender.sendLang("module-script-command-run-succeeded", id, it.toString())
+                    },
+                    onFailure = { ex ->
+                        sender.sendLang("module-script-command-run-failed", id, ex.actionName, ex.actionDetails)
+                    }
+                )
             }
 
             dynamic("sender") {
@@ -43,8 +53,18 @@ object ScriptCommand {
                 execute<ProxyCommandSender> { sender, context, senderName ->
                     val id = context["id"]
                     val scriptSender = senderName.toSender(sender)
-                    ScriptService.run(id, scriptSender, emptyMap())
                     sender.sendLang("module-script-command-run", id, scriptSender?.name ?: "null", "[]")
+                    ScriptService.run(
+                        id,
+                        scriptSender,
+                        emptyMap(),
+                        onSucceeded = {
+                            sender.sendLang("module-script-command-run-succeeded", id, it.toString())
+                        },
+                        onFailure = { ex ->
+                            sender.sendLang("module-script-command-run-failed", id, ex.actionName, ex.actionDetails)
+                        }
+                    )
                 }
 
                 dynamic("args") {
@@ -52,8 +72,18 @@ object ScriptCommand {
                         val id = context["id"]
                         val scriptSender = context["sender"].toSender(sender)
                         val args = value.split(' ')
-                        ScriptService.run(id, scriptSender, args)
                         sender.sendLang("module-script-command-run", id, scriptSender?.name ?: "null", args)
+                        ScriptService.run(
+                            id,
+                            scriptSender,
+                            args,
+                            onSucceeded = {
+                                sender.sendLang("module-script-command-run-succeeded", id, it.toString())
+                            },
+                            onFailure = { ex ->
+                                sender.sendLang("module-script-command-run-failed", id, ex.actionName, ex.actionDetails)
+                            }
+                        )
                     }
                 }
             }
