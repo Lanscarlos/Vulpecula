@@ -1,4 +1,0 @@
-
-# Bacikal
-
-module-bacikal-runtime-exception-message: '执行到语句 {0} 时出现异常: {1}, 语句详情 {2}.'

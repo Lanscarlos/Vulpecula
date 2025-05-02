@@ -11,7 +11,6 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import java.io.File
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.function.Function
 
@@ -80,7 +79,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
     override fun execute(
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
         // 参数校验
@@ -96,29 +95,22 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             wrappedArgs[name] = applicative.convertOrThrow(arg)
         }
 
-        return run(sender, args, onSucceeded, onFailure)
+        return run(sender, args, onSuccess, onFailure)
     }
 
     private fun run(
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
         if (::quest.isInitialized.not()) {
             quest = buildQuest()
         }
         val pid = ScriptService.nextPid()
-        val context = BacikalService.executeLater(quest, sender, args)
-        var future: CompletableFuture<Any?> = context.runActions()
+        val context = BacikalService.executeLater(quest, timeout, sender, args)
         val startTime = System.currentTimeMillis()
-
-        // 注入超时检测
-        if (timeout > 0) {
-            future = future.orTimeout(timeout, TimeUnit.MILLISECONDS)
-        }
-
-        future = future.exceptionallyCompose { e ->
+        val future: CompletableFuture<Any?> = context.runActions().exceptionallyCompose { e ->
             val ex = e.cause as BacikalRuntimeException
             val exceptionName = ex.native.javaClass.name
             // 匹配异常处理
@@ -128,16 +120,16 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 throw ex
             }
             // 执行异常处理
-            val exContext = BacikalService.executeLater(quest, sender, args.plus(context.rootFrame().deepVars()))
+            val exContext = BacikalService.executeLater(quest, timeout, sender, args.plus(context.rootFrame().deepVars()))
             exContext.runActions()
         }.handle { result, e ->
             ScriptService.clearTask(pid)
             if (e == null) {
-                onSucceeded.accept(result)
+                onSuccess.accept(result)
                 return@handle result
             }
             val ex = e.cause as BacikalRuntimeException
-            return@handle onFailure.apply(ex).also { ex.printKetherErrorMessage() }
+            return@handle onFailure.apply(ex).also { ex.printKetherMessage() }
         }
 
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)

@@ -26,7 +26,7 @@ interface Script {
     fun execute(
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask
 

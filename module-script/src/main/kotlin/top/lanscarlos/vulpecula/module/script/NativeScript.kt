@@ -42,20 +42,20 @@ class NativeScript(override val id: String, source: String) : Script {
     override fun execute(
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
-        onSucceeded: Consumer<Any?>,
+        onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
         val pid = ScriptService.nextPid()
         val startTime = System.currentTimeMillis()
-        val context = BacikalService.executeLater(quest, sender, args)
+        val context = BacikalService.executeLater(quest, -1L, sender, args)
         val future = context.runActions().handle { result, e ->
             ScriptService.clearTask(pid)
             if (e == null) {
-                onSucceeded.accept(result)
+                onSuccess.accept(result)
                 return@handle result
             }
             val ex = e.cause as BacikalRuntimeException
-            return@handle onFailure.apply(ex).also { ex.printKetherErrorMessage() }
+            return@handle onFailure.apply(ex).also { ex.printKetherMessage() }
         }
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
     }

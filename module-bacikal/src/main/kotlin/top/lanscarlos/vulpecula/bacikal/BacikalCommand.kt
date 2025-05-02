@@ -23,7 +23,7 @@ object BacikalCommand {
                  try {
                      val source = if (!content.startsWith("def")) "def main = { $content }" else content
                      val quest = BacikalQuestCompiler.compile(source, "eval", emptyList())
-                     BacikalQuestExecutor.execute(quest, "main", sender, emptyMap()).handle { result, ex ->
+                     BacikalQuestExecutor.execute(quest, "main", -1L, sender, emptyMap()).handle { result, ex ->
                          if (ex != null) {
                              sender.sendMessage(" §5§l‹ ›§r §cException: §f${ex.localizedMessage}")
                              ex.printKetherErrorMessage()

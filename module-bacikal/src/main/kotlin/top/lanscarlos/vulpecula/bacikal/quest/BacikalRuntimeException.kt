@@ -12,7 +12,7 @@ import taboolib.module.lang.asLangText
  * @author Lanscarlos
  * @since 2025-05-02 10:54
  */
-class BacikalRuntimeException(
+open class BacikalRuntimeException(
     val action: ParsedAction<*>,
     properties: Map<String, Any>,
     val native: Throwable
@@ -26,11 +26,7 @@ class BacikalRuntimeException(
 
     val actionDetails = properties["bacikal-content"].toString()
 
-    override fun getLocalizedMessage(): String {
-        return console().asLangText("module-bacikal-runtime-exception-message", actionName, message, actionDetails)
-    }
-
-    fun printKetherErrorMessage(detailError: Boolean = false) {
+    open fun printKetherMessage(detailError: Boolean = false) {
         native.printKetherErrorMessage(detailError)
     }
 

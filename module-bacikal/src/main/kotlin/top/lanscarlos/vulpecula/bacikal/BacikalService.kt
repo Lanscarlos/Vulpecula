@@ -45,8 +45,8 @@ object BacikalService {
      * @param sender 执行者
      * @param args 参数
      */
-    fun execute(quest: Quest, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
-        return execute(quest, "main", sender, args)
+    fun execute(quest: Quest, timeout: Long, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
+        return execute(quest, "main", timeout, sender, args)
     }
 
     /**
@@ -57,8 +57,8 @@ object BacikalService {
      * @param sender 执行者
      * @param args 参数
      */
-    fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
-        return BacikalQuestExecutor.execute(quest, main, sender, args)
+    fun execute(quest: Quest, main: String, timeout: Long, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
+        return BacikalQuestExecutor.execute(quest, main, timeout, sender, args)
     }
 
     /**
@@ -66,8 +66,8 @@ object BacikalService {
      *
      * @param quest 任务
      */
-    fun execute(quest: Quest, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
-        return execute(quest, "main", func)
+    fun execute(quest: Quest, timeout: Long, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
+        return execute(quest, "main", timeout, func)
     }
 
     /**
@@ -76,8 +76,8 @@ object BacikalService {
      * @param quest 任务
      * @param main 入口函数
      */
-    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
-        return BacikalQuestExecutor.execute(quest, main, func)
+    fun execute(quest: Quest, main: String, timeout: Long, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
+        return BacikalQuestExecutor.execute(quest, main, timeout, func)
     }
 
     /**
@@ -87,8 +87,8 @@ object BacikalService {
      * @param sender 执行者
      * @param args 参数
      */
-    fun executeLater(quest: Quest, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
-        return executeLater(quest, "main", sender, args)
+    fun executeLater(quest: Quest, timeout: Long, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
+        return executeLater(quest, "main", timeout, sender, args)
     }
 
     /**
@@ -99,8 +99,8 @@ object BacikalService {
      * @param sender 执行者
      * @param args 参数
      */
-    fun executeLater(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
-        return BacikalQuestExecutor.executeLater(quest, main, sender, args)
+    fun executeLater(quest: Quest, main: String, timeout: Long, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
+        return BacikalQuestExecutor.executeLater(quest, main, timeout, sender, args)
     }
 
     /**
@@ -108,8 +108,8 @@ object BacikalService {
      *
      * @param quest 任务
      */
-    fun executeLater(quest: Quest, func: (ScriptContext) -> Unit): ScriptContext {
-        return executeLater(quest, "main", func)
+    fun executeLater(quest: Quest, timeout: Long, func: (ScriptContext) -> Unit): ScriptContext {
+        return executeLater(quest, "main", timeout, func)
     }
 
     /**
@@ -118,8 +118,8 @@ object BacikalService {
      * @param quest 任务
      * @param main 入口函数
      */
-    fun executeLater(quest: Quest, main: String, func: (ScriptContext) -> Unit): ScriptContext {
-        return BacikalQuestExecutor.executeLater(quest, main, func)
+    fun executeLater(quest: Quest, main: String, timeout: Long, func: (ScriptContext) -> Unit): ScriptContext {
+        return BacikalQuestExecutor.executeLater(quest, main, timeout, func)
     }
 
 }

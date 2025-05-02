@@ -43,7 +43,7 @@ object ScriptCommand {
                         sender.sendLang("module-script-command-run-success", id, it.toString())
                     },
                     onFailure = { ex ->
-                        failure(sender, id, ex.actionName, ex.actionDetails)
+                        failure(sender, id, ex.actionName, ex.actionDetails, ex.localizedMessage)
                     }
                 )
             }
@@ -62,7 +62,7 @@ object ScriptCommand {
                             sender.sendLang("module-script-command-run-success", id, it.toString())
                         },
                         onFailure = { ex ->
-                            failure(sender, id, ex.actionName, ex.actionDetails)
+                            failure(sender, id, ex.actionName, ex.actionDetails, ex.localizedMessage)
                         }
                     )
                 }
@@ -81,7 +81,7 @@ object ScriptCommand {
                                 sender.sendLang("module-script-command-run-success", id, it.toString())
                             },
                             onFailure = { ex ->
-                                failure(sender, id, ex.actionName, ex.actionDetails)
+                                failure(sender, id, ex.actionName, ex.actionDetails, ex.localizedMessage)
                             }
                         )
                     }
@@ -127,8 +127,8 @@ object ScriptCommand {
         }
     }
 
-    private fun failure(sender: ProxyCommandSender, scriptId: String, action: String, details: String) {
-        val text = sender.asLangText("module-script-command-run-failure", scriptId, action, details)
+    private fun failure(sender: ProxyCommandSender, scriptId: String, action: String, location: String, details: String) {
+        val text = sender.asLangText("module-script-command-run-failure", scriptId, action, location, details)
         for (line in text.split('\n')) {
             sender.sendMessage(line)
         }

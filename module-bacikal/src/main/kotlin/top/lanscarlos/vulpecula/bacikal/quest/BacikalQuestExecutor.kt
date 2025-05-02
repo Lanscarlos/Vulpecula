@@ -10,6 +10,9 @@ import taboolib.library.kether.QuestContext
 import taboolib.module.kether.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * Vulpecula
@@ -20,16 +23,16 @@ import java.util.concurrent.CompletableFuture
  */
 object BacikalQuestExecutor {
 
-    fun execute(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
-        return executeLater(quest, main, sender, args).runActions()
+    fun execute(quest: Quest, main: String, timeout: Long, sender: ProxyCommandSender?, args: Map<String, Any?>): CompletableFuture<Any?> {
+        return executeLater(quest, main, timeout, sender, args).runActions()
     }
 
-    fun execute(quest: Quest, main: String, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
-        return executeLater(quest, main, func).runActions()
+    fun execute(quest: Quest, main: String, timeout: Long, func: (ScriptContext) -> Unit): CompletableFuture<Any?> {
+        return executeLater(quest, main, timeout, func).runActions()
     }
 
-    fun executeLater(quest: Quest, main: String, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
-        return executeLater(quest, main) {
+    fun executeLater(quest: Quest, main: String, timeout: Long, sender: ProxyCommandSender?, args: Map<String, Any?>): ScriptContext {
+        return executeLater(quest, main, timeout) {
             it.sender = sender
             for (entry in args) {
                 it[entry.key] = entry.value
@@ -37,10 +40,10 @@ object BacikalQuestExecutor {
         }
     }
 
-    fun executeLater(quest: Quest, main: String, func: (ScriptContext) -> Unit): ScriptContext {
+    fun executeLater(quest: Quest, main: String, timeout: Long, func: (ScriptContext) -> Unit): ScriptContext {
         val context = object : ScriptContext(ScriptService, quest) {
             override fun createRootFrame(): QuestContext.Frame {
-                return QuestExecutorFrame(this, main)
+                return QuestExecutorFrame(this, main, timeout)
             }
         }
         return context.also(func)
@@ -50,7 +53,12 @@ object BacikalQuestExecutor {
      * 海螺爹永远是你爹
      * @see taboolib.library.kether.AbstractQuestContext.SimpleNamedFrame
      * */
-    class QuestExecutorFrame(context: ScriptContext, private val main: String) : AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
+    class QuestExecutorFrame(
+        context: ScriptContext,
+        private val main: String,
+        val timeout: Long
+    ) :
+        AbstractQuestContext.AbstractFrame(null, LinkedList(), AbstractQuestContext.SimpleVarTable(null), context) {
 
         var currentblock: Quest.Block? = null
         var nextBlock: Quest.Block? = null
@@ -102,10 +110,26 @@ object BacikalQuestExecutor {
                 error("Already running.")
             }
             this.varTable.initialize(this)
-            this.future = process(CompletableFuture.completedFuture(null)).exceptionally { ex ->
-                val action = currentAction().get()
-                val properties = action.properties
-                throw BacikalRuntimeException(action, properties, ex.cause!!)
+            this.future = process(CompletableFuture.completedFuture(null))
+            if (timeout > 0) {
+                this.future = this.future.orTimeout(timeout, TimeUnit.MILLISECONDS)
+            }
+            this.future = this.future.exceptionally { ex ->
+                when (ex) {
+                    is TimeoutException -> {
+                        val action = currentAction().get()
+                        val properties = action.properties
+                        throw BacikalTimeoutException(action, properties, ex, timeout)
+                    }
+                    is CompletionException -> {
+                        val action = currentAction().get()
+                        val properties = action.properties
+                        throw BacikalRuntimeException(action, properties, ex.cause!!)
+                    }
+                    else -> {
+                        error("Unexpected exception: ${ex.javaClass.name}")
+                    }
+                }
             }
             return this.future as CompletableFuture<T>
         }
