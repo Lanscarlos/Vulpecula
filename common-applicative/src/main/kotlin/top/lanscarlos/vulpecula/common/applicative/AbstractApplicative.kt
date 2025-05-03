@@ -13,7 +13,7 @@ import taboolib.library.reflex.Reflex.Companion.setProperty
  */
 abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
 
-    override val name: String = clazz.canonicalName.lowercase()
+    override val name: String = clazz.simpleName.lowercase()
 
     override val aliases: Array<String> = emptyArray()
 
