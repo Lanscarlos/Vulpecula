@@ -43,7 +43,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     val exceptions: Map<String, Quest> by config.read("exceptions").convert(::parseException)
 
-    private lateinit var quest: Quest
+    private var quest: Quest = buildQuest()
 
     fun rebuild() {
         quest = buildQuest()
@@ -104,15 +104,12 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
-        if (::quest.isInitialized.not()) {
-            quest = buildQuest()
-        }
         val pid = ScriptService.nextPid()
         val context = BacikalService.executeLater(quest, timeout, sender, args)
         val startTime = System.currentTimeMillis()
         val future: CompletableFuture<Any?> = context.runActions().exceptionallyCompose { e ->
             val ex = e.cause as BacikalRuntimeException
-            val exceptionName = ex.native.javaClass.name
+            val exceptionName = ex.cause.javaClass.name
             // 匹配异常处理
             val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value
             if (quest == null) {
@@ -143,23 +140,23 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
         // 构建自定义参数
         for ((name, value) in variables) {
-            builder.append("set $name to $value").append('\n')
+            builder.appendIndent("set $name to $value", 1).append('\n')
         }
 
         // 构建函数体
         if (condition.isNotBlank()) {
             builder
-                .append("if {").append('\n')
-                .append(condition).append('\n')
-                .append("} then {").append('\n')
-            builder.append(main).append('\n')
+                .appendIndent("if {", 1).append('\n')
+                .appendIndent(condition, 2).append('\n')
+                .appendIndent("} then {", 1).append('\n')
+            builder.appendIndent(main, 2).append('\n')
             if (deny.isNotBlank()) {
-                builder.append("} else {").append('\n')
-                builder.append(deny).append('\n')
+                builder.appendIndent("} else {", 1).append('\n')
+                builder.appendIndent(deny, 2).append('\n')
             }
-            builder.append("}").append('\n')
+            builder.appendIndent("}", 1).append('\n')
         } else {
-            builder.append(main).append('\n')
+            builder.appendIndent(main, 1).append('\n')
         }
 
         // 构建函数尾
@@ -172,7 +169,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 .append("def ")
                 .append(key)
                 .append(" = {").append('\n')
-                .append(value).append('\n')
+                .appendIndent(value, 1).append('\n')
                 .append("}").append('\n')
         }
 
@@ -268,6 +265,19 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             else -> error("Unsupported exception type: ${value::class.java.name}")
         }
         return map.mapValues { (key, value) -> BacikalService.compile(value, "$id-exception-$key", namespace) }
+    }
+
+    private fun StringBuilder.appendIndent(value: String, indent: Int): StringBuilder {
+        val lines = value.trim().split('\n')
+        val space = "    ".repeat(indent)
+        for ((index, line) in lines.withIndex()) {
+            append(space)
+            append(line)
+            if (index != lines.lastIndex) {
+                append('\n')
+            }
+        }
+        return this
     }
 
 }

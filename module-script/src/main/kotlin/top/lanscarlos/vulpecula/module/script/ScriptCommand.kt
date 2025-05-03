@@ -43,7 +43,7 @@ object ScriptCommand {
                         sender.sendLang("module-script-command-run-success", id, it.toString())
                     },
                     onFailure = { ex ->
-                        failure(sender, id, ex.actionName, ex.actionDetails, ex.localizedMessage)
+                        failure(sender, id, ex.header, ex.location, ex.localizedMessage)
                     }
                 )
             }
@@ -62,7 +62,7 @@ object ScriptCommand {
                             sender.sendLang("module-script-command-run-success", id, it.toString())
                         },
                         onFailure = { ex ->
-                            failure(sender, id, ex.actionName, ex.actionDetails, ex.localizedMessage)
+                            failure(sender, id, ex.header, ex.location, ex.localizedMessage)
                         }
                     )
                 }
@@ -81,7 +81,7 @@ object ScriptCommand {
                                 sender.sendLang("module-script-command-run-success", id, it.toString())
                             },
                             onFailure = { ex ->
-                                failure(sender, id, ex.actionName, ex.actionDetails, ex.localizedMessage)
+                                failure(sender, id, ex.header, ex.location, ex.localizedMessage)
                             }
                         )
                     }
@@ -136,8 +136,10 @@ object ScriptCommand {
 
     private val reload: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val log = ScriptService.reload()
-            sender.sendMessage(log)
+            val logs = ScriptService.reload().logs
+            for (log in logs) {
+                sender.sendMessage(log)
+            }
         }
     }
 

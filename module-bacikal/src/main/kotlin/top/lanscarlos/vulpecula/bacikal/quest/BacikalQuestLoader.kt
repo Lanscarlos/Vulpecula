@@ -8,6 +8,7 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
+import java.util.*
 
 /**
  * Vulpecula
@@ -20,10 +21,12 @@ class BacikalQuestLoader : SimpleQuestLoader() {
 
     private lateinit var reader: InnerReader
 
-    fun getLoadMessage(): List<String> {
-        val lines = (reader.previousLines() + reader.nextLine()).filter { it.isNotBlank() }
-        val startIndex = (lines.size - 3).coerceAtLeast(0)
-        return List(3) { lines.getOrNull(startIndex + it) ?: "" }
+    fun getParsedMessage(): String {
+        return reader.parsedContent()
+    }
+
+    fun getUnparseMessage(): String {
+        return reader.unparseContent()
     }
 
     override fun newBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>): BlockReader {
@@ -41,18 +44,12 @@ class BacikalQuestLoader : SimpleQuestLoader() {
      * */
     inner class InnerReader(service: QuestService<*>, reader: BlockReader, namespace: MutableList<String>) : SimpleReader(service, reader, namespace) {
 
-        fun previousLines(): List<String> {
-            return String(content, 0, index).split('\n')
+        fun parsedContent(): String {
+            return String(content, 0, index)
         }
 
-        fun nextLine(): String {
-            val startIndex = this.index
-            var index = startIndex
-            while (index < content.size && content[index] != '\n') {
-                index++
-            }
-            val length = index - startIndex
-            return String(content, startIndex, length)
+        fun unparseContent(): String {
+            return String(content, index, content.size - index)
         }
 
         override fun nextToken(): String {

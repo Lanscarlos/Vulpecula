@@ -7,7 +7,9 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.bacikal.quest.BacikalCompileException
 import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
+import top.lanscarlos.vulpecula.common.config.ConfigLoadContext
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
@@ -15,6 +17,7 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
+import kotlin.math.min
 
 /**
  * Vulpecula
@@ -275,8 +278,10 @@ object ScriptService {
     /**
      * 重载服务
      * */
-    fun reload(): String {
-        return service.load()
+    fun reload(): ConfigLoadContext {
+        val context = ConfigLoadContext()
+        service.load(context)
+        return context
     }
 
     internal fun nextPid(): Long {
@@ -285,11 +290,11 @@ object ScriptService {
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(id: String, file: File) {
+        override fun onFileDeleted(context: ConfigLoadContext, id: String, file: File) {
             scripts.remove(id)
         }
 
-        override fun onFileCreated(id: String, file: File) {
+        override fun onFileCreated(context: ConfigLoadContext, id: String, file: File) {
             val script = when (file.extension) {
                 "ks" -> NativeScript(id, file)
                 "yml", "yaml" -> CompiledScript(id, Configuration.loadFromFile(file))
@@ -298,11 +303,11 @@ object ScriptService {
             scripts[id] = script
         }
 
-        override fun onFileModified(id: String, file: File) {
+        override fun onFileModified(context: ConfigLoadContext, id: String, file: File) {
             when (val script = scripts[id]!!) {
                 is NativeScript -> {
                     // 直接重新创建
-                    onFileCreated(id, file)
+                    onFileCreated(context, id, file)
                 }
                 is CompiledScript -> {
                     // 刷新配置
@@ -314,17 +319,57 @@ object ScriptService {
             }
         }
 
-        override fun onLoadInit(directory: File) {
+        override fun onLoadInit(context: ConfigLoadContext, directory: File) {
             releaseResourceFolder("script")
         }
 
-        override fun onLoadCompleted(time: Double): String {
-            return console().asLangText("module-script-service-load-success", scripts.size, time)
+        override fun onLoadCompleted(context: ConfigLoadContext, time: Double) {
+            context.logs += console().asLangText("module-script-service-load-success", scripts.size, time)
         }
 
-        override fun onLoadFailed(e: Throwable): String {
-            e.printStackTrace()
-            return console().asLangText("module-script-service-load-failure", e.localizedMessage)
+        override fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable) {
+            when (e) {
+                is BacikalCompileException -> {
+                    context.logs += console().asLangText("module-script-service-load-failure", id).split('\n')
+                    context.logs += console().asLangText("module-script-service-load-failure-reason", e.localizedMessage)
+                    val builder = StringBuilder(console().asLangText("module-script-service-load-failure-detail"))
+                    val parsed = e.parsedContent.split('\n').filter { it.isNotEmpty() }
+                    val unparse = e.unparseContent.split('\n').filter { it.isNotEmpty() }
+                    var index = 0
+                    for (i in 0 until 2) {
+                        val line = parsed.getOrNull(parsed.size - 3 + i) ?: continue
+                        val displayIndex = String.format("%3d", ++index)
+                        val color = console().asLangText("module-script-service-load-failure-detail-parsed")
+                        val content = console().asLangText("module-script-service-load-failure-detail-format", displayIndex, color + line)
+                        builder.append('\n').append(content)
+                    }
+                    also {
+                        val line = parsed.lastOrNull() ?: return@also
+                        val displayIndex = String.format("%3d", ++index)
+                        val color = console().asLangText("module-script-service-load-failure-detail-warning")
+                        val content = console().asLangText("module-script-service-load-failure-detail-format", displayIndex, color + line)
+                        builder.append('\n').append(content)
+                    }
+                    println("unparse >> $unparse")
+                    for (i in 0 .. 5 - index) {
+                        val line = unparse.getOrNull(i) ?: break
+                        println("i >> $i")
+                        if (i == 0) {
+                            val color = console().asLangText("module-script-service-load-failure-detail-error")
+                            builder.append(color).append(line)
+                            continue
+                        }
+                        val displayIndex = String.format("%3d", i + index)
+                        val color = console().asLangText("module-script-service-load-failure-detail-error")
+                        val content = console().asLangText("module-script-service-load-failure-detail-format", displayIndex, color + line)
+                        builder.append('\n').append(content)
+                    }
+                    context.logs += builder.toString()
+                }
+                else -> {
+                    context.logs += console().asLangText("module-script-service-load-failure", e.localizedMessage)
+                }
+            }
         }
     }
 

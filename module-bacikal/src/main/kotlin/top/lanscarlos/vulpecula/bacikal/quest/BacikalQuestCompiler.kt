@@ -35,7 +35,7 @@ object BacikalQuestCompiler {
                 listOf("vulpecula", *namespace.toTypedArray()).distinct() // 命名空间去重
             )
         } catch (ex: Exception) {
-            throw BacikalCompileException(ex, loader.getLoadMessage())
+            throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage())
         }
     }
 
