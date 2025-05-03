@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.library.kether.ParsedAction
+import taboolib.library.kether.Quest
 import taboolib.module.kether.printKetherErrorMessage
 
 /**
@@ -12,9 +13,10 @@ import taboolib.module.kether.printKetherErrorMessage
  */
 class BacikalTimeoutException(
     cause: Throwable,
+    quest: Quest,
     properties: Map<String, Any>,
     timeout: Long
-) : BacikalRuntimeException(cause, properties) {
+) : BacikalRuntimeException(cause, quest, properties) {
 
     override val message: String = "Timeout ${timeout}ms"
 

@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.*
 import taboolib.library.reflex.Reflex.Companion.setProperty
@@ -8,7 +7,6 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
-import java.util.*
 
 /**
  * Vulpecula
@@ -135,6 +133,7 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             val properties = mutableMapOf<String, Any>()
             properties["bacikal-header"] = token
             properties["bacikal-content"] = content
+            properties["bacikal-line"] = lineOf(this.content, startIndex)
             if (parser != null) {
                 properties["bacikal-parser"] = parser.javaClass.name
             }
@@ -149,6 +148,16 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             warning("Calling wrap(action: QuestAction<T>?) in InnerReader is not allowed.")
             val properties = mutableMapOf<String, Any>()
             return ParsedAction(action, properties)
+        }
+
+        private fun lineOf(chars: CharArray, index: Int): Int {
+            var line = 0
+            for (i in 0 until index) {
+                if (chars[i] == '\n') {
+                    ++line
+                }
+            }
+            return line
         }
     }
 

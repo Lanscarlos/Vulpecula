@@ -42,7 +42,7 @@ class BacikalCompileException(cause: Throwable, parsedContent: String, unparseCo
     /**
      * 获取报错原因信息
      * */
-    fun getErrorReason(): String {
+    fun getErrorReasonMessage(): String {
         return console().asLangText("module-bacikal-service-compile-failure-reason", localizedMessage)
     }
 

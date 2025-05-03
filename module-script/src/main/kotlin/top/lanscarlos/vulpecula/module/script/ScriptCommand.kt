@@ -43,7 +43,10 @@ object ScriptCommand {
                         sender.sendLang("module-script-command-run-success", id, it.toString())
                     },
                     onFailure = { ex ->
-                        failure(sender, id, ex.header, ex.location, ex.localizedMessage)
+                        sender.sendLang("module-script-command-run-failure", id)
+                        sender.sendMessage(ex.getErrorActionMessage())
+                        sender.sendMessage(ex.getErrorReasonMessage())
+                        sender.sendMessage(ex.getErrorDetailMessage())
                     }
                 )
             }
@@ -62,7 +65,10 @@ object ScriptCommand {
                             sender.sendLang("module-script-command-run-success", id, it.toString())
                         },
                         onFailure = { ex ->
-                            failure(sender, id, ex.header, ex.location, ex.localizedMessage)
+                            sender.sendLang("module-script-command-run-failure", id)
+                            sender.sendMessage(ex.getErrorActionMessage())
+                            sender.sendMessage(ex.getErrorReasonMessage())
+                            sender.sendMessage(ex.getErrorDetailMessage())
                         }
                     )
                 }
@@ -81,7 +87,10 @@ object ScriptCommand {
                                 sender.sendLang("module-script-command-run-success", id, it.toString())
                             },
                             onFailure = { ex ->
-                                failure(sender, id, ex.header, ex.location, ex.localizedMessage)
+                                sender.sendLang("module-script-command-run-failure", id)
+                                sender.sendMessage(ex.getErrorActionMessage())
+                                sender.sendMessage(ex.getErrorReasonMessage())
+                                sender.sendMessage(ex.getErrorDetailMessage())
                             }
                         )
                     }
@@ -124,13 +133,6 @@ object ScriptCommand {
                     sender.sendMessage(footer)
                 }
             }
-        }
-    }
-
-    private fun failure(sender: ProxyCommandSender, scriptId: String, action: String, location: String, details: String) {
-        val text = sender.asLangText("module-script-command-run-failure", scriptId, action, location, details)
-        for (line in text.split('\n')) {
-            sender.sendMessage(line)
         }
     }
 

@@ -116,12 +116,12 @@ object BacikalQuestExecutor {
                     is TimeoutException -> {
                         val action = currentAction().get()
                         val properties = action.properties
-                        throw BacikalTimeoutException(ex, properties, timeout)
+                        throw BacikalTimeoutException(ex, context().quest, properties, timeout)
                     }
                     is CompletionException -> {
                         val action = currentAction().get()
                         val properties = action.properties
-                        throw BacikalRuntimeException(ex.cause!!, properties)
+                        throw BacikalRuntimeException(ex.cause!!, context().quest, properties)
                     }
                     else -> {
                         error("Unexpected exception: ${ex.javaClass.name}")

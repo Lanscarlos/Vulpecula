@@ -17,7 +17,6 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
-import kotlin.math.min
 
 /**
  * Vulpecula
@@ -331,7 +330,7 @@ object ScriptService {
             when (e) {
                 is BacikalCompileException -> {
                     context.logs += console().asLangText("module-script-service-load-failure", id)
-                    context.logs += e.getErrorReason()
+                    context.logs += e.getErrorReasonMessage()
                     context.logs += e.getErrorDetailMessage()
                 }
                 else -> {

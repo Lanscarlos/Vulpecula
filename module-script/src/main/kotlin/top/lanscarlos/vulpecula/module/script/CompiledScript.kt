@@ -126,7 +126,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
                 return@handle result
             }
             val ex = e.cause as BacikalRuntimeException
-            return@handle onFailure.apply(ex).also { ex.printKetherMessage() }
+            ex.printKetherMessage()
+            return@handle onFailure.apply(ex)
         }
 
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
