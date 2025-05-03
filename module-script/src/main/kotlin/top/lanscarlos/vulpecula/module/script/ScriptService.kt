@@ -330,41 +330,9 @@ object ScriptService {
         override fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable) {
             when (e) {
                 is BacikalCompileException -> {
-                    context.logs += console().asLangText("module-script-service-load-failure", id).split('\n')
-                    context.logs += console().asLangText("module-script-service-load-failure-reason", e.localizedMessage)
-                    val builder = StringBuilder(console().asLangText("module-script-service-load-failure-detail"))
-                    val parsed = e.parsedContent.split('\n').filter { it.isNotEmpty() }
-                    val unparse = e.unparseContent.split('\n').filter { it.isNotEmpty() }
-                    var index = 0
-                    for (i in 0 until 2) {
-                        val line = parsed.getOrNull(parsed.size - 3 + i) ?: continue
-                        val displayIndex = String.format("%3d", ++index)
-                        val color = console().asLangText("module-script-service-load-failure-detail-parsed")
-                        val content = console().asLangText("module-script-service-load-failure-detail-format", displayIndex, color + line)
-                        builder.append('\n').append(content)
-                    }
-                    also {
-                        val line = parsed.lastOrNull() ?: return@also
-                        val displayIndex = String.format("%3d", ++index)
-                        val color = console().asLangText("module-script-service-load-failure-detail-warning")
-                        val content = console().asLangText("module-script-service-load-failure-detail-format", displayIndex, color + line)
-                        builder.append('\n').append(content)
-                    }
-                    println("unparse >> $unparse")
-                    for (i in 0 .. 5 - index) {
-                        val line = unparse.getOrNull(i) ?: break
-                        println("i >> $i")
-                        if (i == 0) {
-                            val color = console().asLangText("module-script-service-load-failure-detail-error")
-                            builder.append(color).append(line)
-                            continue
-                        }
-                        val displayIndex = String.format("%3d", i + index)
-                        val color = console().asLangText("module-script-service-load-failure-detail-error")
-                        val content = console().asLangText("module-script-service-load-failure-detail-format", displayIndex, color + line)
-                        builder.append('\n').append(content)
-                    }
-                    context.logs += builder.toString()
+                    context.logs += console().asLangText("module-script-service-load-failure", id)
+                    context.logs += e.getErrorReason()
+                    context.logs += e.getErrorDetailMessage()
                 }
                 else -> {
                     context.logs += console().asLangText("module-script-service-load-failure", e.localizedMessage)

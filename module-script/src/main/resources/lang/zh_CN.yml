@@ -3,12 +3,6 @@
 
 module-script-service-load-success: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个脚本 &8({0}ms)'
 module-script-service-load-failure: '&8[&3Vul&bpecula&8] &c错误 &8|&7 脚本 &a{0}&7 加载失败！'
-module-script-service-load-failure-reason: '&8[&3Vul&bpecula&8] &c错误 &8|&7 异常原因: &e{0}'
-module-script-service-load-failure-detail: '&8[&3Vul&bpecula&8] &c错误 &8|&7 异常位置:'
-module-script-service-load-failure-detail-format: '&7 {0} &8|&7 {1}'
-module-script-service-load-failure-detail-parsed: '&a'
-module-script-service-load-failure-detail-warning: '&e'
-module-script-service-load-failure-detail-error: '&c'
 module-script-command-run: '&8[&3Vul&bpecula&8] &a良好 &8|&7 正在运行脚本 &a{0}&7. 执行者 &a{1}&7, 参数 &a{2}&7'
 module-script-command-run-success: '&8[&3Vul&bpecula&8] &a良好 &8|&7 脚本 &a{0}&7 运行成功. 运行结果: &a{1}&7'
 module-script-command-run-failure: |-
