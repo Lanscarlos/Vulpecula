@@ -11,11 +11,10 @@ import taboolib.module.kether.printKetherErrorMessage
  * @since 2025-05-02 20:04
  */
 class BacikalTimeoutException(
-    action: ParsedAction<*>,
+    cause: Throwable,
     properties: Map<String, Any>,
-    native: Throwable,
-    private val timeout: Long
-) : BacikalRuntimeException(action, properties, native) {
+    timeout: Long
+) : BacikalRuntimeException(cause, properties) {
 
     override val message: String = "Timeout ${timeout}ms"
 

@@ -1,63 +1,59 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.*
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.kether.Kether
-import taboolib.module.kether.ScriptService
 import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
-import java.io.File
-import java.nio.charset.StandardCharsets
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.bacikal.quest
  *
  * @author Lanscarlos
- * @since 2024-11-23 12:48
+ * @since 2025-05-03 13:55
  */
-object BacikalQuestCompiler {
+class BacikalQuestLoader : SimpleQuestLoader() {
 
-    fun compile(source: File, namespace: List<String>): Quest {
-        return compile(source.readText(StandardCharsets.UTF_8), source.name, namespace)
+    private lateinit var reader: InnerReader
+
+    fun getLoadMessage(): List<String> {
+        val lines = (reader.previousLines() + reader.nextLine()).filter { it.isNotBlank() }
+        val startIndex = (lines.size - 3).coerceAtLeast(0)
+        return List(3) { lines.getOrNull(startIndex + it) ?: "" }
     }
 
-    fun compile(source: String, name: String, namespace: List<String>): Quest {
-        val content = if (source.trim().startsWith("def")) source else "def main = { $source }"
-        val loader = BacikalQuestLoader()
-        return try {
-            loader.load(
-                ScriptService,
-                "bacikal_$name",
-                content.toByteArray(StandardCharsets.UTF_8),
-                listOf("vulpecula", *namespace.toTypedArray()).distinct() // 命名空间去重
-            )
-        } catch (ex: Exception) {
-            throw BacikalCompileException(ex, loader.getLoadMessage())
-        }
+    override fun newBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>): BlockReader {
+        return InnerBlockReader(content, service, namespace)
     }
 
-    /**
-     * @see taboolib.module.kether.KetherScriptLoader
-     * */
-    class InnerLoader : SimpleQuestLoader() {
-        override fun newBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>): BlockReader {
-            return InnerBlockReader(content, service, namespace)
-        }
-    }
-
-    class InnerBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>) : BlockReader(content, service, namespace) {
+    inner class InnerBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>) : BlockReader(content, service, namespace) {
         override fun newActionReader(service: QuestService<*>, namespace: MutableList<String>): SimpleReader {
-            return InnerReader(service, this, namespace)
+            return InnerReader(service, this, namespace).also { reader = it }
         }
     }
 
     /**
      * @see taboolib.module.kether.KetherScriptLoader.Reader
      * */
-    class InnerReader(service: QuestService<*>, reader: BlockReader, namespace: MutableList<String>) : SimpleReader(service, reader, namespace) {
+    inner class InnerReader(service: QuestService<*>, reader: BlockReader, namespace: MutableList<String>) : SimpleReader(service, reader, namespace) {
+
+        fun previousLines(): List<String> {
+            return String(content, 0, index).split('\n')
+        }
+
+        fun nextLine(): String {
+            val startIndex = this.index
+            var index = startIndex
+            while (index < content.size && content[index] != '\n') {
+                index++
+            }
+            val length = index - startIndex
+            return String(content, startIndex, length)
+        }
 
         override fun nextToken(): String {
             return super.nextToken().replace("\\s", " ")
@@ -76,7 +72,7 @@ object BacikalQuestCompiler {
                  * fix literal
                  * */
                 '\'', '\"' -> {
-                    wrap(index, ActionLiteral(nextToken()), null, null)
+                    wrap(index, ActionLiteral(nextToken()), "literal", null)
                 }
                 '{' -> {
                     blockParser.setProperty("index", index)
@@ -101,7 +97,7 @@ object BacikalQuestCompiler {
                 '*' -> {
                     val anchor = index
                     skip(1)
-                    wrap(anchor, ActionLiteral(nextToken()), null, null)
+                    wrap(anchor, ActionLiteral(nextToken()), "*", null)
                 }
                 else -> {
                     // property player[name]
@@ -136,16 +132,12 @@ object BacikalQuestCompiler {
             }
         }
 
-        fun <T : Any?> wrap(startIndex: Int, action: QuestAction<T>?, token: String?, parser: QuestActionParser?): ParsedAction<T> {
+        fun <T : Any?> wrap(startIndex: Int, action: QuestAction<T>?, token: String, parser: QuestActionParser?): ParsedAction<T> {
             val length = index - startIndex
-            val content = String(content, startIndex, length)
+            val content = token + String(content, startIndex, length).replace("[\\s|\\n]+".toRegex(), " ")
             val properties = mutableMapOf<String, Any>()
-            if (token != null) {
-                properties["bacikal-content"] = token + content
-                properties["bacikal-token"] = token
-            } else {
-                properties["bacikal-content"] = content
-            }
+            properties["bacikal-header"] = token
+            properties["bacikal-content"] = content
             if (parser != null) {
                 properties["bacikal-parser"] = parser.javaClass.name
             }
