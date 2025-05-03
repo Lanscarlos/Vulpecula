@@ -7,6 +7,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
+import top.lanscarlos.vulpecula.common.config.ConfigLoadContext
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
@@ -42,37 +43,37 @@ object CommandService {
     /**
      * 重载服务
      * */
-    fun reload(): String {
-        return service.load()
+    fun reload() {
+        service.load(ConfigLoadContext())
     }
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(id: String, file: File) {
+        override fun onFileDeleted(context: ConfigLoadContext, id: String, file: File) {
             commands.remove(id)
         }
 
-        override fun onFileCreated(id: String, file: File) {
+        override fun onFileCreated(context: ConfigLoadContext, id: String, file: File) {
             val command = CustomCommand(id, Configuration.loadFromFile(file))
             commands[id] = command
         }
 
-        override fun onFileModified(id: String, file: File) {
+        override fun onFileModified(context: ConfigLoadContext, id: String, file: File) {
             val command = commands[id]!!
             command.rebuild()
         }
 
-        override fun onLoadInit(directory: File) {
+        override fun onLoadInit(context: ConfigLoadContext, directory: File) {
             releaseResourceFolder("command")
         }
 
-        override fun onLoadCompleted(time: Double): String {
-            return console().asLangText("module-command-service-load-succeeded", commands.size, time)
+        override fun onLoadCompleted(context: ConfigLoadContext, time: Double) {
+            context.logs += console().asLangText("module-command-service-load-succeeded", commands.size, time)
         }
 
-        override fun onLoadFailed(e: Throwable): String {
+        override fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable) {
             e.printStackTrace()
-            return console().asLangText("module-command-service-load-failed", e.localizedMessage)
+            context.logs += console().asLangText("module-command-service-load-failed", e.localizedMessage)
         }
 
     }
