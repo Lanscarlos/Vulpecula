@@ -1,12 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.warning
-import taboolib.library.kether.AbstractQuestContext
-import taboolib.library.kether.ParsedAction
-import taboolib.library.kether.Quest
-import taboolib.library.kether.QuestContext
+import taboolib.library.kether.*
 import taboolib.module.kether.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -115,6 +110,8 @@ object BacikalQuestExecutor {
                 this.future = this.future.orTimeout(timeout, TimeUnit.MILLISECONDS)
             }
             this.future = this.future.exceptionally { ex ->
+                // 发生异常, 终止程序
+                this.context().setExitStatus(ExitStatus.paused())
                 when (ex) {
                     is TimeoutException -> {
                         val action = currentAction().get()
