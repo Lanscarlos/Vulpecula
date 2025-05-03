@@ -44,17 +44,18 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     /**
      * 加载配置
      * */
-    fun load(): String {
+    fun load(context: ConfigLoadContext) {
+        var currentFile: File = directory
         try {
             // 调试计时
             val startTime = System.nanoTime()
 
             if (!directory.exists()) {
-                callback.onLoadInit(directory)
+                callback.onLoadInit(context, directory)
             }
 
             // 重载开始
-            callback.onLoadStarted()
+            callback.onLoadStarted(context)
 
             // 获取所有文件
             val queue = LinkedList<File>()
@@ -77,38 +78,41 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
 
             // 处理被移除的文件
             for (file in cacheFiles - loadedFiles) {
+                currentFile = file
                 cache.remove(file)
                 hash.remove(file)
-                callback.onFileDeleted(buildFileId(file), file)
+                callback.onFileDeleted(context, buildFileId(file), file)
             }
 
             // 处理新增的文件
             for (file in loadedFiles - cacheFiles) {
+                currentFile = file
                 cache += file
                 hash[file] = file.digest("SHA-256")
-                callback.onFileCreated(buildFileId(file), file)
+                callback.onFileCreated(context, buildFileId(file), file)
             }
 
             // 处理变动的文件
             for (file in loadedFiles intersect cacheFiles) {
+                currentFile = file
                 // 计算哈希指纹
                 val hash = file.digest("SHA-256")
                 // 哈希指纹比对
                 if (hash == this.hash[file]) {
                     continue
                 }
-                callback.onFileModified(buildFileId(file), file)
+                callback.onFileModified(context, buildFileId(file), file)
                 this.hash[file] = hash
             }
 
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
             // 重载完成
-            return callback.onLoadCompleted(time)
+            callback.onLoadCompleted(context, time)
         } catch (e: Throwable) {
             // 重载失败, 重置缓存
             reset()
-            return callback.onLoadFailed(e)
+            callback.onLoadFailed(context, buildFileId(currentFile), currentFile, e)
         }
     }
 

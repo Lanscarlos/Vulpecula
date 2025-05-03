@@ -13,21 +13,21 @@ import java.io.File
  */
 interface ConfigServiceCallback {
 
-    fun onFileDeleted(id: String, file: File)
+    fun onFileDeleted(context: ConfigLoadContext, id: String, file: File)
 
-    fun onFileCreated(id: String, file: File)
+    fun onFileCreated(context: ConfigLoadContext, id: String, file: File)
 
-    fun onFileModified(id: String, file: File)
+    fun onFileModified(context: ConfigLoadContext, id: String, file: File)
 
     /**
      * 当路径不存在时调用
      * */
-    fun onLoadInit(directory: File)
+    fun onLoadInit(context: ConfigLoadContext, directory: File)
 
-    fun onLoadStarted() {}
+    fun onLoadStarted(context: ConfigLoadContext) {}
 
-    fun onLoadCompleted(time: Double): String
+    fun onLoadCompleted(context: ConfigLoadContext, time: Double)
 
-    fun onLoadFailed(e: Throwable): String
+    fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable)
 
 }

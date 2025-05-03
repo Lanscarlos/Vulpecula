@@ -28,7 +28,7 @@ object Configs {
     @Awake(LifeCycle.ENABLE)
     fun onEnable() {
         // 自动载入所有配置
-        val logs = reload()
+        val logs = reload().logs
         for (log in logs) {
             console().sendMessage(log)
         }
@@ -39,8 +39,8 @@ object Configs {
      *
      * @return 本次加载所涉及的调试信息
      * */
-    fun reload(): List<String> {
-        val logs = LinkedList<String>()
+    fun reload(): ConfigLoadContext {
+        val context = ConfigLoadContext()
 
         // 调试计时
         val startTime = System.nanoTime()
@@ -50,16 +50,17 @@ object Configs {
             config.reload()
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
-            logs += console().asLangText("common-config-main-load-succeeded", time)
+            context.logs += console().asLangText("common-config-main-load-succeeded", time)
         } catch (ex: Exception) {
-            logs += console().asLangText("common-config-main-load-failed", ex.localizedMessage)
+            context.logs += console().asLangText("common-config-main-load-failed", ex.localizedMessage)
         }
 
         // 重载所有服务
         for (service in services) {
-            logs += service.load()
+            service.load(context)
         }
-        return logs
+
+        return context
     }
 
     fun register(service: ConfigService) {
