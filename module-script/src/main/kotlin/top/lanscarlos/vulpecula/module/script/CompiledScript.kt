@@ -184,10 +184,11 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     private fun parseParameters(source: List<Map<*, *>>): List<Parameter> {
         val cache = mutableListOf<Parameter>()
+        var optional = false
         for (map in source) {
             val name = map["name"].toString()
             val applicative: Applicative<Any> = map["type"].toString().lowercase().let(ApplicativeRegistry::getApplicative)
-            val optional = map["optional"].applicativeBoolean(false)
+            optional = optional || map["optional"].applicativeBoolean(false)
             cache += Parameter(name, applicative, optional)
         }
         return cache
