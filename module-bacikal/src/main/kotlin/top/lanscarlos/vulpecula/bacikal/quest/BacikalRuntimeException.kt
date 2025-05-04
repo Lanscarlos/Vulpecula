@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.bacikal.quest
 
 import taboolib.common.platform.function.console
 import taboolib.library.kether.Quest
+import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.chat.colored
 import taboolib.module.kether.printKetherErrorMessage
 import taboolib.module.lang.asLangText
@@ -47,8 +48,17 @@ open class BacikalRuntimeException(
     }
 
     fun getErrorDetailMessage(): String {
-        require(quest is BacikalQuest)
+        val lines = quest.getProperty<CharArray>("content")?.let(::String)?.split('\n')
         val builder = StringBuilder(console().asLangText("module-bacikal-service-execute-failure-detail-header"))
+        if (lines == null) {
+            listOf(
+                "&c# 无法查看当前任务的全部源码",
+                "&c# Unable to view all source code of the current task."
+            ).forEach {
+                builder.appendLine(console().asLangText("module-bacikal-service-execute-failure-detail-item", 1.formatIndex(), it.colored()))
+            }
+            return builder.toString()
+        }
         val startIndex = (startLine - 2).coerceAtLeast(0)
         for (index in startIndex until endLine + 3) {
             val color = when {
@@ -56,7 +66,7 @@ open class BacikalRuntimeException(
                 index in startLine..endLine -> colorError
                 else -> colorWarning
             }
-            val line = quest.lines.getOrNull(index) ?: break
+            val line = lines.getOrNull(index) ?: break
             val content = console().asLangText("module-bacikal-service-execute-failure-detail-item", (index + 1).formatIndex(), color + line)
             builder.append('\n').append(content)
         }

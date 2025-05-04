@@ -22,13 +22,12 @@ object BacikalQuestCompiler {
         val content = if (source.trim().startsWith("def")) source else "def main = { $source }"
         val loader = BacikalQuestLoader()
         return try {
-            val native: Quest = loader.load(
+            loader.load(
                 ScriptService,
                 "bacikal_$name",
                 content.toByteArray(StandardCharsets.UTF_8),
                 listOf("vulpecula", *namespace.toTypedArray()).distinct() // 命名空间去重
             )
-            BacikalQuest(native, source)
         } catch (ex: Exception) {
             throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
         }
