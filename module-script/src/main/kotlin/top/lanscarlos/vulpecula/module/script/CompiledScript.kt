@@ -23,7 +23,7 @@ import java.util.function.Function
  */
 class CompiledScript(override val id: String, val config: Configuration) : Script {
 
-    data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean)
+    data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean, val default: Any?)
 
     val namespace: List<String> by config.read("namespace").stringList(emptyList())
 
@@ -66,6 +66,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             val arg = args.getOrNull(index)
             if (parameter.optional) {
                 val value = arg?.let(parameter.applicative::convertOrNull)
+                    ?: parameter.default?.let(parameter.applicative::convertOrNull) // 采用缺省值
                 wrappedArgs[parameter.name] = value ?: continue
                 continue
             }
@@ -84,10 +85,11 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
     ): ScriptTask {
         // 参数校验
         val wrappedArgs = HashMap(args)
-        for ((name, applicative, optional) in parameters) {
+        for ((name, applicative, optional, default) in parameters) {
             val arg = args[name]
             if (optional) {
                 val value = arg?.let(applicative::convertOrNull)
+                    ?: default?.let(applicative::convertOrNull) // 采用缺省值
                 wrappedArgs[name] = value ?: continue
                 continue
             }
@@ -187,7 +189,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             val name = map["name"].toString()
             val applicative: Applicative<Any> = map["type"].toString().lowercase().let(ApplicativeRegistry::getApplicative)
             optional = optional || map["optional"].applicativeBoolean(false)
-            cache += Parameter(name, applicative, optional)
+            val default = map["default"]
+            cache += Parameter(name, applicative, optional, default)
         }
         return cache
     }
