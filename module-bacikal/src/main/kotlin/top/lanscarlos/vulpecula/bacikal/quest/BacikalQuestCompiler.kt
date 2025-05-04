@@ -30,7 +30,7 @@ object BacikalQuestCompiler {
             )
             BacikalQuest(native, source)
         } catch (ex: Exception) {
-            throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage())
+            throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
         }
     }
 

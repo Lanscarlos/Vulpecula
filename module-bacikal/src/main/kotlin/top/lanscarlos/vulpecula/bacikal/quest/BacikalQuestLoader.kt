@@ -7,6 +7,7 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
+import java.util.LinkedList
 
 /**
  * Vulpecula
@@ -17,24 +18,46 @@ import taboolib.module.kether.action.ActionProperty
  */
 class BacikalQuestLoader : SimpleQuestLoader() {
 
-    private lateinit var reader: InnerReader
+    private lateinit var innerReader: InnerReader
+    private lateinit var innerBlockReader: InnerBlockReader
 
     fun getParsedMessage(): String {
-        return reader.parsedContent()
+        return innerReader.parsedContent()
     }
 
     fun getUnparseMessage(): String {
-        return reader.unparseContent()
+        return innerReader.unparseContent()
+    }
+
+    fun getParsedActions(): List<ParsedAction<*>> {
+        return innerBlockReader.actions
     }
 
     override fun newBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>): BlockReader {
-        return InnerBlockReader(content, service, namespace)
+        return InnerBlockReader(content, service, namespace).also { innerBlockReader = it }
     }
 
     inner class InnerBlockReader(content: CharArray, service: QuestService<*>, namespace: MutableList<String>) : BlockReader(content, service, namespace) {
+
+        val actions: LinkedList<ParsedAction<*>> = LinkedList()
+
         override fun newActionReader(service: QuestService<*>, namespace: MutableList<String>): SimpleReader {
-            return InnerReader(service, this, namespace).also { reader = it }
+            return InnerReader(service, this, namespace).also { innerReader = it }
         }
+
+        override fun readBlock() {
+            expect("def")
+            val name = nextToken()
+            expect("=")
+            this.currentBlock = name
+            val actions = readActions()
+            this.actions += actions
+            checkLiteral(actions)
+            val block = SimpleQuest.SimpleBlock(name, actions)
+            this.processActions(block, actions)
+            this.blocks[name] = block
+        }
+
     }
 
     /**
@@ -67,7 +90,7 @@ class BacikalQuestLoader : SimpleQuestLoader() {
                  * fix literal
                  * */
                 '\'', '\"' -> {
-                    wrap(index, ActionLiteral(nextToken()), "literal", null)
+                    wrap(index, ActionLiteral(nextToken()), "", null)
                 }
                 '{' -> {
                     blockParser.setProperty("index", index)
@@ -95,6 +118,7 @@ class BacikalQuestLoader : SimpleQuestLoader() {
                     wrap(anchor, ActionLiteral(nextToken()), "*", null)
                 }
                 else -> {
+                    val startIndex = index
                     // property player[name]
                     val tokenBlock = nextTokenBlock()
                     val token = tokenBlock.token
@@ -119,7 +143,7 @@ class BacikalQuestLoader : SimpleQuestLoader() {
                             val parser = optional.get()
                             return wrap(index, parser.resolve(this), token, parser)
                         } else if (Kether.isAllowToleranceParser) {
-                            return wrap(index, ActionLiteral(token, true), token, null)
+                            return wrap(startIndex, ActionLiteral(token, true), token, null)
                         }
                         throw LoadError.UNKNOWN_ACTION.create(token)
                     }
@@ -133,7 +157,10 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             val properties = mutableMapOf<String, Any>()
             properties["bacikal-header"] = token
             properties["bacikal-content"] = content
-            properties["bacikal-line"] = lineOf(this.content, startIndex)
+            properties["bacikal-start-index"] = startIndex
+            properties["bacikal-end-index"] = index
+            properties["bacikal-start-line"] = lineOf(this.content, startIndex)
+            properties["bacikal-end-line"] = lineOf(this.content, index)
             if (parser != null) {
                 properties["bacikal-parser"] = parser.javaClass.name
             }
