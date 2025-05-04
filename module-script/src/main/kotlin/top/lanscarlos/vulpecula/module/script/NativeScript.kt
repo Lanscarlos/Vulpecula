@@ -3,8 +3,8 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
-import top.lanscarlos.vulpecula.bacikal.BacikalService
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.BacikalService
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.function.Consumer

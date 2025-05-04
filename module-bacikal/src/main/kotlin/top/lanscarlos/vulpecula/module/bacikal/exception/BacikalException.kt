@@ -1,8 +1,8 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.exception
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.exception
  *
  * @author Lanscarlos
  * @since 2025-05-03 13:19

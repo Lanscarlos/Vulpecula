@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.module.bacikal
 
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
@@ -13,14 +13,14 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
-import top.lanscarlos.vulpecula.bacikal.annotation.BacikalParser
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionParser
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionResolver
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalComplexActionParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalComplexActionParser
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.module.bacikal
  *
  * 注册中心
  *

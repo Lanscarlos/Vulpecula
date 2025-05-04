@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal.parser
+package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
@@ -10,9 +10,9 @@ import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
-import top.lanscarlos.vulpecula.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.bacikal.annotation.Expected
-import top.lanscarlos.vulpecula.bacikal.annotation.Optional
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.LinkedList
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.parser
+ * top.lanscarlos.vulpecula.module.bacikal.parser
  *
  * @author Lanscarlos
  * @since 2024-11-20 11:11

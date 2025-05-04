@@ -1,12 +1,11 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.exception
 
-import taboolib.library.kether.ParsedAction
 import taboolib.library.kether.Quest
 import taboolib.module.kether.printKetherErrorMessage
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.exception
  *
  * @author Lanscarlos
  * @since 2025-05-02 20:04

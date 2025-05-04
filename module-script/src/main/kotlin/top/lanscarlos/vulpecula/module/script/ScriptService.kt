@@ -7,8 +7,8 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.asLangText
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalCompileException
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.config.ConfigLoadContext
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs

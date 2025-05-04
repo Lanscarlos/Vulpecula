@@ -1,8 +1,10 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.*
 import taboolib.module.kether.*
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalTimeoutException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
@@ -11,7 +13,7 @@ import java.util.concurrent.TimeoutException
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.quest
  *
  * @author Lanscarlos
  * @since 2024-11-22 21:04

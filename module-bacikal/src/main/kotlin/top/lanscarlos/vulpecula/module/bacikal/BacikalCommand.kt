@@ -1,15 +1,15 @@
-package top.lanscarlos.vulpecula.bacikal
+package top.lanscarlos.vulpecula.module.bacikal
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.module.kether.printKetherErrorMessage
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuestCompiler
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuestExecutor
+import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestCompiler
+import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.module.bacikal
  *
  * @author Lanscarlos
  * @since 2024-11-22 17:17

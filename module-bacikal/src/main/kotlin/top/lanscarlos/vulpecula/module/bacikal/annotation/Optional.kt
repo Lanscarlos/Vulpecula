@@ -1,8 +1,8 @@
-package top.lanscarlos.vulpecula.bacikal.annotation
+package top.lanscarlos.vulpecula.module.bacikal.annotation
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.annotation
+ * top.lanscarlos.vulpecula.module.bacikal.annotation
  *
  * @author Lanscarlos
  * @since 2024-11-20 11:07

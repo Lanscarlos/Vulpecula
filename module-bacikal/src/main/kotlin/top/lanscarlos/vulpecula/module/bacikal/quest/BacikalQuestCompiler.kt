@@ -1,13 +1,14 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.quest
 
 import taboolib.library.kether.*
 import taboolib.module.kether.ScriptService
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
 import java.nio.charset.StandardCharsets
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.quest
  *
  * @author Lanscarlos
  * @since 2024-11-23 12:48

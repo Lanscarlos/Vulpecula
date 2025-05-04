@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal.parser
+package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.ParsedAction
@@ -8,7 +8,7 @@ import taboolib.module.kether.expects
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.parser
+ * top.lanscarlos.vulpecula.module.bacikal.parser
  *
  * @author Lanscarlos
  * @since 2023-08-25 01:02

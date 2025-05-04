@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal.parser
+package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestActionParser
@@ -6,7 +6,7 @@ import taboolib.library.kether.QuestReader
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal
+ * top.lanscarlos.vulpecula.module.bacikal.parser
  *
  * @author Lanscarlos
  * @since 2024-05-13 17:02

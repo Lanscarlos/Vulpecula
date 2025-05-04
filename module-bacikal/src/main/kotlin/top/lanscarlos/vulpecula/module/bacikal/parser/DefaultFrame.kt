@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal.parser
+package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.parser
+ * top.lanscarlos.vulpecula.module.bacikal.parser
  *
  * @author Lanscarlos
  * @since 2023-08-27 22:17

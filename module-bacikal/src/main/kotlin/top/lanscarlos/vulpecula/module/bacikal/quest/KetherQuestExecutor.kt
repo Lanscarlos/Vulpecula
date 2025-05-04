@@ -1,16 +1,15 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.quest
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.library.kether.QuestContext
 import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.ScriptService
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalQuestExecutor.QuestExecutorFrame
 import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.quest
  *
  * @author Lanscarlos
  * @since 2025-05-02 10:37

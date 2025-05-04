@@ -4,8 +4,8 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.deepVars
-import top.lanscarlos.vulpecula.bacikal.BacikalService
-import top.lanscarlos.vulpecula.bacikal.quest.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.BacikalService
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*

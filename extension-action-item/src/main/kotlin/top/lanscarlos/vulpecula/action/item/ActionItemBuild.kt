@@ -3,9 +3,9 @@ package top.lanscarlos.vulpecula.action.item
 import org.bukkit.inventory.ItemStack
 import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
-import top.lanscarlos.vulpecula.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.bacikal.annotation.BacikalParser
-import top.lanscarlos.vulpecula.bacikal.parser.BacikalActionResolver
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
+import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
 
 /**
  * Vulpecula

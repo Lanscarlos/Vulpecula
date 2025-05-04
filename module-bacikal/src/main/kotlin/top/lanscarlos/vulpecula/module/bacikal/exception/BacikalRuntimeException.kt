@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.exception
 
 import taboolib.common.platform.function.console
 import taboolib.library.kether.Quest
@@ -10,7 +10,7 @@ import top.lanscarlos.vulpecula.common.applicative.IntApplicative
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.exception
  *
  * @author Lanscarlos
  * @since 2025-05-02 10:54

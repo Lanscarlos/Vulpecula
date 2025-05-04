@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.bacikal.quest
+package top.lanscarlos.vulpecula.module.bacikal.quest
 
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.*
@@ -11,7 +11,7 @@ import java.util.LinkedList
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.bacikal.quest
+ * top.lanscarlos.vulpecula.module.bacikal.quest
  *
  * @author Lanscarlos
  * @since 2025-05-03 13:55
