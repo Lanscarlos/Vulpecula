@@ -23,10 +23,9 @@ open class BacikalRuntimeException(
 
     override val message: String = cause.message ?: "EXCEPTION_MESSAGE_MISSING"
 
-    val header = properties["bacikal-header"].toString()
-    val location = properties["bacikal-content"].toString()
-    val startLine = properties["bacikal-start-line"].let(IntApplicative::convertOrThrow)
-    val endLine = properties["bacikal-end-line"].let(IntApplicative::convertOrThrow)
+    val content = properties["BACIKAL_CONTENT"].toString()
+    val startLine = properties["BACIKAL_START_LINE"].let(IntApplicative::convertOrThrow)
+    val endLine = properties["BACIKAL_END_LINE"].let(IntApplicative::convertOrThrow)
 
     private val colorParsed: String = "&a".colored()
     private val colorWarning: String = "&e".colored()
@@ -37,7 +36,7 @@ open class BacikalRuntimeException(
     }
 
     fun getErrorActionMessage(): String {
-        return console().asLangText("module-bacikal-service-execute-failure-action", location)
+        return console().asLangText("module-bacikal-service-execute-failure-action", content)
     }
 
     /**

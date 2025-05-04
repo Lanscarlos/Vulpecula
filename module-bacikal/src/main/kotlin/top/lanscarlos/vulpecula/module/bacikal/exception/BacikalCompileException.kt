@@ -76,10 +76,10 @@ class BacikalCompileException(
             val action = it.action
             action is ActionLiteral<*> && action.isMisspelled
         }
-        val errorStartIndex = misspelledAction.properties["bacikal-start-index"].let(IntApplicative::convertOrThrow)
-        val errorEndIndex = misspelledAction.properties["bacikal-end-index"].let(IntApplicative::convertOrThrow)
-        val startLine = misspelledAction.properties["bacikal-start-line"].let(IntApplicative::convertOrThrow)
-        val endLine = misspelledAction.properties["bacikal-end-line"].let(IntApplicative::convertOrThrow)
+        val errorStartIndex = misspelledAction.properties["BACIKAL_START_INDEX"].let(IntApplicative::convertOrThrow)
+        val errorEndIndex = misspelledAction.properties["BACIKAL_END_INDEX"].let(IntApplicative::convertOrThrow)
+        val startLine = misspelledAction.properties["BACIKAL_START_LINE"].let(IntApplicative::convertOrThrow)
+        val endLine = misspelledAction.properties["BACIKAL_END_LINE"].let(IntApplicative::convertOrThrow)
 
         val errorRange = errorStartIndex..errorEndIndex
         val lines = highlight(source, errorRange).split('\n')

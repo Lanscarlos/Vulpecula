@@ -99,23 +99,23 @@ class BacikalQuestLoader : SimpleQuestLoader() {
                     action as ParsedAction<T>
                 }
                 '&' -> {
-                    val anchor = index
+                    val startIndex = index
                     skip(1)
                     val token = nextToken()
                     if (token.isNotEmpty() && token[token.length - 1] == ']' && token.indexOf('[') in 1 until token.length) {
                         val i = token.indexOf('[')
                         val element = token.substring(0, i)
                         val propertyKey = token.substring(i + 1, token.length - 1)
-                        val innerAction = wrap(anchor, ActionGet<Any>(element), element, null)
-                        wrap(anchor, ActionProperty.Get(innerAction, propertyKey), token, null) as ParsedAction<T>
+                        val innerAction = wrap(startIndex, ActionGet<Any>(element), element, null)
+                        wrap(startIndex, ActionProperty.Get(innerAction, propertyKey), token, null) as ParsedAction<T>
                     } else {
-                        wrap(anchor, ActionGet(token), token, null)
+                        wrap(startIndex, ActionGet(token), token, null)
                     }
                 }
                 '*' -> {
-                    val anchor = index
+                    val startIndex = index
                     skip(1)
-                    wrap(anchor, ActionLiteral(nextToken()), "*", null)
+                    wrap(startIndex, ActionLiteral(nextToken()), "*", null)
                 }
                 else -> {
                     val startIndex = index
@@ -129,19 +129,19 @@ class BacikalQuestLoader : SimpleQuestLoader() {
                         if (optional.isPresent) {
                             val propertyKey = token.substring(i + 1, token.length - 1)
                             val parser = optional.get()
-                            val innerAction = wrap(index, parser.resolve<Any>(this), element, parser)
-                            return wrap(index, ActionProperty.Get(innerAction, propertyKey), token, null) as ParsedAction<T>
+                            val innerAction = wrap(startIndex, parser.resolve<Any>(this), element, parser)
+                            return wrap(startIndex, ActionProperty.Get(innerAction, propertyKey), token, null) as ParsedAction<T>
                         } else if (Kether.isAllowToleranceParser) {
                             val propertyKey = token.substring(i + 1, token.length - 1)
-                            val innerAction = wrap(index, ActionLiteral<Any>(element, true), element, null)
-                            return wrap(index, ActionProperty.Get(innerAction, propertyKey), token, null) as ParsedAction<T>
+                            val innerAction = wrap(startIndex, ActionLiteral<Any>(element, true), element, null)
+                            return wrap(startIndex, ActionProperty.Get(innerAction, propertyKey), token, null) as ParsedAction<T>
                         }
                         throw LoadError.UNKNOWN_ACTION.create(element)
                     } else {
                         val optional = service.registry.getParser(token, namespace)
                         if (optional.isPresent) {
                             val parser = optional.get()
-                            return wrap(index, parser.resolve(this), token, parser)
+                            return wrap(startIndex, parser.resolve(this), token, parser)
                         } else if (Kether.isAllowToleranceParser) {
                             return wrap(startIndex, ActionLiteral(token, true), token, null)
                         }
@@ -151,18 +151,18 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             }
         }
 
-        fun <T : Any?> wrap(startIndex: Int, action: QuestAction<T>?, token: String, parser: QuestActionParser?): ParsedAction<T> {
+        fun <T : Any?> wrap(startIndex: Int, action: QuestAction<T>?, header: String, parser: QuestActionParser?): ParsedAction<T> {
             val length = index - startIndex
-            val content = token + String(content, startIndex, length).replace("[\\s|\\n]+".toRegex(), " ")
+            val content = String(content, startIndex, length).replace("[\\s|\\n]+".toRegex(), " ")
             val properties = mutableMapOf<String, Any>()
-            properties["bacikal-header"] = token
-            properties["bacikal-content"] = content
-            properties["bacikal-start-index"] = startIndex
-            properties["bacikal-end-index"] = index
-            properties["bacikal-start-line"] = lineOf(this.content, startIndex)
-            properties["bacikal-end-line"] = lineOf(this.content, index)
+            properties["BACIKAL_HEADER"] = header
+            properties["BACIKAL_CONTENT"] = content
+            properties["BACIKAL_START_INDEX"] = startIndex
+            properties["BACIKAL_END_INDEX"] = index
+            properties["BACIKAL_START_LINE"] = lineOf(this.content, startIndex)
+            properties["BACIKAL_END_LINE"] = lineOf(this.content, index)
             if (parser != null) {
-                properties["bacikal-parser"] = parser.javaClass.name
+                properties["BACIKAL_PARSER"] = parser.javaClass.name
             }
             return wrap(action, properties)
         }
