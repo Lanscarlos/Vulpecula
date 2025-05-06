@@ -1,4 +1,6 @@
 
+name: 'exam'
+
 main:
   execute: |-
     print "Hello, World!"
@@ -11,10 +13,6 @@ components:
     parent: 'script'
     parameters:
       - name: 'scriptId'
-        type: 'text'
-        optional: false
-        suggest: |-
-          array [ 1, 2, 3 ]
-
-  script-id:
-    parent: 'run'
+    execute: |-
+      tell hi!
+      tell &scriptId

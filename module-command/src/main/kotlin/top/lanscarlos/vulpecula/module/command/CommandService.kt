@@ -22,23 +22,25 @@ import java.io.File
  */
 object CommandService {
 
-    private val directory: File = File(getDataFolder(), "script")
+    private val directory: File = File(getDataFolder(), "command")
 
-    private val service: ConfigService = ConfigService(id = "script", directory = directory, priority = 8, callback = Callback)
+    private val service: ConfigService = ConfigService(id = "command", directory = directory, priority = 8, callback = Callback)
 
     private val commands: HashMap<String, CustomCommand> = hashMapOf()
 
-    init {
+    @Awake(LifeCycle.LOAD)
+    fun onEnable() {
+        // 自动注册配置服务
         Configs.register(service)
     }
 
-    @Awake(LifeCycle.ACTIVE)
-    private fun onActive() {
-        // 注册命令
-        for ((_, command) in commands) {
-            command.register()
-        }
-    }
+//    @Awake(LifeCycle.ACTIVE)
+//    private fun onActive() {
+//        // 注册命令
+//        for ((_, command) in commands) {
+//            command.register()
+//        }
+//    }
 
     /**
      * 重载服务
@@ -50,16 +52,18 @@ object CommandService {
     private object Callback : ConfigServiceCallback {
 
         override fun onFileDeleted(context: ConfigLoadContext, id: String, file: File) {
-            commands.remove(id)
+            commands.remove(id)?.unregister()
         }
 
         override fun onFileCreated(context: ConfigLoadContext, id: String, file: File) {
             val command = CustomCommand(id, Configuration.loadFromFile(file))
+            command.register()
             commands[id] = command
         }
 
         override fun onFileModified(context: ConfigLoadContext, id: String, file: File) {
             val command = commands[id]!!
+            command.config.loadFromFile(file)
             command.rebuild()
         }
 

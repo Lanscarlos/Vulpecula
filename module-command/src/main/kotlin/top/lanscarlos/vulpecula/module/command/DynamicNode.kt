@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.command
 
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.library.configuration.ConfigurationSection
@@ -28,6 +29,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
             permission = permission
         )
         when (strategy) {
+            null -> {}
             is Suggester -> {
                 component.suggestion(
                     bind = senderClass,
@@ -41,11 +43,11 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
                     function = strategy::restrict
                 )
             }
-            else -> error("Invalid strategy: ${strategy?.javaClass?.name}.")
+            else -> error("Invalid strategy: ${strategy.javaClass.name}.")
         }
 
         if (executor != null) {
-            component.execute(bind = senderClass, function = executor::execute)
+            component.execute(bind = ProxyCommandSender::class.java, function = executor::execute)
         }
 
         // 处理子节点
@@ -56,7 +58,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         return component
     }
 
-    private fun parseStrategy(value: Any): Strategy<out Any> {
+    private fun parseStrategy(value: Any): Strategy<out Any>? {
         require(value is String) { "Strategy content is not a string." }
         require(value.isNotBlank()) { "Strategy content cannot be blank." }
 
@@ -66,6 +68,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         }
 
         return when (value.substring(1).lowercase()) {
+            "*" -> null
             "bool", "boolean" -> BooleanSuggester
             "int" -> IntRestrictor
             "double" -> DoubleRestrictor

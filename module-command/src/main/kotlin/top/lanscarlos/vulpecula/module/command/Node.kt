@@ -22,8 +22,6 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
 
     val permission = section["permission"]?.toString() ?: ""
 
-    val executor: Executor? = section["execute"]?.let(::parseExecution)
-
     val optional = section["optional"].applicativeBoolean(false)
 
     val playerRequired = section["require-player"].applicativeBoolean(false)
@@ -42,6 +40,8 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
      * */
     val index: Int
 
+    val executor: Executor?
+
     init {
         val linkedList = LinkedList<Node>()
         var parentNode: Node? = parent
@@ -51,6 +51,7 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
         }
         chain = linkedList
         index = linkedList.size - 1
+        executor = section["execute"]?.let(::parseExecution)
     }
 
     abstract fun build(): CommandComponent

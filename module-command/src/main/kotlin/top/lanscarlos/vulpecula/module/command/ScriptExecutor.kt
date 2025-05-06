@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
+import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import java.util.concurrent.CompletableFuture
@@ -54,12 +55,24 @@ class ScriptExecutor(source: String, val chain: List<Node>) : Suggester<Any>, Re
         for ((index, rawArg) in rawArgs.withIndex()) {
             args["arg$index"] = rawArgs
             val node = chain[index] as? DynamicNode ?: continue
-            val arg = node.strategy?.convert(rawArg) ?: continue
-            args[node.name] = arg
+            val arg = node.strategy?.convert(rawArg)
+            args[node.name] = arg ?: rawArg
         }
 
         // 执行脚本
-        return ScriptService.run(script, sender, args)
+        return ScriptService.run(
+            script,
+            sender,
+            args,
+            onSuccess = {
+                info("执行成功")
+            },
+            onFailure = {
+                it.printStackTrace()
+                info("执行失败")
+                null
+            }
+        )
     }
 
 }
