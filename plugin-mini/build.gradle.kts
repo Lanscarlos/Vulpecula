@@ -15,6 +15,7 @@ tasks {
             project(":common-config"),
             project(":common-core"),
             project(":common-livedata"),
+            project(":common-message"),
             project(":module-bacikal"),
             project(":module-command"),
             project(":module-core"),

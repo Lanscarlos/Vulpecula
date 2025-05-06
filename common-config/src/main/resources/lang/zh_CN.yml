@@ -1,7 +1,7 @@
 
 # 主配置
 
-common-config-main-load-succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 主配置加载成功 &8({0} ms)'
+common-config-main-load-succeeded: '主配置加载成功 &8({0} ms)'
 common-config-main-load-failed: |-
-  &8[&3Vul&bpecula&8] &c错误 &8|&7 主配置加载失败！
+  主配置加载失败！
   &e[ERROR: config#load]: {0}

@@ -10,9 +10,9 @@ import taboolib.common.platform.command.CommandContext
  * @author Lanscarlos
  * @since 2025/5/6 11:47
  */
-class ListSuggester(val list: List<String>) : Suggester<String> {
+class ListSuggester(list: List<*>) : Suggester<String> {
 
-    constructor(list: List<*>): this(list.map { it.toString() })
+    val list = list.map { it.toString() }
 
     override fun <S : ProxyCommandSender> suggest(sender: S, context: CommandContext<S>): List<String> {
         return list

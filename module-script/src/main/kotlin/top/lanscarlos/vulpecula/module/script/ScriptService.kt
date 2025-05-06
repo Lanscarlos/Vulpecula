@@ -6,13 +6,15 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
-import taboolib.module.lang.asLangText
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
-import top.lanscarlos.vulpecula.common.config.ConfigLoadContext
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
+import top.lanscarlos.vulpecula.common.message.errorSync
+import top.lanscarlos.vulpecula.common.message.errorLiteralSync
+import top.lanscarlos.vulpecula.common.message.infoSync
+import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -50,7 +52,7 @@ object ScriptService {
      * @throws IllegalStateException 脚本不存在
      * @return 脚本
      * */
-    fun get(id: String): Script = getOrNull(id) ?: error("Script not found: $id")
+    fun get(id: String): Script = getOrNull(id) ?: throw ScriptNotFoundException(id)
 
     /**
      * 获取脚本
@@ -277,10 +279,8 @@ object ScriptService {
     /**
      * 重载服务
      * */
-    fun reload(): ConfigLoadContext {
-        val context = ConfigLoadContext()
-        service.load(context)
-        return context
+    fun reload(sender: ProxyCommandSender) {
+        service.load(sender)
     }
 
     internal fun nextPid(): Long {
@@ -289,11 +289,11 @@ object ScriptService {
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(context: ConfigLoadContext, id: String, file: File) {
+        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
             scripts.remove(id)
         }
 
-        override fun onFileCreated(context: ConfigLoadContext, id: String, file: File) {
+        override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val script = when (file.extension) {
                 "ks" -> NativeScript(id, file)
                 "yml", "yaml" -> CompiledScript(id, Configuration.loadFromFile(file))
@@ -302,11 +302,11 @@ object ScriptService {
             scripts[id] = script
         }
 
-        override fun onFileModified(context: ConfigLoadContext, id: String, file: File) {
+        override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
             when (val script = scripts[id]!!) {
                 is NativeScript -> {
                     // 直接重新创建
-                    onFileCreated(context, id, file)
+                    onFileCreated(sender, id, file)
                 }
                 is CompiledScript -> {
                     // 刷新配置
@@ -318,23 +318,24 @@ object ScriptService {
             }
         }
 
-        override fun onLoadInit(context: ConfigLoadContext, directory: File) {
+        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
             releaseResourceFolder("script")
         }
 
-        override fun onLoadCompleted(context: ConfigLoadContext, time: Double) {
-            context.logs += console().asLangText("module-script-service-load-success", scripts.size, time)
+        override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
+            sender.infoSync("module-script-service-load-success", scripts.size, time)
         }
 
-        override fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable) {
+        override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
+            sender.infoSync("module-script-service-load-failure", id)
             when (e) {
                 is BacikalCompileException -> {
-                    context.logs += console().asLangText("module-script-service-load-failure", id)
-                    context.logs += e.getErrorReasonMessage()
-                    context.logs += e.getErrorDetailMessage()
+                    sender.errorSync("module-script-service-load-failure", id)
+                    sender.errorLiteralSync(e.getErrorReasonMessage())
+                    sender.errorLiteralSync(e.getErrorDetailMessage())
                 }
                 else -> {
-                    context.logs += console().asLangText("module-script-service-load-failure", e.localizedMessage)
+                    sender.errorSync("module-script-service-load-failure", e.localizedMessage)
                 }
             }
         }

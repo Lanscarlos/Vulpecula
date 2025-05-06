@@ -1,6 +1,8 @@
 package top.lanscarlos.vulpecula.common.config
 
 import taboolib.common.io.digest
+import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
 import java.io.File
@@ -44,18 +46,18 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     /**
      * 加载配置
      * */
-    fun load(context: ConfigLoadContext) {
+    fun load(sender: ProxyCommandSender = console()) {
         var currentFile: File = directory
         try {
             // 调试计时
             val startTime = System.nanoTime()
 
             if (!directory.exists()) {
-                callback.onLoadInit(context, directory)
+                callback.onLoadInit(sender, directory)
             }
 
             // 重载开始
-            callback.onLoadStarted(context)
+            callback.onLoadStarted(sender)
 
             // 获取所有文件
             val queue = LinkedList<File>()
@@ -81,7 +83,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                 currentFile = file
                 cache.remove(file)
                 hash.remove(file)
-                callback.onFileDeleted(context, buildFileId(file), file)
+                callback.onFileDeleted(sender, buildFileId(file), file)
             }
 
             // 处理新增的文件
@@ -89,7 +91,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                 currentFile = file
                 cache += file
                 hash[file] = file.digest("SHA-256")
-                callback.onFileCreated(context, buildFileId(file), file)
+                callback.onFileCreated(sender, buildFileId(file), file)
             }
 
             // 处理变动的文件
@@ -101,18 +103,18 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                 if (hash == this.hash[file]) {
                     continue
                 }
-                callback.onFileModified(context, buildFileId(file), file)
+                callback.onFileModified(sender, buildFileId(file), file)
                 this.hash[file] = hash
             }
 
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
             // 重载完成
-            callback.onLoadCompleted(context, time)
+            callback.onLoadCompleted(sender, time)
         } catch (e: Throwable) {
             // 重载失败, 重置缓存
             reset()
-            callback.onLoadFailed(context, buildFileId(currentFile), currentFile, e)
+            callback.onLoadFailed(sender, buildFileId(currentFile), currentFile, e)
         }
     }
 

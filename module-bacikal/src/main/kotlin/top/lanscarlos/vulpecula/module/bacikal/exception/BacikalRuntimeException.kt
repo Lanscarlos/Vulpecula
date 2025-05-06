@@ -1,12 +1,11 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
-import taboolib.common.platform.function.console
 import taboolib.library.kether.Quest
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.chat.colored
 import taboolib.module.kether.printKetherErrorMessage
-import taboolib.module.lang.asLangText
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
+import top.lanscarlos.vulpecula.common.message.MessageService
 
 /**
  * Vulpecula
@@ -36,25 +35,25 @@ open class BacikalRuntimeException(
     }
 
     fun getActionMessage(): String {
-        return console().asLangText("module-bacikal-service-execute-failure-action", content)
+        return MessageService.asLang("module-bacikal-service-execute-failure-action", content)
     }
 
     /**
      * 获取报错原因信息
      * */
     fun getReasonMessage(): String {
-        return console().asLangText("module-bacikal-service-execute-failure-reason", localizedMessage)
+        return MessageService.asLang("module-bacikal-service-execute-failure-reason", localizedMessage)
     }
 
     fun getDetailMessage(): String {
         val lines = quest.getProperty<CharArray>("content")?.let(::String)?.split('\n')
-        val builder = StringBuilder(console().asLangText("module-bacikal-service-execute-failure-detail-header"))
+        val builder = StringBuilder(MessageService.asLang("module-bacikal-service-execute-failure-detail-header"))
         if (lines == null) {
             listOf(
                 "&c# 无法查看当前任务的全部源码",
                 "&c# Unable to view all source code of the current task."
             ).forEach {
-                builder.appendLine(console().asLangText("module-bacikal-service-execute-failure-detail-item", 1.formatIndex(), it.colored()))
+                builder.appendLine(MessageService.asLang("module-bacikal-service-execute-failure-detail-item", 1.formatIndex(), it.colored()))
             }
             return builder.toString()
         }
@@ -66,7 +65,7 @@ open class BacikalRuntimeException(
                 else -> colorWarning
             }
             val line = lines.getOrNull(index) ?: break
-            val content = console().asLangText("module-bacikal-service-execute-failure-detail-item", (index + 1).formatIndex(), color + line)
+            val content = MessageService.asLang("module-bacikal-service-execute-failure-detail-item", (index + 1).formatIndex(), color + line)
             builder.append('\n').append(content)
         }
         return builder.toString()

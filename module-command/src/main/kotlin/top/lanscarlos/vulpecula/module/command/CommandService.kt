@@ -2,15 +2,15 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.console
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.module.configuration.Configuration
-import taboolib.module.lang.asLangText
-import top.lanscarlos.vulpecula.common.config.ConfigLoadContext
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
+import top.lanscarlos.vulpecula.common.message.errorSync
+import top.lanscarlos.vulpecula.common.message.infoSync
 import java.io.File
 
 /**
@@ -45,41 +45,39 @@ object CommandService {
     /**
      * 重载服务
      * */
-    fun reload(): ConfigLoadContext {
-        val context = ConfigLoadContext()
-        service.load(context)
-        return context
+    fun reload(sender: ProxyCommandSender) {
+        service.load(sender)
     }
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(context: ConfigLoadContext, id: String, file: File) {
+        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
             commands.remove(id)?.unregister()
         }
 
-        override fun onFileCreated(context: ConfigLoadContext, id: String, file: File) {
+        override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val command = CustomCommand(id, Configuration.loadFromFile(file))
             command.register()
             commands[id] = command
         }
 
-        override fun onFileModified(context: ConfigLoadContext, id: String, file: File) {
+        override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
             val command = commands[id]!!
             command.config.loadFromFile(file)
             command.rebuild()
         }
 
-        override fun onLoadInit(context: ConfigLoadContext, directory: File) {
+        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
             releaseResourceFolder("command")
         }
 
-        override fun onLoadCompleted(context: ConfigLoadContext, time: Double) {
-            context.logs += console().asLangText("module-command-service-load-succeeded", commands.size, time)
+        override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
+            sender.infoSync("module-command-service-load-succeeded", commands.size, time)
         }
 
-        override fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable) {
+        override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
             e.printStackTrace()
-            context.logs += console().asLangText("module-command-service-load-failed", e.localizedMessage)
+            sender.errorSync("module-command-service-load-failed", e.localizedMessage)
         }
 
     }

@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.common.config
 
+import taboolib.common.platform.ProxyCommandSender
 import java.io.File
 
 /**
@@ -13,21 +14,21 @@ import java.io.File
  */
 interface ConfigServiceCallback {
 
-    fun onFileDeleted(context: ConfigLoadContext, id: String, file: File)
+    fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File)
 
-    fun onFileCreated(context: ConfigLoadContext, id: String, file: File)
+    fun onFileCreated(sender: ProxyCommandSender, id: String, file: File)
 
-    fun onFileModified(context: ConfigLoadContext, id: String, file: File)
+    fun onFileModified(sender: ProxyCommandSender, id: String, file: File)
 
     /**
      * 当路径不存在时调用
      * */
-    fun onLoadInit(context: ConfigLoadContext, directory: File)
+    fun onLoadInit(sender: ProxyCommandSender, directory: File)
 
-    fun onLoadStarted(context: ConfigLoadContext) {}
+    fun onLoadStarted(sender: ProxyCommandSender) {}
 
-    fun onLoadCompleted(context: ConfigLoadContext, time: Double)
+    fun onLoadCompleted(sender: ProxyCommandSender, time: Double)
 
-    fun onLoadFailed(context: ConfigLoadContext, id: String, file: File, e: Throwable)
+    fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable)
 
 }

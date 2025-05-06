@@ -17,10 +17,7 @@ object ReloadCommand {
     val command = subCommand {
         literal("reload") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                val logs = CommandService.reload().logs
-                for (log in logs) {
-                    sender.sendMessage(log)
-                }
+                CommandService.reload(sender)
             }
         }
     }

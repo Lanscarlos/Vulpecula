@@ -1,14 +1,18 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
+import taboolib.module.lang.Language
+import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.common.applicative.*
+import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.message.errorLiteralSync
+import top.lanscarlos.vulpecula.common.message.errorSync
+import top.lanscarlos.vulpecula.common.message.info
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
+import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -47,7 +51,14 @@ class ScriptExecutor(source: String, private val chain: List<Node>) : Suggester<
     }
 
     override fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>, argument: String) {
-        execute(sender, context)
+        try {
+            execute(sender, context)
+        } catch (ex: ScriptNotFoundException) {
+            // Script not found.
+            MessageService.logSync(sender, ex.localizedMessage)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
     }
 
     override fun convert(input: String): Any {
@@ -75,35 +86,29 @@ class ScriptExecutor(source: String, private val chain: List<Node>) : Suggester<
             args[node.name] = arg ?: rawArg
         }
 
+        // 获取命令行
+        val command = "/${context.name} ${rawArgs.joinToString(" ")}"
+
         // 执行脚本
         return when (script) {
-            is String -> ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, it) }, onFailure = { onFailure(sender, it) })
-            is Script -> ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, it) }, onFailure = { onFailure(sender, it) })
+            is String -> {
+                ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
+            }
+            is Script -> ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
             else -> error("Unsupported script type: ${script.javaClass.name}")
         }
     }
 
-    private fun onSuccess(sender: ProxyCommandSender, value: Any?) {
-
+    private fun onSuccess(sender: ProxyCommandSender, command: String, value: Any?) {
+        sender.info("module-command-execute-success", command, value.toString())
     }
 
-    private fun onFailure(sender: ProxyCommandSender, exception: BacikalRuntimeException): Any {
-        val logs = listOf(
-            exception.getActionMessage(),
-            exception.getReasonMessage(),
-            exception.getDetailMessage()
-        )
-        if (sender is ProxyPlayer && sender.isOp) {
-            // 向 OP 输出报错详情
-            for (log in logs) {
-                sender.sendMessage(log)
-            }
-        }
-        // 报错同步至控制台
-        for (log in logs) {
-            console().sendMessage(log)
-        }
-        return false
+    private fun onFailure(sender: ProxyCommandSender, command: String, exception: BacikalRuntimeException): Any? {
+        sender.errorSync("module-command-execute-failure", command)
+        sender.errorLiteralSync(exception.getActionMessage())
+        sender.errorLiteralSync(exception.getReasonMessage())
+        sender.errorLiteralSync(exception.getDetailMessage())
+        return null
     }
 
 }

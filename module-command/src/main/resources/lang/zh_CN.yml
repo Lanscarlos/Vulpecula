@@ -1,7 +1,9 @@
 
 
 # 命令模块
-module-command-service-load-succeeded: '&8[&3Vul&bpecula&8] &a良好 &8|&7 成功加载 &a{0}&7 个命令 &8({0} ms)'
+module-command-service-load-succeeded: '成功加载 &a{0}&7 个命令 &8({1} ms)'
 module-command-service-load-failed: |-
-  &8[&3Vul&bpecula&8] &c错误 &8|&7 命令加载失败！
+  命令加载失败！
   &e[ERROR: script#load]: {0}
+module-command-execute-success: '命令 &a{0}&7 执行成功.'
+module-command-execute-failure: '命令 &a{0}&7 执行异常.'
