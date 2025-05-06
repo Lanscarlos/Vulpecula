@@ -2,8 +2,6 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
-import taboolib.module.lang.Language
-import taboolib.module.lang.sendLang
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.message.MessageService
 import top.lanscarlos.vulpecula.common.message.errorLiteralSync
