@@ -14,7 +14,7 @@ import taboolib.module.lang.asLangText
  */
 object MessageService {
 
-    private val console = console()
+    internal val console = console()
 
     fun asInfo(node: String, vararg args: Any): String {
         return asInfoLiteral(asLang(node, *args))

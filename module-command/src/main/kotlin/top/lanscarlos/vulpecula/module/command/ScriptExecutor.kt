@@ -92,7 +92,9 @@ class ScriptExecutor(source: String, private val chain: List<Node>) : Suggester<
             is String -> {
                 ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
             }
-            is Script -> ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
+            is Script -> {
+                ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
+            }
             else -> error("Unsupported script type: ${script.javaClass.name}")
         }
     }

@@ -2,13 +2,13 @@ package top.lanscarlos.vulpecula.common.message
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.function.console
 import top.lanscarlos.vulpecula.common.message.MessageService.asErrorLiteral
 import top.lanscarlos.vulpecula.common.message.MessageService.asError
 import top.lanscarlos.vulpecula.common.message.MessageService.asInfoLiteral
 import top.lanscarlos.vulpecula.common.message.MessageService.asInfo
 import top.lanscarlos.vulpecula.common.message.MessageService.asWarningLiteral
 import top.lanscarlos.vulpecula.common.message.MessageService.asWarning
+import top.lanscarlos.vulpecula.common.message.MessageService.console
 
 /**
  * Vulpecula
@@ -46,7 +46,7 @@ fun ProxyCommandSender.infoSync(node: String, vararg args: Any) {
     val message = asInfo(node, *args)
     sendMessage(message)
     if (this is ProxyPlayer) {
-        console().sendMessage(message)
+        console.sendMessage(message)
     }
 }
 
@@ -54,7 +54,7 @@ fun ProxyCommandSender.infoLiteralSync(message: String) {
     val msg = asInfoLiteral(message)
     sendMessage(msg)
     if (this is ProxyPlayer) {
-        console().sendMessage(msg)
+        console.sendMessage(msg)
     }
 }
 
@@ -62,7 +62,7 @@ fun ProxyCommandSender.warningSync(node: String, vararg args: Any) {
     val message = asWarning(node, *args)
     sendMessage(message)
     if (this is ProxyPlayer) {
-        console().sendMessage(message)
+        console.sendMessage(message)
     }
 }
 
@@ -70,7 +70,7 @@ fun ProxyCommandSender.warningLiteralSync(message: String) {
     val msg = asWarningLiteral(message)
     sendMessage(msg)
     if (this is ProxyPlayer) {
-        console().sendMessage(msg)
+        console.sendMessage(msg)
     }
 }
 
@@ -78,7 +78,7 @@ fun ProxyCommandSender.errorSync(node: String, vararg args: Any) {
     val message = asError(node, *args)
     sendMessage(message)
     if (this is ProxyPlayer) {
-        console().sendMessage(message)
+        console.sendMessage(message)
     }
 }
 
@@ -86,7 +86,7 @@ fun ProxyCommandSender.errorLiteralSync(message: String) {
     val msg = asErrorLiteral(message)
     sendMessage(msg)
     if (this is ProxyPlayer) {
-        console().sendMessage(msg)
+        console.sendMessage(msg)
     }
 }
 
@@ -101,5 +101,5 @@ fun ProxyCommandSender.logSync(message: String) {
     if (this.isOp) {
         this.sendMessage(message)
     }
-    console().sendMessage(message)
+    console.sendMessage(message)
 }
