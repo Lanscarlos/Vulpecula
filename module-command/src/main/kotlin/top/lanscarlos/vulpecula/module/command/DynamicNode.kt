@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.library.configuration.ConfigurationSection
@@ -31,23 +32,28 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         when (strategy) {
             null -> {}
             is Suggester -> {
-                component.suggestion(
-                    bind = senderClass,
-                    uncheck = uncheck,
-                    function = strategy::suggest
-                )
+                if (playerRequired) {
+                    component.suggestion(bind = ProxyPlayer::class.java, uncheck = uncheck, function = strategy::suggest)
+                } else {
+                    component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = strategy::suggest)
+                }
             }
             is Restrictor -> {
-                component.restrict(
-                    bind = senderClass,
-                    function = strategy::restrict
-                )
+                if (playerRequired) {
+                    component.restrict(bind = ProxyPlayer::class.java, function = strategy::restrict)
+                } else {
+                    component.restrict(bind = ProxyCommandSender::class.java, function = strategy::restrict)
+                }
             }
             else -> error("Invalid strategy: ${strategy.javaClass.name}.")
         }
 
         if (executor != null) {
-            component.execute(bind = ProxyCommandSender::class.java, function = executor::execute)
+            if (playerRequired) {
+                component.execute(bind = ProxyPlayer::class.java, function = executor::execute)
+            } else {
+                component.execute(bind = ProxyCommandSender::class.java, function = executor::execute)
+            }
         }
 
         // 处理子节点
