@@ -65,7 +65,10 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
     }
 
     private fun parseStrategy(value: Any): Strategy<out Any>? {
-        require(value is String) { "Strategy content is not a string." }
+        if (value is List<*>) {
+            return ListSuggester(value)
+        }
+        require(value is String) { "Strategy content is not a string or list." }
         require(value.isNotBlank()) { "Strategy content cannot be blank." }
 
         if (value[0] != '@') {
