@@ -1,6 +1,6 @@
 
-# Bacikal
 
+# Bacikal
 module-bacikal-service-compile-failure-reason: '&8[&3Vul&bpecula&8] &c错误 &8|&7 异常原因: &e{0}'
 module-bacikal-service-compile-failure-detail-header: '&8[&3Vul&bpecula&8] &c错误 &8|&7 异常位置:'
 module-bacikal-service-compile-failure-detail-item: '&7 {0} &8|&7 {1}'
