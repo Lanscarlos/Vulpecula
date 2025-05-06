@@ -16,9 +16,10 @@ tasks {
             project(":common-core"),
             project(":common-livedata"),
             project(":module-bacikal"),
+            project(":module-command"),
             project(":module-core"),
             project(":module-script"),
-            project(":platform-bukkit"),
+            project(":platform-bukkit")
         )
 
         // 打包并合并子项目资源
