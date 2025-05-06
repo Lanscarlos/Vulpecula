@@ -59,7 +59,7 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
     private fun parseExecution(value: Any): Executor {
         require(value is String) { "Execution content is not a String." }
         require(value.isNotBlank()) { "Execution content cannot be blank." }
-        return ScriptExecutor(value, chain)
+        return ScriptExecutor(value, chain.drop(1).plus(this))
     }
 
 }

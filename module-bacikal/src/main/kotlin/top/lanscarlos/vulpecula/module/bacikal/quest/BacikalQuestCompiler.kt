@@ -20,7 +20,7 @@ object BacikalQuestCompiler {
     }
 
     fun compile(source: String, name: String, namespace: List<String>): Quest {
-        val content = if (source.trim().startsWith("def")) source else "def main = { $source }"
+        val content = if (source.trim().startsWith("def")) source else format(source)
         val loader = BacikalQuestLoader()
         return try {
             loader.load(
@@ -32,6 +32,27 @@ object BacikalQuestCompiler {
         } catch (ex: Exception) {
             throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
         }
+    }
+
+    private fun format(source: String): String {
+        val builder = StringBuilder()
+        builder.append("def main = {").append('\n')
+        builder.appendIndent(source, 1).append('\n')
+        builder.append("}")
+        return builder.toString()
+    }
+
+    private fun StringBuilder.appendIndent(value: String, indent: Int): StringBuilder {
+        val lines = value.trim().split('\n')
+        val space = "    ".repeat(indent)
+        for ((index, line) in lines.withIndex()) {
+            append(space)
+            append(line)
+            if (index != lines.lastIndex) {
+                append('\n')
+            }
+        }
+        return this
     }
 
 }

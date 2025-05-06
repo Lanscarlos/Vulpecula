@@ -44,9 +44,9 @@ object ScriptCommand {
                     },
                     onFailure = { ex ->
                         sender.sendLang("module-script-command-run-failure", id)
-                        sender.sendMessage(ex.getErrorActionMessage())
-                        sender.sendMessage(ex.getErrorReasonMessage())
-                        sender.sendMessage(ex.getErrorDetailMessage())
+                        sender.sendMessage(ex.getActionMessage())
+                        sender.sendMessage(ex.getReasonMessage())
+                        sender.sendMessage(ex.getDetailMessage())
                     }
                 )
             }
@@ -66,9 +66,9 @@ object ScriptCommand {
                         },
                         onFailure = { ex ->
                             sender.sendLang("module-script-command-run-failure", id)
-                            sender.sendMessage(ex.getErrorActionMessage())
-                            sender.sendMessage(ex.getErrorReasonMessage())
-                            sender.sendMessage(ex.getErrorDetailMessage())
+                            sender.sendMessage(ex.getActionMessage())
+                            sender.sendMessage(ex.getReasonMessage())
+                            sender.sendMessage(ex.getDetailMessage())
                         }
                     )
                 }
@@ -88,9 +88,9 @@ object ScriptCommand {
                             },
                             onFailure = { ex ->
                                 sender.sendLang("module-script-command-run-failure", id)
-                                sender.sendMessage(ex.getErrorActionMessage())
-                                sender.sendMessage(ex.getErrorReasonMessage())
-                                sender.sendMessage(ex.getErrorDetailMessage())
+                                sender.sendMessage(ex.getActionMessage())
+                                sender.sendMessage(ex.getReasonMessage())
+                                sender.sendMessage(ex.getDetailMessage())
                             }
                         )
                     }

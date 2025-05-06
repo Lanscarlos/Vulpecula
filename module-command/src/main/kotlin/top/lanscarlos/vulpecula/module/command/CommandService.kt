@@ -45,8 +45,10 @@ object CommandService {
     /**
      * 重载服务
      * */
-    fun reload() {
-        service.load(ConfigLoadContext())
+    fun reload(): ConfigLoadContext {
+        val context = ConfigLoadContext()
+        service.load(context)
+        return context
     }
 
     private object Callback : ConfigServiceCallback {

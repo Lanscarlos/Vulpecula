@@ -35,18 +35,18 @@ open class BacikalRuntimeException(
         cause.printKetherErrorMessage(detailError)
     }
 
-    fun getErrorActionMessage(): String {
+    fun getActionMessage(): String {
         return console().asLangText("module-bacikal-service-execute-failure-action", content)
     }
 
     /**
      * 获取报错原因信息
      * */
-    fun getErrorReasonMessage(): String {
+    fun getReasonMessage(): String {
         return console().asLangText("module-bacikal-service-execute-failure-reason", localizedMessage)
     }
 
-    fun getErrorDetailMessage(): String {
+    fun getDetailMessage(): String {
         val lines = quest.getProperty<CharArray>("content")?.let(::String)?.split('\n')
         val builder = StringBuilder(console().asLangText("module-bacikal-service-execute-failure-detail-header"))
         if (lines == null) {
