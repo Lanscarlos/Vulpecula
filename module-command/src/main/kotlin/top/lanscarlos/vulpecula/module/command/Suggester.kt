@@ -10,8 +10,8 @@ import taboolib.common.platform.command.CommandContext
  * @author Lanscarlos
  * @since 2025/4/29 13:25
  */
-interface Suggester<T> : Converter<T> {
+interface Suggester {
 
-    fun <S: ProxyCommandSender> suggest(sender: S, context: CommandContext<S>): List<String>
+    fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String>
 
 }

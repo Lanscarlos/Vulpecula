@@ -10,14 +10,10 @@ import taboolib.common.platform.command.CommandContext
  * @author Lanscarlos
  * @since 2025/4/29 14:26
  */
-object DoubleRestrictor : Restrictor<Double> {
+object DoubleRestrictor : Restrictor {
 
-    override fun <T : ProxyCommandSender> restrict(sender: T, context: CommandContext<T>, argument: String): Boolean {
+    override fun restrict(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String): Boolean {
         return argument.toDoubleOrNull() != null
-    }
-
-    override fun convert(input: String): Double {
-        return input.toDoubleOrNull() ?: error("Invalid input.")
     }
 
 }

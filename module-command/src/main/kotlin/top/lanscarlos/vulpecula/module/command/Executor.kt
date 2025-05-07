@@ -12,6 +12,6 @@ import taboolib.common.platform.command.CommandContext
  */
 interface Executor {
 
-    fun <T: ProxyCommandSender> execute(sender: T, context: CommandContext<T>, argument: String)
+    fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String)
 
 }

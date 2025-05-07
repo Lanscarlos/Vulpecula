@@ -12,14 +12,10 @@ import taboolib.common.platform.command.CommandContext
  * @author Lanscarlos
  * @since 2025/4/29 14:18
  */
-object OfflinePlayerSuggester : Suggester<OfflinePlayer> {
+object OfflinePlayerSuggester : Suggester {
 
-    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String> {
+    override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
         return Bukkit.getOfflinePlayers().mapNotNull { it.name }
-    }
-
-    override fun convert(input: String): OfflinePlayer {
-        return Bukkit.getOfflinePlayers().find { it.name == input } ?: error("Invalid input.")
     }
 
 }

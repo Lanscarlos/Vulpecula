@@ -12,14 +12,10 @@ import taboolib.common.platform.command.CommandContext
  * @author Lanscarlos
  * @since 2025/4/29 14:01
  */
-object WorldSuggester : Suggester<World> {
+object WorldSuggester : Suggester {
 
-    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String> {
+    override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
         return Bukkit.getWorlds().map { it.name }
-    }
-
-    override fun convert(input: String): World {
-        return Bukkit.getWorlds().find { it.name == input } ?: error("Invalid input.")
     }
 
 }

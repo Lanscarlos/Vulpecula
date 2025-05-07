@@ -11,14 +11,10 @@ import taboolib.library.xseries.XMaterial
  * @author Lanscarlos
  * @since 2025/4/29 15:06
  */
-object MaterialSuggester : Suggester<XMaterial> {
+object MaterialSuggester : Suggester {
 
-    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String> {
+    override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
         return XMaterial.entries.map { it.name }
-    }
-
-    override fun convert(input: String): XMaterial {
-        return XMaterial.entries.find { it.name == input } ?: error("Invalid input.")
     }
 
 }

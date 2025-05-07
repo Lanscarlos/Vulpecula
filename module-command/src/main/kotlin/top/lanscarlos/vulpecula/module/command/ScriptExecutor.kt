@@ -2,9 +2,7 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
-import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.common.applicative.*
-import top.lanscarlos.vulpecula.common.message.MessageService
 import top.lanscarlos.vulpecula.common.message.errorLiteralSync
 import top.lanscarlos.vulpecula.common.message.errorSync
 import top.lanscarlos.vulpecula.common.message.info
@@ -23,11 +21,11 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025/4/30 10:19
  */
-class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggester<Any>, Restrictor<Any>, Executor {
+class ScriptExecutor(execution: String) : Suggester, Restrictor {
 
     val script: Any = parseScript(execution)
 
-    override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String> {
+    override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
@@ -48,7 +46,7 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         return list.map { it.toString() }
     }
 
-    override fun <T : ProxyCommandSender> restrict(sender: T, context: CommandContext<T>, argument: String): Boolean {
+    override fun restrict(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String): Boolean {
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
@@ -69,11 +67,13 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         return boolean
     }
 
-    override fun convert(input: String): Any {
-        return input
-    }
-
-    override fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>, argument: String) {
+    fun execute(
+        script: Any,
+        sender: ProxyCommandSender,
+        context: CommandContext<ProxyCommandSender>,
+        onSuccess: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ) {
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
@@ -105,9 +105,6 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         val args = mutableMapOf<String, Any>("args" to rawArgs)
         for ((index, rawArg) in rawArgs.withIndex()) {
             args["arg$index"] = rawArg
-            val node = chain[index] as? DynamicNode ?: continue
-            val arg = node.converter?.convert(rawArg)
-            args[node.name] = arg ?: rawArg
         }
         return args
     }

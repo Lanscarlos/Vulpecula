@@ -1,7 +1,11 @@
 package top.lanscarlos.vulpecula.module.command
 
+import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentLiteral
+import taboolib.common.platform.function.info
+import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.applicative.applicativeStringList
@@ -20,8 +24,10 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
 
     val hidden: Boolean = section["hidden"].applicativeBoolean(false)
 
+    val parameters: List<DynamicNode>
+
     init {
-        parseParameters(section.getMapList("parameters"), section["execute"])
+        parameters = parseParameters(section.getMapList("parameters"))
     }
 
     override fun build(): CommandComponent {
@@ -33,9 +39,8 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
             permission = permission
         )
 
-        if (executor != null) {
-            component.execute(bind = senderClass, function = executor::execute)
-        }
+        // 执行器
+        component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
 
         // 处理子节点
         for (child in children) {
@@ -45,16 +50,39 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
         return component
     }
 
-    private fun parseParameters(value: List<Map<*, *>>, execution: Any?): List<DynamicNode> {
+    override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
+        if (parameters.isNotEmpty() && !parameters.first().optional) {
+            warning("LiteralNode 缺失必要参数: ${parameters.first().name}")
+            return
+        }
+        super.execute(sender, context, argument)
+    }
+
+    private fun parseParameters(value: List<Map<*, *>>): List<DynamicNode> {
         val list = LinkedList<DynamicNode>()
         var parent: Node = this
         for (section in value) {
             val id = section["name"]!!.toString()
-            val node = DynamicNode(id, parent, section.plus("execute" to execution))
+            val node = ParameterNode(id, parent, section)
+            list += node
             parent.children += node
             parent = node
         }
         return list
+    }
+
+    inner class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : DynamicNode(id, parent, section) {
+
+        override val script: Any = this@LiteralNode.script!!
+
+        override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
+            if (children.isNotEmpty() && !children.single().optional) {
+                warning("ParameterNode 缺失必要参数: ${children.single().name}")
+                return
+            }
+            super.execute(sender, context, argument)
+        }
+
     }
 
 }

@@ -2,10 +2,16 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
+import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
+import taboolib.common.platform.function.info
+import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
+import top.lanscarlos.vulpecula.common.message.errorLiteralSync
+import top.lanscarlos.vulpecula.common.message.errorSync
+import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 
 /**
  * Vulpecula
@@ -14,17 +20,15 @@ import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
  * @author Lanscarlos
  * @since 2025/4/29 13:19
  */
-class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, parent, section) {
+open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, parent, section) {
 
     constructor(id: String, parent: Node?, section: ConfigurationSection) : this(id, parent, section.toMap())
 
     val uncheck: Boolean
 
-    val suggester: Suggester<out Any>?
+    val suggester: Suggester?
 
-    val restrictor: Restrictor<out Any>?
-
-    val converter: Converter<out Any>?
+    val restrictor: Restrictor?
 
     init {
         // 验证配置结构
@@ -32,7 +36,6 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         uncheck = section["uncheck"].applicativeBoolean(false)
         suggester = section["suggest"]?.let(::parseSuggester)
         restrictor = section["restrict"]?.let(::parseRestrictor)
-        converter = suggester ?: restrictor
     }
 
     override fun build(): CommandComponent {
@@ -44,28 +47,14 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         )
         when {
             suggester != null -> {
-                if (playerRequired) {
-                    component.suggestion(bind = ProxyPlayer::class.java, uncheck = uncheck, function = suggester::suggest)
-                } else {
-                    component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = suggester::suggest)
-                }
+                component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = suggester::suggest)
             }
             restrictor != null -> {
-                if (playerRequired) {
-                    component.restrict(bind = ProxyPlayer::class.java, function = restrictor::restrict)
-                } else {
-                    component.restrict(bind = ProxyCommandSender::class.java, function = restrictor::restrict)
-                }
+                component.restrict(bind = ProxyCommandSender::class.java, function = restrictor::restrict)
             }
         }
 
-        if (executor != null) {
-            if (playerRequired) {
-                component.execute(bind = ProxyPlayer::class.java, function = executor::execute)
-            } else {
-                component.execute(bind = ProxyCommandSender::class.java, function = executor::execute)
-            }
-        }
+        component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
 
         // 处理子节点
         for (child in children) {
@@ -75,7 +64,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         return component
     }
 
-    private fun parseSuggester(suggestion: Any): Suggester<out Any> {
+    private fun parseSuggester(suggestion: Any): Suggester {
         if (suggestion is List<*>) {
             return ListSuggester(suggestion)
         }
@@ -83,7 +72,7 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         require(suggestion.isNotBlank()) { "Suggester content cannot be blank." }
         if (suggestion[0] != '@' || suggestion.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(suggestion, chain)
+            return ScriptExecutor(suggestion)
         }
         return when (suggestion.substring(1).lowercase()) {
             "bool", "boolean" -> BooleanSuggester
@@ -94,12 +83,12 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         }
     }
 
-    private fun parseRestrictor(restriction: Any): Restrictor<out Any> {
+    private fun parseRestrictor(restriction: Any): Restrictor {
         require(restriction is String) { "Restrictor content is not a string or list." }
         require(restriction.isNotBlank()) { "Restrictor content cannot be blank." }
         if (restriction[0] != '@' || restriction.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(restriction, chain)
+            return ScriptExecutor(restriction)
         }
         return when (restriction.substring(1).lowercase()) {
             "int" -> IntRestrictor
