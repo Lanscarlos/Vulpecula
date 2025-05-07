@@ -49,15 +49,15 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
     }
 
     override fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>, argument: String) {
+        val rawArgs = getRawArgs(context)
+        val args = transformArgs(rawArgs)
+        val command = getCommand(context, rawArgs)
         try {
-            val rawArgs = getRawArgs(context)
-            val args = transformArgs(rawArgs)
-            val command = getCommand(context, rawArgs)
-
             execute(script, sender, command, args)
         } catch (ex: ScriptNotFoundException) {
             // Script not found.
-            MessageService.logSync(sender, ex.localizedMessage)
+            sender.errorSync("module-command-execute-failure", command)
+            sender.errorLiteralSync(ex.localizedMessage)
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
