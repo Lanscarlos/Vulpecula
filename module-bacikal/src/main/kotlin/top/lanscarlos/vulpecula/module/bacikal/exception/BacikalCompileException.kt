@@ -91,7 +91,7 @@ class BacikalCompileException(
         val errorRange = errorStartIndex..errorEndIndex
         val line = parsedContent.count { it == '\n' }
         val lines = highlight(parsedContent + unparseContent, errorRange).split('\n')
-        return buildErrorDetailMessage(lines, line, 2)
+        return buildErrorDetailMessage(lines, line..line)
     }
 
     private fun highlight(source: String, errorRange: IntRange): String {

@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
+import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.message.MessageService
 import top.lanscarlos.vulpecula.common.message.errorLiteralSync
@@ -12,6 +13,8 @@ import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -28,20 +31,42 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
-        val result = execute(script, sender, command, args)
+        val future = execute(script, sender, args, onSuccess = {}, onFailure = { onFailure("suggest", sender, command, it) })
 
-        require(result.isDone)
-        return result.getNow(null).applicativeStringList(emptyList())
+        if (!future.isDone) {
+            sender.errorSync("module-command-suggest-failure", command)
+            sender.errorSync("module-command-suggest-failure-timeout")
+            return emptyList()
+        }
+        val result = future.getNow(null)
+        val list = ListApplicative.convertOrNull(result)
+        if (list == null) {
+            sender.errorSync("module-command-suggest-failure", command)
+            sender.errorSync("module-command-suggest-failure-conversion", result.toString())
+            return emptyList()
+        }
+        return list.map { it.toString() }
     }
 
     override fun <T : ProxyCommandSender> restrict(sender: T, context: CommandContext<T>, argument: String): Boolean {
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
-        val result = execute(script, sender, command, args)
+        val future = execute(script, sender, args, onSuccess = {}, onFailure = { onFailure("restrict", sender, command, it) })
 
-        require(result.isDone)
-        return result.getNow(null).applicativeBoolean(false)
+        if (!future.isDone) {
+            sender.errorSync("module-command-restrict-failure", command)
+            sender.errorSync("module-command-restrict-failure-timeout")
+            return false
+        }
+        val result = future.getNow(null)
+        val boolean = BooleanApplicative.convertOrNull(result)
+        if (boolean == null) {
+            sender.errorSync("module-command-restrict-failure", command)
+            sender.errorSync("module-command-restrict-failure-conversion", result.toString())
+            return false
+        }
+        return boolean
     }
 
     override fun convert(input: String): Any {
@@ -53,13 +78,13 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
         try {
-            execute(script, sender, command, args)
-        } catch (ex: ScriptNotFoundException) {
-            // Script not found.
+            execute(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure("execute", sender, command, it) })
+        } catch (ex: Exception) {
+            if (ex !is ScriptNotFoundException) {
+                ex.printStackTrace()
+            }
             sender.errorSync("module-command-execute-failure", command)
             sender.errorLiteralSync(ex.localizedMessage)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
         }
     }
 
@@ -87,13 +112,19 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         return args
     }
 
-    private fun execute(script: Any, sender: ProxyCommandSender, command: String, args: Map<String, Any>): CompletableFuture<Any?> {
+    private fun execute(
+        script: Any,
+        sender: ProxyCommandSender,
+        args: Map<String, Any>,
+        onSuccess: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): CompletableFuture<Any?> {
         return when (script) {
             is String -> {
-                ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
+                ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
             }
             is Script -> {
-                ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
+                ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
             }
             else -> error("Unsupported script type: ${script.javaClass.name}")
         }
@@ -103,8 +134,8 @@ class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggest
         sender.info("module-command-execute-success", command, value.toString())
     }
 
-    private fun onFailure(sender: ProxyCommandSender, command: String, exception: BacikalRuntimeException): Any? {
-        sender.errorSync("module-command-execute-failure", command)
+    private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: BacikalRuntimeException): Any? {
+        sender.errorSync("module-command-$action-failure", command)
         sender.errorLiteralSync(exception.getActionMessage())
         sender.errorLiteralSync(exception.getReasonMessage())
         sender.errorLiteralSync(exception.getDetailMessage())

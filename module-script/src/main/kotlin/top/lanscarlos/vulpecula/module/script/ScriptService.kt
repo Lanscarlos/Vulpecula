@@ -327,7 +327,6 @@ object ScriptService {
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            sender.infoSync("module-script-service-load-failure", id)
             when (e) {
                 is BacikalCompileException -> {
                     sender.errorSync("module-script-service-load-failure", id)

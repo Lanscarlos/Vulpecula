@@ -1,9 +1,19 @@
 
 
 # 命令模块
+
 module-command-service-load-succeeded: '成功加载 &a{0}&7 个命令 &8({1} ms)'
 module-command-service-load-failed: |-
   命令加载失败！
   &e[ERROR: script#load]: {0}
+
+module-command-restrict-failure: '命令 &c{0}&7 约束异常.'
+module-command-restrict-failure-timeout: '脚本超时, 请检查&e restrict &7字段的脚本并确保不含有导致延迟的语句.'
+module-command-restrict-failure-conversion: '无法将脚本运行结果 &e{0}&7 转换为布尔值, 请检查&e restrict &7字段的脚本并确保脚本返回值为&e true/false&7.'
+
+module-command-suggest-failure: '命令 &c{0}&7 提示异常.'
+module-command-suggest-failure-timeout: '脚本超时, 请检查&e suggest &7字段的脚本并确保不含有导致延迟的语句.'
+module-command-suggest-failure-conversion: '无法将脚本运行结果 &e{0}&7 转换为提示列表, 请检查&e suggest &7字段的脚本并确保脚本返回值为&e List&7.'
+
 module-command-execute-success: '命令 &a{0}&7 执行成功.'
-module-command-execute-failure: '命令 &a{0}&7 执行异常.'
+module-command-execute-failure: '命令 &c{0}&7 执行异常.'
