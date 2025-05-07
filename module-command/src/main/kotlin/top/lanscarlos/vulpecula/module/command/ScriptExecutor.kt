@@ -20,37 +20,41 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2025/4/30 10:19
  */
-class ScriptExecutor(source: String, private val chain: List<Node>) : Suggester<Any>, Restrictor<Any>, Executor {
+class ScriptExecutor(execution: String, private val chain: List<Node>) : Suggester<Any>, Restrictor<Any>, Executor {
 
-    private val script: Any
-
-    init {
-        require(source.isNotBlank()) { "Source cannot be blank." }
-        script = if (source[0] == '@') {
-            require(!source.contains(' ') && !source.contains('\n')) { "Invalid source: $source" }
-            // 调用脚本
-            source.substring(1)
-        } else {
-            // 编译脚本
-            ScriptService.compile(source, "script-executor")
-        }
-    }
+    val script: Any = parseScript(execution)
 
     override fun <T : ProxyCommandSender> suggest(sender: T, context: CommandContext<T>): List<String> {
-        val result = execute(sender, context)
+        val rawArgs = getRawArgs(context)
+        val args = transformArgs(rawArgs)
+        val command = getCommand(context, rawArgs)
+        val result = execute(script, sender, command, args)
+
         require(result.isDone)
         return result.getNow(null).applicativeStringList(emptyList())
     }
 
     override fun <T : ProxyCommandSender> restrict(sender: T, context: CommandContext<T>, argument: String): Boolean {
-        val result = execute(sender, context)
+        val rawArgs = getRawArgs(context)
+        val args = transformArgs(rawArgs)
+        val command = getCommand(context, rawArgs)
+        val result = execute(script, sender, command, args)
+
         require(result.isDone)
         return result.getNow(null).applicativeBoolean(false)
     }
 
+    override fun convert(input: String): Any {
+        return input
+    }
+
     override fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>, argument: String) {
         try {
-            execute(sender, context)
+            val rawArgs = getRawArgs(context)
+            val args = transformArgs(rawArgs)
+            val command = getCommand(context, rawArgs)
+
+            execute(script, sender, command, args)
         } catch (ex: ScriptNotFoundException) {
             // Script not found.
             MessageService.logSync(sender, ex.localizedMessage)
@@ -59,35 +63,31 @@ class ScriptExecutor(source: String, private val chain: List<Node>) : Suggester<
         }
     }
 
-    override fun convert(input: String): Any {
-        return input
-    }
-
-    private fun <T : ProxyCommandSender> execute(sender: T, context: CommandContext<T>): CompletableFuture<Any?> {
-        // 获取参数
-        val rawArgs = try {
+    private fun getRawArgs(context: CommandContext<*>): List<String> {
+        return try {
             context.args().toList()
         } catch (_: Exception) {
             // 防止根命令获取空参数
             emptyList()
         }
+    }
 
-        // 参数数量校验
-        require(rawArgs.size == chain.size) { "Invalid args size: ${rawArgs.size}. It must be ${chain.size}." }
+    private fun getCommand(context: CommandContext<*>, rawArgs: List<String>): String {
+        return "/${context.name} ${rawArgs.joinToString(" ")}"
+    }
 
-        // 参数转换
+    private fun transformArgs(rawArgs: List<String>): Map<String, Any> {
         val args = mutableMapOf<String, Any>("args" to rawArgs)
         for ((index, rawArg) in rawArgs.withIndex()) {
             args["arg$index"] = rawArg
             val node = chain[index] as? DynamicNode ?: continue
-            val arg = node.strategy?.convert(rawArg)
+            val arg = node.converter?.convert(rawArg)
             args[node.name] = arg ?: rawArg
         }
+        return args
+    }
 
-        // 获取命令行
-        val command = "/${context.name} ${rawArgs.joinToString(" ")}"
-
-        // 执行脚本
+    private fun execute(script: Any, sender: ProxyCommandSender, command: String, args: Map<String, Any>): CompletableFuture<Any?> {
         return when (script) {
             is String -> {
                 ScriptService.run(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure(sender, command, it) })
@@ -109,6 +109,17 @@ class ScriptExecutor(source: String, private val chain: List<Node>) : Suggester<
         sender.errorLiteralSync(exception.getReasonMessage())
         sender.errorLiteralSync(exception.getDetailMessage())
         return null
+    }
+
+    private fun parseScript(source: String): Any {
+        require(source.isNotBlank()) { "Source cannot be blank." }
+        return if (source.lowercase().startsWith("@script:")) {
+            // 调用脚本
+            source.substringAfter(':')
+        } else {
+            // 编译脚本
+            ScriptService.compile(source, "script-executor")
+        }
     }
 
 }

@@ -18,9 +18,22 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
 
     constructor(id: String, parent: Node?, section: ConfigurationSection) : this(id, parent, section.toMap())
 
-    val uncheck = section["uncheck"].applicativeBoolean(false)
+    val uncheck: Boolean
 
-    val strategy: Strategy<out Any>? = section["strategy"]?.let(::parseStrategy)
+    val suggester: Suggester<out Any>?
+
+    val restrictor: Restrictor<out Any>?
+
+    val converter: Converter<out Any>?
+
+    init {
+        // 验证配置结构
+        require("suggest" !in section || "restrict" !in section) { "It is not allowed to set both suggestion and restriction." }
+        uncheck = section["uncheck"].applicativeBoolean(false)
+        suggester = section["suggest"]?.let(::parseSuggester)
+        restrictor = section["restrict"]?.let(::parseRestrictor)
+        converter = suggester ?: restrictor
+    }
 
     override fun build(): CommandComponent {
         val component = CommandComponentDynamic(
@@ -29,23 +42,21 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
             optional = optional,
             permission = permission
         )
-        when (strategy) {
-            null -> {}
-            is Suggester -> {
+        when {
+            suggester != null -> {
                 if (playerRequired) {
-                    component.suggestion(bind = ProxyPlayer::class.java, uncheck = uncheck, function = strategy::suggest)
+                    component.suggestion(bind = ProxyPlayer::class.java, uncheck = uncheck, function = suggester::suggest)
                 } else {
-                    component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = strategy::suggest)
+                    component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = suggester::suggest)
                 }
             }
-            is Restrictor -> {
+            restrictor != null -> {
                 if (playerRequired) {
-                    component.restrict(bind = ProxyPlayer::class.java, function = strategy::restrict)
+                    component.restrict(bind = ProxyPlayer::class.java, function = restrictor::restrict)
                 } else {
-                    component.restrict(bind = ProxyCommandSender::class.java, function = strategy::restrict)
+                    component.restrict(bind = ProxyCommandSender::class.java, function = restrictor::restrict)
                 }
             }
-            else -> error("Invalid strategy: ${strategy.javaClass.name}.")
         }
 
         if (executor != null) {
@@ -64,27 +75,36 @@ class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pare
         return component
     }
 
-    private fun parseStrategy(value: Any): Strategy<out Any>? {
-        if (value is List<*>) {
-            return ListSuggester(value)
+    private fun parseSuggester(suggestion: Any): Suggester<out Any> {
+        if (suggestion is List<*>) {
+            return ListSuggester(suggestion)
         }
-        require(value is String) { "Strategy content is not a string or list." }
-        require(value.isNotBlank()) { "Strategy content cannot be blank." }
-
-        if (value[0] != '@') {
+        require(suggestion is String) { "Suggester content is not a string or list." }
+        require(suggestion.isNotBlank()) { "Suggester content cannot be blank." }
+        if (suggestion[0] != '@' || suggestion.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(value, chain)
+            return ScriptExecutor(suggestion, chain)
         }
-
-        return when (value.substring(1).lowercase()) {
-            "*" -> null
+        return when (suggestion.substring(1).lowercase()) {
             "bool", "boolean" -> BooleanSuggester
-            "int" -> IntRestrictor
-            "double" -> DoubleRestrictor
             "offline" -> OfflinePlayerSuggester
             "player" -> PlayerSuggester
             "world" -> WorldSuggester
-            else -> error("Invalid suggestion content: $value")
+            else -> error("Invalid suggester content: $suggestion")
+        }
+    }
+
+    private fun parseRestrictor(restriction: Any): Restrictor<out Any> {
+        require(restriction is String) { "Restrictor content is not a string or list." }
+        require(restriction.isNotBlank()) { "Restrictor content cannot be blank." }
+        if (restriction[0] != '@' || restriction.lowercase().startsWith("@script:")) {
+            // 启用脚本约束
+            return ScriptExecutor(restriction, chain)
+        }
+        return when (restriction.substring(1).lowercase()) {
+            "int" -> IntRestrictor
+            "double" -> DoubleRestrictor
+            else -> error("Invalid restrictor content: $restriction")
         }
     }
 
