@@ -1,18 +1,11 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.ProxyPlayer
-import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.message.MessageService
-import top.lanscarlos.vulpecula.common.message.errorLiteralSync
-import top.lanscarlos.vulpecula.common.message.errorSync
-import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 
 /**
  * Vulpecula
