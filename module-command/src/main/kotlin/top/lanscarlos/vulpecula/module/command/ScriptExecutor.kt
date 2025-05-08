@@ -21,7 +21,10 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025/4/30 10:19
  */
-class ScriptExecutor(execution: String) : Suggester, Restrictor {
+class ScriptExecutor(
+    execution: Any,
+    private val transformArgs: Function<List<String>, Map<String, Any>>
+) : Suggester, Restrictor {
 
     val script: Any = parseScript(execution)
 
@@ -67,13 +70,7 @@ class ScriptExecutor(execution: String) : Suggester, Restrictor {
         return boolean
     }
 
-    fun execute(
-        script: Any,
-        sender: ProxyCommandSender,
-        context: CommandContext<ProxyCommandSender>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ) {
+    fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>) {
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
@@ -88,7 +85,7 @@ class ScriptExecutor(execution: String) : Suggester, Restrictor {
         }
     }
 
-    private fun getRawArgs(context: CommandContext<*>): List<String> {
+    fun getRawArgs(context: CommandContext<*>): List<String> {
         return try {
             context.args().toList()
         } catch (_: Exception) {
@@ -97,16 +94,12 @@ class ScriptExecutor(execution: String) : Suggester, Restrictor {
         }
     }
 
-    private fun getCommand(context: CommandContext<*>, rawArgs: List<String>): String {
+    fun getCommand(context: CommandContext<*>, rawArgs: List<String>): String {
         return "/${context.name} ${rawArgs.joinToString(" ")}"
     }
 
-    private fun transformArgs(rawArgs: List<String>): Map<String, Any> {
-        val args = mutableMapOf<String, Any>("args" to rawArgs)
-        for ((index, rawArg) in rawArgs.withIndex()) {
-            args["arg$index"] = rawArg
-        }
-        return args
+    fun transformArgs(rawArgs: List<String>): Map<String, Any> {
+        return transformArgs.apply(rawArgs)
     }
 
     private fun execute(
@@ -139,7 +132,11 @@ class ScriptExecutor(execution: String) : Suggester, Restrictor {
         return null
     }
 
-    private fun parseScript(source: String): Any {
+    private fun parseScript(source: Any): Any {
+        if (source is Script) {
+            return source
+        }
+        require(source is String) { "Unsupported script type: ${source.javaClass.name}" }
         require(source.isNotBlank()) { "Source cannot be blank." }
         return if (source.lowercase().startsWith("@script:")) {
             // 调用脚本

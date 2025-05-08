@@ -72,7 +72,7 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
         require(suggestion.isNotBlank()) { "Suggester content cannot be blank." }
         if (suggestion[0] != '@' || suggestion.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(suggestion)
+            return ScriptExecutor(suggestion, ::transformArgs)
         }
         return when (suggestion.substring(1).lowercase()) {
             "bool", "boolean" -> BooleanSuggester
@@ -88,7 +88,7 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
         require(restriction.isNotBlank()) { "Restrictor content cannot be blank." }
         if (restriction[0] != '@' || restriction.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(restriction)
+            return ScriptExecutor(restriction, ::transformArgs)
         }
         return when (restriction.substring(1).lowercase()) {
             "int" -> IntRestrictor

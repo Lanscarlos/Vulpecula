@@ -24,11 +24,7 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
 
     val hidden: Boolean = section["hidden"].applicativeBoolean(false)
 
-    val parameters: List<DynamicNode>
-
-    init {
-        parameters = parseParameters(section.getMapList("parameters"))
-    }
+    val parameters: List<DynamicNode> = parseParameters(section.getMapList("parameters"))
 
     override fun build(): CommandComponent {
         val component = CommandComponentLiteral(
@@ -59,11 +55,15 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
     }
 
     private fun parseParameters(value: List<Map<*, *>>): List<DynamicNode> {
+        if (value.isEmpty()) {
+            return emptyList()
+        }
+        require(executor != null) { "Command executor cannot be null." }
         val list = LinkedList<DynamicNode>()
         var parent: Node = this
         for (section in value) {
             val id = section["name"]!!.toString()
-            val node = ParameterNode(id, parent, section)
+            val node = ParameterNode(id, parent, section.plus("execute" to executor.script))
             list += node
             parent.children += node
             parent = node
@@ -72,8 +72,6 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
     }
 
     inner class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : DynamicNode(id, parent, section) {
-
-        override val script: Any = this@LiteralNode.script!!
 
         override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
             if (children.isNotEmpty() && !children.single().optional) {
