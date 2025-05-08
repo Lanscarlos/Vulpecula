@@ -4,11 +4,12 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentLiteral
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.applicative.applicativeStringList
+import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.message.errorSync
 import java.util.*
 
 /**
@@ -49,6 +50,7 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
     override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
         if (parameters.isNotEmpty() && !parameters.first().optional) {
             warning("LiteralNode 缺失必要参数: ${parameters.first().name}")
+            sender.errorSync("module-command-exception-missing-argument", parameters.first().name)
             return
         }
         super.execute(sender, context, argument)
@@ -58,7 +60,9 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
         if (value.isEmpty()) {
             return emptyList()
         }
-        require(executor != null) { "Command executor cannot be null." }
+        require(executor != null) {
+            MessageService.asLang("module-command-exception-executor-not-found", id)
+        }
         val list = LinkedList<DynamicNode>()
         var parent: Node = this
         for (section in value) {
@@ -76,6 +80,7 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
         override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
             if (children.isNotEmpty() && !children.single().optional) {
                 warning("ParameterNode 缺失必要参数: ${children.single().name}")
+                sender.errorSync("module-command-exception-missing-argument", children.single().name)
                 return
             }
             super.execute(sender, context, argument)

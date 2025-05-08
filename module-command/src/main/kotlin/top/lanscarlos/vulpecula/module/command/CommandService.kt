@@ -5,10 +5,12 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFolder
+import taboolib.common5.util.getStackTraceString
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
+import top.lanscarlos.vulpecula.common.message.errorLiteralSync
 import top.lanscarlos.vulpecula.common.message.errorSync
 import top.lanscarlos.vulpecula.common.message.infoSync
 import java.io.File
@@ -76,8 +78,8 @@ object CommandService {
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            e.printStackTrace()
-            sender.errorSync("module-command-service-load-failed", e.localizedMessage)
+            sender.errorSync("module-command-service-load-failed", id, e.localizedMessage, e.getStackTraceString())
+            sender.errorLiteralSync(e.localizedMessage)
         }
 
     }

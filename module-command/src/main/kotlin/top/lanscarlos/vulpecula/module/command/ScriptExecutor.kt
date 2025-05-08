@@ -136,8 +136,8 @@ class ScriptExecutor(
         if (source is Script) {
             return source
         }
-        require(source is String) { "Unsupported script type: ${source.javaClass.name}" }
-        require(source.isNotBlank()) { "Source cannot be blank." }
+        require(source is String)
+        require(source.isNotBlank())
         return if (source.lowercase().startsWith("@script:")) {
             // 调用脚本
             source.substringAfter(':')

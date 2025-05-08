@@ -9,6 +9,7 @@ import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.common.message.MessageService
 import java.util.HashSet
 import java.util.LinkedList
 
@@ -96,7 +97,9 @@ class CustomCommand(val id: String, val config: Configuration) {
         val relation = HashMap<String, HashSet<String>>()
         for (key in components.getKeys(false)) {
             val parent = components.getString("$key.parent")
-            require(parent != null) { "Parent field is required for component \"$key\"." }
+            require(!parent.isNullOrBlank()) {
+                MessageService.asLang("module-command-exception-field-not-found", key, "parent")
+            }
             relation.computeIfAbsent(parent) { HashSet() } += key
         }
 
@@ -115,11 +118,13 @@ class CustomCommand(val id: String, val config: Configuration) {
             val id = stack.pop()
             if (!visited.add(id)) {
                 // 重复处理节点
-                error("Visited duplicate node $id.")
+                error(MessageService.asLang("module-command-exception-key-conflict", id))
             }
             val section = components.getConfigurationSection(id)!!
             val parent = nodes[section.getString("parent")!!]
-            require(parent != null) { "Parent not found for component \"$id\"." }
+            require(parent != null) {
+                MessageService.asLang("module-command-exception-parent-not-found", id)
+            }
             val node = when {
                 "literal" in section || "aliases" in section -> LiteralNode(id, parent, section)
                 "dynamic" in section || "suggest" in section || "optional" in section -> DynamicNode(id, parent, section)
@@ -140,7 +145,8 @@ class CustomCommand(val id: String, val config: Configuration) {
         if (value == null) {
             return PermissionDefault.OP
         }
-        return PermissionDefault.entries.find { it.name.equals(value, true) } ?: error("Unknown permission default: $value")
+        return PermissionDefault.entries.find { it.name.equals(value, true) }
+            ?: error(MessageService.asLang("module-command-exception-invalid-permission-default", id, value))
     }
 
 }

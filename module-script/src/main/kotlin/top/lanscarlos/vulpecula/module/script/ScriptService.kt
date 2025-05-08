@@ -334,7 +334,8 @@ object ScriptService {
                     sender.errorLiteralSync(e.getErrorDetailMessage())
                 }
                 else -> {
-                    sender.errorSync("module-script-service-load-failure", e.localizedMessage)
+                    e.printStackTrace()
+                    sender.errorSync("module-script-service-load-failure", id, e.localizedMessage)
                 }
             }
         }
