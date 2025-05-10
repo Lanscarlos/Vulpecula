@@ -54,4 +54,4 @@ sender: 'players'
 # 支持调用脚本 script@<脚本ID>, 例如：script@example
 # 支持激活日程 schedule@<日程ID>, 例如：schedule@example
 execute: |-
-  tell hi!
+    tell hi!
