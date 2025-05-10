@@ -1,0 +1,57 @@
+
+# 日程类型
+type: 'cron'
+
+# 秒的定义
+# 填入 * 表示每秒都执行
+# 填入 a-b 表示范围内的每个秒都执行一次
+# 填入 a/b：从第 a 秒开始每隔 b 秒执行一次
+# 填入 a,b,c：指定具体的秒执行
+seconds: 0
+
+# 分的定义, 参考 seconds 字段
+minutes: '*'
+
+# 时的定义, 参考 seconds 字段
+hours: '*'
+
+# 日的定义, 这里表示的是一个月内的日期
+days: '*'
+
+# 月的定义
+months: '*'
+
+# 年的定义, 通常不会设计到这么大的跨度
+years: '*'
+
+# CRON 表达式, 此字段与 年月日时分秒 字段冲突
+# cron: '* * * * * ? *'
+
+# [选填] 最大运转时间
+# 格式参考 period 字段
+duration: '5h'
+
+# [选填] 最大循环次数, 默认为 -1
+# 设置为 -1 则无视循环次数
+max-runs: 10
+
+# [选填] 自启动, 默认为 false
+# 是否在服务器启动后自动激活日程
+auto-start: true
+
+# [选填] 原型模式
+# 启用后允许该日程多次执行
+prototype: false
+
+# [选填] 脚本执行者, 默认为 console
+# null 无
+# console 控制台
+# players 每个在线玩家
+# player-in-world@xxx 指定世界内的所有玩家
+sender: 'players'
+
+# 执行模块
+# 支持调用脚本 script@<脚本ID>, 例如：script@example
+# 支持激活日程 schedule@<日程ID>, 例如：schedule@example
+execute: |-
+  tell hi!
