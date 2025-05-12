@@ -40,7 +40,7 @@ object ScriptService {
     private val service: ConfigService = ConfigService(id = "script", directory = directory, priority = 8, callback = Callback)
 
     @Awake(LifeCycle.LOAD)
-    fun onEnable() {
+    fun onLoad() {
         // 自动注册配置服务
         Configs.register(service)
     }

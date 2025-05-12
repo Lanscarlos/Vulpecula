@@ -31,7 +31,7 @@ object CommandService {
     private val commands: HashMap<String, CustomCommand> = hashMapOf()
 
     @Awake(LifeCycle.LOAD)
-    fun onEnable() {
+    fun onLoad() {
         // 自动注册配置服务
         Configs.register(service)
     }
