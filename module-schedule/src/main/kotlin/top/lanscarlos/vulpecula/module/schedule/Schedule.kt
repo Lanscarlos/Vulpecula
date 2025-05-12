@@ -8,4 +8,15 @@ package top.lanscarlos.vulpecula.module.schedule
  * @since 2025/5/8 15:46
  */
 interface Schedule {
+
+    /**
+     * 激活日程
+     * */
+    fun activate()
+
+    /**
+     * 终止日程
+     * */
+    fun terminate()
+
 }

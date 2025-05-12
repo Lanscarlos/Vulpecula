@@ -60,7 +60,12 @@ object ScriptService {
      * @param id 脚本 ID
      * @return 脚本, 或 null
      * */
-    fun getOrNull(id: String): Script? = scripts[id]
+    fun getOrNull(id: String): Script? {
+        if (!scripts.containsKey(id)) {
+            return null
+        }
+        return ProxyScript(id)
+    }
 
     /**
      * 获取所有已注册的脚本 ID
@@ -110,7 +115,12 @@ object ScriptService {
      * @return 脚本
      * */
     fun compile(source: String): Script {
-        return NativeScript(source)
+        return if (source.getOrNull(6) == '@' && source.lowercase().startsWith("script@")) {
+            // 调用脚本
+            get(source.substringBefore('@'))
+        } else {
+            NativeScript(source)
+        }
     }
 
     /**
@@ -139,7 +149,7 @@ object ScriptService {
         args: List<Any?>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
+    ): ScriptTask {
         return run(get(id), adaptPlayer(player), args, onSuccess, onFailure)
     }
 
@@ -158,7 +168,7 @@ object ScriptService {
         args: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
+    ): ScriptTask {
         return run(get(id), adaptPlayer(player), args, onSuccess, onFailure)
     }
 
@@ -177,7 +187,7 @@ object ScriptService {
         args: List<Any?>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
+    ): ScriptTask {
         return run(get(id), sender, args, onSuccess, onFailure)
     }
 
@@ -196,7 +206,7 @@ object ScriptService {
         args: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
+    ): ScriptTask {
         return run(get(id), sender, args, onSuccess, onFailure)
     }
 
@@ -214,8 +224,8 @@ object ScriptService {
         args: List<Any?>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
-        return script.execute(sender, args, onSuccess, onFailure).future
+    ): ScriptTask {
+        return script.execute(sender, args, onSuccess, onFailure)
     }
 
     /**
@@ -232,8 +242,8 @@ object ScriptService {
         args: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
-        return script.execute(sender, args, onSuccess, onFailure).future
+    ): ScriptTask {
+        return script.execute(sender, args, onSuccess, onFailure)
     }
 
     /**

@@ -47,7 +47,8 @@ prototype: false
 # null 无
 # console 控制台
 # players 每个在线玩家
-# player-in-world@xxx 指定世界内的所有玩家
+# player@xxx 指定玩家
+# world@xxx 指定世界内的所有玩家
 sender: 'players'
 
 # 执行模块
