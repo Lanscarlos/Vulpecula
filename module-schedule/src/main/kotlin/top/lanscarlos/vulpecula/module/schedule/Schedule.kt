@@ -9,6 +9,10 @@ package top.lanscarlos.vulpecula.module.schedule
  */
 interface Schedule {
 
+    val id: String
+
+    val isAutoStart: Boolean
+
     /**
      * 激活日程
      * */

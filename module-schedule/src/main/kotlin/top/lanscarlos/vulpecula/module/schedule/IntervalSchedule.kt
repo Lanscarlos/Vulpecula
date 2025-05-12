@@ -6,7 +6,10 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.boolean
 import top.lanscarlos.vulpecula.common.livedata.convert
-import top.lanscarlos.vulpecula.common.livedata.int
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeParseException
 import java.util.LinkedList
 
 /**
@@ -24,22 +27,16 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     val delay by config.read("delay").convert(::parseTime)
 
-    val maxRetries by config.read("max-retries").int(-1)
-
-    val retryDelay by config.read("retry-delay").convert(::parseTime)
+    val baseTime: Long by config.read("base-time").convert(::parseBaseTime)
 
     val prototype: Boolean by config.read("prototype").boolean(false)
 
     val tasks: LinkedList<Task> = LinkedList()
 
+    private var currentPid: Int = 0
+
     override fun activate() {
-        if (!prototype && tasks.isNotEmpty()) {
-            // 非原型模式, 且任务在进行中
-            return
-        }
-        val task = Task(System.currentTimeMillis())
-        task.start()
-        tasks.add(task)
+        tasks += Task(currentPid++).also(Task::start)
     }
 
     override fun terminate() {
@@ -48,70 +45,138 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         }
     }
 
-    inner class Task(val baseTime: Long) : ScheduleTask {
+    inner class Task(override val pid: Int) : ScheduleTask {
 
-        val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
+        override var state: TaskState = TaskState.WAITING
 
-        val expirationTime: Long = if (duration > 0) activationTime + duration else -1L
+        override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
 
-        private var counter: Int = 0
+        override var expirationTime: Long = if (duration > 0) activationTime + duration else -1L
+
+        var interruptionTime: Long = -1
+
+        override var counter: Int = 0
+
+        override var isOutOfDuration: Boolean = false
+
+        override var isOutOfMaxRuns: Boolean = false
 
         private lateinit var controller: PlatformExecutor.PlatformTask
 
-        fun start() {
+        private fun onTick() {
+            if (state == TaskState.WAITING) {
+                state = TaskState.RUNNING
+            }
+            if (!canContinue()) {
+                stop()
+                return
+            }
+            val args = mutableMapOf(
+                "count" to counter,
+            )
+            execute(args)
+        }
+
+        override fun start() {
+            require(::controller.isInitialized.not()) { "禁止重复调用 start() 函数." }
             val now = System.currentTimeMillis()
             require(expirationTime !in 1 until now) {
                 // 已超时
                 "expiration time is $expirationTime"
             }
-            val delay = now - nextTime(now)
+            onStart(emptyMap())
+            val nextTime = calculateNextTime(activationTime)
+            val delay = nextTime - now
             controller = submit(
                 now = false,
-                async = true,
+                async = isAsynchronous,
                 delay = delay / 50L + 10L,
                 period = period / 50L,
             ) {
-                if (!canContinue()) {
-                    stop()
-                    return@submit
-                }
-                execute()
+                onTick()
             }
         }
 
-        fun stop() {
+        override fun pause() {
+            state = TaskState.PAUSED
+            interruptionTime = System.currentTimeMillis()
             controller.cancel()
-            tasks.remove(this)
+            onPause(emptyMap())
         }
 
-        fun canContinue(): Boolean {
+        override fun resume() {
+            state = TaskState.WAITING
+            onResume(emptyMap())
+            val now = System.currentTimeMillis()
+
+            // 修正失效时间
+            if (expirationTime > 0) {
+                val consumedTime = interruptionTime - activationTime
+                val remainingTime = duration - consumedTime
+                expirationTime = now + remainingTime
+            }
+
+            val nextTime = calculateNextTime(now)
+            val delay = nextTime - now
+            controller = submit(
+                now = false,
+                async = isAsynchronous,
+                delay = delay / 50L + 10L,
+                period = period / 50L,
+            ) {
+                onTick()
+            }
+        }
+
+        override fun stop() {
+            state = TaskState.TERMINATED
+            controller.cancel()
+            onStop(emptyMap())
+        }
+
+        private fun canContinue(): Boolean {
             val now = System.currentTimeMillis()
             if (expirationTime in 1 until now) {
                 // 任务已结束
+                isOutOfDuration = true
                 return false
             }
-            if (++counter > maxExecutions) {
+            if (++counter > maxRuns) {
                 // 已达最大执行次数
+                isOutOfMaxRuns = true
                 return false
             }
             return true
         }
 
-        fun nextTime(now: Long): Long {
-            if (now < activationTime) {
-                // 还未开始
-                return activationTime
-            }
-            if (period < 1) {
-                // 无循环
+        /**
+         * 计算下一次执行任务的时间戳
+         * */
+        private fun calculateNextTime(now: Long): Long {
+            val baseTime = if (baseTime > 0L) baseTime else activationTime
+            if (now - baseTime in -1000L..1000L) {
+                // 差距在 1 秒之内
                 return now
             }
             // 获取过去的循环次数 + 1
             val count = (now - baseTime) / period + 1
             // 计算与下一次任务的时间
-            return baseTime + count * period
+            val nextTime = baseTime + count * period
+            return nextTime
         }
+    }
 
+    private fun parseBaseTime(value: Any?): Long {
+        if (value == null) {
+            return -1L
+        }
+        require(value is String) { "类型不正确" }
+        val time = try {
+            LocalTime.parse(value)
+        } catch (_: DateTimeParseException) {
+            error("格式不正确")
+        }
+        return LocalDate.now().atTime(time).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
 
 }

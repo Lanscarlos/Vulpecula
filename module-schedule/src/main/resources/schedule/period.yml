@@ -8,7 +8,7 @@ type: 'period'
 # 秒 second, s
 # 分 minute, min, m
 # 时 hour, h
-period: '45s'
+period: '5s'
 
 # [选填] 延迟激活
 # 格式参考 period 字段
@@ -16,7 +16,7 @@ delay: '5s'
 
 # [选填] 最大运转时间
 # 格式参考 period 字段
-duration: '5h'
+duration: '5m'
 
 # [选填] 最大循环次数, 默认为 -1
 # 设置为 -1 则无视循环次数
@@ -25,13 +25,6 @@ max-runs: 10
 # [选填] 自启动, 默认为 false
 # 是否在服务器启动后自动激活日程
 auto-start: true
-
-# [选填] 最大重试次数, 默认为 -1
-# 当脚本运行出现异常后, 是否重新执行, -1 为禁用此功能
-max-retries: 3
-
-# [选填] 重试延迟时间, 默认为 5s
-retry-delay: '5s'
 
 # [选填] 原型模式
 # 启用后允许该日程多次执行
@@ -42,10 +35,10 @@ prototype: false
 # console 控制台
 # players 每个在线玩家
 # player-in-world@xxx 指定世界内的所有玩家
-sender: 'players'
+sender: 'console'
 
 # 执行模块
 # 支持调用脚本 script@<脚本ID>, 例如：script@example
 # 支持激活日程 schedule@<日程ID>, 例如：schedule@example
 execute: |-
-    tell hi!
+    tell join [ "Hello, counter >> " &count ]

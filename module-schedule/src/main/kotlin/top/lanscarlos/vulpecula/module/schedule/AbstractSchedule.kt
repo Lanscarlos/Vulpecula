@@ -3,12 +3,8 @@ package top.lanscarlos.vulpecula.module.schedule
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.configuration.Configuration
-import taboolib.platform.util.onlinePlayers
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.boolean
-import top.lanscarlos.vulpecula.common.livedata.convert
-import top.lanscarlos.vulpecula.common.livedata.int
-import top.lanscarlos.vulpecula.common.livedata.string
+import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -20,28 +16,33 @@ import top.lanscarlos.vulpecula.module.script.ScriptService
  * @author Lanscarlos
  * @since 2025/5/9 11:51
  */
-abstract class AbstractSchedule(val id: String, val config: Configuration) : Schedule {
+abstract class AbstractSchedule(override val id: String, val config: Configuration) : Schedule {
 
     val duration: Long by config.read("duration").convert(::parseTime)
 
-    val maxExecutions: Int by config.read("max-runs").int(-1)
+    val maxRuns: Int by config.read("max-runs").int(-1)
 
-    val autoStart: Boolean by config.read("auto-start").boolean(false)
+    override val isAutoStart: Boolean by config.read("auto-start").boolean(false)
+
+    val isAsynchronous: Boolean by config.read("async").boolean(false)
 
     val senderSelector: String by config.read("sender").string("@CONSOLE")
 
     val script: Script by config.read("execute").string().convert(ScriptService::compile)
 
-    fun execute() {
-        val args = getArgs()
+    val onStartScript: Script? by config.read("on-start").convert(::parseScriptOrNull)
+
+    val onStopScript: Script? by config.read("on-stop").convert(::parseScriptOrNull)
+
+    val onPauseScript: Script? by config.read("on-pause").convert(::parseScriptOrNull)
+
+    val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
+
+    private fun run(script: Script, args: Map<String, Any>) {
         when (senderSelector.lowercase()) {
-            "@null" -> {
-                ScriptService.run(script, null, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
-            }
-            "@console" -> {
-                ScriptService.run(script, console(), args, onSuccess = ::onSuccess, onFailure = ::onFailure)
-            }
-            "@players" -> {
+            "null" -> ScriptService.run(script, null, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+            "console" -> ScriptService.run(script, console(), args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+            "players" -> {
                 for (sender in onlinePlayers()) {
                     ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
                 }
@@ -50,15 +51,33 @@ abstract class AbstractSchedule(val id: String, val config: Configuration) : Sch
         }
     }
 
-    fun getArgs(): Map<String, Any> {
-        val args = mutableMapOf<String, Any>()
-        // TODO 加入循环次数，当前时间等等数据
-        return args
+    fun execute(args: Map<String, Any>) {
+        run(script, args)
     }
 
     fun onSuccess(value: Any?) {}
 
     fun onFailure(ex: BacikalRuntimeException) {}
+
+    fun onStart(args: Map<String, Any>) {
+        val script = onStartScript ?: return
+        run(script, args)
+    }
+
+    fun onStop(args: Map<String, Any>) {
+        val script = onStopScript ?: return
+        run(script, args)
+    }
+
+    fun onPause(args: Map<String, Any>) {
+        val script = onPauseScript ?: return
+        run(script, args)
+    }
+
+    fun onResume(args: Map<String, Any>) {
+        val script = onResumeScript ?: return
+        run(script, args)
+    }
 
     protected fun parseTime(value: Any?): Long {
         if (value == null) {
@@ -81,6 +100,15 @@ abstract class AbstractSchedule(val id: String, val config: Configuration) : Sch
             }
             else -> error("Unsupported value type: ${value::class.java.name}")
         }
+    }
+
+    private fun parseScriptOrNull(value: Any?): Script? {
+        if (value == null) {
+            return null
+        }
+        require(value is String)
+        require(value.isNotBlank())
+        return ScriptService.compile(value)
     }
 
 }
