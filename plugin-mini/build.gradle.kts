@@ -19,6 +19,7 @@ tasks {
             project(":module-bacikal"),
             project(":module-command"),
             project(":module-core"),
+            project(":module-schedule"),
             project(":module-script"),
             project(":platform-bukkit")
         )
