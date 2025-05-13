@@ -79,12 +79,8 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
         override fun start() {
             require(::controller.isInitialized.not()) { "禁止重复调用 start() 函数." }
-            val now = System.currentTimeMillis()
-            require(expirationTime !in 1 until now) {
-                // 已超时
-                "expiration time is $expirationTime"
-            }
             onStart(emptyMap())
+            val now = System.currentTimeMillis()
             val nextTime = calculateNextTime(activationTime)
             val delay = nextTime - now
             controller = submit(
@@ -98,6 +94,9 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         }
 
         override fun pause() {
+            if (!state.isRunning) {
+                return
+            }
             state = TaskState.PAUSED
             interruptionTime = System.currentTimeMillis()
             controller.cancel()
@@ -105,6 +104,9 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         }
 
         override fun resume() {
+            if (state != TaskState.PAUSED) {
+                return
+            }
             state = TaskState.WAITING
             onResume(emptyMap())
             val now = System.currentTimeMillis()
@@ -129,6 +131,9 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         }
 
         override fun stop() {
+            if (state == TaskState.TERMINATED) {
+                return
+            }
             state = TaskState.TERMINATED
             controller.cancel()
             onStop(emptyMap())
