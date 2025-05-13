@@ -21,7 +21,7 @@ import java.util.LinkedList
  * @author Lanscarlos
  * @since 2025/5/9 11:50
  */
-class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
+class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
 
     val period by config.read("period").convert(::parseTime)
 
@@ -36,6 +36,7 @@ class IntervalSchedule(id: String, config: Configuration) : AbstractSchedule(id,
     private var currentPid: Int = 0
 
     override fun activate() {
+        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
         tasks += Task(currentPid++).also(Task::start)
     }
 

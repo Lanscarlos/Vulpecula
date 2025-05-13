@@ -77,7 +77,7 @@ object ScheduleService {
         override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val config = Configuration.loadFromFile(file)
             val schedule = when (val type = config.getString("type")?.lowercase()) {
-                "period" -> IntervalSchedule(id, config)
+                "periodic" -> PeriodicSchedule(id, config)
                 "cron" -> CronSchedule(id, config)
                 else -> error("Schedule $id type $type not supported.")
             }

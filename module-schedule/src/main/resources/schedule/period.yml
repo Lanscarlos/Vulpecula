@@ -35,7 +35,7 @@ prototype: false
 # console 控制台
 # players 每个在线玩家
 # player-in-world@xxx 指定世界内的所有玩家
-sender: 'console'
+sender: '@console'
 
 # 执行模块
 # 支持调用脚本 script@<脚本ID>, 例如：script@example
