@@ -18,6 +18,8 @@ import top.lanscarlos.vulpecula.module.script.ScriptService
  */
 abstract class AbstractSchedule(override val id: String, val config: Configuration) : Schedule {
 
+    abstract inner class AbstractTask : ScheduleTask {}
+
     val duration: Long by config.read("duration").convert(::parseTime)
 
     val maxRuns: Int by config.read("max-runs").int(-1)

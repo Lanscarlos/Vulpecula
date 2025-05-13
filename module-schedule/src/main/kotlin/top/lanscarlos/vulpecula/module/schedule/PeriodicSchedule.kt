@@ -46,7 +46,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         }
     }
 
-    inner class Task(override val pid: Int) : ScheduleTask {
+    inner class Task(override val pid: Int) : AbstractTask() {
 
         override var state: TaskState = TaskState.WAITING
 
