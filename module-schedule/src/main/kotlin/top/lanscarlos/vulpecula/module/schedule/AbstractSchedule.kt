@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
+import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
@@ -17,8 +18,6 @@ import top.lanscarlos.vulpecula.module.script.ScriptService
  * @since 2025/5/9 11:51
  */
 abstract class AbstractSchedule(override val id: String, val config: Configuration) : Schedule {
-
-    abstract inner class AbstractTask : ScheduleTask {}
 
     val duration: Long by config.read("duration").convert(::parseTime)
 
@@ -111,6 +110,56 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         require(value is String)
         require(value.isNotBlank())
         return ScriptService.compile(value)
+    }
+
+    abstract inner class AbstractTask : ScheduleTask {
+
+        override var state: TaskState = TaskState.WAITING
+
+        override var counter: Int = 0
+
+        override var isOutOfDuration: Boolean = false
+
+        override var isOutOfMaxRuns: Boolean = false
+
+        protected var interruptionTime: Long = -1
+
+        abstract val controller: PlatformExecutor.PlatformTask
+
+        override fun pause() {
+            if (!state.isRunning) {
+                return
+            }
+            state = TaskState.PAUSED
+            interruptionTime = System.currentTimeMillis()
+            controller.cancel()
+            onPause(emptyMap())
+        }
+
+        override fun stop() {
+            if (state == TaskState.TERMINATED) {
+                return
+            }
+            state = TaskState.TERMINATED
+            controller.cancel()
+            onStop(emptyMap())
+        }
+
+        protected fun canContinue(): Boolean {
+            val now = System.currentTimeMillis()
+            if (expirationTime in 1 until now) {
+                // 任务已结束
+                isOutOfDuration = true
+                return false
+            }
+            if (++counter > maxRuns) {
+                // 已达最大执行次数
+                isOutOfMaxRuns = true
+                return false
+            }
+            return true
+        }
+
     }
 
 }

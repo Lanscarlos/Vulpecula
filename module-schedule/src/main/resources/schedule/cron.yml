@@ -7,7 +7,7 @@ type: 'cron'
 # 填入 a-b 表示范围内的每个秒都执行一次
 # 填入 a/b：从第 a 秒开始每隔 b 秒执行一次
 # 填入 a,b,c：指定具体的秒执行
-seconds: 0
+seconds: '5 at 2'
 
 # 分的定义, 参考 seconds 字段
 minutes: '*'

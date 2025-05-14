@@ -11,6 +11,9 @@ import com.ucasoft.kcron.kotlinx.datetime.CronLocalDateTime
 import com.ucasoft.kcron.kotlinx.datetime.CronLocalDateTimeProvider
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import taboolib.common.env.RuntimeDependencies
+import taboolib.common.env.RuntimeDependency
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import java.util.*
@@ -73,23 +76,13 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         }
     }
 
-    inner class Task(override val pid: Int) : ScheduleTask {
-
-        override var state: TaskState = TaskState.WAITING
+    inner class Task(override val pid: Int) : AbstractTask() {
 
         override val activationTime: Long = System.currentTimeMillis()
 
         override var expirationTime: Long = if (duration > 0) activationTime + duration else -1L
 
-        override var counter: Int = 0
-
-        var interruptionTime: Long = -1
-
-        override var isOutOfDuration: Boolean = false
-
-        override var isOutOfMaxRuns: Boolean = false
-
-        private lateinit var controller: PlatformExecutor.PlatformTask
+        override lateinit var controller: PlatformExecutor.PlatformTask
 
         private fun onTick() {
             if (!canContinue()) {
@@ -110,29 +103,15 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             if (::controller.isInitialized) {
                 controller.cancel()
             }
+            info("delay >> ${delay}ms")
             controller = submit(
                 now = false,
                 async = isAsynchronous,
-                delay = delay,
+                delay = (delay / 50L) + 1L, // 加 50ms
                 period = 0L
             ) {
                 onTick()
             }
-        }
-
-        private fun canContinue(): Boolean {
-            val now = System.currentTimeMillis()
-            if (expirationTime in 1 until now) {
-                // 任务已结束
-                isOutOfDuration = true
-                return false
-            }
-            if (++counter > maxRuns) {
-                // 已达最大执行次数
-                isOutOfMaxRuns = true
-                return false
-            }
-            return true
         }
 
         private fun calculateNextTime(): Long {
@@ -145,16 +124,6 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             require(::controller.isInitialized.not()) { "禁止重复调用 start() 函数." }
             onStart(emptyMap())
             schedule()
-        }
-
-        override fun pause() {
-            if (!state.isRunning) {
-                return
-            }
-            state = TaskState.PAUSED
-            interruptionTime = System.currentTimeMillis()
-            controller.cancel()
-            onPause(emptyMap())
         }
 
         override fun resume() {
@@ -173,15 +142,6 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             }
 
             schedule()
-        }
-
-        override fun stop() {
-            if (state == TaskState.TERMINATED) {
-                return
-            }
-            state = TaskState.TERMINATED
-            controller.cancel()
-            onStop(emptyMap())
         }
 
     }

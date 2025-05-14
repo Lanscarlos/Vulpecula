@@ -48,21 +48,11 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     inner class Task(override val pid: Int) : AbstractTask() {
 
-        override var state: TaskState = TaskState.WAITING
-
         override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
 
         override var expirationTime: Long = if (duration > 0) activationTime + duration else -1L
 
-        var interruptionTime: Long = -1
-
-        override var counter: Int = 0
-
-        override var isOutOfDuration: Boolean = false
-
-        override var isOutOfMaxRuns: Boolean = false
-
-        private lateinit var controller: PlatformExecutor.PlatformTask
+        override lateinit var controller: PlatformExecutor.PlatformTask
 
         private fun onTick() {
             if (state == TaskState.WAITING) {
@@ -94,16 +84,6 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
             }
         }
 
-        override fun pause() {
-            if (!state.isRunning) {
-                return
-            }
-            state = TaskState.PAUSED
-            interruptionTime = System.currentTimeMillis()
-            controller.cancel()
-            onPause(emptyMap())
-        }
-
         override fun resume() {
             if (state != TaskState.PAUSED) {
                 return
@@ -129,30 +109,6 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
             ) {
                 onTick()
             }
-        }
-
-        override fun stop() {
-            if (state == TaskState.TERMINATED) {
-                return
-            }
-            state = TaskState.TERMINATED
-            controller.cancel()
-            onStop(emptyMap())
-        }
-
-        private fun canContinue(): Boolean {
-            val now = System.currentTimeMillis()
-            if (expirationTime in 1 until now) {
-                // 任务已结束
-                isOutOfDuration = true
-                return false
-            }
-            if (++counter > maxRuns) {
-                // 已达最大执行次数
-                isOutOfMaxRuns = true
-                return false
-            }
-            return true
         }
 
         /**
