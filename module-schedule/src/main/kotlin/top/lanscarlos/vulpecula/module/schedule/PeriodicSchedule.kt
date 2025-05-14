@@ -37,7 +37,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     override fun activate() {
         require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
-        tasks += Task(currentPid++).also(Task::start)
+        tasks += Task(currentPid++, senderSelector).also(Task::start)
     }
 
     override fun terminate() {
@@ -46,7 +46,10 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         }
     }
 
-    inner class Task(override val pid: Int) : AbstractTask() {
+    inner class Task(
+        override val pid: Int,
+        val senderSelector: String
+    ) : AbstractTask() {
 
         override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
 
@@ -62,10 +65,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
                 stop()
                 return
             }
-            val args = mutableMapOf(
-                "count" to counter,
-            )
-            execute(args)
+            runScript(script, senderSelector, args())
         }
 
         override fun start() {

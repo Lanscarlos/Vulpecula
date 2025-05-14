@@ -46,7 +46,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
 
-    private fun run(script: Script, senderSelector: String, args: Map<String, Any>) {
+    protected fun runScript(script: Script, senderSelector: String, args: Map<String, Any>) {
         if (senderSelector.first() != '@') {
             // 指定玩家
             val sender = Bukkit.getPlayerExact(senderSelector)?.let(::adaptPlayer)
@@ -100,7 +100,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     }
 
     fun execute(args: Map<String, Any>) {
-        run(script, senderSelector, args)
+        runScript(script, senderSelector, args)
     }
 
     fun onSuccess(value: Any?) {}
@@ -109,22 +109,22 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     fun onStart(args: Map<String, Any>) {
         val script = onStartScript ?: return
-        run(script, senderSelector, args)
+        runScript(script, senderSelector, args)
     }
 
     fun onStop(args: Map<String, Any>) {
         val script = onStopScript ?: return
-        run(script, senderSelector, args)
+        runScript(script, senderSelector, args)
     }
 
     fun onPause(args: Map<String, Any>) {
         val script = onPauseScript ?: return
-        run(script, senderSelector, args)
+        runScript(script, senderSelector, args)
     }
 
     fun onResume(args: Map<String, Any>) {
         val script = onResumeScript ?: return
-        run(script, senderSelector, args)
+        runScript(script, senderSelector, args)
     }
 
     protected fun parseTime(value: Any?): Long {
@@ -172,6 +172,14 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         protected var interruptionTime: Long = -1
 
         abstract val controller: PlatformExecutor.PlatformTask
+
+        fun args(additions: Map<String, Any> = emptyMap()): Map<String, Any> {
+            val args = mutableMapOf<String, Any>(
+                "count" to counter
+            )
+            args.putAll(additions)
+            return args
+        }
 
         override fun pause() {
             if (!state.isRunning) {

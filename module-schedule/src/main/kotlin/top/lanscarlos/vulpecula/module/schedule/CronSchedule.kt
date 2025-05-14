@@ -89,7 +89,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     override fun activate() {
         require(tasks.all { !it.state.isRunning }) { "当前有任务正在运行." }
-        tasks += Task(currentPid++).also(Task::start)
+        tasks += Task(currentPid++, senderSelector).also(Task::start)
     }
 
     override fun terminate() {
@@ -98,7 +98,10 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         }
     }
 
-    inner class Task(override val pid: Int) : AbstractTask() {
+    inner class Task(
+        override val pid: Int,
+        private val senderSelector: String
+    ) : AbstractTask() {
 
         override val activationTime: Long = System.currentTimeMillis()
 
@@ -111,21 +114,25 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 stop()
                 return
             }
-            val args = mutableMapOf(
-                "count" to counter,
-            )
-            execute(args)
+            runScript(script, senderSelector, args())
             schedule() // 继续触发
         }
 
         private fun schedule() {
             val now = System.currentTimeMillis()
             val delay = calculateNextTime() - now
+            info("delay >> ${delay}ms")
+            if (delay <= 50) {
+                // 极小概率出现此情况, 延迟 50ms 再计算
+                submit(delay = 1) {
+                    schedule()
+                }
+                return
+            }
             require(delay >= 0) { "系统异常 delay 小于 0." }
             if (::controller.isInitialized) {
                 controller.cancel()
             }
-            info("delay >> ${delay}ms")
             controller = submit(
                 now = false,
                 async = isAsynchronous,
