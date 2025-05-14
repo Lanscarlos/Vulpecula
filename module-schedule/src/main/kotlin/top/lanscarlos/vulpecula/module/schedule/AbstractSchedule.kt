@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.schedule
 
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.util.BoundingBox
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
