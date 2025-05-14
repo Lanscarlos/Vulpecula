@@ -43,13 +43,8 @@ auto-start: true
 # 启用后允许该日程多次执行
 prototype: false
 
-# [选填] 脚本执行者, 默认为 console
-# null 无
-# console 控制台
-# players 每个在线玩家
-# player@xxx 指定玩家
-# world@xxx 指定世界内的所有玩家
-sender: 'players'
+# [选填] 脚本执行者, 默认为 @console
+sender: '@console'
 
 # 执行模块
 # 支持调用脚本 script@<脚本ID>, 例如：script@example

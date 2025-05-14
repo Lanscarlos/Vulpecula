@@ -1,14 +1,22 @@
 package top.lanscarlos.vulpecula.module.schedule
 
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.util.BoundingBox
+import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
+import taboolib.platform.util.toBukkitLocation
+import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
+import kotlin.math.pow
 
 /**
  * Vulpecula
@@ -39,12 +47,52 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
 
-    private fun run(script: Script, args: Map<String, Any>) {
-        when (senderSelector.lowercase()) {
+    private fun run(script: Script, senderSelector: String, args: Map<String, Any>) {
+        if (senderSelector.first() != '@') {
+            // 指定玩家
+            val sender = Bukkit.getPlayerExact(senderSelector)?.let(::adaptPlayer)
+                ?: error("无法选取脚本执行者 $senderSelector")
+            ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+            return
+        }
+        val selector = senderSelector.substring(1).split(' ')
+        when (selector.first().lowercase()) {
             "null" -> ScriptService.run(script, null, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
             "console" -> ScriptService.run(script, console(), args, onSuccess = ::onSuccess, onFailure = ::onFailure)
             "players" -> {
                 for (sender in onlinePlayers()) {
+                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                }
+            }
+            "world" -> {
+                val senders = selector.getOrNull(1)?.let(Bukkit::getWorld)?.players?.map(::adaptPlayer)
+                    ?: error("无法解析世界 ${selector.getOrNull(1)}")
+                for (sender in senders) {
+                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                }
+            }
+            "range" -> {
+                val location = selector.getOrNull(1)?.let(LocationApplicative::convertOrNull)?.toBukkitLocation()
+                    ?: error("无法解析坐标 ${selector.getOrNull(1)}")
+                val world = location.world
+                    ?: error("坐标不合法 ${selector.getOrNull(1)}")
+                val range = selector.getOrNull(2)?.toDoubleOrNull()?.pow(2)
+                    ?: error("无法解析范围 ${selector.getOrNull(2)}")
+                info("@Range 距离平方 >> $range")
+                val senders = world.players.filter { it.location.distanceSquared(location) <= range }.map(::adaptPlayer)
+                for (sender in senders) {
+                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                }
+            }
+            "area" -> {
+                val loc1 = selector.getOrNull(1)?.let(LocationApplicative::convertOrNull)?.toBukkitLocation()
+                    ?: error("无法解析坐标 ${selector.getOrNull(1)}")
+                val loc2 = selector.getOrNull(2)?.let(LocationApplicative::convertOrNull)?.toBukkitLocation()
+                    ?: error("无法解析坐标 ${selector.getOrNull(2)}")
+                val boundingBox = BoundingBox.of(loc1, loc2)
+                val world = loc1.world!!
+                val senders = world.players.filter { boundingBox.contains(it.location.x, it.location.y, it.location.z) }.map(::adaptPlayer)
+                for (sender in senders) {
                     ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
                 }
             }
@@ -53,7 +101,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     }
 
     fun execute(args: Map<String, Any>) {
-        run(script, args)
+        run(script, senderSelector, args)
     }
 
     fun onSuccess(value: Any?) {}
@@ -62,22 +110,22 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     fun onStart(args: Map<String, Any>) {
         val script = onStartScript ?: return
-        run(script, args)
+        run(script, senderSelector, args)
     }
 
     fun onStop(args: Map<String, Any>) {
         val script = onStopScript ?: return
-        run(script, args)
+        run(script, senderSelector, args)
     }
 
     fun onPause(args: Map<String, Any>) {
         val script = onPauseScript ?: return
-        run(script, args)
+        run(script, senderSelector, args)
     }
 
     fun onResume(args: Map<String, Any>) {
         val script = onResumeScript ?: return
-        run(script, args)
+        run(script, senderSelector, args)
     }
 
     protected fun parseTime(value: Any?): Long {
