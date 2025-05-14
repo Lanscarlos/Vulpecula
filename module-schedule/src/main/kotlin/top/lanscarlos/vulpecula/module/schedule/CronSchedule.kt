@@ -25,6 +25,28 @@ import java.util.*
  * @author Lanscarlos
  * @since 2025/5/9 11:51
  */
+@RuntimeDependencies(
+    RuntimeDependency(
+        value = "!com.ucasoft.kcron:kcron-abstractions-jvm:0.23.0",
+        test = "!com.ucasoft.kcron.abstractions.CronDateTime",
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230."],
+    ),
+    RuntimeDependency(
+        value = "!com.ucasoft.kcron:kcron-common-jvm:0.23.0",
+        test = "!com.ucasoft.kcron.Cron",
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230."],
+    ),
+    RuntimeDependency(
+        value = "!com.ucasoft.kcron:kcron-core-jvm:0.23.0",
+        test = "!com.ucasoft.kcron.core.Cron",
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230."],
+    ),
+    RuntimeDependency(
+        value = "!com.ucasoft.kcron:kcron-kotlinx-datetime-jvm:0.23.0",
+        test = "!com.ucasoft.kcron.kotlinx.datetime.CronLocalDateTime",
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230." ]
+    )
+)
 class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
 
     val seconds: Pair<CronGroups, String> by config.read("seconds").convert(::parseTimeValue)
