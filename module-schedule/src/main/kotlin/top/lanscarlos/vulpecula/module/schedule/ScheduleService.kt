@@ -41,7 +41,7 @@ object ScheduleService {
             if (!schedule.isAutoStart) {
                 return
             }
-            schedule.activate()
+            schedule.start()
         }
     }
 

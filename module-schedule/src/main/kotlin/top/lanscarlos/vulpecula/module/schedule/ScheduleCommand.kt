@@ -25,7 +25,7 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScheduleService.get(id).activate()
+                ScheduleService.get(id).start()
                 sender.sendMessage("schedule $id successfully started.")
             }
         }
@@ -35,7 +35,7 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScheduleService.get(id).terminate()
+                ScheduleService.get(id).stop(-1L)
                 sender.sendMessage("schedule $id successfully stopped.")
             }
         }

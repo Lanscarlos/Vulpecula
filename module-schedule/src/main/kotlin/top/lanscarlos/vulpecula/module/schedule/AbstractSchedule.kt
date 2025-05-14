@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.schedule.PeriodicSchedule.Task
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import kotlin.math.pow
@@ -38,7 +39,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     val isAsynchronous: Boolean by config.read("async").boolean(false)
 
-    val senderSelector: String by config.read("sender").string("@CONSOLE")
+    override val senderSelector: String by config.read("sender").string("@Console")
 
     val script: Script by config.read("execute").string().convert(ScriptService::compile)
 
@@ -49,6 +50,34 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     val onPauseScript: Script? by config.read("on-pause").convert(::parseScriptOrNull)
 
     val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
+
+    abstract val tasks: HashMap<String, out AbstractTask>
+
+    private var currentPid: Long = 0
+
+    protected fun nextPid(): Long {
+        return currentPid++
+    }
+
+    override fun stop(pid: Long) {
+        if (pid < 0) {
+            tasks.values.forEach(ScheduleTask::stop)
+            return
+        }
+        val task = tasks.find { it.pid == pid }
+            ?: error("找不到对应的任务 PID:$pid")
+        task.stop()
+    }
+
+    override fun stop(id: String) {
+        if (id == "*") {
+            tasks.values.forEach(ScheduleTask::stop)
+            return
+        }
+        val task = tasks.find { it.id == id }
+            ?: error("找不到对应的任务 ID:$id")
+        task.stop()
+    }
 
     protected fun runScript(script: Script, senderSelector: String, args: Map<String, Any>) {
         if (senderSelector.first() != '@') {
@@ -174,6 +203,8 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         override var isOutOfMaxRuns: Boolean = false
 
         protected var interruptionTime: Long = -1
+
+        abstract val args: List<Any>
 
         abstract val controller: PlatformExecutor.PlatformTask
 

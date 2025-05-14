@@ -7,8 +7,10 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.boolean
 import top.lanscarlos.vulpecula.common.livedata.convert
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.LinkedList
 
@@ -27,24 +29,42 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     val baseTime: Long by config.read("base-time").convert(::parseBaseTime)
 
-    val tasks: LinkedList<Task> = LinkedList()
+    override val tasks: HashMap<String, Task> = HashMap()
 
-    private var currentPid: Int = 0
-
-    override fun activate() {
-        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
-        tasks += Task(currentPid++, senderSelector).also(Task::start)
+    override fun create(id: String, senderSelector: String, args: List<String>): ScheduleTask {
+        TODO("Not yet implemented")
     }
 
-    override fun terminate() {
-        for (task in tasks.toMutableList()) {
-            task.stop()
+    override fun start(senderSelector: String, args: List<String>): ScheduleTask {
+        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
+        val pid = nextPid()
+        return start(pid, pid.toString(), senderSelector, args)
+    }
+
+    override fun start(id: String, senderSelector: String, args: List<String>): ScheduleTask {
+        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
+
+        if (id != "~") {
+            val task = tasks.find { it.id == id }
+
         }
+
+        val pid = nextPid()
+        val newId = if (id == "@") pid.toString() else id
+        return start(pid, newId, senderSelector, args)
+    }
+
+    private fun start(pid: Long, id: String, senderSelector: String, args: List<String>): ScheduleTask {
+        val task = Task(pid, id, senderSelector, args)
+        tasks += task.also(Task::start)
+        return task
     }
 
     inner class Task(
-        override val pid: Int,
-        val senderSelector: String
+        override val pid: Long,
+        override val id: String,
+        val senderSelector: String,
+        override val args: List<String>
     ) : AbstractTask() {
 
         override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)

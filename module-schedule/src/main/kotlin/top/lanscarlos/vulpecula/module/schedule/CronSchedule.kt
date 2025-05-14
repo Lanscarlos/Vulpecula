@@ -65,7 +65,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     val cron: Builder<LocalDateTime, CronLocalDateTime, CronLocalDateTimeProvider>
 
-    val tasks: LinkedList<Task> = LinkedList()
+    override val tasks: LinkedList<Task> = LinkedList()
 
     private var currentPid: Int = 0
 
@@ -87,23 +87,25 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         }
     }
 
-    override fun activate() {
+    override fun start() {
         require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
         tasks += Task(currentPid++, senderSelector).also(Task::start)
     }
 
-    override fun terminate() {
+    override fun stop() {
         for (task in tasks.toMutableList()) {
             task.stop()
         }
     }
 
     inner class Task(
-        override val pid: Int,
-        private val senderSelector: String
+        override val pid: Long,
+        override val id: String,
+        private val senderSelector: String,
+        override val args: List<Any>
     ) : AbstractTask() {
 
-        override val activationTime: Long = System.currentTimeMillis()
+        override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
 
         override var expirationTime: Long = if (duration > 0) activationTime + duration else -1L
 
