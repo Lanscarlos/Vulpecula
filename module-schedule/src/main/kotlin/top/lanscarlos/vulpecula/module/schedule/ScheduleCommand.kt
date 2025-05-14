@@ -18,6 +18,7 @@ object ScheduleCommand {
     @CommandBody
     val schedule = subCommand {
         literal("start", literal = start)
+        literal("stop", literal = stop)
     }
 
     private val start: CommandComponent.() -> Unit = {
@@ -26,6 +27,16 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 ScheduleService.get(id).activate()
                 sender.sendMessage("schedule $id successfully started.")
+            }
+        }
+    }
+
+    private val stop: CommandComponent.() -> Unit = {
+        dynamic("id") {
+            suggest { ScheduleService.keys().toList() }
+            execute<ProxyCommandSender> { sender, _, id ->
+                ScheduleService.get(id).terminate()
+                sender.sendMessage("schedule $id successfully stopped.")
             }
         }
     }

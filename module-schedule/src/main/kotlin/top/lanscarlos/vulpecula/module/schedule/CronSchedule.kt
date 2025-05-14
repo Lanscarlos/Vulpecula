@@ -88,7 +88,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
     }
 
     override fun activate() {
-        require(tasks.all { !it.state.isRunning }) { "当前有任务正在运行." }
+        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
         tasks += Task(currentPid++, senderSelector).also(Task::start)
     }
 

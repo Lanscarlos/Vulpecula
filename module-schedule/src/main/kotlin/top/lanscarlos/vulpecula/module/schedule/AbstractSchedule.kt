@@ -30,7 +30,11 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     val maxRuns: Int by config.read("max-runs").int(-1)
 
+    val delay by config.read("delay").convert(::parseTime)
+
     override val isAutoStart: Boolean by config.read("auto-start").boolean(false)
+
+    val prototype: Boolean by config.read("prototype").boolean(false)
 
     val isAsynchronous: Boolean by config.read("async").boolean(false)
 

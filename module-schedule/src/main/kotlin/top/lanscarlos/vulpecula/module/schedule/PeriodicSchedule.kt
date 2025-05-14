@@ -25,11 +25,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     val period by config.read("period").convert(::parseTime)
 
-    val delay by config.read("delay").convert(::parseTime)
-
     val baseTime: Long by config.read("base-time").convert(::parseBaseTime)
-
-    val prototype: Boolean by config.read("prototype").boolean(false)
 
     val tasks: LinkedList<Task> = LinkedList()
 
