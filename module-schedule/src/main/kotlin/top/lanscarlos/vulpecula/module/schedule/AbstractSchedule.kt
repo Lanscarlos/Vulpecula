@@ -16,6 +16,8 @@ import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.schedule.PeriodicSchedule.Task
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
+import java.util.function.Consumer
+import java.util.function.Function
 import kotlin.math.pow
 
 /**
@@ -55,16 +57,12 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     private var currentPid: Long = 0
 
-    protected fun nextPid(): Long {
-        return currentPid++
-    }
-
     override fun stop(pid: Long) {
         if (pid < 0) {
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks.find { it.pid == pid }
+        val task = tasks.values.find { it.pid == pid }
             ?: error("找不到对应的任务 PID:$pid")
         task.stop()
     }
@@ -74,33 +72,39 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks.find { it.id == id }
+        val task = tasks[id]
             ?: error("找不到对应的任务 ID:$id")
         task.stop()
     }
 
-    protected fun runScript(script: Script, senderSelector: String, args: Map<String, Any>) {
+    protected fun runScript(
+        script: Script,
+        senderSelector: String,
+        args: Map<String, Any>,
+        onSuccess: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ) {
         if (senderSelector.first() != '@') {
             // 指定玩家
             val sender = Bukkit.getPlayerExact(senderSelector)?.let(::adaptPlayer)
                 ?: error("无法选取脚本执行者 $senderSelector")
-            ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+            ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
             return
         }
         val selector = senderSelector.substring(1).split(' ')
         when (selector.first().lowercase()) {
-            "null" -> ScriptService.run(script, null, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
-            "console" -> ScriptService.run(script, console(), args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+            "null" -> ScriptService.run(script, null, args, onSuccess = onSuccess, onFailure = onFailure)
+            "console" -> ScriptService.run(script, console(), args, onSuccess = onSuccess, onFailure = onFailure)
             "players" -> {
                 for (sender in onlinePlayers()) {
-                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
                 }
             }
             "world" -> {
                 val senders = selector.getOrNull(1)?.let(Bukkit::getWorld)?.players?.map(::adaptPlayer)
                     ?: error("无法解析世界 ${selector.getOrNull(1)}")
                 for (sender in senders) {
-                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
                 }
             }
             "range" -> {
@@ -113,7 +117,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
                 info("@Range 距离平方 >> $range")
                 val senders = world.players.filter { it.location.distanceSquared(location) <= range }.map(::adaptPlayer)
                 for (sender in senders) {
-                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
                 }
             }
             "area" -> {
@@ -125,39 +129,11 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
                 val world = loc1.world!!
                 val senders = world.players.filter { boundingBox.contains(it.location.x, it.location.y, it.location.z) }.map(::adaptPlayer)
                 for (sender in senders) {
-                    ScriptService.run(script, sender, args, onSuccess = ::onSuccess, onFailure = ::onFailure)
+                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
                 }
             }
             else -> error("Unknown sender: $senderSelector")
         }
-    }
-
-    fun execute(args: Map<String, Any>) {
-        runScript(script, senderSelector, args)
-    }
-
-    fun onSuccess(value: Any?) {}
-
-    fun onFailure(ex: BacikalRuntimeException) {}
-
-    fun onStart(args: Map<String, Any>) {
-        val script = onStartScript ?: return
-        runScript(script, senderSelector, args)
-    }
-
-    fun onStop(args: Map<String, Any>) {
-        val script = onStopScript ?: return
-        runScript(script, senderSelector, args)
-    }
-
-    fun onPause(args: Map<String, Any>) {
-        val script = onPauseScript ?: return
-        runScript(script, senderSelector, args)
-    }
-
-    fun onResume(args: Map<String, Any>) {
-        val script = onResumeScript ?: return
-        runScript(script, senderSelector, args)
     }
 
     protected fun parseTime(value: Any?): Long {
@@ -192,9 +168,17 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         return ScriptService.compile(value)
     }
 
-    abstract inner class AbstractTask : ScheduleTask {
+    abstract inner class AbstractTask(id: String) : ScheduleTask {
+
+        final override val pid: Long = currentPid++
+
+        override val id: String = if (id != "~") id else pid.toString()
 
         override var state: TaskState = TaskState.WAITING
+
+        override var activationTime: Long = -1L
+
+        override var expirationTime: Long = -1L
 
         override var counter: Int = 0
 
@@ -216,6 +200,42 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             return args
         }
 
+        fun onStart() {
+            val script = onStartScript ?: return
+            runScript(script, senderSelector, args())
+        }
+
+        fun onStop() {
+            val script = onStopScript ?: return
+            runScript(script, senderSelector, args())
+        }
+
+        fun onPause() {
+            val script = onPauseScript ?: return
+            runScript(script, senderSelector, args(), onSuccess = {}, onFailure = ::onFailure)
+        }
+
+        fun onResume() {
+            val script = onResumeScript ?: return
+            runScript(script, senderSelector, args(), onSuccess = {}, onFailure = ::onFailure)
+        }
+
+        fun onFailure(ex: BacikalRuntimeException) {
+            // 脚本运行异常时, 暂停任务
+            ex.printStackTrace()
+            pause()
+        }
+
+        abstract fun schedule()
+
+        override fun start() {
+            require(activationTime < 0L) { "禁止重复调用 start() 函数." }
+            onStart()
+            activationTime = System.currentTimeMillis() + delay.coerceAtLeast(0)
+            expirationTime = if (duration > 0) activationTime + duration else -1L
+            schedule()
+        }
+
         override fun pause() {
             if (!state.isRunning) {
                 return
@@ -223,7 +243,25 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             state = TaskState.PAUSED
             interruptionTime = System.currentTimeMillis()
             controller.cancel()
-            onPause(emptyMap())
+            onPause()
+        }
+
+        override fun resume() {
+            if (state != TaskState.PAUSED) {
+                return
+            }
+            state = TaskState.WAITING
+            onResume()
+            val now = System.currentTimeMillis()
+
+            // 修正失效时间
+            if (expirationTime > 0) {
+                val consumedTime = interruptionTime - activationTime
+                val remainingTime = duration - consumedTime
+                expirationTime = now + remainingTime
+            }
+
+            schedule()
         }
 
         override fun stop() {
@@ -232,7 +270,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             }
             state = TaskState.TERMINATED
             controller.cancel()
-            onStop(emptyMap())
+            onStop()
         }
 
         protected fun canContinue(): Boolean {

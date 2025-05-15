@@ -12,7 +12,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.util.LinkedList
 
 /**
  * Vulpecula
@@ -32,46 +31,39 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
     override val tasks: HashMap<String, Task> = HashMap()
 
     override fun create(id: String, senderSelector: String, args: List<String>): ScheduleTask {
-        TODO("Not yet implemented")
-    }
-
-    override fun start(senderSelector: String, args: List<String>): ScheduleTask {
-        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
-        val pid = nextPid()
-        return start(pid, pid.toString(), senderSelector, args)
-    }
-
-    override fun start(id: String, senderSelector: String, args: List<String>): ScheduleTask {
-        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
-
-        if (id != "~") {
-            val task = tasks.find { it.id == id }
-
-        }
-
-        val pid = nextPid()
-        val newId = if (id == "@") pid.toString() else id
-        return start(pid, newId, senderSelector, args)
-    }
-
-    private fun start(pid: Long, id: String, senderSelector: String, args: List<String>): ScheduleTask {
-        val task = Task(pid, id, senderSelector, args)
-        tasks += task.also(Task::start)
+        require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
+        val task = Task(id, senderSelector, args)
+        tasks[id] = task
         return task
     }
 
     inner class Task(
-        override val pid: Long,
-        override val id: String,
+        id: String,
         val senderSelector: String,
         override val args: List<String>
-    ) : AbstractTask() {
-
-        override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
-
-        override var expirationTime: Long = if (duration > 0) activationTime + duration else -1L
+    ) : AbstractTask(id) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
+
+        override fun schedule() {
+            val now = System.currentTimeMillis()
+            val nextTime = if (interruptionTime > 0) {
+                // 从暂停中恢复任务
+                calculateNextTime(now)
+            } else {
+                // 初次运行
+                calculateNextTime(activationTime)
+            }
+            val delay = nextTime - now
+            controller = submit(
+                now = false,
+                async = isAsynchronous,
+                delay = delay / 50L + 10L,
+                period = period / 50L,
+            ) {
+                onTick()
+            }
+        }
 
         private fun onTick() {
             if (state == TaskState.WAITING) {
@@ -82,49 +74,6 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
                 return
             }
             runScript(script, senderSelector, args())
-        }
-
-        override fun start() {
-            require(::controller.isInitialized.not()) { "禁止重复调用 start() 函数." }
-            onStart(emptyMap())
-            val now = System.currentTimeMillis()
-            val nextTime = calculateNextTime(activationTime)
-            val delay = nextTime - now
-            controller = submit(
-                now = false,
-                async = isAsynchronous,
-                delay = delay / 50L + 10L,
-                period = period / 50L,
-            ) {
-                onTick()
-            }
-        }
-
-        override fun resume() {
-            if (state != TaskState.PAUSED) {
-                return
-            }
-            state = TaskState.WAITING
-            onResume(emptyMap())
-            val now = System.currentTimeMillis()
-
-            // 修正失效时间
-            if (expirationTime > 0) {
-                val consumedTime = interruptionTime - activationTime
-                val remainingTime = duration - consumedTime
-                expirationTime = now + remainingTime
-            }
-
-            val nextTime = calculateNextTime(now)
-            val delay = nextTime - now
-            controller = submit(
-                now = false,
-                async = isAsynchronous,
-                delay = delay / 50L + 10L,
-                period = period / 50L,
-            ) {
-                onTick()
-            }
         }
 
         /**

@@ -65,7 +65,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     val cron: Builder<LocalDateTime, CronLocalDateTime, CronLocalDateTimeProvider>
 
-    override val tasks: LinkedList<Task> = LinkedList()
+    override val tasks: HashMap<String, Task> = HashMap()
 
     private var currentPid: Int = 0
 
@@ -87,27 +87,18 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         }
     }
 
-    override fun start() {
-        require(prototype || tasks.all { !it.state.isRunning }) { "非原型模式下, 当前有任务正在运行." }
-        tasks += Task(currentPid++, senderSelector).also(Task::start)
-    }
-
-    override fun stop() {
-        for (task in tasks.toMutableList()) {
-            task.stop()
-        }
+    override fun create(id: String, senderSelector: String, args: List<String>): ScheduleTask {
+        require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
+        val task = Task(id, senderSelector, args)
+        tasks[id] = task
+        return task
     }
 
     inner class Task(
-        override val pid: Long,
-        override val id: String,
+        id: String,
         private val senderSelector: String,
         override val args: List<Any>
-    ) : AbstractTask() {
-
-        override val activationTime: Long = System.currentTimeMillis() + delay.coerceAtLeast(0)
-
-        override var expirationTime: Long = if (duration > 0) activationTime + duration else -1L
+    ) : AbstractTask(id) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
 
