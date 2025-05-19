@@ -28,6 +28,7 @@ class NativeScript(override val id: String, source: String) : Script {
     override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,
+        variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
@@ -36,10 +37,10 @@ class NativeScript(override val id: String, source: String) : Script {
         for ((index, arg) in args.withIndex()) {
             wrappedArgs["arg$index"] = arg ?: continue
         }
-        return execute(sender, wrappedArgs, onSuccess, onFailure)
+        return execute(sender, wrappedArgs + variables, onSuccess, onFailure)
     }
 
-    override fun execute(
+    fun execute(
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
         onSuccess: Consumer<Any?>,

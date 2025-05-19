@@ -52,6 +52,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
     override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,
+        variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
@@ -74,30 +75,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
             wrappedArgs[parameter.name] = parameter.applicative.convertOrThrow(arg)
         }
 
-        return run(sender, wrappedArgs, onSuccess, onFailure)
-    }
-
-    override fun execute(
-        sender: ProxyCommandSender?,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ): ScriptTask {
-        // 参数校验
-        val wrappedArgs = HashMap(args)
-        for ((name, applicative, optional, default) in parameters) {
-            val arg = args[name]
-            if (optional) {
-                val value = arg?.let(applicative::convertOrNull)
-                    ?: default?.let(applicative::convertOrNull) // 采用缺省值
-                wrappedArgs[name] = value ?: continue
-                continue
-            }
-            require(arg != null) { "Missing argument $name when run script \"$id\"." }
-            wrappedArgs[name] = applicative.convertOrThrow(arg)
-        }
-
-        return run(sender, args, onSuccess, onFailure)
+        return run(sender, wrappedArgs + variables, onSuccess, onFailure)
     }
 
     private fun run(

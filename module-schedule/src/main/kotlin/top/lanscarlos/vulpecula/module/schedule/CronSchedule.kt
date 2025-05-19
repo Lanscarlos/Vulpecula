@@ -29,17 +29,17 @@ import java.util.*
     RuntimeDependency(
         value = "!com.ucasoft.kcron:kcron-abstractions-jvm:0.23.0",
         test = "!com.ucasoft.kcron.abstractions.CronDateTime",
-        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230."],
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230." ],
     ),
     RuntimeDependency(
         value = "!com.ucasoft.kcron:kcron-common-jvm:0.23.0",
         test = "!com.ucasoft.kcron.Cron",
-        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230."],
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230." ],
     ),
     RuntimeDependency(
         value = "!com.ucasoft.kcron:kcron-core-jvm:0.23.0",
         test = "!com.ucasoft.kcron.core.Cron",
-        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230."],
+        relocate = [ "!kotlin.", "!kotlin2021.", "!com.ucasoft.kcron.", "!com.ucasoft.kcron0230." ],
     ),
     RuntimeDependency(
         value = "!com.ucasoft.kcron:kcron-kotlinx-datetime-jvm:0.23.0",
@@ -67,8 +67,6 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     override val tasks: HashMap<String, Task> = HashMap()
 
-    private var currentPid: Int = 0
-
     init {
         require(days == null || weeks == null) { "不允许同时设置 days 和 weeks." }
         cron = Cron.builder()
@@ -88,6 +86,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
     }
 
     override fun create(id: String, senderSelector: String, args: List<String>): ScheduleTask {
+        require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
         require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
         val task = Task(id, senderSelector, args)
         tasks[id] = task
@@ -96,9 +95,9 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     inner class Task(
         id: String,
-        private val senderSelector: String,
+        senderSelector: String,
         override val args: List<Any>
-    ) : AbstractTask(id) {
+    ) : AbstractTask(id, senderSelector) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
 
@@ -107,11 +106,11 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 stop()
                 return
             }
-            runScript(script, senderSelector, args())
+            onExecute()
             schedule() // 继续触发
         }
 
-        private fun schedule() {
+        override fun schedule() {
             val now = System.currentTimeMillis()
             val delay = calculateNextTime() - now
             info("delay >> ${delay}ms")
@@ -144,7 +143,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
         override fun start() {
             require(::controller.isInitialized.not()) { "禁止重复调用 start() 函数." }
-            onStart(emptyMap())
+            onStart()
             schedule()
         }
 
@@ -153,7 +152,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 return
             }
             state = TaskState.WAITING
-            onResume(emptyMap())
+            onResume()
             val now = System.currentTimeMillis()
 
             // 修正失效时间

@@ -111,10 +111,10 @@ class ScriptExecutor(
     ): CompletableFuture<Any?> {
         return when (script) {
             is String -> {
-                ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure).future
+                ScriptService.run(script, sender, emptyList(), args, onSuccess = onSuccess, onFailure = onFailure).future.thenApply { it }
             }
             is Script -> {
-                ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure).future
+                ScriptService.run(script, sender, emptyList(), args, onSuccess = onSuccess, onFailure = onFailure).future.thenApply { it }
             }
             else -> error("Unsupported script type: ${script.javaClass.name}")
         }

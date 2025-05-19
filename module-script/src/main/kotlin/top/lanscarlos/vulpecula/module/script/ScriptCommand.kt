@@ -37,6 +37,7 @@ object ScriptCommand {
                 ScriptService.run(
                     id,
                     sender,
+                    emptyList(),
                     emptyMap(),
                     onSuccess = {
                         sender.info("module-script-command-run-success", id, it.toString())
@@ -59,6 +60,7 @@ object ScriptCommand {
                     ScriptService.run(
                         id,
                         scriptSender,
+                        emptyList(),
                         emptyMap(),
                         onSuccess = {
                             sender.info("module-script-command-run-success", id, it.toString())
@@ -82,6 +84,7 @@ object ScriptCommand {
                             id,
                             scriptSender,
                             args,
+                            emptyMap(),
                             onSuccess = {
                                 sender.info("module-script-command-run-success", id, it.toString())
                             },

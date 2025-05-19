@@ -31,6 +31,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
     override val tasks: HashMap<String, Task> = HashMap()
 
     override fun create(id: String, senderSelector: String, args: List<String>): ScheduleTask {
+        require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
         require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
         val task = Task(id, senderSelector, args)
         tasks[id] = task
@@ -39,9 +40,9 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     inner class Task(
         id: String,
-        val senderSelector: String,
+        senderSelector: String,
         override val args: List<String>
-    ) : AbstractTask(id) {
+    ) : AbstractTask(id, senderSelector) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
 
@@ -73,7 +74,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
                 stop()
                 return
             }
-            runScript(script, senderSelector, args())
+            onExecute()
         }
 
         /**

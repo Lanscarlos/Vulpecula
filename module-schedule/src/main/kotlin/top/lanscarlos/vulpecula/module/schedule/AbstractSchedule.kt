@@ -13,8 +13,8 @@ import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
-import top.lanscarlos.vulpecula.module.schedule.PeriodicSchedule.Task
 import top.lanscarlos.vulpecula.module.script.Script
+import top.lanscarlos.vulpecula.module.script.ScriptExecutor
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import java.util.function.Consumer
 import java.util.function.Function
@@ -77,65 +77,6 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         task.stop()
     }
 
-    protected fun runScript(
-        script: Script,
-        senderSelector: String,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ) {
-        if (senderSelector.first() != '@') {
-            // 指定玩家
-            val sender = Bukkit.getPlayerExact(senderSelector)?.let(::adaptPlayer)
-                ?: error("无法选取脚本执行者 $senderSelector")
-            ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
-            return
-        }
-        val selector = senderSelector.substring(1).split(' ')
-        when (selector.first().lowercase()) {
-            "null" -> ScriptService.run(script, null, args, onSuccess = onSuccess, onFailure = onFailure)
-            "console" -> ScriptService.run(script, console(), args, onSuccess = onSuccess, onFailure = onFailure)
-            "players" -> {
-                for (sender in onlinePlayers()) {
-                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
-                }
-            }
-            "world" -> {
-                val senders = selector.getOrNull(1)?.let(Bukkit::getWorld)?.players?.map(::adaptPlayer)
-                    ?: error("无法解析世界 ${selector.getOrNull(1)}")
-                for (sender in senders) {
-                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
-                }
-            }
-            "range" -> {
-                val location = selector.getOrNull(1)?.let(LocationApplicative::convertOrNull)?.toBukkitLocation()
-                    ?: error("无法解析坐标 ${selector.getOrNull(1)}")
-                val world = location.world
-                    ?: error("坐标不合法 ${selector.getOrNull(1)}")
-                val range = selector.getOrNull(2)?.toDoubleOrNull()?.pow(2)
-                    ?: error("无法解析范围 ${selector.getOrNull(2)}")
-                info("@Range 距离平方 >> $range")
-                val senders = world.players.filter { it.location.distanceSquared(location) <= range }.map(::adaptPlayer)
-                for (sender in senders) {
-                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
-                }
-            }
-            "area" -> {
-                val loc1 = selector.getOrNull(1)?.let(LocationApplicative::convertOrNull)?.toBukkitLocation()
-                    ?: error("无法解析坐标 ${selector.getOrNull(1)}")
-                val loc2 = selector.getOrNull(2)?.let(LocationApplicative::convertOrNull)?.toBukkitLocation()
-                    ?: error("无法解析坐标 ${selector.getOrNull(2)}")
-                val boundingBox = BoundingBox.of(loc1, loc2)
-                val world = loc1.world!!
-                val senders = world.players.filter { boundingBox.contains(it.location.x, it.location.y, it.location.z) }.map(::adaptPlayer)
-                for (sender in senders) {
-                    ScriptService.run(script, sender, args, onSuccess = onSuccess, onFailure = onFailure)
-                }
-            }
-            else -> error("Unknown sender: $senderSelector")
-        }
-    }
-
     protected fun parseTime(value: Any?): Long {
         if (value == null) {
             return -1L
@@ -168,7 +109,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         return ScriptService.compile(value)
     }
 
-    abstract inner class AbstractTask(id: String) : ScheduleTask {
+    abstract inner class AbstractTask(id: String, val senderSelector: String) : ScheduleTask {
 
         final override val pid: Long = currentPid++
 
@@ -202,22 +143,35 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
         fun onStart() {
             val script = onStartScript ?: return
-            runScript(script, senderSelector, args())
+            runScript(script)
+        }
+
+        fun onExecute() {
+            runScript(script)
         }
 
         fun onStop() {
             val script = onStopScript ?: return
-            runScript(script, senderSelector, args())
+            runScript(script)
         }
 
         fun onPause() {
             val script = onPauseScript ?: return
-            runScript(script, senderSelector, args(), onSuccess = {}, onFailure = ::onFailure)
+            runScript(script)
         }
 
         fun onResume() {
             val script = onResumeScript ?: return
-            runScript(script, senderSelector, args(), onSuccess = {}, onFailure = ::onFailure)
+            runScript(script)
+        }
+
+        fun runScript(script: Script) {
+            ScriptExecutor()
+                .script(script)
+                .senderBy(senderSelector)
+                .variables(args())
+                .onFailure(::onFailure)
+                .execute()
         }
 
         fun onFailure(ex: BacikalRuntimeException) {

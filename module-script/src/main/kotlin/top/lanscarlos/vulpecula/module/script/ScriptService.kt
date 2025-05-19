@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.module.script
 
-import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
@@ -16,7 +15,6 @@ import top.lanscarlos.vulpecula.common.message.errorLiteralSync
 import top.lanscarlos.vulpecula.common.message.infoSync
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.io.File
-import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
 
@@ -61,10 +59,7 @@ object ScriptService {
      * @return 脚本, 或 null
      * */
     fun getOrNull(id: String): Script? {
-        if (!scripts.containsKey(id)) {
-            return null
-        }
-        return ProxyScript(id)
+        return scripts[id]
     }
 
     /**
@@ -117,7 +112,9 @@ object ScriptService {
     fun compile(source: String): Script {
         return if (source.getOrNull(6) == '@' && source.lowercase().startsWith("script@")) {
             // 调用脚本
-            get(source.substringBefore('@'))
+            val id = source.substring(6)
+            get(id) // 检测
+            ProxyScript(source.substringBefore('@'))
         } else {
             NativeScript(source)
         }
@@ -138,44 +135,6 @@ object ScriptService {
      * 运行指定脚本
      *
      * @param id 脚本 ID
-     * @param player 玩家
-     * @param args 脚本参数
-     * @throws IllegalStateException 脚本不存在
-     * @return 运行结果
-     * */
-    fun run(
-        id: String,
-        player: Player,
-        args: List<Any?>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ): ScriptTask {
-        return run(get(id), adaptPlayer(player), args, onSuccess, onFailure)
-    }
-
-    /**
-     * 运行指定脚本
-     *
-     * @param id 脚本 ID
-     * @param player 玩家
-     * @param args 脚本参数
-     * @throws IllegalStateException 脚本不存在
-     * @return 运行结果
-     * */
-    fun run(
-        id: String,
-        player: Player,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ): ScriptTask {
-        return run(get(id), adaptPlayer(player), args, onSuccess, onFailure)
-    }
-
-    /**
-     * 运行指定脚本
-     *
-     * @param id 脚本 ID
      * @param sender 脚本执行者
      * @param args 脚本参数
      * @throws IllegalStateException 脚本不存在
@@ -185,29 +144,11 @@ object ScriptService {
         id: String,
         sender: ProxyCommandSender?,
         args: List<Any?>,
+        variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
-        return run(get(id), sender, args, onSuccess, onFailure)
-    }
-
-    /**
-     * 运行指定脚本
-     *
-     * @param id 脚本 ID
-     * @param sender 脚本执行者
-     * @param args 脚本参数
-     * @throws IllegalStateException 脚本不存在
-     * @return 运行结果
-     * */
-    fun run(
-        id: String,
-        sender: ProxyCommandSender?,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ): ScriptTask {
-        return run(get(id), sender, args, onSuccess, onFailure)
+        return run(get(id), sender, args, variables, onSuccess, onFailure)
     }
 
     /**
@@ -222,28 +163,11 @@ object ScriptService {
         script: Script,
         sender: ProxyCommandSender?,
         args: List<Any?>,
+        variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
-        return script.execute(sender, args, onSuccess, onFailure)
-    }
-
-    /**
-     * 运行脚本
-     *
-     * @param script 脚本
-     * @param sender 脚本执行者
-     * @param args 脚本参数
-     * @return 运行结果
-     * */
-    fun run(
-        script: Script,
-        sender: ProxyCommandSender?,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
-    ): ScriptTask {
-        return script.execute(sender, args, onSuccess, onFailure)
+        return script.execute(sender, args, variables, onSuccess, onFailure)
     }
 
     /**

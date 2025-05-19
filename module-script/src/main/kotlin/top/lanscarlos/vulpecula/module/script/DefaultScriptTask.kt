@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture
 class DefaultScriptTask(
     override val pid: Long,
     override val script: Script,
-    override val context: ScriptContext,
+    val context: ScriptContext,
     override var future: CompletableFuture<Any?>,
     override val startTime: Long
 ) : ScriptTask {

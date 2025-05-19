@@ -18,9 +18,7 @@ interface ScriptTask {
 
     val script: Script
 
-    val context: ScriptContext
-
-    val future: CompletableFuture<Any?>
+    val future: CompletableFuture<out Any?>
 
     val startTime: Long
 
