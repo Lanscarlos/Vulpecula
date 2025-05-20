@@ -25,7 +25,7 @@ class NativeScript(override val id: String, source: String) : Script {
 
     private val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
-    override fun execute(
+    override fun run(
         sender: ProxyCommandSender?,
         args: List<Any?>,
         variables: Map<String, Any>,

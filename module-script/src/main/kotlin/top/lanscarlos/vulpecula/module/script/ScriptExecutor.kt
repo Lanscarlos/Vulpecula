@@ -123,12 +123,12 @@ class ScriptExecutor {
 
     fun execute(): ScriptTask {
         if (sender.isEmpty()) {
-            return script.execute(console(), args, variables, onSuccess, onFailure)
+            return script.run(console(), args, variables, onSuccess, onFailure)
         }
         if (sender.size == 1) {
-            return script.execute(sender.first(), args, variables, onSuccess, onFailure)
+            return script.run(sender.first(), args, variables, onSuccess, onFailure)
         }
-        val tasks = sender.map { script.execute(sender.first(), args, variables, onSuccess, onFailure) }
+        val tasks = sender.map { script.run(sender.first(), args, variables, onSuccess, onFailure) }
         return ComplexScriptTask(ScriptService.nextPid(), script, tasks)
     }
 

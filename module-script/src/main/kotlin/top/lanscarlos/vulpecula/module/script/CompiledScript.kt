@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
+import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.deepVars
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
@@ -21,7 +22,7 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025-03-20 15:11
  */
-class CompiledScript(override val id: String, val config: Configuration) : Script {
+class CompiledScript(override val id: String, val config: Configuration) : AbstractScript() {
 
     data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean, val default: Any?)
 
@@ -43,13 +44,50 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
 
     val exceptions: Map<String, Quest> by config.read("exceptions").convert(::parseException)
 
-    private var quest: Quest = buildQuest()
+    override var quest: Quest = buildQuest()
+
+    inner class Task(
+        override val pid: Long,
+        override val script: Script,
+        val sender: ProxyCommandSender?,
+        val args: Map<String, Any>,
+        override val startTime: Long,
+        var context: ScriptContext
+    ) : ScriptTask {
+
+        lateinit var exContext: ScriptContext
+
+        override val future: CompletableFuture<out Any?> = context.runActions().exceptionallyCompose { e ->
+            val ex = e.cause as BacikalRuntimeException
+            val exceptionName = ex.cause.javaClass.name
+            // 匹配异常处理
+            val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value
+            if (quest == null) {
+                // 无异常处理
+                throw ex
+            }
+            // 执行异常处理
+            this.exContext = BacikalService.executeLater(quest, timeout, sender, args.plus(context.rootFrame().deepVars()))
+            this.exContext.runActions()
+        }
+
+        override val isDone: Boolean
+            get() = future.isDone
+
+        override fun terminate() {
+            context.terminate()
+            if (::exContext.isInitialized) {
+                exContext.terminate()
+            }
+        }
+
+    }
 
     fun rebuild() {
         quest = buildQuest()
     }
 
-    override fun execute(
+    override fun run(
         sender: ProxyCommandSender?,
         args: List<Any?>,
         variables: Map<String, Any>,
@@ -76,6 +114,23 @@ class CompiledScript(override val id: String, val config: Configuration) : Scrip
         }
 
         return run(sender, wrappedArgs + variables, onSuccess, onFailure)
+    }
+
+    override fun runScript(sender: ProxyCommandSender?, args: Map<String, Any>): CompletableFuture<Any?> {
+        val context = BacikalService.executeLater(quest, timeout, sender, args)
+        return context.runActions().exceptionallyCompose { e ->
+            val ex = e.cause as BacikalRuntimeException
+            val exceptionName = ex.cause.javaClass.name
+            // 匹配异常处理
+            val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value
+            if (quest == null) {
+                // 无异常处理
+                throw ex
+            }
+            // 执行异常处理
+            val exContext = BacikalService.executeLater(quest, timeout, sender, args.plus(context.rootFrame().deepVars()))
+            exContext.runActions()
+        }
     }
 
     private fun run(

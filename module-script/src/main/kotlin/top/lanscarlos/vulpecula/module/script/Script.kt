@@ -16,7 +16,7 @@ interface Script {
 
     val id: String
 
-    fun execute(
+    fun run(
         sender: ProxyCommandSender?,
         args: List<Any?>,
         variables: Map<String, Any>,

@@ -167,7 +167,7 @@ object ScriptService {
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
-        return script.execute(sender, args, variables, onSuccess, onFailure)
+        return script.run(sender, args, variables, onSuccess, onFailure)
     }
 
     /**

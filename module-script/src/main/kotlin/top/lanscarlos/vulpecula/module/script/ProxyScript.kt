@@ -14,7 +14,7 @@ import java.util.function.Function
  */
 class ProxyScript(override val id: String) : Script {
 
-    override fun execute(
+    override fun run(
         sender: ProxyCommandSender?,
         args: List<Any?>,
         variables: Map<String, Any>,
