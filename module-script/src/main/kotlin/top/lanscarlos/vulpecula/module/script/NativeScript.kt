@@ -27,6 +27,7 @@ class NativeScript(override val id: String, source: String) : Script {
 
     override fun run(
         sender: ProxyCommandSender?,
+        selector: SenderSelector,
         args: List<Any?>,
         variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
@@ -37,10 +38,11 @@ class NativeScript(override val id: String, source: String) : Script {
         for ((index, arg) in args.withIndex()) {
             wrappedArgs["arg$index"] = arg ?: continue
         }
-        return execute(sender, wrappedArgs + variables, onSuccess, onFailure)
+        wrappedArgs.putAll(variables)
+        return run(sender, wrappedArgs, onSuccess, onFailure)
     }
 
-    fun execute(
+    private fun run(
         sender: ProxyCommandSender?,
         args: Map<String, Any>,
         onSuccess: Consumer<Any?>,

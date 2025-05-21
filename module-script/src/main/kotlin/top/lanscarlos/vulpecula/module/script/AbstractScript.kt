@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.script.selector.SelfSelector
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
@@ -18,16 +19,29 @@ abstract class AbstractScript : Script {
 
     abstract val quest: Quest
 
-    fun handle(result: Any?, ex: Throwable): Any? {
+    abstract fun run(
+        sender: ProxyCommandSender? = null,
+        args: List<Any?> = emptyList(),
+        variables: Map<String, Any> = emptyMap(),
+        onSuccess: Consumer<Any?> = Consumer {  },
+        onFailure: Function<BacikalRuntimeException, Any?> = Function { it }
+    ): ScriptTask
 
-        ScriptService.clearTask(pid)
-        if (e == null) {
-            onSuccess.accept(result)
-            return@handle result
+    override fun run(
+        sender: ProxyCommandSender?,
+        selector: SenderSelector,
+        args: List<Any?>,
+        variables: Map<String, Any>,
+        onSuccess: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
+    ): ScriptTask {
+        val senders = selector.select(sender)
+        if (senders.size == 1) {
+            return run(sender, args, variables, onSuccess, onFailure)
         }
-        val ex = e.cause as BacikalRuntimeException
-        ex.printKetherMessage()
-        return@handle onFailure.apply(ex)
+        when {
+            senders.isEmpty() -> run(sender, args, variables, onSuccess, onFailure)
+        }
     }
 
 }
