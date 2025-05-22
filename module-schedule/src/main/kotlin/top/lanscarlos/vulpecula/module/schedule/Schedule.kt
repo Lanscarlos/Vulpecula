@@ -20,7 +20,7 @@ interface Schedule {
     /**
      * 创建日程任务
      *
-     * @param id 任务 ID
+     * @param pid 任务 ID
      * @param sender 脚本执行者
      * @param args 参数
      * */
@@ -33,7 +33,7 @@ interface Schedule {
     /**
      * 创建并启动日程
      *
-     * @param id 任务 ID
+     * @param pid 任务 ID
      * @param args 参数
      * @return 日程任务
      * */
