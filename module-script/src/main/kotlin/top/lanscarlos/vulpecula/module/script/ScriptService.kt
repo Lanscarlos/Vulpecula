@@ -14,7 +14,6 @@ import top.lanscarlos.vulpecula.common.message.errorSync
 import top.lanscarlos.vulpecula.common.message.errorLiteralSync
 import top.lanscarlos.vulpecula.common.message.infoSync
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
-import top.lanscarlos.vulpecula.module.script.selector.SelfSelector
 import java.io.File
 import java.util.function.Consumer
 import java.util.function.Function
