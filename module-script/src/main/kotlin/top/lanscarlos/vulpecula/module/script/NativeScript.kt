@@ -17,17 +17,16 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025-03-20 15:12
  */
-class NativeScript(override val id: String, source: String) : Script {
+class NativeScript(override val id: String, source: String) : AbstractScript() {
 
     constructor(source: String) : this(source.digest("MD5"), source)
 
     constructor(id: String, file: File) : this(id, file.readText(StandardCharsets.UTF_8))
 
-    private val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
+    override val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
     override fun run(
         sender: ProxyCommandSender?,
-        selector: SenderSelector,
         args: List<Any?>,
         variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,

@@ -36,11 +36,17 @@ abstract class AbstractScript : Script {
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
         val senders = selector.select(sender)
-        if (senders.size == 1) {
-            return run(sender, args, variables, onSuccess, onFailure)
-        }
-        when {
-            senders.isEmpty() -> run(sender, args, variables, onSuccess, onFailure)
+        return when {
+            senders.isEmpty() -> EmptyTask(this)
+            senders.size == 1 -> run(sender, args, variables, onSuccess, onFailure)
+            else -> {
+                val tasks = senders.map { run(it, args, variables, onSuccess, onFailure) }
+                return ComplexScriptTask(
+                    pid = ScriptService.nextPid(),
+                    script = this,
+                    tasks = tasks
+                )
+            }
         }
     }
 

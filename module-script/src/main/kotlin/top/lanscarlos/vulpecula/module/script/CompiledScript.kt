@@ -52,7 +52,6 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
 
     override fun run(
         sender: ProxyCommandSender?,
-        selector: SenderSelector,
         args: List<Any?>,
         variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
