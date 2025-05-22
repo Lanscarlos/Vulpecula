@@ -15,6 +15,8 @@ interface Schedule {
 
     val isAutoStart: Boolean
 
+    val tasks: HashMap<String, out ScheduleTask>
+
     /**
      * 创建日程任务
      *
@@ -23,7 +25,7 @@ interface Schedule {
      * @param args 参数
      * */
     fun create(
-        id: String = "@",
+        pid: String = "~",
         sender: ProxyCommandSender? = null,
         args: List<String> = emptyList()
     ): ScheduleTask
@@ -36,25 +38,18 @@ interface Schedule {
      * @return 日程任务
      * */
     fun start(
-        id: String = "~",
+        pid: String = "~",
         sender: ProxyCommandSender? = null,
         args: List<String> = emptyList()
     ): ScheduleTask {
-        return create(id, sender, args).also(ScheduleTask::start)
+        return create(pid, sender, args).also(ScheduleTask::start)
     }
 
     /**
      * 终止日程
      *
-     * @param pid 任务 ID, 若为 -1 则代表所有任务
+     * @param pid 任务 PID, 若为 * 则代表所有任务
      * */
-    fun stop(pid: Long)
-
-    /**
-     * 终止日程
-     *
-     * @param id 任务 PID, 若为 * 则代表所有任务
-     * */
-    fun stop(id: String)
+    fun stop(pid: String)
 
 }

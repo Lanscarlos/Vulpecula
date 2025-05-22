@@ -1,24 +1,13 @@
 package top.lanscarlos.vulpecula.module.schedule
 
-import org.bukkit.Bukkit
-import org.bukkit.util.BoundingBox
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.adaptPlayer
-import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.onlinePlayers
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
-import taboolib.platform.util.toBukkitLocation
-import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
-import java.util.function.Consumer
-import java.util.function.Function
-import kotlin.math.pow
 
 /**
  * Vulpecula
@@ -53,27 +42,14 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
 
-    abstract val tasks: HashMap<String, out AbstractTask>
-
     private var currentPid: Long = 0
 
-    override fun stop(pid: Long) {
-        if (pid < 0) {
-            tasks.values.forEach(ScheduleTask::stop)
-            return
-        }
-        val task = tasks.values.find { it.pid == pid }
-            ?: error("找不到对应的任务 PID:$pid")
-        task.stop()
-    }
-
-    override fun stop(id: String) {
+    override fun stop(pid: String) {
         if (id == "*") {
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[id]
-            ?: error("找不到对应的任务 ID:$id")
+        val task = tasks[id] ?: error("找不到对应的任务 ID: $id")
         task.stop()
     }
 
@@ -110,14 +86,12 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     }
 
     abstract inner class AbstractTask(
-        id: String,
+        pid: String,
         val sender: ProxyCommandSender?,
         val args: List<Any>
     ) : ScheduleTask {
 
-        final override val pid: Long = currentPid++
-
-        override val id: String = if (id != "~") id else pid.toString()
+        override val pid: String = if (pid != "~") pid else (currentPid++).toString()
 
         override var state: TaskState = TaskState.WAITING
 

@@ -5,13 +5,10 @@ import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.boolean
 import top.lanscarlos.vulpecula.common.livedata.convert
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 /**
@@ -31,7 +28,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     override val tasks: HashMap<String, Task> = HashMap()
 
-    override fun create(id: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
+    override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
         require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
         val task = Task(id, sender, args)
@@ -40,10 +37,10 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
     }
 
     inner class Task(
-        id: String,
+        pid: String,
         sender: ProxyCommandSender?,
         args: List<String>
-    ) : AbstractTask(id, sender, args) {
+    ) : AbstractTask(pid, sender, args) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
 

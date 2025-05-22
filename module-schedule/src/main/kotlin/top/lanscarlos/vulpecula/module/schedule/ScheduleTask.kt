@@ -9,9 +9,7 @@ package top.lanscarlos.vulpecula.module.schedule
  */
 interface ScheduleTask {
 
-    val pid: Long
-
-    val id: String
+    val pid: String
 
     val state: TaskState
 

@@ -14,7 +14,6 @@ import kotlinx.datetime.toInstant
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import java.util.*
@@ -86,7 +85,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         }
     }
 
-    override fun create(id: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
+    override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
         require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
         val task = Task(id, sender, args)
@@ -95,10 +94,10 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
     }
 
     inner class Task(
-        id: String,
+        pid: String,
         sender: ProxyCommandSender?,
         args: List<Any>
-    ) : AbstractTask(id, sender, args) {
+    ) : AbstractTask(pid, sender, args) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
 
@@ -115,7 +114,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             val now = System.currentTimeMillis()
             val delay = calculateNextTime() - now
             if (delay <= 50) {
-                // 极小概率出现此情况, 延迟 50ms 再计算
+                // 极小概率出现此情况, 为避免触发脚本, 延迟 50ms 再计算
                 submit(delay = 1) {
                     schedule()
                 }

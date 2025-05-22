@@ -68,6 +68,13 @@ object ScheduleService {
      * */
     fun entries(): Set<Map.Entry<String, Schedule>> = registry.entries
 
+    /**
+     * 重载服务
+     * */
+    fun reload(sender: ProxyCommandSender) {
+        service.load(sender)
+    }
+
     private object Callback : ConfigServiceCallback {
 
         override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
