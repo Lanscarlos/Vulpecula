@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.schedule
 
 import org.bukkit.Bukkit
 import org.bukkit.util.BoundingBox
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.info
@@ -14,7 +15,6 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
-import top.lanscarlos.vulpecula.module.script.ScriptExecutor
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import java.util.function.Consumer
 import java.util.function.Function
@@ -41,7 +41,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     val isAsynchronous: Boolean by config.read("async").boolean(false)
 
-    override val senderSelector: String by config.read("sender").string("@Console")
+    val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse)
 
     val script: Script by config.read("execute").string().convert(ScriptService::compile)
 
@@ -109,7 +109,11 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         return ScriptService.compile(value)
     }
 
-    abstract inner class AbstractTask(id: String, val senderSelector: String) : ScheduleTask {
+    abstract inner class AbstractTask(
+        id: String,
+        val sender: ProxyCommandSender?,
+        val args: List<Any>
+    ) : ScheduleTask {
 
         final override val pid: Long = currentPid++
 
@@ -129,17 +133,9 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
         protected var interruptionTime: Long = -1
 
-        abstract val args: List<Any>
-
         abstract val controller: PlatformExecutor.PlatformTask
 
-        fun args(additions: Map<String, Any> = emptyMap()): Map<String, Any> {
-            val args = mutableMapOf<String, Any>(
-                "count" to counter
-            )
-            args.putAll(additions)
-            return args
-        }
+        abstract fun schedule()
 
         fun onStart() {
             val script = onStartScript ?: return
@@ -166,12 +162,22 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         }
 
         fun runScript(script: Script) {
-            ScriptExecutor()
-                .script(script)
-                .senderBy(senderSelector)
-                .variables(args())
-                .onFailure(::onFailure)
-                .execute()
+            val variables = variables()
+            for (sender in selector.select(sender)) {
+                ScriptService.run(
+                    script = script,
+                    sender = sender,
+                    args = args,
+                    variables = variables,
+                    onFailure = ::onFailure
+                )
+            }
+        }
+
+        fun variables(): Map<String, Any> {
+            return mapOf<String, Any>(
+                "count" to counter
+            )
         }
 
         fun onFailure(ex: BacikalRuntimeException) {
@@ -179,8 +185,6 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             ex.printStackTrace()
             pause()
         }
-
-        abstract fun schedule()
 
         override fun start() {
             require(activationTime < 0L) { "禁止重复调用 start() 函数." }

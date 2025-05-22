@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.schedule
 
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
@@ -30,19 +31,19 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     override val tasks: HashMap<String, Task> = HashMap()
 
-    override fun create(id: String, senderSelector: String, args: List<String>): ScheduleTask {
+    override fun create(id: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
         require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
-        val task = Task(id, senderSelector, args)
+        val task = Task(id, sender, args)
         tasks[id] = task
         return task
     }
 
     inner class Task(
         id: String,
-        senderSelector: String,
-        override val args: List<String>
-    ) : AbstractTask(id, senderSelector) {
+        sender: ProxyCommandSender?,
+        args: List<String>
+    ) : AbstractTask(id, sender, args) {
 
         override lateinit var controller: PlatformExecutor.PlatformTask
 

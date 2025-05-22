@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.module.schedule
 
+import taboolib.common.platform.ProxyCommandSender
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.schedule
@@ -13,18 +15,16 @@ interface Schedule {
 
     val isAutoStart: Boolean
 
-    val senderSelector: String
-
     /**
      * 创建日程任务
      *
      * @param id 任务 ID
-     * @param senderSelector 脚本执行者选择器
+     * @param sender 脚本执行者
      * @param args 参数
      * */
     fun create(
         id: String = "@",
-        senderSelector: String = this@Schedule.senderSelector,
+        sender: ProxyCommandSender? = null,
         args: List<String> = emptyList()
     ): ScheduleTask
 
@@ -32,16 +32,15 @@ interface Schedule {
      * 创建并启动日程
      *
      * @param id 任务 ID
-     * @param senderSelector 脚本执行者选择器
      * @param args 参数
      * @return 日程任务
      * */
     fun start(
         id: String = "~",
-        senderSelector: String = this@Schedule.senderSelector,
+        sender: ProxyCommandSender? = null,
         args: List<String> = emptyList()
     ): ScheduleTask {
-        return create(id, senderSelector, args).also(ScheduleTask::start)
+        return create(id, sender, args).also(ScheduleTask::start)
     }
 
     /**
