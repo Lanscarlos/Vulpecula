@@ -24,6 +24,7 @@ object ScriptCommand {
     @CommandBody
     val script = subCommand {
         literal("run", literal = run)
+        literal("run-silent", literal = runSilent)
         literal("stop", literal = stop)
         literal("task", literal = task)
         literal("reload", literal = reload)
@@ -35,10 +36,8 @@ object ScriptCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 sender.info("module-script-command-run", id, sender.name, "[]")
                 ScriptService.run(
-                    id,
-                    sender,
-                    emptyList(),
-                    emptyMap(),
+                    id = id,
+                    sender = sender,
                     onSuccess = {
                         sender.info("module-script-command-run-success", id, it.toString())
                     },
@@ -58,10 +57,8 @@ object ScriptCommand {
                     val scriptSender = senderName.toSender(sender)
                     sender.info("module-script-command-run", id, scriptSender?.name ?: "null", "[]")
                     ScriptService.run(
-                        id,
-                        scriptSender,
-                        emptyList(),
-                        emptyMap(),
+                        id = id,
+                        sender = scriptSender,
                         onSuccess = {
                             sender.info("module-script-command-run-success", id, it.toString())
                         },
@@ -81,10 +78,9 @@ object ScriptCommand {
                         val args = value.split(' ')
                         sender.info("module-script-command-run", id, scriptSender?.name ?: "null", args)
                         ScriptService.run(
-                            id,
-                            scriptSender,
-                            args,
-                            emptyMap(),
+                            id = id,
+                            sender = scriptSender,
+                            args = args,
                             onSuccess = {
                                 sender.info("module-script-command-run-success", id, it.toString())
                             },
@@ -94,6 +90,46 @@ object ScriptCommand {
                                 sender.errorLiteralSync(ex.getReasonMessage())
                                 sender.errorLiteralSync(ex.getDetailMessage())
                             }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 静默运行脚本
+     * */
+    private val runSilent: CommandComponent.() -> Unit = {
+        dynamic("id") {
+            suggest { ScriptService.keys().toList() }
+            execute<ProxyCommandSender> { sender, _, id ->
+                ScriptService.run(
+                    id = id,
+                    sender = sender
+                )
+            }
+
+            dynamic("sender") {
+                suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
+                execute<ProxyCommandSender> { sender, context, senderName ->
+                    val id = context["id"]
+                    val scriptSender = senderName.toSender(sender)
+                    ScriptService.run(
+                        id = id,
+                        sender = scriptSender
+                    )
+                }
+
+                dynamic("args") {
+                    execute<ProxyCommandSender> { sender, context, value ->
+                        val id = context["id"]
+                        val scriptSender = context["sender"].toSender(sender)
+                        val args = value.split(' ')
+                        ScriptService.run(
+                            id = id,
+                            sender = scriptSender,
+                            args = args
                         )
                     }
                 }

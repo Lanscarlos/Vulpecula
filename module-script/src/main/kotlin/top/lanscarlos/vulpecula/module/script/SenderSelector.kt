@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
+import top.lanscarlos.vulpecula.module.script.selector.SelfSelector
 
 /**
  * Vulpecula
@@ -12,5 +13,13 @@ import taboolib.common.platform.ProxyCommandSender
 interface SenderSelector {
 
     fun select(sender: ProxyCommandSender?): List<ProxyCommandSender>
+
+    companion object {
+
+        fun parse(value: String): SenderSelector {
+            return SelfSelector
+        }
+
+    }
 
 }

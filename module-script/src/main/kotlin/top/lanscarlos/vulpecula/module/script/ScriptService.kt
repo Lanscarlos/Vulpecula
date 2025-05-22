@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.common.message.errorSync
 import top.lanscarlos.vulpecula.common.message.errorLiteralSync
 import top.lanscarlos.vulpecula.common.message.infoSync
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
+import top.lanscarlos.vulpecula.module.script.selector.SelfSelector
 import java.io.File
 import java.util.function.Consumer
 import java.util.function.Function
@@ -107,13 +108,14 @@ object ScriptService {
      * 编译指定内容为脚本, 本次编译不会被记录
      *
      * @param source 源码
+     * @throws IllegalStateException 脚本不存在
      * @return 脚本
      * */
     fun compile(source: String): Script {
         return if (source.getOrNull(6) == '@' && source.lowercase().startsWith("script@")) {
             // 调用脚本
             val id = source.substring(6)
-            get(id) // 检测
+            get(id) // 检测 ID 是否存在
             ProxyScript(source.substringBefore('@'))
         } else {
             NativeScript(source)
@@ -136,17 +138,21 @@ object ScriptService {
      *
      * @param id 脚本 ID
      * @param sender 脚本执行者
+     * @param selector 脚本执行者选择器
      * @param args 脚本参数
+     * @param variables 脚本变量
+     * @param onSuccess 成功回调
+     * @param onFailure 异常回调
      * @throws IllegalStateException 脚本不存在
      * @return 运行结果
      * */
     fun run(
         id: String,
-        sender: ProxyCommandSender?,
-        args: List<Any?>,
-        variables: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
+        sender: ProxyCommandSender? = null,
+        args: List<Any?> = emptyList(),
+        variables: Map<String, Any> = emptyMap(),
+        onSuccess: Consumer<Any?> = Consumer {  },
+        onFailure: Function<BacikalRuntimeException, Any?> = Function { it }
     ): ScriptTask {
         return run(get(id), sender, args, variables, onSuccess, onFailure)
     }
@@ -157,15 +163,18 @@ object ScriptService {
      * @param script 脚本
      * @param sender 脚本执行者
      * @param args 脚本参数
+     * @param variables 脚本变量
+     * @param onSuccess 成功回调
+     * @param onFailure 异常回调
      * @return 运行结果
      * */
     fun run(
         script: Script,
-        sender: ProxyCommandSender?,
-        args: List<Any?>,
-        variables: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
+        sender: ProxyCommandSender? = null,
+        args: List<Any?> = emptyList(),
+        variables: Map<String, Any> = emptyMap(),
+        onSuccess: Consumer<Any?> = Consumer {  },
+        onFailure: Function<BacikalRuntimeException, Any?> = Function { it }
     ): ScriptTask {
         return script.run(sender, args, variables, onSuccess, onFailure)
     }
@@ -181,6 +190,9 @@ object ScriptService {
         tasks[task.pid] = task
     }
 
+    /**
+     * 移除任务
+     * */
     internal fun clearTask(pid: Long) {
 //        tasks.remove(pid) ?: warning("Running task $pid not found.")
         tasks.remove(pid) // 已完成的任务不会被追踪, 因此任务 pid 可能不一定存在

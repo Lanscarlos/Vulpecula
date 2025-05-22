@@ -16,12 +16,14 @@ class ProxyScript(override val id: String) : Script {
 
     override fun run(
         sender: ProxyCommandSender?,
+        selector: SenderSelector,
         args: List<Any?>,
         variables: Map<String, Any>,
         onSuccess: Consumer<Any?>,
         onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask {
-        return ScriptService.run(id, sender, args, variables, onSuccess, onFailure)
+        val script = ScriptService.get(id)
+        return script.run(sender, selector, args, variables, onSuccess, onFailure)
     }
 
 }

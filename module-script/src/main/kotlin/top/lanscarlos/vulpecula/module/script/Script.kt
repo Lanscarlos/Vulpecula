@@ -18,12 +18,11 @@ interface Script {
     val id: String
 
     fun run(
-        sender: ProxyCommandSender? = null,
-        selector: SenderSelector = SelfSelector,
-        args: List<Any?> = emptyList(),
-        variables: Map<String, Any> = emptyMap(),
-        onSuccess: Consumer<Any?> = Consumer {  },
-        onFailure: Function<BacikalRuntimeException, Any?> = Function { it }
+        sender: ProxyCommandSender?,
+        args: List<Any?>,
+        variables: Map<String, Any>,
+        onSuccess: Consumer<Any?>,
+        onFailure: Function<BacikalRuntimeException, Any?>
     ): ScriptTask
 
 }
