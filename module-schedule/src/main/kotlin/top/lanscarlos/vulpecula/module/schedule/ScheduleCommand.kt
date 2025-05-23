@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
@@ -8,6 +9,7 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
+import taboolib.module.chat.Components
 import top.lanscarlos.vulpecula.common.message.MessageService
 import top.lanscarlos.vulpecula.common.message.info
 import top.lanscarlos.vulpecula.common.message.infoLiteral
@@ -94,14 +96,51 @@ object ScheduleCommand {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 val schedule = ScheduleService.get(id)
-                val builder = StringBuilder(MessageService.asLang("module-schedule-command-task-list-header", id))
+                val builder = Components.text(MessageService.asInfo("module-schedule-command-task-list-header", id))
                 for (task in schedule.tasks.values) {
+                    builder.newLine()
+
                     val pid = task.pid
+
+                    // 操作按钮
+                    val pause = Components
+                        .text(MessageService.asLang("module-schedule-task-operation-pause"))
+                        .hoverText(MessageService.asLang("module-schedule-task-operation-pause-hover"))
+                        .clickSuggestCommand("/vul schedule pause $id $pid")
+                    val resume = Components
+                        .text(MessageService.asLang("module-schedule-task-operation-resume"))
+                        .hoverText(MessageService.asLang("module-schedule-task-operation-resume-hover"))
+                        .clickSuggestCommand("/vul schedule resume $id $pid")
+                    val terminate = Components
+                        .text(MessageService.asLang("module-schedule-task-operation-terminate"))
+                        .hoverText(MessageService.asLang("module-schedule-task-operation-terminate-hover"))
+                        .clickSuggestCommand("/vul schedule stop $id $pid")
+                    when (task.state) {
+                        TaskState.WAITING,
+                        TaskState.RUNNING -> {
+                            builder.append(pause).append(" ")
+                            builder.append(terminate).append(" ")
+                        }
+                        TaskState.PAUSED -> {
+                            builder.append(resume).append(" ")
+                            builder.append(terminate).append(" ")
+                        }
+                        TaskState.TERMINATED -> {}
+                    }
+
+                    // 消息体
                     val state = MessageService.asLang("module-schedule-task-state-${task.state.name.lowercase()}")
                     val message = MessageService.asLang("module-schedule-command-task-list-item", pid, state, task.counter)
-                    builder.append('\n').append(message)
+                    builder.append(message)
                 }
-                sender.infoLiteral(builder.toString())
+
+                // 发送消息
+                if (sender is ProxyPlayer) {
+                    builder.sendTo(sender)
+                    console().sendMessage(builder.toLegacyText())
+                } else {
+                    sender.sendMessage(builder.toLegacyText())
+                }
             }
         }
     }

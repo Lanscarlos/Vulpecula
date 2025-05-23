@@ -14,5 +14,12 @@ module-schedule-task-state-running: '&a运行中'
 module-schedule-task-state-paused: '&e已暂停'
 module-schedule-task-state-terminated: '&c已停止'
 
+module-schedule-task-operation-pause: '&e[暂停]'
+module-schedule-task-operation-pause-hover: '暂停该任务. 后续可恢复运行'
+module-schedule-task-operation-resume: '&a[恢复]'
+module-schedule-task-operation-resume-hover: '从暂停状态恢复运行.'
+module-schedule-task-operation-terminate: '&c[终止]'
+module-schedule-task-operation-terminate-hover: '一旦终止任务, 则不可恢复运行. 请谨慎操作.'
+
 module-schedule-exception-schedule-not-found: '日程 &c{0}&7 不存在.'
 
