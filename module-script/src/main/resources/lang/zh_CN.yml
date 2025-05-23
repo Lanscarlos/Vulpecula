@@ -13,3 +13,4 @@ module-script-command-task-list-item: '&7  - PID: &a{0}&7; 脚本: &a{1}&7; 开�
 module-script-command-task-list-footer: ''
 
 module-script-exception-script-not-found: '脚本 &c{0}&7 不存在.'
+

@@ -8,6 +8,9 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
+import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.message.info
+import top.lanscarlos.vulpecula.common.message.infoLiteral
 
 /**
  * Vulpecula
@@ -22,6 +25,7 @@ object ScheduleCommand {
     val schedule = subCommand {
         literal("start", literal = start)
         literal("stop", literal = stop)
+        literal("detail", literal = detail)
         literal("reload", literal = reload)
     }
 
@@ -29,8 +33,8 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScheduleService.get(id).start()
-                sender.sendMessage("schedule $id successfully started.")
+                val task = ScheduleService.get(id).start()
+                sender.info("module-schedule-command-run-success", id, task.pid, "null", "[]")
             }
         }.dynamic("pid") {
             execute<ProxyCommandSender> { sender, context, pid ->
@@ -38,7 +42,7 @@ object ScheduleCommand {
                 ScheduleService.get(id).start(
                     pid = pid
                 )
-                sender.sendMessage("schedule $id successfully started. with pid: $pid.")
+                sender.info("module-schedule-command-run-success", id, pid, "null", "[]")
             }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
@@ -50,7 +54,7 @@ object ScheduleCommand {
                     pid = pid,
                     sender = runtimeSender
                 )
-                sender.sendMessage("schedule $id successfully started. with pid: $pid.")
+                sender.info("module-schedule-command-run-success", id, pid, runtimeSender?.name ?: "null", "[]")
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
@@ -63,7 +67,7 @@ object ScheduleCommand {
                     sender = runtimeSender,
                     args = args
                 )
-                sender.sendMessage("schedule $id successfully started. with pid: $pid.")
+                sender.info("module-schedule-command-run-success", id, pid, runtimeSender?.name ?: "null", args)
             }
         }
     }
@@ -73,14 +77,31 @@ object ScheduleCommand {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScheduleService.get(id).stop("*")
-                sender.sendMessage("schedule $id successfully stopped.")
+                sender.info("module-schedule-command-stop-all", id)
             }
         }.dynamic("pid") {
             suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
                 ScheduleService.get(id).stop(pid)
-                sender.sendMessage("schedule $id with pid $pid successfully stopped.")
+                sender.info("module-schedule-command-stop-task", id, pid)
+            }
+        }
+    }
+
+    private val detail: CommandComponent.() -> Unit = {
+        dynamic("id") {
+            suggest { ScheduleService.keys().toList() }
+            execute<ProxyCommandSender> { sender, _, id ->
+                val schedule = ScheduleService.get(id)
+                val builder = StringBuilder(MessageService.asLang("module-schedule-command-task-list-header", id))
+                for (task in schedule.tasks.values) {
+                    val pid = task.pid
+                    val state = MessageService.asLang("module-schedule-task-state-${task.state.name.lowercase()}")
+                    val message = MessageService.asLang("module-schedule-command-task-list-item", pid, state, task.counter)
+                    builder.append('\n').append(message)
+                }
+                sender.infoLiteral(builder.toString())
             }
         }
     }

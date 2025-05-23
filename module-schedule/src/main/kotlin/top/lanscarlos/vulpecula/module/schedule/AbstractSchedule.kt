@@ -1,10 +1,15 @@
 package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.console
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.common.message.error
+import top.lanscarlos.vulpecula.common.message.errorLiteral
+import top.lanscarlos.vulpecula.common.message.errorLiteralSync
+import top.lanscarlos.vulpecula.common.message.errorSync
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -178,8 +183,11 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
         fun onFailure(ex: BacikalRuntimeException) {
             // 脚本运行异常时, 暂停任务
-            ex.printStackTrace()
             pause()
+            console().error("module-schedule-run-failure", id, pid)
+            console().errorLiteral(ex.getActionMessage())
+            console().errorLiteral(ex.getReasonMessage())
+            console().errorLiteral(ex.getDetailMessage())
         }
 
         override fun start() {

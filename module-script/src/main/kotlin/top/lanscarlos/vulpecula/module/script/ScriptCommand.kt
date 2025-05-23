@@ -151,17 +151,15 @@ object ScriptCommand {
         }
         literal("list") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                sender.info("module-script-command-task-list-header")
+                val builder = StringBuilder(MessageService.asLang("module-script-command-task-list-header"))
                 for (task in ScriptService.getTaskValues()) {
                     val pid = task.pid
                     val script = task.script.id
                     val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
-                    sender.info("module-script-command-task-list-item", pid, script, startTime)
+                    val message = MessageService.asLang("module-script-command-task-list-item", pid, script, startTime)
+                    builder.append('\n').append(message)
                 }
-                val footer = MessageService.asInfo("module-script-command-task-list-footer")
-                if (footer.isNotBlank()) {
-                    sender.sendMessage(footer)
-                }
+                sender.infoLiteral(builder.toString())
             }
         }
     }
