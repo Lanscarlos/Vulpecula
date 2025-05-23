@@ -16,11 +16,11 @@ delay: '5s'
 
 # [选填] 最大运转时间
 # 格式参考 period 字段
-duration: '5m'
+max-duration: '5m'
 
 # [选填] 最大循环次数, 默认为 -1
 # 设置为 -1 则无视循环次数
-max-runs: 10
+max-replication: 10
 
 # [选填] 自启动, 默认为 false
 # 是否在服务器启动后自动激活日程

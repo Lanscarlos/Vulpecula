@@ -157,7 +157,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             // 修正失效时间
             if (expirationTime > 0) {
                 val consumedTime = interruptionTime - activationTime
-                val remainingTime = duration - consumedTime
+                val remainingTime = maxDuration - consumedTime
                 expirationTime = now + remainingTime
             }
 

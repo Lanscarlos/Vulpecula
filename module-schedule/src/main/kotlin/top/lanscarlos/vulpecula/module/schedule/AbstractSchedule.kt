@@ -18,21 +18,42 @@ import top.lanscarlos.vulpecula.module.script.ScriptService
  */
 abstract class AbstractSchedule(override val id: String, val config: Configuration) : Schedule {
 
-    val duration: Long by config.read("duration").convert(::parseTime)
+    /**
+     * 最大运转时间
+     * */
+    val maxDuration: Long by config.read("max-duration").convert(::parseTime)
 
-    val maxRuns: Int by config.read("max-runs").int(-1)
+    /**
+     * 最大运转次数
+     * */
+    val maxReplication: Int by config.read("max-replication").int(-1)
 
+    /**
+     * 运转延迟
+     * */
     val delay by config.read("delay").convert(::parseTime)
 
+    /**
+     * 是否自启动
+     * */
     override val isAutoStart: Boolean by config.read("auto-start").boolean(false)
 
+    /**
+     * 是否允许多任务
+     * */
     val prototype: Boolean by config.read("prototype").boolean(false)
 
+    /**
+     * 是否异步运行
+     * */
     val isAsynchronous: Boolean by config.read("async").boolean(false)
 
+    /**
+     * 脚本执行者选取
+     * */
     val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse)
 
-    val script: Script by config.read("execute").string().convert(ScriptService::compile)
+    val onExecuteScript: Script by config.read("execute").string().convert(ScriptService::compile)
 
     val onStartScript: Script? by config.read("on-start").convert(::parseScriptOrNull)
 
@@ -117,7 +138,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         }
 
         fun onExecute() {
-            runScript(script)
+            runScript(onExecuteScript)
         }
 
         fun onStop() {
@@ -165,7 +186,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             require(activationTime < 0L) { "禁止重复调用 start() 函数." }
             onStart()
             activationTime = System.currentTimeMillis() + delay.coerceAtLeast(0)
-            expirationTime = if (duration > 0) activationTime + duration else -1L
+            expirationTime = if (maxDuration > 0) activationTime + maxDuration else -1L
             schedule()
         }
 
@@ -190,7 +211,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             // 修正失效时间
             if (expirationTime > 0) {
                 val consumedTime = interruptionTime - activationTime
-                val remainingTime = duration - consumedTime
+                val remainingTime = maxDuration - consumedTime
                 expirationTime = now + remainingTime
             }
 
@@ -213,7 +234,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
                 isOutOfDuration = true
                 return false
             }
-            if (++counter > maxRuns) {
+            if (++counter > maxReplication) {
                 // 已达最大执行次数
                 isOutOfMaxRuns = true
                 return false
