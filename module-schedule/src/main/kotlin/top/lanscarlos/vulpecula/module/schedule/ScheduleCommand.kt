@@ -32,26 +32,36 @@ object ScheduleCommand {
                 ScheduleService.get(id).start()
                 sender.sendMessage("schedule $id successfully started.")
             }
+        }.dynamic("pid") {
+            execute<ProxyCommandSender> { sender, context, pid ->
+                val id = context["id"]
+                ScheduleService.get(id).start(
+                    pid = pid
+                )
+                sender.sendMessage("schedule $id successfully started. with pid: $pid.")
+            }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
+                val pid = context["pid"]
                 val runtimeSender = value.toSender(sender)
                 ScheduleService.get(id).start(
+                    pid = pid,
                     sender = runtimeSender
                 )
-                sender.sendMessage("schedule $id successfully started.")
+                sender.sendMessage("schedule $id successfully started. with pid: $pid.")
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
+                val pid = context["pid"]
                 val runtimeSender = context["sender"].toSender(sender)
                 val args = value.split(' ')
-                val pid = args.find { it.startsWith("--pid=") }?.substring(5) ?: "~"
                 ScheduleService.get(id).start(
                     pid = pid,
                     sender = runtimeSender,
-                    args = args.filter { !it.startsWith("--pid=") } // 去除内置参数
+                    args = args
                 )
                 sender.sendMessage("schedule $id successfully started. with pid: $pid.")
             }
