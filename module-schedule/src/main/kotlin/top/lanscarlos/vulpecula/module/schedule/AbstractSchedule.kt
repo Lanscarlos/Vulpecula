@@ -150,6 +150,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
         fun variables(): Map<String, Any> {
             return mapOf<String, Any>(
+                "pid" to pid,
                 "count" to counter
             )
         }
