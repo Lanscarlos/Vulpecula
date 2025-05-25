@@ -1,6 +1,6 @@
 
 # 日程类型
-type: 'period'
+type: 'periodic'
 
 # 循环间隔
 # 支持的单位:
