@@ -87,9 +87,9 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
-        require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
-        val task = Task(id, sender, args)
-        tasks[id] = task
+        require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) { "任务 $pid 正在运行中" }
+        val task = Task(pid, sender, args)
+        tasks[task.pid] = task
         return task
     }
 
@@ -102,6 +102,9 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         override lateinit var controller: PlatformExecutor.PlatformTask
 
         private fun onTick() {
+            if (state == TaskState.WAITING) {
+                state = TaskState.RUNNING
+            }
             if (!canContinue()) {
                 stop()
                 return
@@ -138,30 +141,6 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             val nextRun = cron.nextRun ?: error("系统异常 cron.nextRun 为空.")
             val time = nextRun.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
             return time
-        }
-
-        override fun start() {
-            require(::controller.isInitialized.not()) { "禁止重复调用 start() 函数." }
-            onStart()
-            schedule()
-        }
-
-        override fun resume() {
-            if (state != TaskState.PAUSED) {
-                return
-            }
-            state = TaskState.WAITING
-            onResume()
-            val now = System.currentTimeMillis()
-
-            // 修正失效时间
-            if (expirationTime > 0) {
-                val consumedTime = interruptionTime - activationTime
-                val remainingTime = maxDuration - consumedTime
-                expirationTime = now + remainingTime
-            }
-
-            schedule()
         }
 
     }

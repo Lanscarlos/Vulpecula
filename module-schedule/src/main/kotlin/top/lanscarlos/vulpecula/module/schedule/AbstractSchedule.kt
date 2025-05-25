@@ -70,12 +70,30 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
 
     private var currentPid: Long = 0
 
-    override fun stop(pid: String) {
-        if (id == "*") {
+    override fun pause(pid: String) {
+        if (pid == "*") {
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[id] ?: error("找不到对应的任务 ID: $id")
+        val task = tasks[pid] ?: error("找不到对应的任务 PID: $pid")
+        task.pause()
+    }
+
+    override fun resume(pid: String) {
+        if (pid == "*") {
+            tasks.values.forEach(ScheduleTask::stop)
+            return
+        }
+        val task = tasks[pid] ?: error("找不到对应的任务 PID: $pid")
+        task.resume()
+    }
+
+    override fun stop(pid: String) {
+        if (pid == "*") {
+            tasks.values.forEach(ScheduleTask::stop)
+            return
+        }
+        val task = tasks[pid] ?: error("找不到对应的任务 PID: $pid")
         task.stop()
     }
 
@@ -116,6 +134,8 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         val sender: ProxyCommandSender?,
         val args: List<Any>
     ) : ScheduleTask {
+
+        override val id: String = this@AbstractSchedule.id
 
         override val pid: String = if (pid != "~") pid else (currentPid++).toString()
 
@@ -245,6 +265,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             if (++counter > maxReplication) {
                 // 已达最大执行次数
                 isOutOfMaxRuns = true
+                counter = maxReplication
                 return false
             }
             return true

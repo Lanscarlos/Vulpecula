@@ -25,6 +25,8 @@ object ScheduleCommand {
     @CommandBody
     val schedule = subCommand {
         literal("start", literal = start)
+        literal("pause", literal = pause)
+        literal("resume", literal = resume)
         literal("stop", literal = stop)
         literal("detail", literal = detail)
         literal("reload", literal = reload)
@@ -73,6 +75,40 @@ object ScheduleCommand {
         }
     }
 
+    private val pause: CommandComponent.() -> Unit = {
+        dynamic("id") {
+            suggest { ScheduleService.keys().toList() }
+            execute<ProxyCommandSender> { sender, _, id ->
+                ScheduleService.get(id).pause("*")
+                sender.info("module-schedule-command-stop-all", id)
+            }
+        }.dynamic("pid") {
+            suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
+            execute<ProxyCommandSender> { sender, context, pid ->
+                val id = context["id"]
+                ScheduleService.get(id).pause(pid)
+                sender.info("module-schedule-command-stop-task", id, pid)
+            }
+        }
+    }
+
+    private val resume: CommandComponent.() -> Unit = {
+        dynamic("id") {
+            suggest { ScheduleService.keys().toList() }
+            execute<ProxyCommandSender> { sender, _, id ->
+                ScheduleService.get(id).resume("*")
+                sender.info("module-schedule-command-stop-all", id)
+            }
+        }.dynamic("pid") {
+            suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
+            execute<ProxyCommandSender> { sender, context, pid ->
+                val id = context["id"]
+                ScheduleService.get(id).resume(pid)
+                sender.info("module-schedule-command-stop-task", id, pid)
+            }
+        }
+    }
+
     private val stop: CommandComponent.() -> Unit = {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
@@ -81,7 +117,7 @@ object ScheduleCommand {
                 sender.info("module-schedule-command-stop-all", id)
             }
         }.dynamic("pid") {
-            suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
+            suggest { ScheduleService.getOrNull(ctx["id"])?.tasks?.keys?.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
                 ScheduleService.get(id).stop(pid)
@@ -91,55 +127,14 @@ object ScheduleCommand {
     }
 
     private val detail: CommandComponent.() -> Unit = {
+        execute<ProxyCommandSender> { sender, _, _ ->
+            showScheduleDetail(sender, "*")
+        }
+
         dynamic("id") {
-            suggest { ScheduleService.keys().toList() }
+            suggest { ScheduleService.keys().toList().plus("*") }
             execute<ProxyCommandSender> { sender, _, id ->
-                val schedule = ScheduleService.get(id)
-                val builder = Components.text(MessageService.asInfo("module-schedule-command-task-list-header", id))
-                for (task in schedule.tasks.values) {
-                    builder.newLine()
-
-                    val pid = task.pid
-
-                    // 操作按钮
-                    val pause = Components
-                        .text(MessageService.asLang("module-schedule-task-operation-pause"))
-                        .hoverText(MessageService.asLang("module-schedule-task-operation-pause-hover"))
-                        .clickSuggestCommand("/vul schedule pause $id $pid")
-                    val resume = Components
-                        .text(MessageService.asLang("module-schedule-task-operation-resume"))
-                        .hoverText(MessageService.asLang("module-schedule-task-operation-resume-hover"))
-                        .clickSuggestCommand("/vul schedule resume $id $pid")
-                    val terminate = Components
-                        .text(MessageService.asLang("module-schedule-task-operation-terminate"))
-                        .hoverText(MessageService.asLang("module-schedule-task-operation-terminate-hover"))
-                        .clickSuggestCommand("/vul schedule stop $id $pid")
-                    when (task.state) {
-                        TaskState.WAITING,
-                        TaskState.RUNNING -> {
-                            builder.append(pause).append(" ")
-                            builder.append(terminate).append(" ")
-                        }
-                        TaskState.PAUSED -> {
-                            builder.append(resume).append(" ")
-                            builder.append(terminate).append(" ")
-                        }
-                        TaskState.TERMINATED -> {}
-                    }
-
-                    // 消息体
-                    val state = MessageService.asLang("module-schedule-task-state-${task.state.name.lowercase()}")
-                    val message = MessageService.asLang("module-schedule-command-task-list-item", pid, state, task.counter)
-                    builder.append(message)
-                }
-
-                // 发送消息
-                if (sender is ProxyPlayer) {
-                    builder.sendTo(sender)
-                    console().sendMessage(builder.toLegacyText())
-                } else {
-                    sender.sendMessage(builder.toLegacyText())
-                }
+                showScheduleDetail(sender, id)
             }
         }
     }
@@ -147,6 +142,64 @@ object ScheduleCommand {
     private val reload: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
             ScheduleService.reload(sender)
+        }
+    }
+
+    private fun showScheduleDetail(sender: ProxyCommandSender, id: String) {
+        // 获取任务列表
+        val tasks = if (id == "*") {
+            ScheduleService.values().flatMap { it.tasks.values }
+        } else {
+            ScheduleService.get(id).tasks.values
+        }
+
+        val builder = Components.text(MessageService.asInfo("module-schedule-command-task-list-header"))
+        for (task in tasks) {
+            builder.newLine()
+
+            // 消息项
+            val pid = task.pid
+            val state = MessageService.asLang("module-schedule-task-state-${task.state.name.lowercase()}")
+            val message = MessageService.asLang("module-schedule-command-task-list-item", task.id, pid, state, task.counter)
+            builder.append(message)
+
+            if (sender !is ProxyPlayer) {
+                // 非玩家操作者不显示操作按钮
+                continue
+            }
+
+            // 操作按钮
+            val pause = Components
+                .text(MessageService.asLang("module-schedule-task-operation-pause"))
+                .hoverText(MessageService.asLang("module-schedule-task-operation-pause-hover"))
+                .clickSuggestCommand("/vul schedule pause ${task.id} $pid")
+            val resume = Components
+                .text(MessageService.asLang("module-schedule-task-operation-resume"))
+                .hoverText(MessageService.asLang("module-schedule-task-operation-resume-hover"))
+                .clickSuggestCommand("/vul schedule resume ${task.id} $pid")
+            val terminate = Components
+                .text(MessageService.asLang("module-schedule-task-operation-terminate"))
+                .hoverText(MessageService.asLang("module-schedule-task-operation-terminate-hover"))
+                .clickSuggestCommand("/vul schedule stop ${task.id} $pid")
+            when (task.state) {
+                TaskState.WAITING,
+                TaskState.RUNNING -> {
+                    builder.append(pause).append(" ")
+                    builder.append(terminate).append(" ")
+                }
+                TaskState.PAUSED -> {
+                    builder.append(resume).append(" ")
+                    builder.append(terminate).append(" ")
+                }
+                TaskState.TERMINATED -> {}
+            }
+        }
+
+        // 发送消息
+        if (sender is ProxyPlayer) {
+            builder.sendTo(sender)
+        } else {
+            sender.sendMessage(builder.toLegacyText())
         }
     }
 

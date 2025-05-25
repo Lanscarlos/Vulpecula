@@ -30,9 +30,9 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
-        require(!tasks.containsKey(id) || tasks[id]!!.state.isRunning) { "任务 $id 正在运行中" }
-        val task = Task(id, sender, args)
-        tasks[id] = task
+        require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) { "任务 $pid 正在运行中" }
+        val task = Task(pid, sender, args)
+        tasks[task.pid] = task
         return task
     }
 

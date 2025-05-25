@@ -46,6 +46,16 @@ interface Schedule {
     }
 
     /**
+     * 暂停日程
+     * */
+    fun pause(pid: String)
+
+    /**
+     * 恢复日程
+     * */
+    fun resume(pid: String)
+
+    /**
      * 终止日程
      *
      * @param pid 任务 PID, 若为 * 则代表所有任务
