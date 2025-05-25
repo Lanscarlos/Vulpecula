@@ -92,7 +92,12 @@ object ScheduleService {
         }
 
         override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
-            (registry[id] as AbstractSchedule).config.loadFromFile(file)
+            val schedule = (registry[id] as AbstractSchedule)
+            schedule.stop("*")
+            schedule.config.loadFromFile(file)
+            if (schedule.isAutoStart) {
+                schedule.start()
+            }
         }
 
         override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
@@ -105,7 +110,7 @@ object ScheduleService {
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
             e.printStackTrace()
-            sender.errorSync("module-schedule-schedule-load-failure", id, e.localizedMessage)
+            sender.errorSync("module-schedule-service-load-failure", id, e.localizedMessage)
         }
     }
 
