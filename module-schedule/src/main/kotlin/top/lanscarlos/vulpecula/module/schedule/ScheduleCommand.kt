@@ -153,14 +153,14 @@ object ScheduleCommand {
             ScheduleService.get(id).tasks.values
         }
 
-        val builder = Components.text(MessageService.asInfo("module-schedule-command-task-list-header"))
+        val builder = Components.text(MessageService.asInfo("module-schedule-command-detail-header"))
         for (task in tasks) {
             builder.newLine()
 
             // 消息项
             val pid = task.pid
             val state = MessageService.asLang("module-schedule-task-state-${task.state.name.lowercase()}")
-            val message = MessageService.asLang("module-schedule-command-task-list-item", task.id, pid, state, task.counter)
+            val message = MessageService.asLang("module-schedule-command-detail-item", task.id, pid, state, task.counter)
             builder.append(message)
 
             if (sender !is ProxyPlayer) {
@@ -196,7 +196,7 @@ object ScheduleCommand {
         }
 
         // 尾部
-        val footer = MessageService.asLang("module-schedule-command-task-list-footer")
+        val footer = MessageService.asLang("module-schedule-command-detail-footer")
         if (footer.isNotEmpty()) {
             builder.append(footer)
         }
