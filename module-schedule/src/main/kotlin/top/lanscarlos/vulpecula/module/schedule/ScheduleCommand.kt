@@ -57,7 +57,7 @@ object ScheduleCommand {
                     pid = pid,
                     sender = runtimeSender
                 )
-                sender.info("module-schedule-command-run-success", id, pid, runtimeSender?.name ?: "null", "[]")
+                sender.info("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", "[]")
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
@@ -70,7 +70,7 @@ object ScheduleCommand {
                     sender = runtimeSender,
                     args = args
                 )
-                sender.info("module-schedule-command-run-success", id, pid, runtimeSender?.name ?: "null", args)
+                sender.info("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", args)
             }
         }
     }
@@ -80,14 +80,14 @@ object ScheduleCommand {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScheduleService.get(id).pause("*")
-                sender.info("module-schedule-command-stop-all", id)
+                sender.info("module-schedule-command-pause-all", id)
             }
         }.dynamic("pid") {
             suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
                 ScheduleService.get(id).pause(pid)
-                sender.info("module-schedule-command-stop-task", id, pid)
+                sender.info("module-schedule-command-pause-task", id, pid)
             }
         }
     }
@@ -97,14 +97,14 @@ object ScheduleCommand {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScheduleService.get(id).resume("*")
-                sender.info("module-schedule-command-stop-all", id)
+                sender.info("module-schedule-command-resume-all", id)
             }
         }.dynamic("pid") {
             suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
                 ScheduleService.get(id).resume(pid)
-                sender.info("module-schedule-command-stop-task", id, pid)
+                sender.info("module-schedule-command-resume-task", id, pid)
             }
         }
     }
@@ -193,6 +193,12 @@ object ScheduleCommand {
                 }
                 TaskState.TERMINATED -> {}
             }
+        }
+
+        // 尾部
+        val footer = MessageService.asLang("module-schedule-command-task-list-footer")
+        if (footer.isNotEmpty()) {
+            builder.append(footer)
         }
 
         // 发送消息
