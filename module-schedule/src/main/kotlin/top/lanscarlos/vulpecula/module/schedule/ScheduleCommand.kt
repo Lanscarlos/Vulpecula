@@ -184,12 +184,12 @@ object ScheduleCommand {
             when (task.state) {
                 TaskState.WAITING,
                 TaskState.RUNNING -> {
-                    builder.append(pause).append(" ")
-                    builder.append(terminate).append(" ")
+                    builder.append(" ").append(pause)
+                    builder.append(" ").append(terminate)
                 }
                 TaskState.PAUSED -> {
-                    builder.append(resume).append(" ")
-                    builder.append(terminate).append(" ")
+                    builder.append(" ").append(resume)
+                    builder.append(" ").append(terminate)
                 }
                 TaskState.TERMINATED -> {}
             }
