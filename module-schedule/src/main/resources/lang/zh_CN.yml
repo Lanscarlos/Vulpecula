@@ -26,4 +26,7 @@ module-schedule-task-operation-terminate: '&c[终止]'
 module-schedule-task-operation-terminate-hover: '一旦终止任务, 则不可恢复运行. 请谨慎操作.'
 
 module-schedule-exception-schedule-not-found: '日程 &c{0}&7 不存在.'
+module-schedule-exception-field-not-found: '日程 &e{0}&7 缺少必要的字段 &e{1}&7.'
+module-schedule-exception-invalid-content: '日程 &e{0}&7 的字段 &e{1}&7 内容不符合规则. 异常值 &e{2}&7.'
+module-schedule-exception-invalid-unit: '日程 &e{0}&7 的字段 &e{1}&7 单位不符合规则. 异常值 &e{2}&7.'
 

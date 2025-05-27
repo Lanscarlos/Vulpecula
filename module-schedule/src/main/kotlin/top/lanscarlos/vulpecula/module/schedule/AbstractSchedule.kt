@@ -6,10 +6,7 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
-import top.lanscarlos.vulpecula.common.message.error
-import top.lanscarlos.vulpecula.common.message.errorLiteral
-import top.lanscarlos.vulpecula.common.message.errorLiteralSync
-import top.lanscarlos.vulpecula.common.message.errorSync
+import top.lanscarlos.vulpecula.common.message.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -26,7 +23,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 最大运转时间
      * */
-    val maxDuration: Long by config.read("max-duration").convert(::parseTime)
+    val maxDuration: Long by config.read("max-duration").convert { parseTime("max-duration", it) }
 
     /**
      * 最大运转次数
@@ -36,7 +33,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 运转延迟
      * */
-    val delay by config.read("delay").convert(::parseTime)
+    val delay by config.read("delay").convert { parseTime("delay", it) }
 
     /**
      * 是否自启动
@@ -58,15 +55,15 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
      * */
     val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse)
 
-    val onExecuteScript: Script by config.read("execute").string().convert(ScriptService::compile)
+    val onExecuteScript: Script by config.read("execute").convert { parseScript("execute", it) }
 
-    val onStartScript: Script? by config.read("on-start").convert(::parseScriptOrNull)
+    val onStartScript: Script? by config.read("on-start").convert { parseScriptOrNull("on-start", it) }
 
-    val onStopScript: Script? by config.read("on-stop").convert(::parseScriptOrNull)
+    val onStopScript: Script? by config.read("on-stop").convert { parseScriptOrNull("on-stop", it) }
 
-    val onPauseScript: Script? by config.read("on-pause").convert(::parseScriptOrNull)
+    val onPauseScript: Script? by config.read("on-pause").convert { parseScriptOrNull("on-pause", it) }
 
-    val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
+    val onResumeScript: Script? by config.read("on-resume").convert { parseScriptOrNull("on-resume", it) }
 
     private var currentPid: Long = 0
 
@@ -97,7 +94,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         task.stop()
     }
 
-    protected fun parseTime(value: Any?): Long {
+    protected fun parseTime(field: String, value: Any?): Long {
         if (value == null) {
             return -1L
         }
@@ -106,26 +103,37 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             is Long -> value * 50L
             is String -> {
                 val regex = Regex("^(\\d+)(ticks|tick|t|seconds|second|s|minutes|minute|min|m|hours|hour|h)$", RegexOption.IGNORE_CASE)
-                val matches = regex.find(value) ?: error("Unsupported time format: $value")
+                val matches = regex.find(value) ?: error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value))
                 val time = matches.groupValues[1].toLong()
                 when (val unit = matches.groupValues[2].lowercase()) {
                     "ticks", "tick", "t" -> time * 50
                     "seconds", "second", "s" -> time * 1_000
                     "minutes", "minute", "min", "m" -> time * 60_000
                     "hours", "hour", "h" -> time * 3_600_000
-                    else -> error("Invalid time unit: $unit")
+                    else -> error(MessageService.asLang("module-schedule-exception-invalid-unit", id, field, unit))
                 }
             }
-            else -> error("Unsupported value type: ${value::class.java.name}")
+            else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value::class.java.name))
         }
     }
 
-    private fun parseScriptOrNull(value: Any?): Script? {
+    private fun parseScript(field: String, value: Any?): Script {
+        if (value == null) {
+            error(MessageService.asLang("module-schedule-exception-field-not-found", id, field))
+        }
+        return parseScriptOrNull(field, value)!!
+    }
+
+    private fun parseScriptOrNull(field: String, value: Any?): Script? {
         if (value == null) {
             return null
         }
-        require(value is String)
-        require(value.isNotBlank())
+        require(value is String) {
+            MessageService.asLang("module-schedule-exception-invalid-content", id, field, value)
+        }
+        require(value.isNotBlank()) {
+            MessageService.asLang("module-schedule-exception-invalid-content", id, field, "BLANK#空白")
+        }
         return ScriptService.compile(value)
     }
 
