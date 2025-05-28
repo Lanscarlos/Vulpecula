@@ -11,6 +11,7 @@ import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.chat.Components
 import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.message.errorLiteral
 import top.lanscarlos.vulpecula.common.message.info
 
 /**
@@ -79,15 +80,23 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScheduleService.get(id).pause("*")
-                sender.info("module-schedule-command-pause-all", id)
+                try {
+                    ScheduleService.get(id).pause("*")
+                    sender.info("module-schedule-command-pause-all", id)
+                } catch (e: Exception) {
+                    sender.errorLiteral(e.localizedMessage)
+                }
             }
         }.dynamic("pid") {
             suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
-                ScheduleService.get(id).pause(pid)
-                sender.info("module-schedule-command-pause-task", id, pid)
+                try {
+                    ScheduleService.get(id).pause(pid)
+                    sender.info("module-schedule-command-pause-task", id, pid)
+                } catch (e: Exception) {
+                    sender.errorLiteral(e.localizedMessage)
+                }
             }
         }
     }
@@ -96,15 +105,23 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScheduleService.get(id).resume("*")
-                sender.info("module-schedule-command-resume-all", id)
+                try {
+                    ScheduleService.get(id).resume("*")
+                    sender.info("module-schedule-command-resume-all", id)
+                } catch (e: Exception) {
+                    sender.errorLiteral(e.localizedMessage)
+                }
             }
         }.dynamic("pid") {
             suggest { ScheduleService.get(ctx["id"]).tasks.keys.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
-                ScheduleService.get(id).resume(pid)
-                sender.info("module-schedule-command-resume-task", id, pid)
+                try {
+                    ScheduleService.get(id).resume(pid)
+                    sender.info("module-schedule-command-resume-task", id, pid)
+                } catch (e: Exception) {
+                    sender.errorLiteral(e.localizedMessage)
+                }
             }
         }
     }
@@ -113,15 +130,23 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScheduleService.get(id).stop("*")
-                sender.info("module-schedule-command-stop-all", id)
+                try {
+                    ScheduleService.get(id).stop("*")
+                    sender.info("module-schedule-command-stop-all", id)
+                } catch (e: Exception) {
+                    sender.errorLiteral(e.localizedMessage)
+                }
             }
         }.dynamic("pid") {
             suggest { ScheduleService.getOrNull(ctx["id"])?.tasks?.keys?.toList() }
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
-                ScheduleService.get(id).stop(pid)
-                sender.info("module-schedule-command-stop-task", id, pid)
+                try {
+                    ScheduleService.get(id).stop(pid)
+                    sender.info("module-schedule-command-stop-task", id, pid)
+                } catch (e: Exception) {
+                    sender.errorLiteral(e.localizedMessage)
+                }
             }
         }
     }

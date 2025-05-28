@@ -72,7 +72,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error("找不到对应的任务 PID: $pid")
+        val task = tasks[pid] ?: error(MessageService.asLang("module-schedule-exception-task-not-found", pid))
         task.pause()
     }
 
@@ -81,7 +81,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error("找不到对应的任务 PID: $pid")
+        val task = tasks[pid] ?: error(MessageService.asLang("module-schedule-exception-task-not-found", pid))
         task.resume()
     }
 
@@ -90,7 +90,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error("找不到对应的任务 PID: $pid")
+        val task = tasks[pid] ?: error(MessageService.asLang("module-schedule-exception-task-not-found", pid))
         task.stop()
     }
 

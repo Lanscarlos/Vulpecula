@@ -14,8 +14,11 @@ import kotlinx.datetime.toInstant
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
+import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.message.error
 import java.util.*
 
 /**
@@ -49,26 +52,28 @@ import java.util.*
 )
 class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
 
-    val seconds: Pair<CronGroups, String> by config.read("seconds").convert(::parseTimeValue)
+    val seconds: Pair<CronGroups, String> by config.read("seconds").convert { parseTimeValue("seconds", it) }
 
-    val minutes: Pair<CronGroups, String> by config.read("minutes").convert(::parseTimeValue)
+    val minutes: Pair<CronGroups, String> by config.read("minutes").convert { parseTimeValue("minutes", it) }
 
-    val hours: Pair<CronGroups, String> by config.read("hours").convert(::parseTimeValue)
+    val hours: Pair<CronGroups, String> by config.read("hours").convert { parseTimeValue("hours", it) }
 
     val days: Pair<CronGroups, String>? by config.read("days").convert(::parseDays)
 
     val weeks: Pair<CronGroups, String>? by config.read("weeks").convert(::parseWeeks)
 
-    val months: Pair<CronGroups, String> by config.read("months").convert(::parseTimeValue)
+    val months: Pair<CronGroups, String> by config.read("months").convert { parseTimeValue("months", it) }
 
-    val years: Pair<CronGroups, String> by config.read("years").convert(::parseTimeValue)
+    val years: Pair<CronGroups, String> by config.read("years").convert { parseTimeValue("years", it) }
 
     val cron: Builder<LocalDateTime, CronLocalDateTime, CronLocalDateTimeProvider>
 
     override val tasks: HashMap<String, Task> = HashMap()
 
     init {
-        require(days == null || weeks == null) { "不允许同时设置 days 和 weeks." }
+        require(days == null || weeks == null) {
+            MessageService.asLang("module-schedule-exception-conflict-days-weeks", id)
+        }
         cron = Cron.builder()
             .seconds(TimeGroups.entries.first { it.index == seconds.first.index }, seconds.second)
             .minutes(TimeGroups.entries.first { it.index == minutes.first.index }, minutes.second)
@@ -86,8 +91,13 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
     }
 
     override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
-        require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
-        require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) { "任务 $pid 正在运行中" }
+        require(prototype || tasks.values.all { !it.state.isRunning }) {
+            val runningPid = tasks.values.firstOrNull { it.state.isRunning }
+            MessageService.asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
+        }
+        require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
+            MessageService.asLang("module-schedule-exception-conflict-task", id, pid)
+        }
         val task = Task(pid, sender, args)
         tasks[task.pid] = task
         return task
@@ -109,8 +119,13 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 stop()
                 return
             }
-            onExecute()
-            schedule() // 继续触发
+            try {
+                onExecute()
+                schedule() // 继续触发
+            } catch (e: Exception) {
+                console().error(e.localizedMessage)
+                pause()
+            }
         }
 
         override fun schedule() {
@@ -123,7 +138,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 }
                 return
             }
-            require(delay >= 0) { "系统异常 delay 小于 0." }
+            require(delay >= 0) { "SYSTEM ERROR: delay < 0." }
             if (::controller.isInitialized) {
                 controller.cancel()
             }
@@ -138,7 +153,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
         }
 
         private fun calculateNextTime(): Long {
-            val nextRun = cron.nextRun ?: error("系统异常 cron.nextRun 为空.")
+            val nextRun = cron.nextRun ?: error("SYSTEM ERROR: property cron.nextRun returns null.")
             val time = nextRun.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
             return time
         }
@@ -150,7 +165,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             return null
         }
         if (value !is String) {
-            return parseTimeValue(value)
+            return parseTimeValue("weeks", value)
         }
         return when {
             value.matches("^\\dL$".toRegex()) -> DayOfWeekGroups.Last to value
@@ -161,7 +176,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 val (from, to) = value.split("-| to ".toRegex()).map(String::toInt)
                 DayGroups.Specific to IntRange(from, to).joinToString(",")
             }
-            else -> parseTimeString(value)
+            else -> parseTimeString("weeks", value)
         }
     }
 
@@ -170,7 +185,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             return null
         }
         if (value !is String) {
-            return parseTimeValue(value)
+            return parseTimeValue("days", value)
         }
         return when {
             value == "L" -> DayGroups.LastDay to "L"
@@ -180,21 +195,21 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 val (from, to) = value.split("-| to ".toRegex()).map(String::toInt)
                 DayGroups.Specific to IntRange(from, to).joinToString(",")
             }
-            else -> parseTimeString(value)
+            else -> parseTimeString("days", value)
         }
     }
 
-    private fun parseTimeValue(value: Any?): Pair<CronGroups, String> {
+    private fun parseTimeValue(field: String, value: Any?): Pair<CronGroups, String> {
         return when (value) {
             null -> TimeGroups.Any to "*"
-            is String -> parseTimeString(value)
+            is String -> parseTimeString(field, value)
             is Number -> TimeGroups.Specific to value.toString()
             is List<*> -> TimeGroups.Specific to value.joinToString(",")
-            else -> error("Invalid value $value.")
+            else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value))
         }
     }
 
-    private fun parseTimeString(value: String): Pair<CronGroups, String> {
+    private fun parseTimeString(field: String, value: String): Pair<CronGroups, String> {
         return when {
             value == "*" -> TimeGroups.Any to "*"
             value.matches("^\\d{1,2}(,( )?\\d{1,2})+$".toRegex()) -> {
@@ -216,7 +231,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                     TimeGroups.EveryStartingAt to "$starting/$every"
                 }
             }
-            else -> error("Invalid value $value.")
+            else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value))
         }
     }
 
