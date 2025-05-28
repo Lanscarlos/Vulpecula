@@ -18,7 +18,7 @@ import java.time.format.DateTimeParseException
  *
  * 循环间隔日程
  *
- * @author Lanscarlos
+ * @author lanscarlos
  * @since 2025/5/9 11:50
  */
 class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {

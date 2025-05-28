@@ -57,17 +57,17 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 脚本执行者选取
      * */
-    val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse)
+    val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse).exceptionally("sender")
 
-    val onExecuteScript: Script by config.read("execute").convert { parseScript("execute", it) }
+    val onExecuteScript: Script by config.read("execute").convert(::parseScript).exceptionally("execute")
 
-    val onStartScript: Script? by config.read("on-start").convert { parseScriptOrNull("on-start", it) }
+    val onStartScript: Script? by config.read("on-start").convert(::parseScriptOrNull).exceptionally("on-start")
 
-    val onStopScript: Script? by config.read("on-stop").convert { parseScriptOrNull("on-stop", it) }
+    val onStopScript: Script? by config.read("on-stop").convert(::parseScriptOrNull).exceptionally("on-stop")
 
-    val onPauseScript: Script? by config.read("on-pause").convert { parseScriptOrNull("on-pause", it) }
+    val onPauseScript: Script? by config.read("on-pause").convert(::parseScriptOrNull).exceptionally("on-pause")
 
-    val onResumeScript: Script? by config.read("on-resume").convert { parseScriptOrNull("on-resume", it) }
+    val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull).exceptionally("on-resume")
 
     private var currentPid: Long = 0
 
@@ -117,26 +117,23 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
                     else -> error(MessageService.asLang("module-schedule-exception-invalid-time-unit", unit))
                 }
             }
-            else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value::class.java.name))
+            else -> error(MessageService.asLang("module-schedule-exception-invalid-type", value::class.java.name))
         }
     }
 
-    private fun parseScript(field: String, value: Any?): Script {
-        if (value == null) {
-            error(MessageService.asLang("module-schedule-exception-field-not-found", id, field))
-        }
-        return parseScriptOrNull(field, value)!!
+    private fun parseScript(value: Any?): Script {
+        return parseScriptOrNull(value) ?: throw NullPointerException("value is null.")
     }
 
-    private fun parseScriptOrNull(field: String, value: Any?): Script? {
+    private fun parseScriptOrNull(value: Any?): Script? {
         if (value == null) {
             return null
         }
         require(value is String) {
-            MessageService.asLang("module-schedule-exception-invalid-content", id, field, value)
+            MessageService.asLang("module-schedule-exception-invalid-type", value::class.java.name)
         }
         require(value.isNotBlank()) {
-            MessageService.asLang("module-schedule-exception-invalid-content", id, field, "BLANK#空白")
+            MessageService.asLang("module-schedule-exception-invalid-blank")
         }
         return ScriptService.compile(value)
     }
