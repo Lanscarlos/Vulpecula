@@ -6,6 +6,7 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.convert
+import top.lanscarlos.vulpecula.common.message.MessageService
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -22,15 +23,20 @@ import java.time.format.DateTimeParseException
  */
 class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
 
-    val period by config.read("period").convert(::parseTime)
+    val period by config.read("period").convert { parseTime("period", it) }
 
     val baseTime: Long by config.read("base-time").convert(::parseBaseTime)
 
     override val tasks: HashMap<String, Task> = HashMap()
 
     override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
-        require(prototype || tasks.values.all { !it.state.isRunning }) { "非原型模式下只允许一个任务运行." }
-        require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) { "任务 $pid 正在运行中" }
+        require(prototype || tasks.values.all { !it.state.isRunning }) {
+            val runningPid = tasks.values.firstOrNull { it.state.isRunning }
+            MessageService.asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
+        }
+        require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
+            MessageService.asLang("module-schedule-exception-conflict-task", id, pid)
+        }
         val task = Task(pid, sender, args)
         tasks[task.pid] = task
         return task
@@ -96,11 +102,13 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         if (value == null) {
             return -1L
         }
-        require(value is String) { "类型不正确" }
+        require(value is String) {
+            MessageService.asLang("module-schedule-exception-invalid-content", id, "base-time", value::class.java.name)
+        }
         val time = try {
             LocalTime.parse(value)
         } catch (_: DateTimeParseException) {
-            error("格式不正确")
+            error(MessageService.asLang("module-schedule-exception-invalid-content", id, "base-time", value))
         }
         return LocalDate.now().atTime(time).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
