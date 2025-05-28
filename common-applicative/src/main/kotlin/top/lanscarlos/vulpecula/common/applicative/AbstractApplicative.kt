@@ -56,7 +56,10 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
     protected abstract fun writeProperty(instance: T, key: String, value: Any?)
 
     override fun convertOrThrow(instance: Any?): T {
-        return convertOrNull(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance?.javaClass?.name} to ${this::class.java.name}.")
+        if (instance == null) {
+            throw NullPointerException("instance is null.")
+        }
+        return convertOrNull(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance::class.java.name} to ${this::class.java.name}.")
     }
 
     @Suppress("UNCHECKED_CAST")

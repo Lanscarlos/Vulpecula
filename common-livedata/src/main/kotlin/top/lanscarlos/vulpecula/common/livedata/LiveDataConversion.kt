@@ -11,6 +11,10 @@ import java.util.function.Function
  * @since 2025-03-10 19:04
  */
 
+fun <T> LiveData<T>.exceptionally(exceptionally: Function<Exception, T>): LiveData<T> {
+    return ExceptionalLiveData(this, exceptionally)
+}
+
 fun <T, R> LiveData<T>.convert(transformer: Function<T, R>): LiveData<R> {
     return ProxyLiveData(this, transformer)
 }

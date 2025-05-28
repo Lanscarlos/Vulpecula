@@ -26,7 +26,9 @@ interface SenderSelector {
                 "console" -> ConsoleSelector
                 "players" -> OnlinePlayerSelector
                 "world" -> {
-                    require(selector.size == 2) { "世界名不能为空" }
+                    require(selector.size == 2) {
+
+                    }
                     WorldSelector(selector[1])
                 }
                 "range" -> {

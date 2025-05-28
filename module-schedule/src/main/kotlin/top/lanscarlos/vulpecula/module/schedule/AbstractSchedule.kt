@@ -8,8 +8,12 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.livedata.*
 import top.lanscarlos.vulpecula.common.message.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.common.livedata.ExceptionalLiveData
+import top.lanscarlos.vulpecula.module.schedule.exception.FieldNotFoundException
+import top.lanscarlos.vulpecula.module.schedule.exception.InvalidFieldException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -23,7 +27,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 最大运转时间
      * */
-    val maxDuration: Long by config.read("max-duration").convert { parseTime("max-duration", it) }
+    val maxDuration: Long by config.read("max-duration").convert(::parseTime).exceptionally("max-duration")
 
     /**
      * 最大运转次数
@@ -33,7 +37,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 运转延迟
      * */
-    val delay by config.read("delay").convert { parseTime("delay", it) }
+    val delay by config.read("delay").convert(::parseTime).exceptionally("delay")
 
     /**
      * 是否自启动
@@ -94,7 +98,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         task.stop()
     }
 
-    protected fun parseTime(field: String, value: Any?): Long {
+    protected fun parseTime(value: Any?): Long {
         if (value == null) {
             return -1L
         }
@@ -103,14 +107,14 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             is Long -> value * 50L
             is String -> {
                 val regex = Regex("^(\\d+)(ticks|tick|t|seconds|second|s|minutes|minute|min|m|hours|hour|h)$", RegexOption.IGNORE_CASE)
-                val matches = regex.find(value) ?: error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value))
+                val matches = regex.find(value) ?: error(MessageService.asLang("module-schedule-exception-invalid-time-format", value))
                 val time = matches.groupValues[1].toLong()
                 when (val unit = matches.groupValues[2].lowercase()) {
                     "ticks", "tick", "t" -> time * 50
                     "seconds", "second", "s" -> time * 1_000
                     "minutes", "minute", "min", "m" -> time * 60_000
                     "hours", "hour", "h" -> time * 3_600_000
-                    else -> error(MessageService.asLang("module-schedule-exception-invalid-unit", id, field, unit))
+                    else -> error(MessageService.asLang("module-schedule-exception-invalid-time-unit", unit))
                 }
             }
             else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value::class.java.name))
@@ -135,6 +139,16 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             MessageService.asLang("module-schedule-exception-invalid-content", id, field, "BLANK#空白")
         }
         return ScriptService.compile(value)
+    }
+
+    protected fun <T> LiveData<T>.exceptionally(field: String): LiveData<T> {
+        return this.exceptionally { ex ->
+            val detail = when (ex) {
+                is NullPointerException -> throw FieldNotFoundException(id, field)
+                else -> ex.localizedMessage
+            }
+            throw InvalidFieldException(id, field, detail)
+        }
     }
 
     abstract inner class AbstractTask(
@@ -219,7 +233,9 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         }
 
         override fun start() {
-            require(activationTime < 0L) { "禁止重复调用 start() 函数." }
+            require(activationTime < 0L) {
+                MessageService.asLang("module-schedule-exception-repetition-start", id, pid)
+            }
             onStart()
             activationTime = System.currentTimeMillis() + delay.coerceAtLeast(0)
             expirationTime = if (maxDuration > 0) activationTime + maxDuration else -1L
