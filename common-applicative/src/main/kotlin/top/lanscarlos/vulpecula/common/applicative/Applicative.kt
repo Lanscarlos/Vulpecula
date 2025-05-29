@@ -14,21 +14,23 @@ interface Applicative<T> {
     val aliases: Array<String>
 
     /**
+     * 强制转换为目标类型
+     *
+     * @param instance 实例
+     * @return 转换后的实例
+     * @throws NullPointerException 实例为空
+     * @throws InvalidValueException 内容不规范
+     * @throws UnsupportedTypeException 实例类型不支持
+     * */
+    fun convert(instance: Any?): T
+
+    /**
      * 转换为目标类型, 果转换失败则返回 null
      *
      * @param instance 实例
      * @return 转换后的实例
      * */
     fun convertOrNull(instance: Any?): T?
-
-    /**
-     * 强制转换为目标类型
-     *
-     * @param instance 实例
-     * @return 转换后的实例
-     * @throws IllegalStateException 如果转换失败
-     * */
-    fun convertOrThrow(instance: Any?): T
 
     /**
      * 获取属性

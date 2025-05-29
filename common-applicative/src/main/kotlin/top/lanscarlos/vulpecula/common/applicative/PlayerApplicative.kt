@@ -16,13 +16,13 @@ import taboolib.platform.util.toBukkitLocation
  */
 object PlayerApplicative : AbstractApplicative<Player>(Player::class.java) {
 
-    override fun convertOrNull(instance: Any?): Player? {
+    override fun convert(instance: Any): Player {
         return when (instance) {
             is Player -> instance
-            is OfflinePlayer -> instance.player
-            is ProxyPlayer -> instance.castSafely()
-            is String -> Bukkit.getPlayerExact(instance)
-            else -> null
+            is OfflinePlayer -> instance.player!!
+            is ProxyPlayer -> instance.cast()
+            is String -> Bukkit.getPlayerExact(instance) ?: throw InvalidValueException(instance, Player::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Player::class.java)
         }
     }
 
@@ -63,7 +63,7 @@ object PlayerApplicative : AbstractApplicative<Player>(Player::class.java) {
             "ping" -> instance.ping
             "locale" -> instance.locale
             "isAllowingServerListings" -> instance.isAllowingServerListings
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
@@ -76,7 +76,7 @@ object PlayerApplicative : AbstractApplicative<Player>(Player::class.java) {
             "isSprinting" -> instance.isSprinting = value.applicativeBoolean()
             "isSleepingIgnored" -> instance.isSleepingIgnored = value.applicativeBoolean()
             "bedSpawnLocation" -> instance.bedSpawnLocation = value.applicativeLocation().toBukkitLocation()
-            "gameMode" -> instance.gameMode = GameMode.entries.find { it.name == value.toString() } ?: failedByInvalidValue(instance, key, value)
+            "gameMode" -> instance.gameMode = GameMode.entries.find { it.name == value.toString() } ?: errorByInvalidValue(instance, key, value)
             "expCooldown" -> instance.expCooldown = value.applicativeInt()
             "exp" -> instance.exp = value.applicativeFloat()
             "level" -> instance.level = value.applicativeInt()
@@ -87,7 +87,7 @@ object PlayerApplicative : AbstractApplicative<Player>(Player::class.java) {
             "walkSpeed" -> instance.walkSpeed = value.applicativeFloat()
             "isHealthScaled" -> instance.isHealthScaled = value.applicativeBoolean()
             "healthScale" -> instance.healthScale = value.applicativeDouble()
-            else -> failedBySetPropertyNotSupported(instance, key)
+            else -> errorBySetPropertyNotSupported(instance, key)
         }
     }
 }

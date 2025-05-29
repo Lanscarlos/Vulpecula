@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object IntApplicative : AbstractApplicative<Int>(Int::class.java) {
 
-    override fun convertOrNull(instance: Any?): Int? {
+    override fun convert(instance: Any): Int {
         return when (instance) {
             is Int -> instance
             is Number -> instance.toInt()
-            is String -> instance.toIntOrNull()
-            else -> null
+            is String -> instance.toIntOrNull() ?: throw InvalidValueException(instance, Int::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Int::class.java)
         }
     }
 
@@ -33,11 +33,11 @@ object IntApplicative : AbstractApplicative<Int>(Int::class.java) {
             "toFloat" -> instance.toFloat()
             "toDouble" -> instance.toDouble()
             "toString" -> instance.toString()
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
     override fun writeProperty(instance: Int, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

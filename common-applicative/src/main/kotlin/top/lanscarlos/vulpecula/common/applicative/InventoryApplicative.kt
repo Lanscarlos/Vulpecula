@@ -15,23 +15,21 @@ import taboolib.common.platform.ProxyPlayer
  */
 object InventoryApplicative : AbstractApplicative<Inventory>(Inventory::class.java) {
 
-    override fun convertOrNull(instance: Any?): Inventory? {
+    override fun convert(instance: Any): Inventory {
         return when (instance) {
             is Inventory -> instance
             is HumanEntity -> instance.inventory
-            is ProxyPlayer -> instance.castSafely<Player>()?.inventory
-            is String -> {
-                Bukkit.getPlayerExact(instance)?.inventory
-            }
-            else -> null
+            is ProxyPlayer -> instance.cast<Player>().inventory
+            is String -> Bukkit.getPlayerExact(instance)?.inventory ?: throw InvalidValueException(instance, Inventory::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Inventory::class.java)
         }
     }
 
     override fun readProperty(instance: Inventory, key: String): Any? {
-        failedByGetPropertyNotSupported(instance, key)
+        errorGetPropertyNotSupported(instance, key)
     }
 
     override fun writeProperty(instance: Inventory, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

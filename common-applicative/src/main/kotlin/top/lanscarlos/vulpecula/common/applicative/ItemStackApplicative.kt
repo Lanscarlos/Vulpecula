@@ -20,7 +20,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
 
     override val aliases: Array<String> = arrayOf("item")
 
-    override fun convertOrNull(instance: Any?): ItemStack? {
+    override fun convert(instance: Any): ItemStack {
         return when (instance) {
             is ItemStack -> instance
             is Item -> instance.itemStack
@@ -30,12 +30,12 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
                         mat.get()
                     } else {
                         warning("ItemStackApplicative#apply >> Instance cannot transform to material. $instance")
-                        return null
+                        throw InvalidValueException(instance, ItemStack::class.java)
                     }
                 }
                 buildItem(material)
             }
-            else -> null
+            else -> throw UnsupportedTypeException(instance::class.java, ItemStack::class.java)
         }
     }
 
@@ -56,7 +56,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
             "customModelData" -> instance.itemMeta?.customModelData
             "itemFlags" -> instance.itemMeta?.itemFlags
             "itemMeta" -> instance.itemMeta
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
@@ -64,7 +64,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
     override fun writeProperty(instance: ItemStack, key: String, value: Any?) {
         when (key) {
             "type" -> {
-                val material = XMaterial.matchXMaterial(value.toString().uppercase()).getOrNull()?.parseMaterial() ?: failedByInvalidValue(instance, key, value)
+                val material = XMaterial.matchXMaterial(value.toString().uppercase()).getOrNull()?.parseMaterial() ?: errorByInvalidValue(instance, key, value)
                 instance.type = material
             }
             "amount" -> instance.amount = value.applicativeInt()
@@ -76,18 +76,18 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
                 for (enchant in meta.enchants.keys) {
                     meta.removeEnchant(enchant)
                 }
-                val enchants = value as? Map<*, *> ?: failedByInvalidValue(instance, key, value)
+                val enchants = value as? Map<*, *> ?: errorByInvalidValue(instance, key, value)
                 for ((name, level) in enchants) {
                     meta.addEnchant(Enchantment.getByName(name.toString()) ?: continue, level.applicativeInt(), true)
                 }
             }
             "flags" -> {
-                val flag = ItemFlag.entries.find { it.name == value.toString() } ?: failedByInvalidValue(instance, key, value)
+                val flag = ItemFlag.entries.find { it.name == value.toString() } ?: errorByInvalidValue(instance, key, value)
                 instance.itemMeta?.addItemFlags(flag)
             }
             "unbreakable" -> instance.itemMeta?.isUnbreakable = value.applicativeBoolean()
-            "itemMeta" -> instance.itemMeta = value as? org.bukkit.inventory.meta.ItemMeta ?: failedByInvalidValue(instance, key, value)
-            else -> failedBySetPropertyNotSupported(instance, key)
+            "itemMeta" -> instance.itemMeta = value as? org.bukkit.inventory.meta.ItemMeta ?: errorByInvalidValue(instance, key, value)
+            else -> errorBySetPropertyNotSupported(instance, key)
         }
     }
 

@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object DoubleApplicative : AbstractApplicative<Double>(Double::class.java) {
 
-    override fun convertOrNull(instance: Any?): Double? {
+    override fun convert(instance: Any): Double {
         return when (instance) {
             is Double -> instance
             is Number -> instance.toDouble()
-            is String -> instance.toDoubleOrNull()
-            else -> null
+            is String -> instance.toDoubleOrNull() ?: throw InvalidValueException(instance, Double::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Double::class.java)
         }
     }
 
@@ -33,11 +33,11 @@ object DoubleApplicative : AbstractApplicative<Double>(Double::class.java) {
             "toFloat" -> instance.toFloat()
             "toDouble" -> instance
             "toString" -> instance.toString()
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
     override fun writeProperty(instance: Double, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

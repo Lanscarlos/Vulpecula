@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object LongApplicative : AbstractApplicative<Long>(Long::class.java) {
 
-    override fun convertOrNull(instance: Any?): Long? {
+    override fun convert(instance: Any): Long {
         return when (instance) {
             is Long -> instance
             is Number -> instance.toLong()
-            is String -> instance.toLongOrNull()
-            else -> null
+            is String -> instance.toLongOrNull() ?: throw InvalidValueException(instance, Long::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Long::class.java)
         }
     }
 
@@ -33,11 +33,11 @@ object LongApplicative : AbstractApplicative<Long>(Long::class.java) {
             "toFloat" -> instance.toFloat()
             "toDouble" -> instance.toDouble()
             "toString" -> instance.toString()
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
     override fun writeProperty(instance: Long, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

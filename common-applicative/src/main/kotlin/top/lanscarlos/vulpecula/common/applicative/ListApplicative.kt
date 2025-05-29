@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object ListApplicative : AbstractApplicative<List<*>>(List::class.java) {
 
-    override fun convertOrNull(instance: Any?): List<Any?>? {
+    override fun convert(instance: Any): List<*> {
         return when (instance) {
             is Array<*> -> instance.toList()
             is Collection<*> -> instance.toList()
             is Map<*, *> -> instance.toList()
-            else -> instance?.let(::listOf)
+            else -> listOf(instance)
         }
     }
 
@@ -27,7 +27,7 @@ object ListApplicative : AbstractApplicative<List<*>>(List::class.java) {
             "last" -> instance.lastOrNull()
             "random" -> instance.randomOrNull()
             else -> {
-                val index = key.toIntOrNull() ?: failedByGetPropertyNotSupported(instance, key)
+                val index = key.toIntOrNull() ?: errorGetPropertyNotSupported(instance, key)
                 instance.getOrNull(index)
             }
         }
@@ -56,12 +56,12 @@ object ListApplicative : AbstractApplicative<List<*>>(List::class.java) {
                     instance[(instance.indices).random()] = value
                 }
                 else -> {
-                    val index = key.toIntOrNull() ?: failedBySetPropertyNotSupported(instance, key)
+                    val index = key.toIntOrNull() ?: errorBySetPropertyNotSupported(instance, key)
                     instance[index] = value
                 }
             }
         } else {
-            failedBySetPropertyNotSupported(instance, key)
+            errorBySetPropertyNotSupported(instance, key)
         }
     }
 }

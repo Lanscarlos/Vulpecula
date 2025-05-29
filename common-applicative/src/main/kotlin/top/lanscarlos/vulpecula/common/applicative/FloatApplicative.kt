@@ -9,12 +9,12 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object FloatApplicative : AbstractApplicative<Float>(Float::class.java) {
 
-    override fun convertOrNull(instance: Any?): Float? {
+    override fun convert(instance: Any): Float {
         return when (instance) {
             is Float -> instance
             is Number -> instance.toFloat()
-            is String -> instance.toFloatOrNull()
-            else -> null
+            is String -> instance.toFloatOrNull() ?: throw InvalidValueException(instance, Float::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Float::class.java)
         }
     }
 
@@ -33,11 +33,11 @@ object FloatApplicative : AbstractApplicative<Float>(Float::class.java) {
             "toFloat" -> instance
             "toDouble" -> instance.toDouble()
             "toString" -> instance.toString()
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
     override fun writeProperty(instance: Float, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

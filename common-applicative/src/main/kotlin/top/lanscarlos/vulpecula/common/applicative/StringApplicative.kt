@@ -9,11 +9,11 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object StringApplicative : AbstractApplicative<String>(String::class.java) {
 
-    override fun convertOrNull(instance: Any?): String? {
+    override fun convert(instance: Any): String {
         if (instance is Collection<*>) {
             return instance.joinToString("\n") { it.toString() }
         }
-        return instance?.toString()
+        return instance.toString()
     }
 
     override fun readProperty(instance: String, key: String): Any? {
@@ -34,11 +34,11 @@ object StringApplicative : AbstractApplicative<String>(String::class.java) {
             "toDouble" -> instance.toDoubleOrNull()
             "toBoolean" -> instance.toBoolean()
             "toString" -> instance
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
     override fun writeProperty(instance: String, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

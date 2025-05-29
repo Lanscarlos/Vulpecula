@@ -55,11 +55,24 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
      * */
     protected abstract fun writeProperty(instance: T, key: String, value: Any?)
 
-    override fun convertOrThrow(instance: Any?): T {
+    abstract fun convert(instance: Any): T
+
+    override fun convert(instance: Any?): T {
         if (instance == null) {
             throw NullPointerException("instance is null.")
         }
-        return convertOrNull(instance) ?: error("AbstractApplicative#applyUnsafe >> Cannot apply ${instance::class.java.name} to ${this::class.java.name}.")
+        return convert(instance)
+    }
+
+    override fun convertOrNull(instance: Any?): T? {
+        if (instance == null) {
+            return null
+        }
+        return try {
+            convert(instance)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -171,7 +184,7 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
             // 关联父类未找到对应的属性
             if (strict) {
                 // 严格模式下抛出异常
-                failedByGetPropertyNotSupported(instance, key)
+                errorGetPropertyNotSupported(instance, key)
             }
         }
         return null
@@ -215,7 +228,7 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
             // 关联父类未找到对应的属性
             if (strict) {
                 // 严格模式下抛出异常
-                failedBySetPropertyNotSupported(instance, key)
+                errorBySetPropertyNotSupported(instance, key)
             }
             warning("Cannot set property in ${instance?.let { it::class.java.name }}[$key]. Not supported yet.")
         }
@@ -238,15 +251,15 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
         }
     }
 
-    fun failedByGetPropertyNotSupported(instance: Any?, key: String): Nothing {
+    fun errorGetPropertyNotSupported(instance: Any?, key: String): Nothing {
         error("Cannot get property in ${instance?.javaClass?.name}[$key]. Not supported yet.")
     }
 
-    fun failedBySetPropertyNotSupported(instance: Any?, key: String): Nothing {
+    fun errorBySetPropertyNotSupported(instance: Any?, key: String): Nothing {
         error("Cannot set property in ${instance?.javaClass?.name}[$key]. Not supported yet.")
     }
 
-    fun failedByInvalidValue(instance: Any?, key: String, value: Any?): Nothing {
+    fun errorByInvalidValue(instance: Any?, key: String, value: Any?): Nothing {
         error("Cannot set property in ${instance?.javaClass?.name}[$key]. Invalid value: $value::${value?.javaClass?.name}")
     }
 

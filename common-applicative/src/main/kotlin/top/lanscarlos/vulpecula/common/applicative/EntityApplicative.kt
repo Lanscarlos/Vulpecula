@@ -14,21 +14,21 @@ import taboolib.common.platform.ProxyPlayer
  */
 object EntityApplicative : AbstractApplicative<Entity>(Entity::class.java) {
 
-    override fun convertOrNull(instance: Any?): Entity? {
+    override fun convert(instance: Any): Entity {
         return when (instance) {
             is Entity -> instance
-            is OfflinePlayer -> instance.player
-            is ProxyPlayer -> instance.castSafely()
-            is String -> Bukkit.getPlayerExact(instance)
-            else -> null
+            is OfflinePlayer -> instance.player!!
+            is ProxyPlayer -> instance.cast()
+            is String -> Bukkit.getPlayerExact(instance) ?: throw InvalidValueException(instance, Entity::class.java)
+            else -> throw UnsupportedTypeException(instance::class.java, Entity::class.java)
         }
     }
 
     override fun readProperty(instance: Entity, key: String): Any? {
-        failedByGetPropertyNotSupported(instance, key)
+        errorGetPropertyNotSupported(instance, key)
     }
 
     override fun writeProperty(instance: Entity, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }

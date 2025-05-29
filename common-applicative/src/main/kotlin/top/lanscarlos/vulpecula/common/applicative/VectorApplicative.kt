@@ -13,11 +13,11 @@ import taboolib.platform.util.toProxyLocation
  */
 object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
 
-    val REGEX_NUMBER = "-?\\d+(\\.\\d+)?".toRegex()
+    private val REGEX_NUMBER = "-?\\d+(\\.\\d+)?".toRegex()
 
-    val REGEX_XYZ = "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()
+    private val REGEX_XYZ = "^-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?,-?\\d+(\\.\\d+)?\$".toRegex()
 
-    override fun convertOrNull(instance: Any?): Vector? {
+    override fun convert(instance: Any): Vector {
         return when (instance) {
             is Vector -> instance
             is org.bukkit.util.Vector -> Vector(instance.x, instance.y, instance.z)
@@ -33,17 +33,15 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
                         val number = instance.toDouble()
                         Vector(number, number, number)
                     }
-
                     instance.matches(REGEX_XYZ) -> {
                         // x,y,z
                         val demand = instance.split(",").map { it.toDouble() }
                         Vector(demand[0], demand[1], demand[2])
                     }
-
-                    else -> null
+                    else -> throw InvalidValueException(instance, Vector::class.java)
                 }
             }
-            else -> null
+            else -> throw UnsupportedTypeException(instance::class.java, Vector::class.java)
         }
     }
 
@@ -61,7 +59,7 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
             "isNormalized" -> instance.isNormalized
             "zero" -> instance.zero()
             "clone" -> instance.clone()
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
@@ -70,7 +68,7 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
             "x" -> instance.x = value.applicativeDouble()
             "y" -> instance.y = value.applicativeDouble()
             "z" -> instance.z = value.applicativeDouble()
-            else -> failedBySetPropertyNotSupported(instance, key)
+            else -> errorBySetPropertyNotSupported(instance, key)
         }
     }
 }

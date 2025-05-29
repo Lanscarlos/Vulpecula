@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import taboolib.common.platform.function.warning
 import java.awt.Color
 
 /**
@@ -12,11 +11,11 @@ import java.awt.Color
  */
 object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
 
-    val REGEX_HEX = "^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex()
+    private val REGEX_HEX = "^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\$".toRegex()
 
-    val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
+    private val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
 
-    override fun convertOrNull(instance: Any?): Color? {
+    override fun convert(instance: Any): Color {
         return when (instance) {
             is Color -> instance
             is org.bukkit.Color -> Color(instance.red, instance.green, instance.blue)
@@ -36,15 +35,12 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
                         }
                     }
                     else -> {
-                        val rgb = instance.toIntOrNull() ?: let {
-                            warning("ColorApplicative#apply >> Instance cannot transform to rgb color. $instance")
-                            return null
-                        }
+                        val rgb = instance.toIntOrNull() ?: throw InvalidValueException(instance, Color::class.java)
                         Color(rgb)
                     }
                 }
             }
-            else -> null
+            else -> throw UnsupportedTypeException(instance::class.java, Color::class.java)
         }
     }
 
@@ -55,11 +51,11 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
             "blue" -> instance.blue
             "alpha" -> instance.alpha
             "rgb" -> instance.rgb
-            else -> failedByGetPropertyNotSupported(instance, key)
+            else -> errorGetPropertyNotSupported(instance, key)
         }
     }
 
     override fun writeProperty(instance: Color, key: String, value: Any?) {
-        failedBySetPropertyNotSupported(instance, key)
+        errorBySetPropertyNotSupported(instance, key)
     }
 }
