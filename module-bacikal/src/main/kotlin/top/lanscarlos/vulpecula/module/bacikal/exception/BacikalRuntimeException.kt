@@ -23,8 +23,8 @@ open class BacikalRuntimeException(
     override val message: String = cause.message ?: "EXCEPTION_MESSAGE_MISSING"
 
     val content = properties["BACIKAL_CONTENT"].toString()
-    val startLine = properties["BACIKAL_START_LINE"].let(IntApplicative::convertOrThrow)
-    val endLine = properties["BACIKAL_END_LINE"].let(IntApplicative::convertOrThrow)
+    val startLine = properties["BACIKAL_START_LINE"].let(IntApplicative::convert)
+    val endLine = properties["BACIKAL_END_LINE"].let(IntApplicative::convert)
 
     private val colorParsed: String = "&a".colored()
     private val colorWarning: String = "&e".colored()

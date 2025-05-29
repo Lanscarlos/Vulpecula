@@ -71,7 +71,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
                 continue
             }
             require(arg != null) { "Missing argument ${parameter.name} at index $index when run script \"$id\"." }
-            wrappedArgs[parameter.name] = parameter.applicative.convertOrThrow(arg)
+            wrappedArgs[parameter.name] = parameter.applicative.convert(arg)
         }
 
         return run(sender, wrappedArgs + variables, onSuccess, onFailure)
@@ -173,7 +173,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
     }
 
     private fun parseStringMap(entry: Map.Entry<Any?, Any?>): Pair<String, String> {
-        return StringApplicative.convertOrThrow(entry.key) to StringApplicative.convertOrThrow(entry.value)
+        return StringApplicative.convert(entry.key) to StringApplicative.convert(entry.value)
     }
 
     private fun parseCondition(value: Any?): String {
@@ -230,7 +230,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
 
         when (value) {
             is List<*> -> {
-                for (item in value.map(MapApplicative::convertOrThrow)) {
+                for (item in value.map(MapApplicative::convert)) {
                     val exception = item["catch"].applicativeString()
                     val script = item["handle"].applicativeString()
                     map[exception] = script
