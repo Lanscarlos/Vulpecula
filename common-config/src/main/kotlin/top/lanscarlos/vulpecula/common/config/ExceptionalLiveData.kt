@@ -20,6 +20,8 @@ class ExceptionalLiveData<T>(private val source: LiveData<T>, private val except
     override fun getValue(): T {
         return try {
             source.getValue()
+        } catch (e: InvalidFieldException) {
+            exceptionally.apply(e.cause as Exception)
         } catch (e: Exception) {
             exceptionally.apply(e)
         }

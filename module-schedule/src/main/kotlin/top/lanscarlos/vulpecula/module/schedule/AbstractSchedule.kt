@@ -6,9 +6,8 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.common.message.*
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
-import top.lanscarlos.vulpecula.module.schedule.exception.FieldNotFoundException
-import top.lanscarlos.vulpecula.module.schedule.exception.InvalidFieldException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 
@@ -24,7 +23,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 最大运转时间
      * */
-    val maxDuration: Long by config.read("max-duration").convert(::parseTime).exceptionally("max-duration")
+    val maxDuration: Long by config.read("max-duration").convert(::parseTime)
 
     /**
      * 最大运转次数
@@ -34,7 +33,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 运转延迟
      * */
-    val delay by config.read("delay").convert(::parseTime).exceptionally("delay")
+    val delay by config.read("delay").convert(::parseTime)
 
     /**
      * 是否自启动
@@ -54,17 +53,17 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 脚本执行者选取
      * */
-    val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse).exceptionally("sender")
+    val selector: SenderSelector by config.read("sender").string("@Console").convert(SenderSelector::parse)
 
-    val onExecuteScript: Script by config.read("execute").convert(::parseScript).exceptionally("execute")
+    val onExecuteScript: Script by config.read("execute").convert(::parseScript)
 
-    val onStartScript: Script? by config.read("on-start").convert(::parseScriptOrNull).exceptionally("on-start")
+    val onStartScript: Script? by config.read("on-start").convert(::parseScriptOrNull)
 
-    val onStopScript: Script? by config.read("on-stop").convert(::parseScriptOrNull).exceptionally("on-stop")
+    val onStopScript: Script? by config.read("on-stop").convert(::parseScriptOrNull)
 
-    val onPauseScript: Script? by config.read("on-pause").convert(::parseScriptOrNull).exceptionally("on-pause")
+    val onPauseScript: Script? by config.read("on-pause").convert(::parseScriptOrNull)
 
-    val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull).exceptionally("on-resume")
+    val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
 
     private var currentPid: Long = 0
 
@@ -133,16 +132,6 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             MessageService.asLang("module-schedule-exception-invalid-blank")
         }
         return ScriptService.compile(value)
-    }
-
-    protected fun <T> LiveData<T>.exceptionally(field: String): LiveData<T> {
-        return this.exceptionally { ex ->
-            val detail = when (ex) {
-                is NullPointerException -> throw FieldNotFoundException(id, field)
-                else -> ex.localizedMessage
-            }
-            throw InvalidFieldException(id, field, detail)
-        }
     }
 
     abstract inner class AbstractTask(

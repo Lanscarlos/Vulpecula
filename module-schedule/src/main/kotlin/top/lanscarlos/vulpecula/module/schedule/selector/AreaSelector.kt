@@ -23,8 +23,8 @@ class AreaSelector(location1: String, location2: String) : SenderSelector {
     val boundingBox: BoundingBox
 
     init {
-        val a: Location = LocationApplicative.convertOrThrow(location1).toBukkitLocation()
-        val b: Location = LocationApplicative.convertOrThrow(location2).toBukkitLocation()
+        val a: Location = LocationApplicative.convert(location1).toBukkitLocation()
+        val b: Location = LocationApplicative.convert(location2).toBukkitLocation()
         require(a.world != null && b.world != null && a.world == b.world) { "坐标不合法" }
         world = a.world!!
         boundingBox = BoundingBox.of(a, b)

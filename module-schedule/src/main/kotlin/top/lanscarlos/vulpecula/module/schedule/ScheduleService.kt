@@ -9,8 +9,9 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
-import top.lanscarlos.vulpecula.common.message.errorSync
-import top.lanscarlos.vulpecula.common.message.infoSync
+import top.lanscarlos.vulpecula.common.config.InvalidFieldException
+import top.lanscarlos.vulpecula.common.message.*
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
 
 /**
@@ -109,8 +110,31 @@ object ScheduleService {
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            e.printStackTrace()
-            sender.errorSync("module-schedule-service-load-failure", id, e.localizedMessage)
+            when (e) {
+                is InvalidFieldException -> {
+                    when (val cause = e.cause) {
+                        is BacikalCompileException -> {
+                            // Kether 编译错误
+                            val detail = MessageService.asLang("module-schedule-exception-invalid-script")
+                            sender.errorSync("module-schedule-exception-invalid-field", id, e.field, detail)
+                            sender.errorLiteralSync(cause.getErrorReasonMessage())
+                            sender.errorLiteralSync(cause.getErrorDetailMessage())
+                        }
+                        is NullPointerException -> {
+                            // 缺少必要的字段
+                            sender.errorSync("module-schedule-exception-field-not-found", id, e.field)
+                        }
+                        else -> {
+                            // 其他异常
+                            sender.errorSync("module-schedule-exception-invalid-field", id, e.field, e.localizedMessage)
+                        }
+                    }
+                }
+                else -> {
+                    sender.errorSync("module-schedule-service-load-failure", id)
+                    e.printStackTrace()
+                }
+            }
         }
     }
 

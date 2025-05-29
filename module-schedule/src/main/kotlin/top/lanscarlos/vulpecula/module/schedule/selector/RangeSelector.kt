@@ -18,7 +18,7 @@ import kotlin.math.pow
  */
 class RangeSelector(location: String, range: String) : SenderSelector {
 
-    val center: Location = LocationApplicative.convertOrThrow(location).toBukkitLocation()
+    val center: Location = LocationApplicative.convert(location).toBukkitLocation()
 
     val range = range.toDouble().pow(2)
 

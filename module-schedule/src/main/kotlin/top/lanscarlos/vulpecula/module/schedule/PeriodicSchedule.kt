@@ -23,7 +23,7 @@ import java.time.format.DateTimeParseException
  */
 class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
 
-    val period by config.read("period").convert { parseTime("period", it) }
+    val period by config.read("period").convert(::parseTime)
 
     val baseTime: Long by config.read("base-time").convert(::parseBaseTime)
 
@@ -103,12 +103,12 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
             return -1L
         }
         require(value is String) {
-            MessageService.asLang("module-schedule-exception-invalid-content", id, "base-time", value::class.java.name)
+            MessageService.asLang("module-schedule-exception-invalid-type", value::class.java.name)
         }
         val time = try {
             LocalTime.parse(value)
         } catch (_: DateTimeParseException) {
-            error(MessageService.asLang("module-schedule-exception-invalid-content", id, "base-time", value))
+            error(MessageService.asLang("module-schedule-exception-invalid-time-format", value))
         }
         return LocalDate.now().atTime(time).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }

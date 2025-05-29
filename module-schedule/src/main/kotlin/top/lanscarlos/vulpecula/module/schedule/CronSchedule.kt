@@ -52,19 +52,19 @@ import java.util.*
 )
 class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, config) {
 
-    val seconds: Pair<CronGroups, String> by config.read("seconds").convert { parseTimeValue("seconds", it) }
+    val seconds: Pair<CronGroups, String> by config.read("seconds").convert(::parseTimeValue)
 
-    val minutes: Pair<CronGroups, String> by config.read("minutes").convert { parseTimeValue("minutes", it) }
+    val minutes: Pair<CronGroups, String> by config.read("minutes").convert(::parseTimeValue)
 
-    val hours: Pair<CronGroups, String> by config.read("hours").convert { parseTimeValue("hours", it) }
+    val hours: Pair<CronGroups, String> by config.read("hours").convert(::parseTimeValue)
 
     val days: Pair<CronGroups, String>? by config.read("days").convert(::parseDays)
 
     val weeks: Pair<CronGroups, String>? by config.read("weeks").convert(::parseWeeks)
 
-    val months: Pair<CronGroups, String> by config.read("months").convert { parseTimeValue("months", it) }
+    val months: Pair<CronGroups, String> by config.read("months").convert(::parseTimeValue)
 
-    val years: Pair<CronGroups, String> by config.read("years").convert { parseTimeValue("years", it) }
+    val years: Pair<CronGroups, String> by config.read("years").convert(::parseTimeValue)
 
     val cron: Builder<LocalDateTime, CronLocalDateTime, CronLocalDateTimeProvider>
 
@@ -165,7 +165,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             return null
         }
         if (value !is String) {
-            return parseTimeValue("weeks", value)
+            return parseTimeValue(value)
         }
         return when {
             value.matches("^\\dL$".toRegex()) -> DayOfWeekGroups.Last to value
@@ -176,7 +176,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 val (from, to) = value.split("-| to ".toRegex()).map(String::toInt)
                 DayGroups.Specific to IntRange(from, to).joinToString(",")
             }
-            else -> parseTimeString("weeks", value)
+            else -> parseTimeString(value)
         }
     }
 
@@ -185,7 +185,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             return null
         }
         if (value !is String) {
-            return parseTimeValue("days", value)
+            return parseTimeValue(value)
         }
         return when {
             value == "L" -> DayGroups.LastDay to "L"
@@ -195,21 +195,21 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 val (from, to) = value.split("-| to ".toRegex()).map(String::toInt)
                 DayGroups.Specific to IntRange(from, to).joinToString(",")
             }
-            else -> parseTimeString("days", value)
+            else -> parseTimeString(value)
         }
     }
 
-    private fun parseTimeValue(field: String, value: Any?): Pair<CronGroups, String> {
+    private fun parseTimeValue(value: Any?): Pair<CronGroups, String> {
         return when (value) {
             null -> TimeGroups.Any to "*"
-            is String -> parseTimeString(field, value)
+            is String -> parseTimeString(value)
             is Number -> TimeGroups.Specific to value.toString()
             is List<*> -> TimeGroups.Specific to value.joinToString(",")
-            else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value))
+            else -> error(MessageService.asLang("module-schedule-exception-invalid-cron", value))
         }
     }
 
-    private fun parseTimeString(field: String, value: String): Pair<CronGroups, String> {
+    private fun parseTimeString(value: String): Pair<CronGroups, String> {
         return when {
             value == "*" -> TimeGroups.Any to "*"
             value.matches("^\\d{1,2}(,( )?\\d{1,2})+$".toRegex()) -> {
@@ -231,7 +231,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                     TimeGroups.EveryStartingAt to "$starting/$every"
                 }
             }
-            else -> error(MessageService.asLang("module-schedule-exception-invalid-content", id, field, value))
+            else -> error(MessageService.asLang("module-schedule-exception-invalid-cron", value))
         }
     }
 

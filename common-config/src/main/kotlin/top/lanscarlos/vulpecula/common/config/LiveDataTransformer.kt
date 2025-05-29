@@ -29,7 +29,13 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
     override fun getValue(): R {
         if (!isInitialized) {
             // 初始化
-            value = transfer.apply(source.getValue())
+            try {
+                value = transfer.apply(source.getValue())
+            } catch (e: InvalidFieldException) {
+                throw e
+            } catch (e: Exception) {
+                throw InvalidFieldException(id, e)
+            }
         }
         return value as R
     }
