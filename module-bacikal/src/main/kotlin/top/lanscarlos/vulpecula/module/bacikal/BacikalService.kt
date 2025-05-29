@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.kether.ScriptContext
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestCompiler
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 import java.io.File
@@ -33,6 +34,7 @@ object BacikalService {
      * @param source 任务源码
      * @param name 任务名称
      * @param namespace 命名空间
+     * @throws BacikalCompileException 编译错误
      */
     fun compile(source: String, name: String, namespace: List<String>): Quest {
         return BacikalQuestCompiler.compile(source, name, namespace)
