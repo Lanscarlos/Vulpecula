@@ -1,15 +1,18 @@
-package top.lanscarlos.vulpecula.common.livedata
+package top.lanscarlos.vulpecula.common.config
 
 import java.util.function.Function
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.common.livedata
+ * top.lanscarlos.vulpecula.common.config
  *
  * @author Lanscarlos
  * @since 2025-03-10 19:12
  */
-class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>) : LiveData<R> {
+class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<T, R>) : LiveData<R> {
+
+    override val id: String
+        get() = source.id
 
     /**
      * 缓存值
@@ -29,14 +32,6 @@ class ProxyLiveData<T, R>(val source: LiveData<T>, val transfer: Function<T, R>)
             value = transfer.apply(source.getValue())
         }
         return value as R
-    }
-
-    override fun getValueOrNull(): R? {
-        if (!isInitialized) {
-            // 初始化
-            value = source.getValueOrNull()?.let(transfer::apply)
-        }
-        return value
     }
 
     override fun update() {

@@ -1,9 +1,8 @@
 package top.lanscarlos.vulpecula.common.config
 
 import taboolib.library.configuration.ConfigurationSection
+import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.livedata.DefaultLiveData
-import top.lanscarlos.vulpecula.common.livedata.LiveData
 
 /**
  * Vulpecula
@@ -12,14 +11,18 @@ import top.lanscarlos.vulpecula.common.livedata.LiveData
  * @author Lanscarlos
  * @since 2025-03-11 17:06
  */
-class DelegateConfigNode(val config: ConfigurationSection, val keys: Array<out String>) : LiveData<Any?> {
+class DelegateConfigNode(val config: ConfigurationSection, private val keys: Array<out String>) : LiveData<Any?>, Runnable {
 
-    lateinit var key: String
+    override lateinit var id: String
 
-    override val isInitialized: Boolean
-        get() = liveData.isInitialized
+    override var isInitialized = false
 
-    val liveData = DefaultLiveData(source = ::read, transformer = ::transformer)
+    private val root: Configuration
+
+    /**
+     * 缓存值
+     * */
+    private var value: Any? = null
 
     init {
         // 获取根配置
@@ -29,8 +32,12 @@ class DelegateConfigNode(val config: ConfigurationSection, val keys: Array<out S
         }
 
         // 注册变动监听
-        val root = parent as? Configuration ?: error("Root configuration not found.")
-        root.onReload(::update)
+        root = parent as? Configuration ?: error("Root configuration not found.")
+        root.onReload(this)
+    }
+
+    override fun run() {
+        update()
     }
 
     private fun read(): Any? {
@@ -38,26 +45,30 @@ class DelegateConfigNode(val config: ConfigurationSection, val keys: Array<out S
             if (!config.contains(key)) {
                 continue
             }
-            this.key = key
+            this.id = key
             return config[key]
         }
         return null
     }
 
-    private fun transformer(value: Any?): Any? {
+    override fun getValue(): Any? {
+        if (!isInitialized) {
+            // 初始化
+            value = read()
+            isInitialized = true
+        }
         return value
     }
 
-    override fun getValue(): Any? {
-        return liveData.getValue()
-    }
-
-    override fun getValueOrNull(): Any? {
-        return liveData.getValueOrNull()
-    }
-
     override fun update() {
-        liveData.update()
+        isInitialized = false
+    }
+
+    fun dispose() {
+        // 移除监听器
+        val reloadCallback = root.getProperty<ArrayList<Runnable>>("reloadCallback")
+            ?: error("ReloadCallback does not exist.")
+        reloadCallback.removeIf { it == this }
     }
 
 }

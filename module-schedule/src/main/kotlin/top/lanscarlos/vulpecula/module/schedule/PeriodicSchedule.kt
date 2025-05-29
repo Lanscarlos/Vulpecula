@@ -5,7 +5,7 @@ import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.convert
+import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.message.MessageService
 import java.time.LocalDate
 import java.time.LocalTime

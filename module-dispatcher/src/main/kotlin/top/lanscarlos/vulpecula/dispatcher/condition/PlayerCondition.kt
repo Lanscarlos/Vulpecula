@@ -4,8 +4,10 @@ import org.bukkit.util.BoundingBox
 import taboolib.common.util.Vector
 import taboolib.common5.cdouble
 import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.config.booleanOrNull
+import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.common.config.stringListOrNull
 import top.lanscarlos.vulpecula.dispatcher.Context
 import kotlin.math.max
 import kotlin.math.min

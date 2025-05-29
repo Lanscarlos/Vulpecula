@@ -5,7 +5,7 @@ import com.ucasoft.kcron.core.builders.Builder
 import com.ucasoft.kcron.core.common.*
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.convert
+import top.lanscarlos.vulpecula.common.config.convert
 import kotlinx.datetime.LocalDateTime
 import com.ucasoft.kcron.kotlinx.datetime.CronLocalDateTime
 import com.ucasoft.kcron.kotlinx.datetime.CronLocalDateTimeProvider

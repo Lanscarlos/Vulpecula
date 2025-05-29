@@ -7,8 +7,7 @@ import taboolib.common.platform.function.registerCommand
 import taboolib.common.platform.function.unregisterCommand
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.common.message.MessageService
 import java.util.HashSet
 import java.util.LinkedList

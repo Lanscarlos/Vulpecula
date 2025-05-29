@@ -3,13 +3,11 @@ package top.lanscarlos.vulpecula.module.script
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
-import taboolib.module.kether.ScriptContext
 import taboolib.module.kether.deepVars
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
-import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.common.config.*
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer

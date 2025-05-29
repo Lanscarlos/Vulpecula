@@ -1,22 +1,34 @@
-package top.lanscarlos.vulpecula.common.livedata
+package top.lanscarlos.vulpecula.common.config
 
 import kotlin.reflect.KProperty
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.common.livedata
+ * top.lanscarlos.vulpecula.common.config
  *
  * @author Lanscarlos
  * @since 2025-03-10 18:58
  */
 interface LiveData<out T> {
 
+    /**
+     * 键名
+     * */
+    val id: String
+
+    /**
+     * 是否已初始化
+     * */
     val isInitialized: Boolean
 
+    /**
+     * 获取值
+     * */
     fun getValue(): T
 
-    fun getValueOrNull(): T?
-
+    /**
+     * 更新值
+     * */
     fun update()
 
     /**

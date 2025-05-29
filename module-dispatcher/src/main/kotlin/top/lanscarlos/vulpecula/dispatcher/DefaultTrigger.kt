@@ -8,8 +8,7 @@ import taboolib.common.platform.event.EventPriority
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.livedata.*
+import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.dispatcher.condition.Condition
 import top.lanscarlos.vulpecula.dispatcher.condition.Conditions
 import top.lanscarlos.vulpecula.dispatcher.rule.Rule
