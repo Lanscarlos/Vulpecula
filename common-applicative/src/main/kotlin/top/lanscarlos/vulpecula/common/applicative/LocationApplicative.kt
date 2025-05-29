@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import org.bukkit.Bukkit
 import taboolib.common.util.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
