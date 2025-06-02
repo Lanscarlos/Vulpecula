@@ -11,7 +11,7 @@ import io.izzel.taboolib.gradle.Kether
 plugins {
     java
     id("io.izzel.taboolib") version "2.0.23"
-    id("org.jetbrains.kotlin.jvm") version "2.0.21"
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
 }
 
 subprojects {
@@ -66,10 +66,6 @@ subprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib"))
-    }
-
-    java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     }
 
     gradle.buildFinished {
