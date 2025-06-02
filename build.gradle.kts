@@ -2,8 +2,8 @@ import io.izzel.taboolib.gradle.*
 
 plugins {
     java
-    id("io.izzel.taboolib") version "2.0.11"
-    id("org.jetbrains.kotlin.jvm") version "1.8.22"
+    id("io.izzel.taboolib") version "2.0.23"
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
 }
 
 taboolib {
@@ -22,7 +22,7 @@ taboolib {
         )
     }
     version {
-        taboolib = "6.1.1-beta27"
+        taboolib = "6.2.3-8cc2f66"
     }
     description {
         contributors {
