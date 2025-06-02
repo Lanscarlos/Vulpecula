@@ -54,7 +54,7 @@ object ActionMemory {
     val luckPermsAPI by lazy {
         try {
             Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)?.provider
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
