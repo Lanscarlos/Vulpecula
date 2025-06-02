@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object ListApplicative : AbstractApplicative<List<*>>(List::class.java) {
 
-    override fun convert(instance: Any): List<*> {
+    override fun convertOrThrow(instance: Any): List<*> {
         return when (instance) {
             is Array<*> -> instance.toList()
             is Collection<*> -> instance.toList()

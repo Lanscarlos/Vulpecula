@@ -55,13 +55,13 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
      * */
     protected abstract fun writeProperty(instance: T, key: String, value: Any?)
 
-    abstract fun convert(instance: Any): T
+    abstract fun convertOrThrow(instance: Any): T
 
     override fun convert(instance: Any?): T {
         if (instance == null) {
             throw NullPointerException("instance is null.")
         }
-        return convert(instance)
+        return convertOrThrow(instance)
     }
 
     override fun convertOrNull(instance: Any?): T? {
@@ -69,7 +69,7 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
             return null
         }
         return try {
-            convert(instance)
+            convertOrThrow(instance)
         } catch (e: Exception) {
             null
         }

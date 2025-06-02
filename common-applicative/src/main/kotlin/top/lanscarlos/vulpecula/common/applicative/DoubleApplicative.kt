@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object DoubleApplicative : AbstractApplicative<Double>(Double::class.java) {
 
-    override fun convert(instance: Any): Double {
+    override fun convertOrThrow(instance: Any): Double {
         return when (instance) {
             is Double -> instance
             is Number -> instance.toDouble()

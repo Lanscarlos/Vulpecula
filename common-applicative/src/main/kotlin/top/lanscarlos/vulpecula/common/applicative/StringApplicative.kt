@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object StringApplicative : AbstractApplicative<String>(String::class.java) {
 
-    override fun convert(instance: Any): String {
+    override fun convertOrThrow(instance: Any): String {
         if (instance is Collection<*>) {
             return instance.joinToString("\n") { it.toString() }
         }

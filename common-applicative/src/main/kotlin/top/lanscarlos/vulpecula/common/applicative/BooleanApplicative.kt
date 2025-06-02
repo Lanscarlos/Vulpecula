@@ -11,7 +11,7 @@ object BooleanApplicative : AbstractApplicative<Boolean>(Boolean::class.java) {
 
     override val aliases: Array<String> = arrayOf("bool")
 
-    override fun convert(instance: Any): Boolean {
+    override fun convertOrThrow(instance: Any): Boolean {
         return when (instance) {
             is Boolean -> instance
             "true", "True", "TRUE" -> true

@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object LongApplicative : AbstractApplicative<Long>(Long::class.java) {
 
-    override fun convert(instance: Any): Long {
+    override fun convertOrThrow(instance: Any): Long {
         return when (instance) {
             is Long -> instance
             is Number -> instance.toLong()

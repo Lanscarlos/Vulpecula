@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.common.config
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.ConfigLoader
-import top.lanscarlos.vulpecula.common.livedata.LiveData
 
 /**
  * Vulpecula

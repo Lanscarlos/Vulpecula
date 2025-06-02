@@ -20,7 +20,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
 
     override val aliases: Array<String> = arrayOf("item")
 
-    override fun convert(instance: Any): ItemStack {
+    override fun convertOrThrow(instance: Any): ItemStack {
         return when (instance) {
             is ItemStack -> instance
             is Item -> instance.itemStack

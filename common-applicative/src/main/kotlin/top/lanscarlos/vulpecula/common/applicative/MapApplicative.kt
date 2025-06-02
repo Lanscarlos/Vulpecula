@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.common.applicative
  */
 object MapApplicative : AbstractApplicative<Map<*, *>>(Map::class.java) {
 
-    override fun convert(instance: Any): Map<*, *> {
+    override fun convertOrThrow(instance: Any): Map<*, *> {
         return when (instance) {
             is Map<*, *> -> instance
             is taboolib.library.configuration.ConfigurationSection -> instance.getValues(false)
