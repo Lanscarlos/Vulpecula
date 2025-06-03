@@ -10,7 +10,7 @@ import org.bukkit.event.Event
  * @author Lanscarlos
  * @since 2025-03-12 17:47
  */
-class Context(private val event: Event, val player: Player?) {
+class Context(private val event: Event, var player: Player?) {
 
     @Suppress("UNCHECKED_CAST")
     fun <T: Event> event(): T {

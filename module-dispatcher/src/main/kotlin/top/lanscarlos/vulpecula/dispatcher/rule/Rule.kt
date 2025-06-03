@@ -13,6 +13,11 @@ import top.lanscarlos.vulpecula.dispatcher.Context
 interface Rule<T: Event> {
 
     /**
+     * 解析玩家
+     * */
+    fun parsePlayer(context: Context)
+
+    /**
      * 匹配事件
      * */
     fun matches(context: Context): Boolean
