@@ -17,7 +17,7 @@ import taboolib.library.reflex.ReflexClass
  * @since 2024-10-16 11:41
  */
 @Awake(LifeCycle.LOAD)
-object VulpeculaCommandRegistry : ClassVisitor() {
+object CommandRegistry : ClassVisitor() {
 
     private val mainComponents = mutableListOf(
         SimpleCommandBody().also {
