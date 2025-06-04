@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.common.config
 
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import java.util.function.Function
 
 /**
@@ -31,10 +32,10 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
             // 初始化
             try {
                 value = transfer.apply(source.getValue())
-            } catch (e: InvalidFieldException) {
+            } catch (e: ConfigFieldReadException) {
                 throw e
             } catch (e: Exception) {
-                throw InvalidFieldException(id, e)
+                throw ConfigFieldReadException(id, e)
             }
         }
         return value as R

@@ -1,0 +1,6 @@
+
+# 通用
+common-core-exception-invalid-time-format: '时间格式错误: &e{0}&7.'
+common-core-exception-invalid-time-unit: '时间单位错误: &e{0}&7.'
+common-core-exception-invalid-type: '类型错误: &e{0}&7.'
+

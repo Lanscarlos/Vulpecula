@@ -9,8 +9,8 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
-import top.lanscarlos.vulpecula.common.config.InvalidFieldException
-import top.lanscarlos.vulpecula.common.message.*
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import top.lanscarlos.vulpecula.common.lang.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
 
@@ -111,7 +111,7 @@ object ScheduleService {
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
             when (e) {
-                is InvalidFieldException -> {
+                is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
                         is BacikalCompileException -> {
                             // Kether 编译错误
