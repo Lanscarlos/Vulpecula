@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.common.message
+package top.lanscarlos.vulpecula.common.lang
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer

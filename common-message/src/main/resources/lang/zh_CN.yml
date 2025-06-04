@@ -1,7 +1,0 @@
-
-
-# Message 消息模组
-common-message-info: '&8[&3Vul&bpecula&8] &a良好 &8|&7 {0}'
-common-message-warning: '&8[&3Vul&bpecula&8] &e警告 &8|&7 {0}'
-common-message-error: '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
-common-message-debug: '&8[&3Vul&bpecula&8] &7调试 &8|&7 {0}'

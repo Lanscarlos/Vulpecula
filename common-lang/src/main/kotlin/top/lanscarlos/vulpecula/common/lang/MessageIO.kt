@@ -1,14 +1,14 @@
-package top.lanscarlos.vulpecula.common.message
+package top.lanscarlos.vulpecula.common.lang
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
-import top.lanscarlos.vulpecula.common.message.MessageService.asErrorLiteral
-import top.lanscarlos.vulpecula.common.message.MessageService.asError
-import top.lanscarlos.vulpecula.common.message.MessageService.asInfoLiteral
-import top.lanscarlos.vulpecula.common.message.MessageService.asInfo
-import top.lanscarlos.vulpecula.common.message.MessageService.asWarningLiteral
-import top.lanscarlos.vulpecula.common.message.MessageService.asWarning
-import top.lanscarlos.vulpecula.common.message.MessageService.console
+import top.lanscarlos.vulpecula.common.lang.MessageService.asErrorLiteral
+import top.lanscarlos.vulpecula.common.lang.MessageService.asError
+import top.lanscarlos.vulpecula.common.lang.MessageService.asInfoLiteral
+import top.lanscarlos.vulpecula.common.lang.MessageService.asInfo
+import top.lanscarlos.vulpecula.common.lang.MessageService.asWarningLiteral
+import top.lanscarlos.vulpecula.common.lang.MessageService.asWarning
+import top.lanscarlos.vulpecula.common.lang.MessageService.console
 
 /**
  * Vulpecula

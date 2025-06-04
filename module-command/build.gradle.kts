@@ -6,7 +6,7 @@ taboolib {
 dependencies {
     compileOnly(project(":common-applicative"))
     compileOnly(project(":common-config"))
-    compileOnly(project(":common-message"))
+    compileOnly(project(":common-lang"))
     compileOnly(project(":module-bacikal"))
     compileOnly(project(":module-script"))
     compileOnly("ink.ptms.core:v12004:12004:mapped")

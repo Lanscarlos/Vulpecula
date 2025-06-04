@@ -1,0 +1,7 @@
+
+# 格式
+common-lang-info: '&8[&3Vul&bpecula&8] &a良好 &8|&7 {0}'
+common-lang-warning: '&8[&3Vul&bpecula&8] &e警告 &8|&7 {0}'
+common-lang-error: '&8[&3Vul&bpecula&8] &c错误 &8|&7 {0}'
+common-lang-debug: '&8[&3Vul&bpecula&8] &7调试 &8|&7 {0}'
+

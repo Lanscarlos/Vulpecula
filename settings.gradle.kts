@@ -1,8 +1,10 @@
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
 rootProject.name="Vulpecula"
 include("common-applicative")
 include("common-config")
 include("common-core")
-include("common-message")
 include("extension-action-item")
 include("module-bacikal")
 include("module-command")
@@ -26,3 +28,4 @@ include("project:module-applicative")
 include("project:module-bacikal")
 include("project:module-config")
 include("project:module-volatile")
+include("common-lang")

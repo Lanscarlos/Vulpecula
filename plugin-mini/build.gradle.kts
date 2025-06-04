@@ -17,7 +17,7 @@ tasks {
             project(":common-applicative"),
             project(":common-config"),
             project(":common-core"),
-            project(":common-message"),
+            project(":common-lang"),
             project(":module-bacikal"),
             project(":module-command"),
             project(":module-core"),

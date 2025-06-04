@@ -8,7 +8,7 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
-import top.lanscarlos.vulpecula.common.message.*
+import top.lanscarlos.vulpecula.common.lang.*
 import java.text.SimpleDateFormat
 import java.util.*
 
