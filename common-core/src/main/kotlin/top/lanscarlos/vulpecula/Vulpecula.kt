@@ -23,9 +23,4 @@ import taboolib.module.configuration.Configuration
  * @since 2023-08-14 17:07
  */
 object Vulpecula {
-
-    @Config("config.yml")
-    lateinit var config: Configuration
-        private set
-
 }
