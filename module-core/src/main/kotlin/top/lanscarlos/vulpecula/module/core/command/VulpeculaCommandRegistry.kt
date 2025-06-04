@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.command
+package top.lanscarlos.vulpecula.module.core.command
 
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
