@@ -39,17 +39,15 @@ object ScriptCommand {
                 sender.info { asLang("module-script-command-run", id, sender.name, "[]") }
                 ScriptService.run(
                     id = id,
-                    sender = sender,
-                    onSuccess = {
-                        sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                    },
-                    onFailure = { ex ->
-                        sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                        sender.error(sync = true) { ex.getActionMessage() }
-                        sender.error(sync = true) { ex.getReasonMessage() }
-                        sender.error(sync = true) { ex.getDetailMessage() }
-                    }
-                )
+                    sender = sender
+                ).onSuccess {
+                    sender.info { asLang("module-script-command-run-success", id, it.toString()) }
+                }.onFailure { ex ->
+                    sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+                    sender.error(sync = true) { ex.getActionMessage() }
+                    sender.error(sync = true) { ex.getReasonMessage() }
+                    sender.error(sync = true) { ex.getDetailMessage() }
+                }
             }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
@@ -59,17 +57,15 @@ object ScriptCommand {
                 sender.info { asLang("module-script-command-run", id, runtimeSender?.name ?: "null", "[]") }
                 ScriptService.run(
                     id = id,
-                    sender = runtimeSender,
-                    onSuccess = {
-                        sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                    },
-                    onFailure = { ex ->
-                        sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                        sender.error(sync = true) { ex.getActionMessage() }
-                        sender.error(sync = true) { ex.getReasonMessage() }
-                        sender.error(sync = true) { ex.getDetailMessage() }
-                    }
-                )
+                    sender = runtimeSender
+                ).onSuccess {
+                    sender.info { asLang("module-script-command-run-success", id, it.toString()) }
+                }.onFailure { ex ->
+                    sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+                    sender.error(sync = true) { ex.getActionMessage() }
+                    sender.error(sync = true) { ex.getReasonMessage() }
+                    sender.error(sync = true) { ex.getDetailMessage() }
+                }
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
@@ -80,17 +76,15 @@ object ScriptCommand {
                 ScriptService.run(
                     id = id,
                     sender = runtimeSender,
-                    args = args,
-                    onSuccess = {
-                        sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                    },
-                    onFailure = { ex ->
-                        sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                        sender.error(sync = true) { ex.getActionMessage() }
-                        sender.error(sync = true) { ex.getReasonMessage() }
-                        sender.error(sync = true) { ex.getDetailMessage() }
-                    }
-                )
+                    args = args
+                ).onSuccess {
+                    sender.info { asLang("module-script-command-run-success", id, it.toString()) }
+                }.onFailure { ex ->
+                    sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+                    sender.error(sync = true) { ex.getActionMessage() }
+                    sender.error(sync = true) { ex.getReasonMessage() }
+                    sender.error(sync = true) { ex.getDetailMessage() }
+                }
             }
         }
     }

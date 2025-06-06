@@ -1,10 +1,8 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
-import java.util.function.Function
 
 /**
  * Vulpecula
@@ -81,7 +79,7 @@ class ScriptFlow(
     private fun nextTask(): ScriptTask? {
         val script = scripts.getOrNull(nextPointer++) ?: return null
         val task = script.run(sender = sender, args = emptyList(), variables = variables)
-        task.onComplete {
+        task.onSuccess {
             // 更新变量
             this.variables = task.variables()
         }

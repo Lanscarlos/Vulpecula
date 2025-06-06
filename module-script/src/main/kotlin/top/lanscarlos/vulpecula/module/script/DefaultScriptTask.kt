@@ -32,12 +32,12 @@ class DefaultScriptTask(
         context.terminate()
     }
 
-    override fun onComplete(func: Consumer<Any?>): ScriptTask {
+    override fun onSuccess(func: Consumer<Any?>): ScriptTask {
         future = future.thenApply { func.accept(it) }
         return this
     }
 
-    override fun onError(func: Function<BacikalRuntimeException, Any?>): ScriptTask {
+    override fun onFailure(func: Function<BacikalRuntimeException, Any?>): ScriptTask {
         future = future.exceptionally {
             val ex = it.cause as BacikalRuntimeException
             ex.printKetherMessage()

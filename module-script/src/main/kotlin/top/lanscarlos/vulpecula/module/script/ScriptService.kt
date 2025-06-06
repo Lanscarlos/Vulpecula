@@ -137,7 +137,6 @@ object ScriptService {
      *
      * @param id 脚本 ID
      * @param sender 脚本执行者
-     * @param selector 脚本执行者选择器
      * @param args 脚本参数
      * @param variables 脚本变量
      * @param onSuccess 成功回调
@@ -149,11 +148,9 @@ object ScriptService {
         id: String,
         sender: ProxyCommandSender? = null,
         args: List<Any?> = emptyList(),
-        variables: Map<String, Any> = emptyMap(),
-        onSuccess: Consumer<Any?> = Consumer {  },
-        onFailure: Function<BacikalRuntimeException, Any?> = Function { it }
+        variables: Map<String, Any> = emptyMap()
     ): ScriptTask {
-        return run(get(id), sender, args, variables, onSuccess, onFailure)
+        return run(get(id), sender, args, variables)
     }
 
     /**
@@ -171,11 +168,9 @@ object ScriptService {
         script: Script,
         sender: ProxyCommandSender? = null,
         args: List<Any?> = emptyList(),
-        variables: Map<String, Any> = emptyMap(),
-        onSuccess: Consumer<Any?> = Consumer {  },
-        onFailure: Function<BacikalRuntimeException, Any?> = Function { it }
+        variables: Map<String, Any> = emptyMap()
     ): ScriptTask {
-        return script.run(sender, args, variables, onSuccess, onFailure)
+        return script.run(sender, args, variables)
     }
 
     /**

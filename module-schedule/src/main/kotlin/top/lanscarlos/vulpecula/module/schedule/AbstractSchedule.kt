@@ -192,9 +192,8 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
                     script = script,
                     sender = sender,
                     args = args,
-                    variables = variables,
-                    onFailure = ::onFailure
-                )
+                    variables = variables
+                ).onFailure(::onFailure)
             }
         }
 
