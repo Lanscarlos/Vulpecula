@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.script.exception
 
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -11,6 +11,6 @@ import top.lanscarlos.vulpecula.common.lang.MessageService
  */
 class ScriptNotFoundException(scriptId: String) : RuntimeException() {
 
-    override val message: String = MessageService.asLang("module-script-exception-script-not-found", scriptId)
+    override val message: String = asLang("module-script-exception-script-not-found", scriptId)
 
 }

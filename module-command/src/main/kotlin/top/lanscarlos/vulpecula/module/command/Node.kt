@@ -6,7 +6,7 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.module.script.Script
 import java.util.LinkedList
 
@@ -74,11 +74,11 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
     private fun parseExecution(value: Any): ScriptExecutor {
         require(value is String || value is Script) {
             // 类型不匹配
-            MessageService.asLang("module-command-exception-invalid-content", id, "execute", value.javaClass.name)
+            asLang("module-command-exception-invalid-content", id, "execute", value.javaClass.name)
         }
         require(value !is String || value.isNotBlank()) {
             // 字符串内容为空
-            MessageService.asLang("module-command-exception-invalid-content", id, "execute", "BLANK#空白")
+            asLang("module-command-exception-invalid-content", id, "execute", "BLANK#空白")
         }
         return ScriptExecutor(value, ::transformArgs)
     }

@@ -71,7 +71,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error(MessageService.asLang("module-schedule-exception-task-not-found", pid))
+        val task = tasks[pid] ?: error(asLang("module-schedule-exception-task-not-found", pid))
         task.pause()
     }
 
@@ -80,7 +80,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error(MessageService.asLang("module-schedule-exception-task-not-found", pid))
+        val task = tasks[pid] ?: error(asLang("module-schedule-exception-task-not-found", pid))
         task.resume()
     }
 
@@ -89,7 +89,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error(MessageService.asLang("module-schedule-exception-task-not-found", pid))
+        val task = tasks[pid] ?: error(asLang("module-schedule-exception-task-not-found", pid))
         task.stop()
     }
 
@@ -102,17 +102,17 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             is Long -> value * 50L
             is String -> {
                 val regex = Regex("^(\\d+)(ticks|tick|t|seconds|second|s|minutes|minute|min|m|hours|hour|h)$", RegexOption.IGNORE_CASE)
-                val matches = regex.find(value) ?: error(MessageService.asLang("module-schedule-exception-invalid-time-format", value))
+                val matches = regex.find(value) ?: error(asLang("module-schedule-exception-invalid-time-format", value))
                 val time = matches.groupValues[1].toLong()
                 when (val unit = matches.groupValues[2].lowercase()) {
                     "ticks", "tick", "t" -> time * 50
                     "seconds", "second", "s" -> time * 1_000
                     "minutes", "minute", "min", "m" -> time * 60_000
                     "hours", "hour", "h" -> time * 3_600_000
-                    else -> error(MessageService.asLang("module-schedule-exception-invalid-time-unit", unit))
+                    else -> error(asLang("module-schedule-exception-invalid-time-unit", unit))
                 }
             }
-            else -> error(MessageService.asLang("module-schedule-exception-invalid-type", value::class.java.name))
+            else -> error(asLang("module-schedule-exception-invalid-type", value::class.java.name))
         }
     }
 
@@ -125,10 +125,10 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             return null
         }
         require(value is String) {
-            MessageService.asLang("module-schedule-exception-invalid-type", value::class.java.name)
+            asLang("module-schedule-exception-invalid-type", value::class.java.name)
         }
         require(value.isNotBlank()) {
-            MessageService.asLang("module-schedule-exception-invalid-blank")
+            asLang("module-schedule-exception-invalid-blank")
         }
         return ScriptService.compile(value)
     }
@@ -208,15 +208,15 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         fun onFailure(ex: BacikalRuntimeException) {
             // 脚本运行异常时, 暂停任务
             pause()
-            console().error("module-schedule-run-failure", id, pid)
-            console().errorLiteral(ex.getActionMessage())
-            console().errorLiteral(ex.getReasonMessage())
-            console().errorLiteral(ex.getDetailMessage())
+            console().error { asLang("module-schedule-run-failure", id, pid) }
+            console().error { ex.getActionMessage() }
+            console().error { ex.getReasonMessage() }
+            console().error { ex.getDetailMessage() }
         }
 
         override fun start() {
             require(activationTime < 0L) {
-                MessageService.asLang("module-schedule-exception-repetition-start", id, pid)
+                asLang("module-schedule-exception-repetition-start", id, pid)
             }
             onStart()
             activationTime = System.currentTimeMillis() + delay.coerceAtLeast(0)
@@ -248,7 +248,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
                 val remainingTime = maxDuration - consumedTime
                 expirationTime = now + remainingTime
             }
-
+            activationTime = now + delay.coerceAtLeast(0)
             schedule()
         }
 

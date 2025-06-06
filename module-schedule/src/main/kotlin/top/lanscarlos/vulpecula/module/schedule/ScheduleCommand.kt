@@ -10,8 +10,8 @@ import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.chat.Components
-import top.lanscarlos.vulpecula.common.lang.MessageService
-import top.lanscarlos.vulpecula.common.lang.errorLiteral
+import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.lang.error
 import top.lanscarlos.vulpecula.common.lang.info
 
 /**
@@ -38,7 +38,7 @@ object ScheduleCommand {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 val task = ScheduleService.get(id).start()
-                sender.info("module-schedule-command-run-success", id, task.pid, "null", "[]")
+                sender.info { asLang("module-schedule-command-run-success", id, task.pid, "null", "[]") }
             }
         }.dynamic("pid") {
             execute<ProxyCommandSender> { sender, context, pid ->
@@ -46,7 +46,7 @@ object ScheduleCommand {
                 ScheduleService.get(id).start(
                     pid = pid
                 )
-                sender.info("module-schedule-command-run-success", id, pid, "null", "[]")
+                sender.info { asLang("module-schedule-command-run-success", id, pid, "null", "[]") }
             }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
@@ -58,7 +58,7 @@ object ScheduleCommand {
                     pid = pid,
                     sender = runtimeSender
                 )
-                sender.info("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", "[]")
+                sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", "[]") }
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
@@ -71,7 +71,7 @@ object ScheduleCommand {
                     sender = runtimeSender,
                     args = args
                 )
-                sender.info("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", args)
+                sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", args) }
             }
         }
     }
@@ -82,9 +82,9 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     ScheduleService.get(id).pause("*")
-                    sender.info("module-schedule-command-pause-all", id)
+                    sender.info { asLang("module-schedule-command-pause-all", id) }
                 } catch (e: Exception) {
-                    sender.errorLiteral(e.localizedMessage)
+                    sender.error { e.localizedMessage }
                 }
             }
         }.dynamic("pid") {
@@ -93,9 +93,9 @@ object ScheduleCommand {
                 val id = context["id"]
                 try {
                     ScheduleService.get(id).pause(pid)
-                    sender.info("module-schedule-command-pause-task", id, pid)
+                    sender.info { asLang("module-schedule-command-pause-task", id, pid) }
                 } catch (e: Exception) {
-                    sender.errorLiteral(e.localizedMessage)
+                    sender.error { e.localizedMessage }
                 }
             }
         }
@@ -107,9 +107,9 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     ScheduleService.get(id).resume("*")
-                    sender.info("module-schedule-command-resume-all", id)
+                    sender.info { asLang("module-schedule-command-resume-all", id) }
                 } catch (e: Exception) {
-                    sender.errorLiteral(e.localizedMessage)
+                    sender.error { e.localizedMessage }
                 }
             }
         }.dynamic("pid") {
@@ -118,9 +118,9 @@ object ScheduleCommand {
                 val id = context["id"]
                 try {
                     ScheduleService.get(id).resume(pid)
-                    sender.info("module-schedule-command-resume-task", id, pid)
+                    sender.info { asLang("module-schedule-command-resume-task", id, pid) }
                 } catch (e: Exception) {
-                    sender.errorLiteral(e.localizedMessage)
+                    sender.error { e.localizedMessage }
                 }
             }
         }
@@ -132,9 +132,9 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     ScheduleService.get(id).stop("*")
-                    sender.info("module-schedule-command-stop-all", id)
+                    sender.info { asLang("module-schedule-command-stop-all", id) }
                 } catch (e: Exception) {
-                    sender.errorLiteral(e.localizedMessage)
+                    sender.error { e.localizedMessage }
                 }
             }
         }.dynamic("pid") {
@@ -143,9 +143,9 @@ object ScheduleCommand {
                 val id = context["id"]
                 try {
                     ScheduleService.get(id).stop(pid)
-                    sender.info("module-schedule-command-stop-task", id, pid)
+                    sender.info { asLang("module-schedule-command-stop-task", id, pid) }
                 } catch (e: Exception) {
-                    sender.errorLiteral(e.localizedMessage)
+                    sender.error { e.localizedMessage }
                 }
             }
         }
@@ -178,14 +178,14 @@ object ScheduleCommand {
             ScheduleService.get(id).tasks.values
         }
 
-        val builder = Components.text(MessageService.asInfo("module-schedule-command-detail-header"))
+        val builder = Components.text(asLang("module-schedule-command-detail-header"))
         for (task in tasks) {
             builder.newLine()
 
             // 消息项
             val pid = task.pid
-            val state = MessageService.asLang("module-schedule-task-state-${task.state.name.lowercase()}")
-            val message = MessageService.asLang("module-schedule-command-detail-item", task.id, pid, state, task.counter)
+            val state = asLang("module-schedule-task-state-${task.state.name.lowercase()}")
+            val message = asLang("module-schedule-command-detail-item", task.id, pid, state, task.counter)
             builder.append(message)
 
             if (sender !is ProxyPlayer) {
@@ -195,16 +195,16 @@ object ScheduleCommand {
 
             // 操作按钮
             val pause = Components
-                .text(MessageService.asLang("module-schedule-task-operation-pause"))
-                .hoverText(MessageService.asLang("module-schedule-task-operation-pause-hover"))
+                .text(asLang("module-schedule-task-operation-pause"))
+                .hoverText(asLang("module-schedule-task-operation-pause-hover"))
                 .clickSuggestCommand("/vul schedule pause ${task.id} $pid")
             val resume = Components
-                .text(MessageService.asLang("module-schedule-task-operation-resume"))
-                .hoverText(MessageService.asLang("module-schedule-task-operation-resume-hover"))
+                .text(asLang("module-schedule-task-operation-resume"))
+                .hoverText(asLang("module-schedule-task-operation-resume-hover"))
                 .clickSuggestCommand("/vul schedule resume ${task.id} $pid")
             val terminate = Components
-                .text(MessageService.asLang("module-schedule-task-operation-terminate"))
-                .hoverText(MessageService.asLang("module-schedule-task-operation-terminate-hover"))
+                .text(asLang("module-schedule-task-operation-terminate"))
+                .hoverText(asLang("module-schedule-task-operation-terminate-hover"))
                 .clickSuggestCommand("/vul schedule stop ${task.id} $pid")
             when (task.state) {
                 TaskState.WAITING,
@@ -221,7 +221,7 @@ object ScheduleCommand {
         }
 
         // 尾部
-        val footer = MessageService.asLang("module-schedule-command-detail-footer")
+        val footer = asLang("module-schedule-command-detail-footer")
         if (footer.isNotEmpty()) {
             builder.append(footer)
         }
@@ -230,7 +230,7 @@ object ScheduleCommand {
         if (sender is ProxyPlayer) {
             builder.sendTo(sender)
         } else {
-            sender.sendMessage(builder.toLegacyText())
+            sender.info { builder.toLegacyText() }
         }
     }
 

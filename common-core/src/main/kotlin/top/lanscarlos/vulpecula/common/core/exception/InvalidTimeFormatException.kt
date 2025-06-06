@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.core.exception
 
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -11,6 +11,6 @@ import top.lanscarlos.vulpecula.common.lang.MessageService
  */
 class InvalidTimeFormatException(value: String) : RuntimeException() {
 
-    override val message: String = MessageService.asLang("common-core-exception-invalid-time-format", value)
+    override val message: String = asLang("common-core-exception-invalid-time-format", value)
 
 }

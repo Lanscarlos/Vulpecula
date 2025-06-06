@@ -10,9 +10,7 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
-import top.lanscarlos.vulpecula.common.lang.errorLiteralSync
-import top.lanscarlos.vulpecula.common.lang.errorSync
-import top.lanscarlos.vulpecula.common.lang.infoSync
+import top.lanscarlos.vulpecula.common.lang.*
 import java.io.File
 
 /**
@@ -74,12 +72,12 @@ object CommandService {
         }
 
         override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.infoSync("module-command-service-load-succeeded", commands.size, time)
+            sender.info(sync = true) { asLang("module-command-service-load-succeeded", commands.size, time) }
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            sender.errorSync("module-command-service-load-failed", id, e.localizedMessage, e.getStackTraceString())
-            sender.errorLiteralSync(e.localizedMessage)
+            sender.error(sync = true) { asLang("module-command-service-load-failed", id, e.localizedMessage, e.getStackTraceString()) }
+            sender.error(sync = true) { e.localizedMessage }
         }
 
     }

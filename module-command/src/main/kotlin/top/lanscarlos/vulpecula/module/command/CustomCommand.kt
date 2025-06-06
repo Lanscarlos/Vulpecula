@@ -8,7 +8,7 @@ import taboolib.common.platform.function.unregisterCommand
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.*
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 import java.util.HashSet
 import java.util.LinkedList
 
@@ -97,7 +97,7 @@ class CustomCommand(val id: String, val config: Configuration) {
         for (key in components.getKeys(false)) {
             val parent = components.getString("$key.parent")
             require(!parent.isNullOrBlank()) {
-                MessageService.asLang("module-command-exception-field-not-found", key, "parent")
+                asLang("module-command-exception-field-not-found", key, "parent")
             }
             relation.computeIfAbsent(parent) { HashSet() } += key
         }
@@ -117,12 +117,12 @@ class CustomCommand(val id: String, val config: Configuration) {
             val id = stack.pop()
             if (!visited.add(id)) {
                 // 重复处理节点
-                error(MessageService.asLang("module-command-exception-key-conflict", id))
+                error(asLang("module-command-exception-key-conflict", id))
             }
             val section = components.getConfigurationSection(id)!!
             val parent = nodes[section.getString("parent")!!]
             require(parent != null) {
-                MessageService.asLang("module-command-exception-parent-not-found", id)
+                asLang("module-command-exception-parent-not-found", id)
             }
             val node = when {
                 "literal" in section || "aliases" in section -> LiteralNode(id, parent, section)
@@ -145,7 +145,7 @@ class CustomCommand(val id: String, val config: Configuration) {
             return PermissionDefault.OP
         }
         return PermissionDefault.entries.find { it.name.equals(value, true) }
-            ?: error(MessageService.asLang("module-command-exception-invalid-permission-default", id, value))
+            ?: error(asLang("module-command-exception-invalid-permission-default", id, value))
     }
 
 }

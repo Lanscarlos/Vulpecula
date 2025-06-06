@@ -5,7 +5,7 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -28,7 +28,7 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
         // 验证配置结构
         require("suggest" !in section || "restrict" !in section) {
             // 策略冲突
-            MessageService.asLang("module-command-exception-strategy-conflict", id)
+            asLang("module-command-exception-strategy-conflict", id)
         }
         uncheck = section["uncheck"].applicativeBoolean(false)
         suggester = section["suggest"]?.let(::parseSuggester)
@@ -66,10 +66,10 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
             return ListSuggester(suggestion)
         }
         require(suggestion is String) {
-            MessageService.asLang("module-command-exception-invalid-content", id, "suggest", suggestion.javaClass.name)
+            asLang("module-command-exception-invalid-content", id, "suggest", suggestion.javaClass.name)
         }
         require(suggestion.isNotBlank()) {
-            MessageService.asLang("module-command-exception-invalid-content", id, "suggest", "BLANK#空白")
+            asLang("module-command-exception-invalid-content", id, "suggest", "BLANK#空白")
         }
         if (suggestion[0] != '@' || suggestion.lowercase().startsWith("@script:")) {
             // 启用脚本约束
@@ -80,16 +80,16 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
             "offline" -> OfflinePlayerSuggester
             "player" -> PlayerSuggester
             "world" -> WorldSuggester
-            else -> error(MessageService.asLang("module-command-exception-invalid-content", id, "suggest", suggestion))
+            else -> error(asLang("module-command-exception-invalid-content", id, "suggest", suggestion))
         }
     }
 
     private fun parseRestrictor(restriction: Any): Restrictor {
         require(restriction is String) {
-            MessageService.asLang("module-command-exception-invalid-content", id, "restrict", restriction.javaClass.name)
+            asLang("module-command-exception-invalid-content", id, "restrict", restriction.javaClass.name)
         }
         require(restriction.isNotBlank()) {
-            MessageService.asLang("module-command-exception-invalid-content", id, "restrict", "BLANK#空白")
+            asLang("module-command-exception-invalid-content", id, "restrict", "BLANK#空白")
         }
         if (restriction[0] != '@' || restriction.lowercase().startsWith("@script:")) {
             // 启用脚本约束
@@ -98,7 +98,7 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
         return when (restriction.substring(1).lowercase()) {
             "int" -> IntRestrictor
             "double" -> DoubleRestrictor
-            else -> error(MessageService.asLang("module-command-exception-invalid-content", id, "restrict", restriction))
+            else -> error(asLang("module-command-exception-invalid-content", id, "restrict", restriction))
         }
     }
 

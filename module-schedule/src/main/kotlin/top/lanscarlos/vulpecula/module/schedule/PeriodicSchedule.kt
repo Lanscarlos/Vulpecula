@@ -6,7 +6,7 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.convert
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -32,10 +32,10 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
     override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) {
             val runningPid = tasks.values.firstOrNull { it.state.isRunning }
-            MessageService.asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
+            asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
         }
         require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
-            MessageService.asLang("module-schedule-exception-conflict-task", id, pid)
+            asLang("module-schedule-exception-conflict-task", id, pid)
         }
         val task = Task(pid, sender, args)
         tasks[task.pid] = task
@@ -103,12 +103,12 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
             return -1L
         }
         require(value is String) {
-            MessageService.asLang("module-schedule-exception-invalid-type", value::class.java.name)
+            asLang("module-schedule-exception-invalid-type", value::class.java.name)
         }
         val time = try {
             LocalTime.parse(value)
         } catch (_: DateTimeParseException) {
-            error(MessageService.asLang("module-schedule-exception-invalid-time-format", value))
+            error(asLang("module-schedule-exception-invalid-time-format", value))
         }
         return LocalDate.now().atTime(time).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }

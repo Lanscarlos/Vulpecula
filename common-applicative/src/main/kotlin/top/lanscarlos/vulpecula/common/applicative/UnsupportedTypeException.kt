@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -11,6 +11,6 @@ import top.lanscarlos.vulpecula.common.lang.MessageService
  */
 class UnsupportedTypeException(val source: Class<*>, val target: Class<*>) : RuntimeException() {
 
-    override val message: String = MessageService.asLang("common-applicative-exception-unsupported-type", source.name, target.name)
+    override val message: String = asLang("common-applicative-exception-unsupported-type", source.name, target.name)
 
 }

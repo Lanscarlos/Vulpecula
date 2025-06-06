@@ -8,7 +8,9 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
-import top.lanscarlos.vulpecula.common.lang.*
+import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.lang.error
+import top.lanscarlos.vulpecula.common.lang.info
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,18 +36,18 @@ object ScriptCommand {
         dynamic("id") {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                sender.info("module-script-command-run", id, sender.name, "[]")
+                sender.info { asLang("module-script-command-run", id, sender.name, "[]") }
                 ScriptService.run(
                     id = id,
                     sender = sender,
                     onSuccess = {
-                        sender.info("module-script-command-run-success", id, it.toString())
+                        sender.info { asLang("module-script-command-run-success", id, it.toString()) }
                     },
                     onFailure = { ex ->
-                        sender.errorSync("module-script-command-run-failure", id)
-                        sender.errorLiteralSync(ex.getActionMessage())
-                        sender.errorLiteralSync(ex.getReasonMessage())
-                        sender.errorLiteralSync(ex.getDetailMessage())
+                        sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+                        sender.error(sync = true) { ex.getActionMessage() }
+                        sender.error(sync = true) { ex.getReasonMessage() }
+                        sender.error(sync = true) { ex.getDetailMessage() }
                     }
                 )
             }
@@ -54,18 +56,18 @@ object ScriptCommand {
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
                 val runtimeSender = value.toSender(sender)
-                sender.info("module-script-command-run", id, runtimeSender?.name ?: "null", "[]")
+                sender.info { asLang("module-script-command-run", id, runtimeSender?.name ?: "null", "[]") }
                 ScriptService.run(
                     id = id,
                     sender = runtimeSender,
                     onSuccess = {
-                        sender.info("module-script-command-run-success", id, it.toString())
+                        sender.info { asLang("module-script-command-run-success", id, it.toString()) }
                     },
                     onFailure = { ex ->
-                        sender.errorSync("module-script-command-run-failure", id)
-                        sender.errorLiteralSync(ex.getActionMessage())
-                        sender.errorLiteralSync(ex.getReasonMessage())
-                        sender.errorLiteralSync(ex.getDetailMessage())
+                        sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+                        sender.error(sync = true) { ex.getActionMessage() }
+                        sender.error(sync = true) { ex.getReasonMessage() }
+                        sender.error(sync = true) { ex.getDetailMessage() }
                     }
                 )
             }
@@ -74,19 +76,19 @@ object ScriptCommand {
                 val id = context["id"]
                 val runtimeSender = context["sender"].toSender(sender)
                 val args = value.split(' ')
-                sender.info("module-script-command-run", id, runtimeSender?.name ?: "null", args)
+                sender.info { asLang("module-script-command-run", id, runtimeSender?.name ?: "null", args) }
                 ScriptService.run(
                     id = id,
                     sender = runtimeSender,
                     args = args,
                     onSuccess = {
-                        sender.info("module-script-command-run-success", id, it.toString())
+                        sender.info { asLang("module-script-command-run-success", id, it.toString()) }
                     },
                     onFailure = { ex ->
-                        sender.errorSync("module-script-command-run-failure", id)
-                        sender.errorLiteralSync(ex.getActionMessage())
-                        sender.errorLiteralSync(ex.getReasonMessage())
-                        sender.errorLiteralSync(ex.getDetailMessage())
+                        sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+                        sender.error(sync = true) { ex.getActionMessage() }
+                        sender.error(sync = true) { ex.getReasonMessage() }
+                        sender.error(sync = true) { ex.getDetailMessage() }
                     }
                 )
             }
@@ -134,7 +136,7 @@ object ScriptCommand {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScriptService.stop(id)
-                sender.info("module-script-command-stop", id)
+                sender.info { asLang("module-script-command-stop", id) }
             }
         }
     }
@@ -145,21 +147,21 @@ object ScriptCommand {
                 suggest { ScriptService.getTaskKeys().map { it.toString() } }
                 execute<ProxyCommandSender> { sender, _, pid ->
                     ScriptService.stop(pid.toLong())
-                    sender.info("module-script-command-task-stop", pid)
+                    sender.info { asLang("module-script-command-task-stop", pid) }
                 }
             }
         }
         literal("list") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                val builder = StringBuilder(MessageService.asLang("module-script-command-task-list-header"))
+                val builder = StringBuilder(asLang("module-script-command-task-list-header"))
                 for (task in ScriptService.getTaskValues()) {
                     val pid = task.pid
                     val script = task.script.id
                     val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
-                    val message = MessageService.asLang("module-script-command-task-list-item", pid, script, startTime)
+                    val message = asLang("module-script-command-task-list-item", pid, script, startTime)
                     builder.append('\n').append(message)
                 }
-                sender.infoLiteral(builder.toString())
+                sender.info { builder.toString() }
             }
         }
     }

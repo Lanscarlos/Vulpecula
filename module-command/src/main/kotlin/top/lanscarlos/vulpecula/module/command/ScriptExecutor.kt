@@ -3,8 +3,8 @@ package top.lanscarlos.vulpecula.module.command
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
 import top.lanscarlos.vulpecula.common.applicative.*
-import top.lanscarlos.vulpecula.common.lang.errorLiteralSync
-import top.lanscarlos.vulpecula.common.lang.errorSync
+import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.lang.error
 import top.lanscarlos.vulpecula.common.lang.info
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
@@ -35,15 +35,15 @@ class ScriptExecutor(
         val future = execute(script, sender, args, onSuccess = {}, onFailure = { onFailure("suggest", sender, command, it) })
 
         if (!future.isDone) {
-            sender.errorSync("module-command-suggest-failure", command)
-            sender.errorSync("module-command-suggest-failure-timeout")
+            sender.error(sync = true) { asLang("module-command-suggest-failure", command) }
+            sender.error(sync = true) { asLang("module-command-suggest-failure-timeout") }
             return emptyList()
         }
         val result = future.getNow(null)
         val list = ListApplicative.convertOrNull(result)
         if (list == null) {
-            sender.errorSync("module-command-suggest-failure", command)
-            sender.errorSync("module-command-suggest-failure-conversion", result.toString())
+            sender.error(sync = true) { asLang("module-command-suggest-failure", command) }
+            sender.error(sync = true) { asLang("module-command-suggest-failure-conversion", result.toString()) }
             return emptyList()
         }
         return list.map { it.toString() }
@@ -56,15 +56,15 @@ class ScriptExecutor(
         val future = execute(script, sender, args, onSuccess = {}, onFailure = { onFailure("restrict", sender, command, it) })
 
         if (!future.isDone) {
-            sender.errorSync("module-command-restrict-failure", command)
-            sender.errorSync("module-command-restrict-failure-timeout")
+            sender.error(sync = true) { asLang("module-command-restrict-failure", command) }
+            sender.error(sync = true) { asLang("module-command-restrict-failure-timeout") }
             return false
         }
         val result = future.getNow(null)
         val boolean = BooleanApplicative.convertOrNull(result)
         if (boolean == null) {
-            sender.errorSync("module-command-restrict-failure", command)
-            sender.errorSync("module-command-restrict-failure-conversion", result.toString())
+            sender.error(sync = true) { asLang("module-command-restrict-failure", command) }
+            sender.error(sync = true) { asLang("module-command-restrict-failure-conversion", result.toString()) }
             return false
         }
         return boolean
@@ -80,8 +80,8 @@ class ScriptExecutor(
             if (ex !is ScriptNotFoundException) {
                 ex.printStackTrace()
             }
-            sender.errorSync("module-command-execute-failure", command)
-            sender.errorLiteralSync(ex.localizedMessage)
+            sender.error(sync = true) { asLang("module-command-execute-failure", command) }
+            sender.error(sync = true) { ex.localizedMessage }
         }
     }
 
@@ -121,14 +121,14 @@ class ScriptExecutor(
     }
 
     private fun onSuccess(sender: ProxyCommandSender, command: String, value: Any?) {
-        sender.info("module-command-execute-success", command, value.toString())
+        sender.info { asLang("module-command-execute-success", command, value.toString()) }
     }
 
     private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: BacikalRuntimeException): Any? {
-        sender.errorSync("module-command-$action-failure", command)
-        sender.errorLiteralSync(exception.getActionMessage())
-        sender.errorLiteralSync(exception.getReasonMessage())
-        sender.errorLiteralSync(exception.getDetailMessage())
+        sender.error(sync = true) { asLang("module-command-$action-failure", command) }
+        sender.error(sync = true) { exception.getActionMessage() }
+        sender.error(sync = true) { exception.getReasonMessage() }
+        sender.error(sync = true) { exception.getDetailMessage() }
         return null
     }
 

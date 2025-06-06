@@ -7,8 +7,7 @@ import taboolib.common.platform.function.console
 import taboolib.common5.Coerce
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.lang.errorSync
-import top.lanscarlos.vulpecula.common.lang.infoSync
+import top.lanscarlos.vulpecula.common.lang.*
 import java.util.LinkedList
 
 /**
@@ -44,9 +43,9 @@ object Configs {
             config.reload()
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
-            sender.infoSync("common-config-main-load-succeeded", time)
+            sender.info(sync = true) { asLang("common-config-main-load-succeeded", time) }
         } catch (ex: Exception) {
-            sender.errorSync("common-config-main-load-failed", ex.localizedMessage)
+            sender.error(sync = true) { asLang("common-config-main-load-failed", ex.localizedMessage) }
         }
 
         // 重载所有服务

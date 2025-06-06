@@ -5,7 +5,7 @@ import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionLiteral
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -34,7 +34,7 @@ class BacikalCompileException(
      * 获取报错原因信息
      * */
     fun getErrorReasonMessage(): String {
-        return MessageService.asLang("module-bacikal-service-compile-failure-reason", localizedMessage)
+        return asLang("module-bacikal-service-compile-failure-reason", localizedMessage)
     }
 
     /**
@@ -127,10 +127,10 @@ class BacikalCompileException(
     }
 
     private fun buildErrorDetailMessage(lines: List<String>, startLine: Int, endLine: Int): String {
-        val builder = StringBuilder(MessageService.asLang("module-bacikal-service-compile-failure-detail-header"))
+        val builder = StringBuilder(asLang("module-bacikal-service-compile-failure-detail-header"))
         for (index in startLine until endLine) {
             val line = lines.getOrNull(index) ?: break
-            val content = MessageService.asLang("module-bacikal-service-compile-failure-detail-item", (index + 1).formatIndex(), line)
+            val content = asLang("module-bacikal-service-compile-failure-detail-item", (index + 1).formatIndex(), line)
             builder.append('\n').append(content)
         }
         return builder.toString()

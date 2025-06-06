@@ -17,7 +17,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.common.lang.error
 import java.util.*
 
@@ -72,7 +72,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     init {
         require(days == null || weeks == null) {
-            MessageService.asLang("module-schedule-exception-conflict-days-weeks", id)
+            asLang("module-schedule-exception-conflict-days-weeks", id)
         }
         cron = Cron.builder()
             .seconds(TimeGroups.entries.first { it.index == seconds.first.index }, seconds.second)
@@ -93,10 +93,10 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
     override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) {
             val runningPid = tasks.values.firstOrNull { it.state.isRunning }
-            MessageService.asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
+            asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
         }
         require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
-            MessageService.asLang("module-schedule-exception-conflict-task", id, pid)
+            asLang("module-schedule-exception-conflict-task", id, pid)
         }
         val task = Task(pid, sender, args)
         tasks[task.pid] = task
@@ -123,7 +123,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 onExecute()
                 schedule() // 继续触发
             } catch (e: Exception) {
-                console().error(e.localizedMessage)
+                console().error { e.localizedMessage }
                 pause()
             }
         }
@@ -157,7 +157,6 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             val time = nextRun.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
             return time
         }
-
     }
 
     private fun parseWeeks(value: Any?): Pair<CronGroups, String>? {
@@ -205,7 +204,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             is String -> parseTimeString(value)
             is Number -> TimeGroups.Specific to value.toString()
             is List<*> -> TimeGroups.Specific to value.joinToString(",")
-            else -> error(MessageService.asLang("module-schedule-exception-invalid-cron", value))
+            else -> error(asLang("module-schedule-exception-invalid-cron", value))
         }
     }
 
@@ -231,8 +230,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                     TimeGroups.EveryStartingAt to "$starting/$every"
                 }
             }
-            else -> error(MessageService.asLang("module-schedule-exception-invalid-cron", value))
+            else -> error(asLang("module-schedule-exception-invalid-cron", value))
         }
     }
-
 }

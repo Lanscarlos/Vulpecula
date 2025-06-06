@@ -10,9 +10,9 @@ import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
-import top.lanscarlos.vulpecula.common.lang.errorSync
-import top.lanscarlos.vulpecula.common.lang.errorLiteralSync
-import top.lanscarlos.vulpecula.common.lang.infoSync
+import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.lang.error
+import top.lanscarlos.vulpecula.common.lang.info
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.io.File
 import java.util.function.Consumer
@@ -268,19 +268,19 @@ object ScriptService {
         }
 
         override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.infoSync("module-script-service-load-success", scripts.size, time)
+            sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
             when (e) {
                 is BacikalCompileException -> {
-                    sender.errorSync("module-script-service-load-failure", id)
-                    sender.errorLiteralSync(e.getErrorReasonMessage())
-                    sender.errorLiteralSync(e.getErrorDetailMessage())
+                    sender.error(sync = true) { asLang("module-script-service-load-failure", id) }
+                    sender.error(sync = true) { e.getErrorReasonMessage() }
+                    sender.error(sync = true) { e.getErrorDetailMessage() }
                 }
                 else -> {
                     e.printStackTrace()
-                    sender.errorSync("module-script-service-load-failure", id, e.localizedMessage)
+                    sender.error(sync = true) { asLang("module-script-service-load-failure", id, e.localizedMessage) }
                 }
             }
         }

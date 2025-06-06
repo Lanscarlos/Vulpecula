@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -11,6 +11,6 @@ import top.lanscarlos.vulpecula.common.lang.MessageService
  */
 class InvalidValueException(val value: String, val target: Class<*>) : RuntimeException() {
 
-    override val message: String = MessageService.asLang("common-applicative-exception-invalid-value", value, target.name)
+    override val message: String = asLang("common-applicative-exception-invalid-value", value, target.name)
 
 }

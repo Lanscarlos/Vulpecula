@@ -106,7 +106,7 @@ object ScheduleService {
         }
 
         override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.infoSync("module-schedule-service-load-success", registry.size, time)
+            sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
@@ -115,23 +115,23 @@ object ScheduleService {
                     when (val cause = e.cause) {
                         is BacikalCompileException -> {
                             // Kether 编译错误
-                            val detail = MessageService.asLang("module-schedule-exception-invalid-script")
-                            sender.errorSync("module-schedule-exception-invalid-field", id, e.field, detail)
-                            sender.errorLiteralSync(cause.getErrorReasonMessage())
-                            sender.errorLiteralSync(cause.getErrorDetailMessage())
+                            val detail = asLang("module-schedule-exception-invalid-script")
+                            sender.error(sync = true) { asLang("module-schedule-exception-invalid-field", id, e.field, detail) }
+                            sender.error(sync = true) { cause.getErrorReasonMessage() }
+                            sender.error(sync = true) { cause.getErrorDetailMessage() }
                         }
                         is NullPointerException -> {
                             // 缺少必要的字段
-                            sender.errorSync("module-schedule-exception-field-not-found", id, e.field)
+                            sender.error(sync = true) { asLang("module-schedule-exception-field-not-found", id, e.field) }
                         }
                         else -> {
                             // 其他异常
-                            sender.errorSync("module-schedule-exception-invalid-field", id, e.field, e.localizedMessage)
+                            sender.error(sync = true) { asLang("module-schedule-exception-invalid-field", id, e.field, e.localizedMessage) }
                         }
                     }
                 }
                 else -> {
-                    sender.errorSync("module-schedule-service-load-failure", id)
+                    sender.error(sync = true) { asLang("module-schedule-service-load-failure", id) }
                     e.printStackTrace()
                 }
             }
