@@ -26,7 +26,6 @@ object RuleRegistry : ClassVisitor() {
         return registry[clazz.name!!] ?: ReflexClass.of(GenericEventRule::class.java)
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun visitStart(owner: ReflexClass) {
         if (owner.toClass().`package`.name != this.javaClass.`package`.name) {
             // 包路径不对
