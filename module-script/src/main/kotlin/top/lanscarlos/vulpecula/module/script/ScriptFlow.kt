@@ -17,25 +17,38 @@ class ScriptFlow(
     private val sender: ProxyCommandSender?,
     private var variables: Map<String, Any> = emptyMap()
 ) {
+
     private val scripts = mutableListOf<Script>()
-    private var errorHandler: Script? = null
+    private val preprocessMap = mutableMapOf<Script, Consumer<ScriptTask>>()
+    private val postprocessMap = mutableMapOf<Script, Consumer<ScriptTask>>()
 
     private var nextPointer: Int = -1
+    private lateinit var currentTask: ScriptTask
     private var future: CompletableFuture<Any?> = CompletableFuture.completedFuture(null)
+
+    /**
+     * 设置最后一个 Script 的前置处理逻辑
+     */
+    fun preprocess(preprocess: Consumer<ScriptTask>): ScriptFlow {
+        require(scripts.isNotEmpty()) { "Scripts list is empty. Cannot set pre-process." }
+        preprocessMap[scripts.last()] = preprocess
+        return this
+    }
+
+    /**
+     * 设置最后一个 Script 的后置处理逻辑
+     */
+    fun postprocess(postprocess: Consumer<ScriptTask>): ScriptFlow {
+        require(scripts.isNotEmpty()) { "Scripts list is empty. Cannot set post-process." }
+        postprocessMap[scripts.last()] = postprocess
+        return this
+    }
 
     /**
      * 添加要执行的脚本
      */
     fun add(script: Script): ScriptFlow {
         scripts.add(script)
-        return this
-    }
-
-    /**
-     * 设置错误处理脚本
-     */
-    fun onError(script: Script): ScriptFlow {
-        errorHandler = script
         return this
     }
 
@@ -54,20 +67,25 @@ class ScriptFlow(
 
     private fun process(source: CompletableFuture<*>): CompletableFuture<Any?> {
         return source.thenCompose { result ->
-            // TODO 这里可以执行上一个 Task 的后置处理
-            val task = nextTask()?.future ?: return@thenCompose CompletableFuture.completedFuture(result)
-            // TODO 这里可以执行该 Task 的前置处理
-            process(task)
+            // 执行上一个 Task 的后置处理
+            if (::currentTask.isInitialized) {
+                postprocessMap[scripts.getOrNull(nextPointer - 2)]?.accept(currentTask)
+            }
+            val task = nextTask() ?: return@thenCompose CompletableFuture.completedFuture(result)
+            // 执行该 Task 的前置处理
+            preprocessMap[scripts.getOrNull(nextPointer - 1)]?.accept(task)
+            process(task.future)
         }
     }
 
     private fun nextTask(): ScriptTask? {
         val script = scripts.getOrNull(nextPointer++) ?: return null
-        val task = script.run(sender = sender, emptyList(), variables = variables)
+        val task = script.run(sender = sender, args = emptyList(), variables = variables)
         task.onComplete {
             // 更新变量
             this.variables = task.variables()
         }
+        this.currentTask = task
         return task
     }
 }
