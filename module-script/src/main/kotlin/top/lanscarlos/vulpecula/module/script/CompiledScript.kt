@@ -51,9 +51,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
     override fun run(
         sender: ProxyCommandSender?,
         args: List<Any?>,
-        variables: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
+        variables: Map<String, Any>
     ): ScriptTask {
         val wrappedArgs = mutableMapOf<String, Any>()
         wrappedArgs["args"] = args
@@ -74,14 +72,12 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
             wrappedArgs[parameter.name] = parameter.applicative.convert(arg)
         }
 
-        return run(sender, wrappedArgs + variables, onSuccess, onFailure)
+        return run(sender, wrappedArgs + variables)
     }
 
     private fun run(
         sender: ProxyCommandSender?,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
+        args: Map<String, Any>
     ): ScriptTask {
         val pid = ScriptService.nextPid()
         val context = BacikalService.executeLater(quest, timeout, sender, args)
@@ -98,15 +94,6 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
             // 执行异常处理
             val exContext = BacikalService.executeLater(quest, timeout, sender, args.plus(context.rootFrame().deepVars()))
             exContext.runActions()
-        }.handle { result, e ->
-            ScriptService.clearTask(pid)
-            if (e == null) {
-                onSuccess.accept(result)
-                return@handle result
-            }
-            val ex = e.cause as BacikalRuntimeException
-            ex.printKetherMessage()
-            return@handle onFailure.apply(ex)
         }
 
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
