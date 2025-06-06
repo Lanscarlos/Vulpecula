@@ -6,7 +6,7 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.convert
-import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.lang.MessageService
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId

@@ -6,7 +6,7 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
-import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.lang.MessageService
 import top.lanscarlos.vulpecula.module.script.Script
 import java.util.LinkedList
 

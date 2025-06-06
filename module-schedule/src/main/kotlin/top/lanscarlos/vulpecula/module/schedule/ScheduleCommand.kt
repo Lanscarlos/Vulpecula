@@ -10,9 +10,9 @@ import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.chat.Components
-import top.lanscarlos.vulpecula.common.message.MessageService
-import top.lanscarlos.vulpecula.common.message.errorLiteral
-import top.lanscarlos.vulpecula.common.message.info
+import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.errorLiteral
+import top.lanscarlos.vulpecula.common.lang.info
 
 /**
  * Vulpecula

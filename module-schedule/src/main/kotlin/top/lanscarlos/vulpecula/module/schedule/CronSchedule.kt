@@ -17,8 +17,8 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
-import top.lanscarlos.vulpecula.common.message.MessageService
-import top.lanscarlos.vulpecula.common.message.error
+import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.error
 import java.util.*
 
 /**

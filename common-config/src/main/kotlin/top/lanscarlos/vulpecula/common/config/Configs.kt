@@ -7,8 +7,8 @@ import taboolib.common.platform.function.console
 import taboolib.common5.Coerce
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.message.errorSync
-import top.lanscarlos.vulpecula.common.message.infoSync
+import top.lanscarlos.vulpecula.common.lang.errorSync
+import top.lanscarlos.vulpecula.common.lang.infoSync
 import java.util.LinkedList
 
 /**

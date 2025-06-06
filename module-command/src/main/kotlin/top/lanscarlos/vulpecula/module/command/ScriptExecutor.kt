@@ -3,9 +3,9 @@ package top.lanscarlos.vulpecula.module.command
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
 import top.lanscarlos.vulpecula.common.applicative.*
-import top.lanscarlos.vulpecula.common.message.errorLiteralSync
-import top.lanscarlos.vulpecula.common.message.errorSync
-import top.lanscarlos.vulpecula.common.message.info
+import top.lanscarlos.vulpecula.common.lang.errorLiteralSync
+import top.lanscarlos.vulpecula.common.lang.errorSync
+import top.lanscarlos.vulpecula.common.lang.info
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService

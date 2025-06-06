@@ -8,8 +8,8 @@ import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.applicative.applicativeStringList
-import top.lanscarlos.vulpecula.common.message.MessageService
-import top.lanscarlos.vulpecula.common.message.errorSync
+import top.lanscarlos.vulpecula.common.lang.MessageService
+import top.lanscarlos.vulpecula.common.lang.errorSync
 import java.util.*
 
 /**

@@ -10,9 +10,9 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
-import top.lanscarlos.vulpecula.common.message.errorLiteralSync
-import top.lanscarlos.vulpecula.common.message.errorSync
-import top.lanscarlos.vulpecula.common.message.infoSync
+import top.lanscarlos.vulpecula.common.lang.errorLiteralSync
+import top.lanscarlos.vulpecula.common.lang.errorSync
+import top.lanscarlos.vulpecula.common.lang.infoSync
 import java.io.File
 
 /**

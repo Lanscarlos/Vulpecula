@@ -5,7 +5,7 @@ import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionLiteral
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.lang.MessageService
 
 /**
  * Vulpecula

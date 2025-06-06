@@ -5,7 +5,7 @@ import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.chat.colored
 import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.lang.MessageService
 
 /**
  * Vulpecula

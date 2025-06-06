@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.script.exception
 
-import top.lanscarlos.vulpecula.common.message.MessageService
+import top.lanscarlos.vulpecula.common.lang.MessageService
 
 /**
  * Vulpecula
