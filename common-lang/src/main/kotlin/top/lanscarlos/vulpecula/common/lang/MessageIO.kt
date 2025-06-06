@@ -2,13 +2,8 @@ package top.lanscarlos.vulpecula.common.lang
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
-import top.lanscarlos.vulpecula.common.lang.MessageService.asErrorLiteral
-import top.lanscarlos.vulpecula.common.lang.MessageService.asError
-import top.lanscarlos.vulpecula.common.lang.MessageService.asInfoLiteral
-import top.lanscarlos.vulpecula.common.lang.MessageService.asInfo
-import top.lanscarlos.vulpecula.common.lang.MessageService.asWarningLiteral
-import top.lanscarlos.vulpecula.common.lang.MessageService.asWarning
-import top.lanscarlos.vulpecula.common.lang.MessageService.console
+import taboolib.common.platform.function.console
+import taboolib.module.lang.asLangText
 
 /**
  * Vulpecula
@@ -18,88 +13,78 @@ import top.lanscarlos.vulpecula.common.lang.MessageService.console
  * @since 2025/5/6 15:44
  */
 
-fun ProxyCommandSender.info(node: String, vararg args: Any) {
-    sendMessage(asInfo(node, *args))
+private val console = console()
+
+/**
+ * 将节点和参数解析为语言消息
+ * @param node 语言节点
+ * @param args 消息参数
+ * @return 解析后的消息
+ */
+fun asLang(node: String, vararg args: Any): String {
+    return console.asLangText(node, *args)
 }
 
-fun ProxyCommandSender.infoLiteral(message: String) {
-    sendMessage(asInfoLiteral(message))
-}
-
-fun ProxyCommandSender.warning(node: String, vararg args: Any) {
-    sendMessage(asWarning(node, *args))
-}
-
-fun ProxyCommandSender.warningLiteral(message: String) {
-    sendMessage(asWarningLiteral(message))
-}
-
-fun ProxyCommandSender.error(node: String, vararg args: Any) {
-    sendMessage(asError(node, *args))
-}
-
-fun ProxyCommandSender.errorLiteral(message: String) {
-    sendMessage(asErrorLiteral(message))
-}
-
-fun ProxyCommandSender.infoSync(node: String, vararg args: Any) {
-    val message = asInfo(node, *args)
-    sendMessage(message)
-    if (this is ProxyPlayer) {
-        console.sendMessage(message)
-    }
-}
-
-fun ProxyCommandSender.infoLiteralSync(message: String) {
-    val msg = asInfoLiteral(message)
+/**
+ * 发送信息消息
+ * @param sync 是否同步到控制台
+ * @param message 消息生成器
+ */
+fun ProxyCommandSender.info(
+    sync: Boolean = false,
+    message: () -> String
+) {
+    val msg = asLang("common-message-info", message())
     sendMessage(msg)
-    if (this is ProxyPlayer) {
-        console.sendMessage(msg)
-    }
-}
-
-fun ProxyCommandSender.warningSync(node: String, vararg args: Any) {
-    val message = asWarning(node, *args)
-    sendMessage(message)
-    if (this is ProxyPlayer) {
-        console.sendMessage(message)
-    }
-}
-
-fun ProxyCommandSender.warningLiteralSync(message: String) {
-    val msg = asWarningLiteral(message)
-    sendMessage(msg)
-    if (this is ProxyPlayer) {
-        console.sendMessage(msg)
-    }
-}
-
-fun ProxyCommandSender.errorSync(node: String, vararg args: Any) {
-    val message = asError(node, *args)
-    sendMessage(message)
-    if (this is ProxyPlayer) {
-        console.sendMessage(message)
-    }
-}
-
-fun ProxyCommandSender.errorLiteralSync(message: String) {
-    val msg = asErrorLiteral(message)
-    sendMessage(msg)
-    if (this is ProxyPlayer) {
+    if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
     }
 }
 
 /**
- * 输出同步日志, 且仅管理员和后台可见
- * */
-fun ProxyCommandSender.logSync(message: String) {
-    if (this !is ProxyPlayer) {
-        this.sendMessage(message)
-        return
+ * 发送警告消息
+ * @param sync 是否同步到控制台
+ * @param message 消息生成器
+ */
+fun ProxyCommandSender.warning(
+    sync: Boolean = false,
+    message: () -> String
+) {
+    val msg = asLang("common-message-warning", message())
+    sendMessage(msg)
+    if (sync && this is ProxyPlayer) {
+        console.sendMessage(msg)
     }
-    if (this.isOp) {
-        this.sendMessage(message)
+}
+
+/**
+ * 发送错误消息
+ * @param sync 是否同步到控制台
+ * @param message 消息生成器
+ */
+fun ProxyCommandSender.error(
+    sync: Boolean = false,
+    message: () -> String
+) {
+    val msg = asLang("common-message-error", message())
+    sendMessage(msg)
+    if (sync && this is ProxyPlayer) {
+        console.sendMessage(msg)
     }
-    console.sendMessage(message)
+}
+
+/**
+ * 发送调试消息
+ * @param sync 是否同步到控制台
+ * @param message 消息生成器
+ */
+fun ProxyCommandSender.debug(
+    sync: Boolean = false,
+    message: () -> String
+) {
+    val msg = asLang("common-message-debug", message())
+    sendMessage(msg)
+    if (sync && this is ProxyPlayer) {
+        console.sendMessage(msg)
+    }
 }
