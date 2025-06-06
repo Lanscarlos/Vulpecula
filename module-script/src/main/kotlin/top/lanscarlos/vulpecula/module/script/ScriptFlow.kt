@@ -15,10 +15,13 @@ import java.util.function.Function
  */
 class ScriptFlow(
     private val sender: ProxyCommandSender?,
-    private val variables: Map<String, Any> = emptyMap()
+    private var variables: Map<String, Any> = emptyMap()
 ) {
     private val scripts = mutableListOf<Script>()
     private var errorHandler: Script? = null
+
+    private var nextPointer: Int = -1
+    private var future: CompletableFuture<Any?> = CompletableFuture.completedFuture(null)
 
     /**
      * 添加要执行的脚本
@@ -44,47 +47,8 @@ class ScriptFlow(
             return CompletableFuture.completedFuture(null)
         }
 
-        var future = CompletableFuture<Any?>()
-
-        // 递归执行脚本
-        fun executeNext(index: Int, lastResult: Any?) {
-            if (index >= scripts.size) {
-                future.complete(lastResult)
-                return
-            }
-
-            val script = scripts[index]
-            val task = script.run(
-                sender = sender,
-                args = listOf(lastResult),
-                variables = variables,
-                onSuccess = { result ->
-                    executeNext(index + 1, result)
-                },
-                onFailure = { ex ->
-                    if (errorHandler != null) {
-                        // 执行错误处理脚本
-                        errorHandler!!.run(
-                            sender = sender,
-                            args = listOf(ex),
-                            variables = variables,
-                            onSuccess = { result ->
-                                executeNext(index + 1, result)
-                            },
-                            onFailure = { errorEx ->
-                                future.completeExceptionally(errorEx)
-                            }
-                        )
-                    } else {
-                        future.completeExceptionally(ex)
-                    }
-                }
-            )
-        }
-
-        // 开始执行第一个脚本
-        executeNext(0, null)
-
+        nextPointer = 0
+        future = process(future)
         return future
     }
 
@@ -98,6 +62,12 @@ class ScriptFlow(
     }
 
     private fun nextTask(): ScriptTask? {
-        TODO()
+        val script = scripts.getOrNull(nextPointer++) ?: return null
+        val task = script.run(sender = sender, emptyList(), variables = variables)
+        task.onComplete {
+            // 更新变量
+            this.variables = task.variables()
+        }
+        return task
     }
 }

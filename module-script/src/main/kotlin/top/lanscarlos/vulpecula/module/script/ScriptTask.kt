@@ -23,7 +23,7 @@ interface ScriptTask {
 
     val startTime: Long
 
-    val isStarted: Boolean
+    val future: CompletableFuture<Any?>
 
     val isDone: Boolean
 
