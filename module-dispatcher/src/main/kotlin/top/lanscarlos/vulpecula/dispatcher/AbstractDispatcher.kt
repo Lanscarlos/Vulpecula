@@ -13,6 +13,7 @@ import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
+import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.utils.TimeUtil
@@ -79,10 +80,10 @@ abstract class AbstractDispatcher(override val id: String, val config: Configura
             return null
         }
         require(value is String) {
-            MessageService.asLang("module-dispatcher-exception-invalid-type", value::class.java.name)
+            asLang("module-dispatcher-exception-invalid-type", value::class.java.name)
         }
         require(value.isNotBlank()) {
-            MessageService.asLang("module-dispatcher-exception-invalid-blank")
+            asLang("module-dispatcher-exception-invalid-blank")
         }
         return ScriptService.compile(value)
     }
