@@ -6,7 +6,6 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
@@ -15,8 +14,6 @@ import top.lanscarlos.vulpecula.common.lang.error
 import top.lanscarlos.vulpecula.common.lang.info
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.io.File
-import java.util.function.Consumer
-import java.util.function.Function
 
 /**
  * Vulpecula
