@@ -5,26 +5,20 @@ import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
-import taboolib.common5.Baffle
-import taboolib.common5.Baffle.BaffleCounter
-import taboolib.common5.Baffle.BaffleTime
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.applicative.BooleanApplicative
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
-import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.common.lang.error
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
+import top.lanscarlos.vulpecula.module.script.ScriptFlow
 import top.lanscarlos.vulpecula.module.script.ScriptService
-import top.lanscarlos.vulpecula.utils.TimeUtil
 import java.io.File
-import java.util.concurrent.TimeUnit
 
 /**
  * Vulpecula
@@ -61,44 +55,40 @@ abstract class AbstractDispatcher(override val id: String, val config: Configura
             return
         }
 
+        // 更新阻断
+        rule.updateBaffle(context)
+
+        // 流式执行脚本
         val sender = context.player?.let(::adaptPlayer) ?: console()
-        var variables = rule.parseVariables(event).mapNotNull { (k, v) -> v?.let { k to it } }.toMap()
+        val variables = rule.parseVariables(event).mapNotNull { (k, v) -> v?.let { k to it } }.toMap()
+        val flow = ScriptFlow(sender, variables)
 
         // 执行前置处理
         if (preprocessing != null) {
-            val task = ScriptService.run(
-                script = preprocessing!!,
-                sender = sender,
-                variables = variables,
-                onFailure = ::onFailure
-            )
-            variables = task.variables()
-            when (val status = variables["@EVENT_STATUS"]) {
-                null -> {}
-                "CANCEL" -> {
-                    require(event is Cancellable) { "Event $event is not Cancellable" }
-                    event.isCancelled = true
-                    return
+            flow.add(preprocessing!!)
+                .postprocess { task ->
+                    when (val status = task.variables()["@EVENT_STATUS"]) {
+                        null -> {}
+                        "CANCEL" -> {
+                            require(event is Cancellable) { "Event $event is not Cancellable" }
+                            event.isCancelled = true
+                            flow.terminate()
+                        }
+                        "FILTER" -> {
+                            flow.terminate()
+                        }
+                        else -> error("Unknown event status $status")
+                    }
                 }
-                "FILTER" -> {
-                    return
-                }
-                else -> error("Unknown event status $status")
-            }
         }
 
-        ScriptService.run(
-            script = executable,
-            sender = context.player?.let(::adaptPlayer) ?: console(),
-            variables = variables,
-            onFailure = ::onFailure
-        )
+        flow.add(executable)
+        if (postprocessing != null) {
+            flow.add(preprocessing!!)
+        }
 
-        // TODO 更新变量
-        // TODO 执行后置处理
-
-        // 更新阻断
-        rule.updateBaffle(context)
+        // 执行脚本流
+        flow.execute()
     }
 
     fun onFailure(ex: BacikalRuntimeException) {

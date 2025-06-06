@@ -21,8 +21,16 @@ class ScriptFlow(
     private val postprocessMap = mutableMapOf<Script, Consumer<ScriptTask>>()
 
     private var nextPointer: Int = -1
+    private var isTerminated: Boolean = false
     private lateinit var currentTask: ScriptTask
     private var future: CompletableFuture<Any?> = CompletableFuture.completedFuture(null)
+
+    /**
+     * 终止脚本流
+     */
+    fun terminate() {
+        isTerminated = true
+    }
 
     /**
      * 设置最后一个 Script 的前置处理逻辑
@@ -77,6 +85,9 @@ class ScriptFlow(
     }
 
     private fun nextTask(): ScriptTask? {
+        if (isTerminated) {
+            return null
+        }
         val script = scripts.getOrNull(nextPointer++) ?: return null
         val task = script.run(sender = sender, args = emptyList(), variables = variables)
         task.onSuccess {
