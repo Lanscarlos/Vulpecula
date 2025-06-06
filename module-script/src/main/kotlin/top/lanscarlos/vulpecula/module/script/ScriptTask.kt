@@ -1,7 +1,10 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.module.kether.ScriptContext
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -18,14 +21,23 @@ interface ScriptTask {
 
     val script: Script
 
-    val future: CompletableFuture<out Any?>
-
     val startTime: Long
+
+    val isStarted: Boolean
 
     val isDone: Boolean
 
     fun variables(): Map<String, Any>
 
-    fun terminate()
+    /**
+     * 停止任务
+     * */
+    fun stop()
+
+    fun onComplete(func: Consumer<Any?>): ScriptTask
+
+    fun onError(func: Function<BacikalRuntimeException, Any?>): ScriptTask
+
+    fun getNow(): Any?
 
 }

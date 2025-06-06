@@ -218,7 +218,7 @@ object ScriptService {
      * @param pid 任务 ID
      * */
     fun stop(pid: Long) {
-        getTask(pid).terminate()
+        getTask(pid).stop()
     }
 
     /**

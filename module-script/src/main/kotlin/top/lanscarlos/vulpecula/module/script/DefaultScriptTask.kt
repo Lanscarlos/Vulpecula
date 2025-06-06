@@ -1,7 +1,10 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.module.kether.ScriptContext
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Function
 
 /**
  * Vulpecula
@@ -14,9 +17,11 @@ class DefaultScriptTask(
     override val pid: Long,
     override val script: Script,
     val context: ScriptContext,
-    override var future: CompletableFuture<Any?>,
+    var future: CompletableFuture<Any?>,
     override val startTime: Long
 ) : ScriptTask {
+
+    override var isStarted = false
 
     override val isDone: Boolean
         get() = future.isDone
@@ -25,8 +30,26 @@ class DefaultScriptTask(
         return context.rootFrame().variables().toMap()
     }
 
-    override fun terminate() {
+    override fun stop() {
         context.terminate()
+    }
+
+    override fun onComplete(func: Consumer<Any?>): ScriptTask {
+        future = future.thenApply { func.accept(it) }
+        return this
+    }
+
+    override fun onError(func: Function<BacikalRuntimeException, Any?>): ScriptTask {
+        future = future.exceptionally {
+            val ex = it.cause as BacikalRuntimeException
+            ex.printKetherMessage()
+            return@exceptionally func.apply(ex)
+        }
+        return this
+    }
+
+    override fun getNow(): Any? {
+        return future.getNow(null)
     }
 
 }
