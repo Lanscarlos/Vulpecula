@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.dispatcher.rule
 
-import org.bukkit.event.Event
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
