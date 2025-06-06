@@ -27,7 +27,7 @@ import java.io.File
  * @author Lanscarlos
  * @since 2025/6/4 9:23
  */
-abstract class AbstractDispatcher(override val id: String, val config: Configuration) : Dispatcher {
+class DefaultDispatcher(override val id: String, val config: Configuration) : Dispatcher {
 
     override val clazz: ReflexClass by config.read("listen-event").string().convert(::parseEventClass)
 
