@@ -18,4 +18,12 @@ abstract class PlayerEventRule<T: PlayerEvent>(clazz: ReflexClass, config: Confi
         return event.player
     }
 
+    override fun parseVariables(event: T): Map<String, Any?> {
+        return super.parseVariables(event).plus(
+            mapOf(
+                "player" to event.player
+            )
+        )
+    }
+
 }

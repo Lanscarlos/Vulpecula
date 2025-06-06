@@ -37,6 +37,10 @@ abstract class AbstractRule<T: Event>(val clazz: ReflexClass, val config: Config
         return playerField?.get(event) as? Player
     }
 
+    override fun parseVariables(event: T): Map<String, Any?> {
+        return mapOf("eventName" to event.eventName)
+    }
+
     override fun matches(context: Context): Boolean {
         if (baffle != null && !baffle!!.hasNext("*", false)) {
             // 冷却

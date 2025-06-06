@@ -13,4 +13,10 @@ import taboolib.library.reflex.ReflexClass
  * @author Lanscarlos
  * @since 2025/6/4 13:38
  */
-class GenericEventRule(clazz: ReflexClass, config: ConfigurationSection) : AbstractRule<Event>(clazz, config)
+class GenericEventRule(clazz: ReflexClass, config: ConfigurationSection) : AbstractRule<Event>(clazz, config) {
+
+    override fun parseVariables(event: Event): Map<String, Any?> {
+        return emptyMap()
+    }
+
+}

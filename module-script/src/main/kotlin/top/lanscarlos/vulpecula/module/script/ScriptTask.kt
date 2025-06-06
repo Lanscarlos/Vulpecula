@@ -24,6 +24,8 @@ interface ScriptTask {
 
     val isDone: Boolean
 
+    fun variables(): Map<String, Any>
+
     fun terminate()
 
 }

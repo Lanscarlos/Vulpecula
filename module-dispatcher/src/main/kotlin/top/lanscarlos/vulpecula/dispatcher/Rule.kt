@@ -21,6 +21,11 @@ interface Rule<T: Event> {
     fun parsePlayer(event: T): Player?
 
     /**
+     * 从事件中解析出事件变量
+     * */
+    fun parseVariables(event: T): Map<String, Any?>
+
+    /**
      * 判断此次事件是否通过规则
      * */
     fun matches(context: Context): Boolean

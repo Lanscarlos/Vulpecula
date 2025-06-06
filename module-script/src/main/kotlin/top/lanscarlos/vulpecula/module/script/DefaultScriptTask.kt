@@ -21,6 +21,10 @@ class DefaultScriptTask(
     override val isDone: Boolean
         get() = future.isDone
 
+    override fun variables(): Map<String, Any> {
+        return context.rootFrame().variables().toMap()
+    }
+
     override fun terminate() {
         context.terminate()
     }

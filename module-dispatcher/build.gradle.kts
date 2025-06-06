@@ -8,6 +8,7 @@ dependencies {
     compileOnly(project(":common-config"))
     compileOnly(project(":common-core"))
     compileOnly(project(":common-lang"))
+    compileOnly(project(":module-bacikal"))
     compileOnly(project(":module-script"))
     compileOnly("ink.ptms.core:v12004:12004:mapped")
 

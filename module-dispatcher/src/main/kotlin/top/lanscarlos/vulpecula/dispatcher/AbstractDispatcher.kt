@@ -1,19 +1,25 @@
 package top.lanscarlos.vulpecula.dispatcher
 
+import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
+import taboolib.common.platform.function.adaptPlayer
+import taboolib.common.platform.function.console
 import taboolib.common5.Baffle
 import taboolib.common5.Baffle.BaffleCounter
 import taboolib.common5.Baffle.BaffleTime
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.applicative.BooleanApplicative
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.lang.error
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.utils.TimeUtil
@@ -55,12 +61,52 @@ abstract class AbstractDispatcher(override val id: String, val config: Configura
             return
         }
 
-        // TODO 执行前置处理
+        val sender = context.player?.let(::adaptPlayer) ?: console()
+        var variables = rule.parseVariables(event).mapNotNull { (k, v) -> v?.let { k to it } }.toMap()
 
+        // 执行前置处理
+        if (preprocessing != null) {
+            val task = ScriptService.run(
+                script = preprocessing!!,
+                sender = sender,
+                variables = variables,
+                onFailure = ::onFailure
+            )
+            variables = task.variables()
+            when (val status = variables["@EVENT_STATUS"]) {
+                null -> {}
+                "CANCEL" -> {
+                    require(event is Cancellable) { "Event $event is not Cancellable" }
+                    event.isCancelled = true
+                    return
+                }
+                "FILTER" -> {
+                    return
+                }
+                else -> error("Unknown event status $status")
+            }
+        }
+
+        ScriptService.run(
+            script = executable,
+            sender = context.player?.let(::adaptPlayer) ?: console(),
+            variables = variables,
+            onFailure = ::onFailure
+        )
+
+        // TODO 更新变量
         // TODO 执行后置处理
 
         // 更新阻断
         rule.updateBaffle(context)
+    }
+
+    fun onFailure(ex: BacikalRuntimeException) {
+        // 脚本运行异常时, 暂停任务
+        console().error { asLang("module-dispatcher-run-failure", id) }
+        console().error { ex.getActionMessage() }
+        console().error { ex.getReasonMessage() }
+        console().error { ex.getDetailMessage() }
     }
 
     private fun parseRule(value: Any?): Rule<Event> {
