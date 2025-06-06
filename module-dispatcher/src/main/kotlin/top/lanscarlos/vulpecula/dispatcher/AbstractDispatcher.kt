@@ -87,6 +87,9 @@ abstract class AbstractDispatcher(override val id: String, val config: Configura
             flow.add(preprocessing!!)
         }
 
+        // 处理异常
+        flow.onFailure(::onFailure)
+
         // 执行脚本流
         flow.execute()
     }
