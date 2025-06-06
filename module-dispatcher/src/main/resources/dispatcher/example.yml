@@ -1,0 +1,28 @@
+# 监听事件
+listen-event: 'org.bukkit.event.player.PlayerMoveEvent'
+# 监听优先级
+listen-priority: 'NORMAL'
+# 是否监听已取消的事件
+listen-cancelled: false
+
+# 权重, 权重越高, 同类触发器中越先触发
+weight: 1
+
+# 规则
+rule:
+  player-required: true
+  baffle: 100ms
+
+pre-processing: |-
+    tell pre-processing
+
+post-processing: |-
+    tell post-processing
+
+# 脚本
+script: 'script@example'
+
+# 调试
+debug:
+  # 启用文件自动重载
+  config-auto-reload: true
