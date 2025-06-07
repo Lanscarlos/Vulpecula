@@ -13,7 +13,7 @@ import taboolib.module.configuration.Configuration
  */
 class DelegateConfigNode(val config: ConfigurationSection, private val keys: Array<out String>) : LiveData<Any?>, Runnable {
 
-    override lateinit var id: String
+    override var id: String = keys.first()
 
     private val root: Configuration
 
