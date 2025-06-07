@@ -11,10 +11,13 @@ import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
+import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.common.lang.error
 import top.lanscarlos.vulpecula.common.lang.info
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
+import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
 import java.io.File
 
 /**
@@ -80,7 +83,7 @@ object ScriptService {
      * 获取正在运行的任务
      * @throws IllegalStateException 脚本不存在
      * */
-    fun getTask(pid: Long): ScriptTask = getTaskOrNull(pid) ?: error("Task not found: $pid")
+    fun getTask(pid: Long): ScriptTask = getTaskOrNull(pid) ?: throw TaskNotFoundException(pid)
 
     /**
      * 获取正在运行的任务
@@ -236,7 +239,7 @@ object ScriptService {
             val script = when (file.extension) {
                 "ks" -> NativeScript(id, file)
                 "yml", "yaml" -> CompiledScript(id, Configuration.loadFromFile(file))
-                else -> error("Unsupported file extension ${file.extension}")
+                else -> throw UnsupportedFileExtensionException(file.extension)
             }
             scripts[id] = script
         }
@@ -253,7 +256,7 @@ object ScriptService {
                     // 重新构建脚本任务
                     script.rebuild()
                 }
-                else -> error("Unknown script type ${script::class.java}")
+                else -> InvalidTypeException(script)
             }
         }
 

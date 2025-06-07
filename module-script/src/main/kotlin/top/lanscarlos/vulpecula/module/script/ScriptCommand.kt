@@ -36,17 +36,23 @@ object ScriptCommand {
         dynamic("id") {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                sender.info { asLang("module-script-command-run", id, sender.name, "[]") }
-                ScriptService.run(
-                    id = id,
-                    sender = sender
-                ).onSuccess {
+                val task = try {
+                    ScriptService.run(
+                        id = id,
+                        sender = sender
+                    ).also {
+                        sender.info { asLang("module-script-command-run", id, sender.name, "[]") }
+                    }
+                } catch (e: Exception) {
+                    sender.error(sync = true) { asLang("module-script-command-run-failure", id, e.localizedMessage) }
+                    null
+                }
+                task?.onSuccess {
                     sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                }.onFailure { ex ->
+                }
+                task?.onFailure { ex ->
                     sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                    sender.error(sync = true) { ex.getActionMessage() }
-                    sender.error(sync = true) { ex.getReasonMessage() }
-                    sender.error(sync = true) { ex.getDetailMessage() }
+                    ex.printLocalizedMessage(sender)
                 }
             }
         }.dynamic("sender") {
