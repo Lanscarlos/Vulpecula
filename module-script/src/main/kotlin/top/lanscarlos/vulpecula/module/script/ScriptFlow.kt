@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.script.exception.ScriptExecuteException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 
@@ -79,8 +80,12 @@ class ScriptFlow(
             return CompletableFuture.completedFuture(null)
         }
 
-        nextPointer = 0
-        future = process(future)
+        try {
+            nextPointer = 0
+            future = process(future)
+        } catch (e: Exception) {
+            throw ScriptExecuteException(scripts[nextPointer], e)
+        }
         return future
     }
 
