@@ -15,8 +15,6 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
 
     override lateinit var id: String
 
-    override var isInitialized = false
-
     private val root: Configuration
 
     /**
@@ -25,6 +23,9 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
     private var value: Any? = null
 
     init {
+        // 获取值
+        update()
+
         // 获取根配置
         var parent: ConfigurationSection = config
         while (parent.parent != null) {
@@ -52,16 +53,11 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
     }
 
     override fun getValue(): Any? {
-        if (!isInitialized) {
-            // 初始化
-            value = read()
-            isInitialized = true
-        }
         return value
     }
 
     override fun update() {
-        isInitialized = false
+        value = read()
     }
 
     fun dispose() {

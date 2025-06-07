@@ -15,21 +15,26 @@ class ExceptionalLiveData<T>(private val source: LiveData<T>, private val except
     override val id: String
         get() = source.id
 
-    override val isInitialized
-        get() = source.isInitialized
+    private var value: T? = null
 
+    init {
+        update()
+    }
+
+    @Suppress("UNCHECKED_CAST")
     override fun getValue(): T {
-        return try {
-            source.getValue()
+        return value as T
+    }
+
+    override fun update() {
+        source.update()
+        try {
+            value = source.getValue()
         } catch (e: ConfigFieldReadException) {
             exceptionally.apply(e.cause as Exception)
         } catch (e: Exception) {
             exceptionally.apply(e)
         }
-    }
-
-    override fun update() {
-        source.update()
     }
 
 }

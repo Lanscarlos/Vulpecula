@@ -17,11 +17,6 @@ interface LiveData<out T> {
     val id: String
 
     /**
-     * 是否已初始化
-     * */
-    val isInitialized: Boolean
-
-    /**
      * 获取值
      * */
     fun getValue(): T
