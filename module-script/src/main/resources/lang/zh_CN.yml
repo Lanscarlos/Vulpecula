@@ -2,7 +2,7 @@
 
 # 脚本模块
 module-script-service-load-success: '成功加载 &a{0}&7 个脚本 &8({0}ms)'
-module-script-service-load-failure: '脚本 &c{0}&7 加载失败!'
+module-script-service-load-failure: '脚本 &c{0}&7 加载失败! {1}'
 module-script-command-run: '正在运行脚本 &a{0}&7. 执行者 &a{1}&7, 参数 &a{2}&7'
 module-script-command-run-success: '脚本 &a{0}&7 运行成功. 运行结果: &a{1}&7'
 module-script-command-run-failure: '脚本 &c{0}&7 运行异常.'

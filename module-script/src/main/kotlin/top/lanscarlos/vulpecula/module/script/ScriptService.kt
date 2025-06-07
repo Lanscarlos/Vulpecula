@@ -9,6 +9,8 @@ import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.common.lang.error
 import top.lanscarlos.vulpecula.common.lang.info
@@ -264,15 +266,16 @@ object ScriptService {
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
+            sender.error(sync = true) { asLang("module-script-service-load-failure", id, e.localizedMessage) }
             when (e) {
-                is BacikalCompileException -> {
-                    sender.error(sync = true) { asLang("module-script-service-load-failure", id) }
-                    sender.error(sync = true) { e.getErrorReasonMessage() }
-                    sender.error(sync = true) { e.getErrorDetailMessage() }
+                is ConfigFieldNotFoundException -> {}
+                is ConfigFieldReadException -> {
+                    when (val cause = e.cause) {
+                        is BacikalCompileException -> cause.printLocalizedMessage(sender)
+                    }
                 }
                 else -> {
                     e.printStackTrace()
-                    sender.error(sync = true) { asLang("module-script-service-load-failure", id, e.localizedMessage) }
                 }
             }
         }

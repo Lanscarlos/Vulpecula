@@ -3,7 +3,7 @@
 # 命令模块
 
 module-command-service-load-succeeded: '成功加载 &a{0}&7 个命令 &8({1} ms)'
-module-command-service-load-failed: '命令 &c{0}&7 加载失败!'
+module-command-service-load-failed: '命令 &c{0}&7 加载失败! {1}'
 
 module-command-restrict-failure: '命令 &c{0}&7 约束异常.'
 module-command-restrict-failure-timeout: '脚本超时, 请检查&e restrict &7字段的脚本并确保不含有导致延迟的语句.'
