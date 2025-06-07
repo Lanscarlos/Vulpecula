@@ -1,5 +1,6 @@
 
 # 调度模块
 module-dispatcher-service-load-success: '成功加载 &a{0}&7 个调度器 &8({0}ms)'
-module-dispatcher-service-load-failure: '调度器 &c{0}&7 加载失败! {1}'
+module-dispatcher-service-load-failure: '调度器模块加载失败!'
+module-dispatcher-service-file-load-failure: '调度器 &c{0}&7 加载失败! {1}'
 

@@ -260,16 +260,8 @@ object ScriptService {
             }
         }
 
-        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
-            releaseResourceFolder("script")
-        }
-
-        override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
-        }
-
-        override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            sender.error(sync = true) { asLang("module-script-service-load-failure", id, e.localizedMessage) }
+        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
+            sender.error(sync = true) { asLang("module-script-service-file-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
@@ -280,6 +272,19 @@ object ScriptService {
                 is BacikalCompileException -> e.printLocalizedMessage(sender)
                 else -> e.printStackTrace()
             }
+        }
+
+        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
+            releaseResourceFolder("script")
+        }
+
+        override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
+            sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
+        }
+
+        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
+            e.printStackTrace()
+            sender.error(sync = true) { asLang("module-script-service-load-failure", e.localizedMessage) }
         }
     }
 

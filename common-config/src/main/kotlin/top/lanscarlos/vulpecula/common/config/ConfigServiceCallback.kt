@@ -20,6 +20,8 @@ interface ConfigServiceCallback {
 
     fun onFileModified(sender: ProxyCommandSender, id: String, file: File)
 
+    fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception)
+
     /**
      * 当路径不存在时调用
      * */
@@ -27,8 +29,8 @@ interface ConfigServiceCallback {
 
     fun onLoadStarted(sender: ProxyCommandSender) {}
 
-    fun onLoadCompleted(sender: ProxyCommandSender, time: Double)
+    fun onLoadSuccess(sender: ProxyCommandSender, time: Double)
 
-    fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable)
+    fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable)
 
 }

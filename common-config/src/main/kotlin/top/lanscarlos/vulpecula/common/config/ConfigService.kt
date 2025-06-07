@@ -47,11 +47,9 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
      * 加载配置
      * */
     fun load(sender: ProxyCommandSender = console()) {
-        var currentFile: File = directory
+        // 调试计时
+        val startTime = System.nanoTime()
         try {
-            // 调试计时
-            val startTime = System.nanoTime()
-
             if (!directory.exists()) {
                 callback.onLoadInit(sender, directory)
             }
@@ -80,42 +78,55 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
 
             // 处理被移除的文件
             for (file in cacheFiles - loadedFiles) {
-                currentFile = file
-                cache.remove(file)
-                hash.remove(file)
-                callback.onFileDeleted(sender, buildFileId(file), file)
+                try {
+                    callback.onFileDeleted(sender, buildFileId(file), file)
+                    cache.remove(file)
+                    hash.remove(file)
+                } catch (e: Exception) {
+                    callback.onFileException(sender, buildFileId(file), file, e)
+                }
             }
 
             // 处理新增的文件
             for (file in loadedFiles - cacheFiles) {
-                currentFile = file
-                cache += file
-                hash[file] = file.digest("SHA-256")
-                callback.onFileCreated(sender, buildFileId(file), file)
+                try {
+                    callback.onFileCreated(sender, buildFileId(file), file)
+                    cache += file
+                    hash[file] = file.digest("SHA-256")
+                } catch (e: Exception) {
+                    callback.onFileException(sender, buildFileId(file), file, e)
+                }
             }
 
             // 处理变动的文件
             for (file in loadedFiles intersect cacheFiles) {
-                currentFile = file
                 // 计算哈希指纹
                 val hash = file.digest("SHA-256")
                 // 哈希指纹比对
                 if (hash == this.hash[file]) {
                     continue
                 }
-                callback.onFileModified(sender, buildFileId(file), file)
-                this.hash[file] = hash
+                try {
+                    callback.onFileModified(sender, buildFileId(file), file)
+                    this.hash[file] = hash
+                } catch (e: Exception) {
+                    callback.onFileException(sender, buildFileId(file), file, e)
+                }
             }
 
-            // 计算耗时, 单位毫秒
-            val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
             // 重载完成
-            callback.onLoadCompleted(sender, time)
+            callback.onLoadSuccess(sender, timing(startTime))
         } catch (e: Throwable) {
-            // 重载失败, 重置缓存
+            // 加载失败, 重置缓存
             reset()
-            callback.onLoadFailed(sender, buildFileId(currentFile), currentFile, e)
+
+            // 计算耗时, 单位毫秒
+            callback.onLoadFailure(sender, timing(startTime), e)
         }
+    }
+
+    private fun timing(time: Long): Double {
+        return Coerce.format((System.nanoTime() - time).div(1000000.0))
     }
 
     /**

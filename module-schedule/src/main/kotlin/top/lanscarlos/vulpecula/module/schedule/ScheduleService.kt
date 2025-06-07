@@ -102,16 +102,8 @@ object ScheduleService {
             }
         }
 
-        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
-            releaseResourceFolder("schedule")
-        }
-
-        override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
-        }
-
-        override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            sender.error(sync = true) { asLang("module-schedule-service-load-failure", id, e.localizedMessage) }
+        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
+            sender.error(sync = true) { asLang("module-schedule-service-file-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
@@ -124,6 +116,20 @@ object ScheduleService {
                 }
             }
         }
+
+        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
+            releaseResourceFolder("schedule")
+        }
+
+        override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
+            sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
+        }
+
+        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
+            e.printStackTrace()
+            sender.error(sync = true) { asLang("module-schedule-service-load-failure", e.localizedMessage) }
+        }
+
     }
 
 }

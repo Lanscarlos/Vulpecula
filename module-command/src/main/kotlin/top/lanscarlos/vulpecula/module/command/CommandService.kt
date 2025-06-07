@@ -70,15 +70,7 @@ object CommandService {
             command.rebuild()
         }
 
-        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
-            releaseResourceFolder("command")
-        }
-
-        override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.info(sync = true) { asLang("module-command-service-load-succeeded", commands.size, time) }
-        }
-
-        override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
+        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
             sender.error(sync = true) { asLang("module-command-service-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
@@ -92,6 +84,20 @@ object CommandService {
                 }
             }
         }
+
+        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
+            releaseResourceFolder("command")
+        }
+
+        override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
+            sender.info(sync = true) { asLang("module-command-service-load-succeeded", commands.size, time) }
+        }
+
+        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
+            e.printStackTrace()
+            sender.error(sync = true) { asLang("module-command-service-load-failure", e.localizedMessage) }
+        }
+
 
     }
 

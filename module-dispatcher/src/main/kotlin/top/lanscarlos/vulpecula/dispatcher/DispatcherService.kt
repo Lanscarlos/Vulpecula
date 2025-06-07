@@ -87,15 +87,7 @@ object DispatcherService {
             dispatcher.config.loadFromFile(file)
         }
 
-        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
-            releaseResourceFolder("dispatcher")
-        }
-
-        override fun onLoadCompleted(sender: ProxyCommandSender, time: Double) {
-            sender.info(sync = true) { asLang("module-dispatcher-service-load-success", registry.size, time) }
-        }
-
-        override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
+        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
             sender.error(sync = true) { asLang("module-dispatcher-service-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
@@ -109,5 +101,19 @@ object DispatcherService {
                 }
             }
         }
+
+        override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
+            releaseResourceFolder("dispatcher")
+        }
+
+        override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
+            sender.info(sync = true) { asLang("module-dispatcher-service-load-success", registry.size, time) }
+        }
+
+        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
+            e.printStackTrace()
+            sender.error(sync = true) { asLang("module-dispatcher-service-load-failure", e.localizedMessage) }
+        }
+
     }
 }
