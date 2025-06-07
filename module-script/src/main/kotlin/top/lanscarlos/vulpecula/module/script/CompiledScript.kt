@@ -8,10 +8,9 @@ import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.*
+import top.lanscarlos.vulpecula.utils.TimeUtil
 import java.io.File
 import java.util.concurrent.CompletableFuture
-import java.util.function.Consumer
-import java.util.function.Function
 
 /**
  * Vulpecula
@@ -188,20 +187,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
         return when (value) {
             is Int -> value.toLong() * 50L
             is Long -> value * 50L
-            is String -> {
-                val regex = Regex("^(\\d+)(ticks|tick|t|ms|s|m|h|d)$", RegexOption.IGNORE_CASE)
-                val matches = regex.find(value) ?: error("Unsupported time format: $value")
-                val time = matches.groupValues[1].toLong()
-                when (val unit = matches.groupValues[2].lowercase()) {
-                    "ticks", "tick", "t" -> time * 50L
-                    "ms" -> time
-                    "s" -> time * 1_000
-                    "m" -> time * 60_000
-                    "h" -> time * 3_600_000
-                    "d" -> time * 86_400_000
-                    else -> error("Invalid time unit: $unit")
-                }
-            }
+            is String -> TimeUtil.parse(value)
             else -> error("Unsupported timeout type: ${value::class.java.name}")
         }
     }
