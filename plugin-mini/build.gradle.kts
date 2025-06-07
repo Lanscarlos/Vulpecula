@@ -3,7 +3,6 @@ taboolib {
     subproject = false
     relocate("kotlinx.metadata.", "kotlinx.metadata060.")
     relocate("com.ucasoft.kcron.", "com.ucasoft.kcron0230.")
-    relocate("com.ucasoft.kcron.kotlinx.", "com.ucasoft.kcron0230.kotlinx2021.")
     relocate("io.foldright.cffu.", "io.foldright.cffu113.")
 }
 
