@@ -20,7 +20,7 @@ open class BacikalRuntimeException(
     properties: Map<String, Any>,
 ) : BacikalException(cause) {
 
-    override val message: String = cause.message ?: "EXCEPTION_MESSAGE_MISSING"
+    override val message: String = asLang("module-bacikal-exception-execute-failure")
 
     val content = properties["BACIKAL_CONTENT"].toString()
     val startLine = properties["BACIKAL_START_LINE"].let(IntApplicative::convert)

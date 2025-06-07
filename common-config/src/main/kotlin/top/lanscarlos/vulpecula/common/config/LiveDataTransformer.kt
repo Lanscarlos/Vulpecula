@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.common.config
 
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import java.util.function.Function
 
 /**
@@ -33,6 +34,9 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
         this.source.update()
         try {
             value = transfer.apply(source.getValue())
+        } catch (_: NullPointerException) {
+            // 缺少必要字段
+            throw ConfigFieldNotFoundException(id)
         } catch (e: ConfigFieldReadException) {
             throw e
         } catch (e: Exception) {

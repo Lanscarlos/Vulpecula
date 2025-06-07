@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal.exception
 
 import taboolib.library.kether.Quest
 import taboolib.module.kether.printKetherErrorMessage
+import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
@@ -17,7 +18,7 @@ class BacikalTimeoutException(
     timeout: Long
 ) : BacikalRuntimeException(cause, quest, properties) {
 
-    override val message: String = "Timeout ${timeout}ms"
+    override val message: String = asLang("module-bacikal-exception-execute-timeout", timeout)
 
     override fun getLocalizedMessage(): String {
         return message

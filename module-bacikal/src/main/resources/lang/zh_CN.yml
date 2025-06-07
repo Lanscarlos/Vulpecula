@@ -8,3 +8,8 @@ module-bacikal-service-execute-failure-action: '异常语句: &e{0}'
 module-bacikal-service-execute-failure-reason: '异常原因: &e{0}'
 module-bacikal-service-execute-failure-detail-header: '异常位置:'
 module-bacikal-service-execute-failure-detail-item: '&7 {0} &8|&7 {1}'
+
+module-bacikal-exception-compile-failure: '脚本编译异常'
+module-bacikal-exception-execute-failure: '脚本运行异常'
+module-bacikal-exception-execute-timeout: '脚本运行超时 &c{0}ms'
+

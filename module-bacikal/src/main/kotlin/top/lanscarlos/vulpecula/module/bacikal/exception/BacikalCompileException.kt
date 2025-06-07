@@ -1,11 +1,13 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.ParsedAction
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionLiteral
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
 import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.lang.error
 
 /**
  * Vulpecula
@@ -26,8 +28,11 @@ class BacikalCompileException(
     private val colorError: String = "&c".colored()
     private val padding: Int = 2
 
-    override fun getLocalizedMessage(): String {
-        return cause.localizedMessage
+    override val message: String = asLang("module-bacikal-exception-compile-failure")
+
+    fun printLocalizedMessage(sender: ProxyCommandSender) {
+        sender.error(sync = true) { getErrorReasonMessage() }
+        sender.error(sync = true) { getErrorDetailMessage() }
     }
 
     /**
