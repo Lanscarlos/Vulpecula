@@ -1,7 +1,7 @@
 
 # 日程模块
 module-schedule-service-load-success: '成功加载 &a{0}&7 个日程 &8({0}ms)'
-module-schedule-service-load-failure: '日程 &c{0}&7 加载失败!'
+module-schedule-service-load-failure: '日程 &c{0}&7 加载失败! {1}'
 module-schedule-command-start-success: '启动日程 &a{0}&7. PID &a{1}&7, 执行者 &a{2}&7, 参数 &a{3}&7'
 module-schedule-command-pause-all: '暂停日程 &a{0}&7 下的所有任务.'
 module-schedule-command-pause-task: '暂停日程 &a{0}&7 下 PID 为 &a{1}&7 的任务.'
@@ -27,9 +27,6 @@ module-schedule-task-operation-terminate-hover: '一旦终止任务, 则不可�
 
 module-schedule-exception-schedule-not-found: '日程 &c{0}&7 不存在.'
 module-schedule-exception-task-not-found: '日程任务 &c{0}&7 不存在.'
-module-schedule-exception-field-not-found: '日程 &e{0}&7 缺少必要的字段 &e{1}&7.'
-module-schedule-exception-invalid-field: '日程 &e{0}&7 的字段 &e{1}&7 读取异常. {2}'
-module-schedule-exception-invalid-script: '脚本编译错误.'
 module-schedule-exception-invalid-time-format: '时间格式错误: &e{0}&7.'
 module-schedule-exception-invalid-time-unit: '时间单位错误: &e{0}&7.'
 module-schedule-exception-invalid-type: '类型错误: &e{0}&7.'
