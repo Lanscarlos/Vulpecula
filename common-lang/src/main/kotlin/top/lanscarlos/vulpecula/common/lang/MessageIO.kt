@@ -34,7 +34,7 @@ fun ProxyCommandSender.info(
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-message-info", message())
+    val msg = asLang("common-lang-info", message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
@@ -50,7 +50,7 @@ fun ProxyCommandSender.warning(
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-message-warning", message())
+    val msg = asLang("common-lang-warning", message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
@@ -66,7 +66,7 @@ fun ProxyCommandSender.error(
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-message-error", message())
+    val msg = asLang("common-lang-error", message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
@@ -82,7 +82,7 @@ fun ProxyCommandSender.debug(
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-message-debug", message())
+    val msg = asLang("common-lang-debug", message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
