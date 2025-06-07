@@ -4,11 +4,13 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
 import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.common.lang.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
+import top.lanscarlos.vulpecula.utils.TimeUtil
 
 /**
  * Vulpecula
@@ -100,19 +102,8 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         return when (value) {
             is Int -> value.toLong() * 50L
             is Long -> value * 50L
-            is String -> {
-                val regex = Regex("^(\\d+)(ticks|tick|t|seconds|second|s|minutes|minute|min|m|hours|hour|h)$", RegexOption.IGNORE_CASE)
-                val matches = regex.find(value) ?: error(asLang("module-schedule-exception-invalid-time-format", value))
-                val time = matches.groupValues[1].toLong()
-                when (val unit = matches.groupValues[2].lowercase()) {
-                    "ticks", "tick", "t" -> time * 50
-                    "seconds", "second", "s" -> time * 1_000
-                    "minutes", "minute", "min", "m" -> time * 60_000
-                    "hours", "hour", "h" -> time * 3_600_000
-                    else -> error(asLang("module-schedule-exception-invalid-time-unit", unit))
-                }
-            }
-            else -> error(asLang("module-schedule-exception-invalid-type", value::class.java.name))
+            is String -> TimeUtil.parse(value)
+            else -> throw UnsupportedTypeException(value::class.java, Long::class.java)
         }
     }
 
