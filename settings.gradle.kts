@@ -1,6 +1,3 @@
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
 rootProject.name="Vulpecula"
 include("common-applicative")
 include("common-config")
@@ -18,7 +15,7 @@ include("module-schedule")
 include("module-script")
 include("module-wireshark")
 include("platform-bukkit")
-include("plugin-mini")
+include("plugin-experiment")
 
 include("project:common")
 include("project:common-core")

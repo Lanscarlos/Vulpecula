@@ -8,7 +8,7 @@ taboolib {
 
 tasks {
     jar {
-        archiveBaseName.set("${rootProject.name}-mini")
+        archiveBaseName.set("${rootProject.name}-experiment")
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs"))
 
