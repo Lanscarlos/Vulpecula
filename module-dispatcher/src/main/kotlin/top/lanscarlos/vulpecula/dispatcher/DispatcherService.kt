@@ -9,6 +9,7 @@ import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.common.lang.error
@@ -95,28 +96,15 @@ object DispatcherService {
         }
 
         override fun onLoadFailed(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
+            sender.error(sync = true) { asLang("module-dispatcher-service-load-failure", id, e.localizedMessage) }
             when (e) {
+                is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is BacikalCompileException -> {
-                            // Kether 编译错误
-                            val detail = asLang("module-dispatcher-exception-invalid-script")
-                            sender.error(sync = true) { asLang("module-dispatcher-exception-invalid-field", id, e.field, detail) }
-                            sender.error(sync = true) { cause.getErrorReasonMessage() }
-                            sender.error(sync = true) { cause.getErrorDetailMessage() }
-                        }
-                        is NullPointerException -> {
-                            // 缺少必要的字段
-                            sender.error(sync = true) { asLang("module-dispatcher-exception-field-not-found", id, e.field) }
-                        }
-                        else -> {
-                            // 其他异常
-                            sender.error(sync = true) { asLang("module-dispatcher-exception-invalid-field", id, e.field, e.localizedMessage) }
-                        }
+                        is BacikalCompileException -> cause.printLocalizedMessage(sender)
                     }
                 }
                 else -> {
-                    sender.error(sync = true) { asLang("module-dispatcher-service-load-failure", id) }
                     e.printStackTrace()
                 }
             }
