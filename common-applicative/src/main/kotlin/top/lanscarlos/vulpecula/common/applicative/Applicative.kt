@@ -19,8 +19,8 @@ interface Applicative<T> {
      * @param instance 实例
      * @return 转换后的实例
      * @throws NullPointerException 实例为空
-     * @throws InvalidValueException 内容不规范
-     * @throws UnsupportedTypeException 实例类型不支持
+     * @throws top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException 内容不规范
+     * @throws top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException 实例类型不支持
      * */
     fun convert(instance: Any?): T
 

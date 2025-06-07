@@ -4,6 +4,8 @@ import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Entity
 import taboolib.common.platform.ProxyPlayer
+import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
+import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
 
 /**
  * Vulpecula

@@ -1,5 +1,5 @@
 
 # Applicative 模块
 common-applicative-exception-invalid-value: '无法将 &e{0}&7 转换为 &e{1}&7.'
-common-applicative-exception-unsupported-type: '无法将 &e{0}&7 转换为 &e{1}&7.'
+common-applicative-exception-unsupported-type: '暂不支持将 &e{0}&7 转换为 &e{1}&7.'
 

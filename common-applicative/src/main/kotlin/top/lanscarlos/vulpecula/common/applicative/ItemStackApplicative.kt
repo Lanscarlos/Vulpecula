@@ -7,6 +7,8 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.function.warning
 import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
+import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
+import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
 import kotlin.jvm.optionals.getOrNull
 
 /**

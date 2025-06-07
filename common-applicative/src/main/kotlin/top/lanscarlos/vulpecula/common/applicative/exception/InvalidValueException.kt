@@ -1,10 +1,10 @@
-package top.lanscarlos.vulpecula.common.applicative
+package top.lanscarlos.vulpecula.common.applicative.exception
 
 import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.common.applicative
+ * top.lanscarlos.vulpecula.common.applicative.exception
  *
  * @author Lanscarlos
  * @since 2025/5/29 11:54
