@@ -37,41 +37,57 @@ object ScheduleCommand {
         dynamic("id") {
             suggest { ScheduleService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                val task = ScheduleService.get(id).start()
-                sender.info { asLang("module-schedule-command-run-success", id, task.pid, "null", "[]") }
+                try {
+                    val task = ScheduleService.get(id).start()
+                    sender.info { asLang("module-schedule-command-run-success", id, task.pid, "null", "[]") }
+                } catch (e: Exception) {
+                    sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
+                }
             }
         }.dynamic("pid") {
             execute<ProxyCommandSender> { sender, context, pid ->
                 val id = context["id"]
-                ScheduleService.get(id).start(
-                    pid = pid
-                )
-                sender.info { asLang("module-schedule-command-run-success", id, pid, "null", "[]") }
+                try {
+                    ScheduleService.get(id).start(
+                        pid = pid
+                    )
+                    sender.info { asLang("module-schedule-command-run-success", id, pid, "null", "[]") }
+                } catch (e: Exception) {
+                    sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
+                }
             }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
-                val pid = context["pid"]
-                val runtimeSender = value.toSender(sender)
-                ScheduleService.get(id).start(
-                    pid = pid,
-                    sender = runtimeSender
-                )
-                sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", "[]") }
+                try {
+                    val pid = context["pid"]
+                    val runtimeSender = value.toSender(sender)
+                    ScheduleService.get(id).start(
+                        pid = pid,
+                        sender = runtimeSender
+                    )
+                    sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", "[]") }
+                } catch (e: Exception) {
+                    sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
+                }
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
-                val pid = context["pid"]
-                val runtimeSender = context["sender"].toSender(sender)
-                val args = value.split(' ')
-                ScheduleService.get(id).start(
-                    pid = pid,
-                    sender = runtimeSender,
-                    args = args
-                )
-                sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", args) }
+                try {
+                    val pid = context["pid"]
+                    val runtimeSender = context["sender"].toSender(sender)
+                    val args = value.split(' ')
+                    ScheduleService.get(id).start(
+                        pid = pid,
+                        sender = runtimeSender,
+                        args = args
+                    )
+                    sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", args) }
+                } catch (e: Exception) {
+                    sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
+                }
             }
         }
     }
@@ -82,9 +98,9 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     ScheduleService.get(id).pause("*")
-                    sender.info { asLang("module-schedule-command-pause-all", id) }
+                    sender.info { asLang("module-schedule-command-pause-all-success", id) }
                 } catch (e: Exception) {
-                    sender.error { e.localizedMessage }
+                    sender.error { asLang("module-schedule-command-pause-all-failure", id) }
                 }
             }
         }.dynamic("pid") {
@@ -93,9 +109,9 @@ object ScheduleCommand {
                 val id = context["id"]
                 try {
                     ScheduleService.get(id).pause(pid)
-                    sender.info { asLang("module-schedule-command-pause-task", id, pid) }
+                    sender.info { asLang("module-schedule-command-pause-task-success", id, pid) }
                 } catch (e: Exception) {
-                    sender.error { e.localizedMessage }
+                    sender.error { asLang("module-schedule-command-pause-task-failure", id, pid, e.localizedMessage) }
                 }
             }
         }
@@ -107,9 +123,9 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     ScheduleService.get(id).resume("*")
-                    sender.info { asLang("module-schedule-command-resume-all", id) }
+                    sender.info { asLang("module-schedule-command-resume-all-success", id) }
                 } catch (e: Exception) {
-                    sender.error { e.localizedMessage }
+                    sender.error { asLang("module-schedule-command-resume-all-failure", id, e.localizedMessage) }
                 }
             }
         }.dynamic("pid") {
@@ -118,9 +134,9 @@ object ScheduleCommand {
                 val id = context["id"]
                 try {
                     ScheduleService.get(id).resume(pid)
-                    sender.info { asLang("module-schedule-command-resume-task", id, pid) }
+                    sender.info { asLang("module-schedule-command-resume-task-success", id, pid) }
                 } catch (e: Exception) {
-                    sender.error { e.localizedMessage }
+                    sender.error { asLang("module-schedule-command-resume-task-failure", id, pid, e.localizedMessage) }
                 }
             }
         }
@@ -132,9 +148,9 @@ object ScheduleCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     ScheduleService.get(id).stop("*")
-                    sender.info { asLang("module-schedule-command-stop-all", id) }
+                    sender.info { asLang("module-schedule-command-stop-all-success", id) }
                 } catch (e: Exception) {
-                    sender.error { e.localizedMessage }
+                    sender.error { asLang("module-schedule-command-stop-all-failure", id, e.localizedMessage) }
                 }
             }
         }.dynamic("pid") {
@@ -143,9 +159,9 @@ object ScheduleCommand {
                 val id = context["id"]
                 try {
                     ScheduleService.get(id).stop(pid)
-                    sender.info { asLang("module-schedule-command-stop-task", id, pid) }
+                    sender.info { asLang("module-schedule-command-stop-task-success", id, pid) }
                 } catch (e: Exception) {
-                    sender.error { e.localizedMessage }
+                    sender.error { asLang("module-schedule-command-stop-task-failure", id, pid, e.localizedMessage) }
                 }
             }
         }

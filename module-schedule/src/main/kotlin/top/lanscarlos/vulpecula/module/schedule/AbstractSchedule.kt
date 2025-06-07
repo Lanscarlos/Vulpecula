@@ -8,6 +8,7 @@ import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeExce
 import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.common.lang.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.schedule.exception.TaskNotFoundException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.utils.TimeUtil
@@ -73,7 +74,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error(asLang("module-schedule-exception-task-not-found", pid))
+        val task = tasks[pid] ?: throw TaskNotFoundException(pid)
         task.pause()
     }
 
@@ -82,7 +83,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error(asLang("module-schedule-exception-task-not-found", pid))
+        val task = tasks[pid] ?: throw TaskNotFoundException(pid)
         task.resume()
     }
 
@@ -91,7 +92,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             tasks.values.forEach(ScheduleTask::stop)
             return
         }
-        val task = tasks[pid] ?: error(asLang("module-schedule-exception-task-not-found", pid))
+        val task = tasks[pid] ?: throw TaskNotFoundException(pid)
         task.stop()
     }
 
@@ -199,9 +200,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             // 脚本运行异常时, 暂停任务
             pause()
             console().error { asLang("module-schedule-run-failure", id, pid) }
-            console().error { ex.getActionMessage() }
-            console().error { ex.getReasonMessage() }
-            console().error { ex.getDetailMessage() }
+            ex.printLocalizedMessage(console())
         }
 
         override fun start() {

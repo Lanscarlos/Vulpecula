@@ -19,6 +19,7 @@ import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.common.lang.error
+import top.lanscarlos.vulpecula.module.schedule.exception.InvalidCronException
 import java.util.*
 
 /**
@@ -204,7 +205,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
             is String -> parseTimeString(value)
             is Number -> TimeGroups.Specific to value.toString()
             is List<*> -> TimeGroups.Specific to value.joinToString(",")
-            else -> error(asLang("module-schedule-exception-invalid-cron", value))
+            else -> throw InvalidCronException(value)
         }
     }
 
@@ -230,7 +231,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                     TimeGroups.EveryStartingAt to "$starting/$every"
                 }
             }
-            else -> error(asLang("module-schedule-exception-invalid-cron", value))
+            else -> throw InvalidCronException(value)
         }
     }
 }
