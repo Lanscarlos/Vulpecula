@@ -38,7 +38,11 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
             // 缺少必要字段
             throw ConfigFieldNotFoundException(id)
         } catch (e: ConfigFieldReadException) {
-            throw e
+            if (e.field == id) {
+                // 重复包装
+                throw e
+            }
+            throw ConfigFieldReadException("$id.${e.field}", e)
         } catch (e: Exception) {
             throw ConfigFieldReadException(id, e)
         }
