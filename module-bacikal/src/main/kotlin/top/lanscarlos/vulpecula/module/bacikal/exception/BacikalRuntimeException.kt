@@ -42,7 +42,7 @@ open class BacikalRuntimeException(
      * 获取报错原因信息
      * */
     fun getReasonMessage(): String {
-        return asLang("module-bacikal-service-execute-failure-reason", localizedMessage)
+        return asLang("module-bacikal-service-execute-failure-reason", cause.localizedMessage)
     }
 
     fun getDetailMessage(): String {

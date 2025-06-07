@@ -39,7 +39,7 @@ class BacikalCompileException(
      * 获取报错原因信息
      * */
     fun getErrorReasonMessage(): String {
-        return asLang("module-bacikal-service-compile-failure-reason", localizedMessage)
+        return asLang("module-bacikal-service-compile-failure-reason", cause.localizedMessage)
     }
 
     /**
