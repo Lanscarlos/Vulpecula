@@ -8,6 +8,8 @@ import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.*
+import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
+import top.lanscarlos.vulpecula.common.lang.asLang
 import top.lanscarlos.vulpecula.utils.TimeUtil
 import java.io.File
 import java.util.concurrent.CompletableFuture
@@ -67,7 +69,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
                 wrappedArgs[parameter.name] = value ?: continue
                 continue
             }
-            require(arg != null) { "Missing argument ${parameter.name} at index $index when run script \"$id\"." }
+            require(arg != null) { asLang("module-script-exception-argument-missing", id, index, parameter.name) }
             wrappedArgs[parameter.name] = parameter.applicative.convert(arg)
         }
 
@@ -176,7 +178,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
                 builder.append("]")
                 builder.toString()
             }
-            else -> error("Unsupported condition type: ${value::class.java.name}")
+            else -> throw InvalidTypeException(value)
         }
     }
 
@@ -188,7 +190,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
             is Int -> value.toLong() * 50L
             is Long -> value * 50L
             is String -> TimeUtil.parse(value)
-            else -> error("Unsupported timeout type: ${value::class.java.name}")
+            else -> throw InvalidTypeException(value)
         }
     }
 
@@ -216,7 +218,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
                     map[exception] = script
                 }
             }
-            else -> error("Unsupported exception type: ${value::class.java.name}")
+            else -> throw InvalidTypeException(value)
         }
         return map.mapValues { (key, value) -> BacikalService.compile(value, "$id-exception-$key", namespace) }
     }
