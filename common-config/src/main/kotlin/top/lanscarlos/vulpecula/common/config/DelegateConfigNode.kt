@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.common.config
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.configuration.Configuration
+import java.util.function.Consumer
 
 /**
  * Vulpecula
@@ -17,14 +18,13 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
 
     private val root: Configuration
 
-    /**
-     * 缓存值
-     * */
+    private var onUpdate: Consumer<Any?>? = null
+
     private var value: Any? = null
 
     init {
-        // 获取值
-        update()
+        // 初始化并读取值
+        run()
 
         // 获取根配置
         var parent: ConfigurationSection = config
@@ -38,7 +38,8 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
     }
 
     override fun run() {
-        update()
+        value = read()
+        onUpdate?.accept(getValue())
     }
 
     private fun read(): Any? {
@@ -56,8 +57,8 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
         return value
     }
 
-    override fun update() {
-        value = read()
+    override fun onUpdate(func: Consumer<Any?>) {
+        onUpdate = func
     }
 
     fun dispose() {

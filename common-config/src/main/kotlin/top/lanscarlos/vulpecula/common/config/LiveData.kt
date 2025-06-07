@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.common.config
 
+import java.util.function.Consumer
 import kotlin.reflect.KProperty
 
 /**
@@ -9,7 +10,7 @@ import kotlin.reflect.KProperty
  * @author Lanscarlos
  * @since 2025-03-10 18:58
  */
-interface LiveData<out T> {
+interface LiveData<T> {
 
     /**
      * 键名
@@ -22,9 +23,9 @@ interface LiveData<out T> {
     fun getValue(): T
 
     /**
-     * 更新值
+     * 值更新时调用
      * */
-    fun update()
+    fun onUpdate(func: Consumer<T>)
 
     /**
      * 兼容代理属性

@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.common.config
 
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
+import java.util.function.Consumer
 import java.util.function.Function
 
 /**
@@ -16,13 +17,13 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
     override val id: String
         get() = source.id
 
-    /**
-     * 缓存值
-     * */
+    private var onUpdate: Consumer<R>? = null
+
     private var value: R? = null
 
     init {
-        update()
+        source.onUpdate(::update)
+        update(source.getValue())
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -30,10 +31,14 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
         return value as R
     }
 
-    override fun update() {
-        this.source.update()
+    override fun onUpdate(func: Consumer<R>) {
+        onUpdate = func
+    }
+
+    fun update(value: T) {
         try {
-            value = transfer.apply(source.getValue())
+            this.value = transfer.apply(value)
+            onUpdate?.accept(getValue())
         } catch (_: NullPointerException) {
             // 缺少必要字段
             throw ConfigFieldNotFoundException(id)

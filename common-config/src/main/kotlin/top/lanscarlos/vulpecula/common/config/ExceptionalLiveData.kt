@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.common.config
 
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import java.util.function.Consumer
 import java.util.function.Function
 
 /**
@@ -15,10 +16,13 @@ class ExceptionalLiveData<T>(private val source: LiveData<T>, private val except
     override val id: String
         get() = source.id
 
+    private var onUpdate: Consumer<T>? = null
+
     private var value: T? = null
 
     init {
-        update()
+        source.onUpdate(::update)
+        update(source.getValue())
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -26,10 +30,13 @@ class ExceptionalLiveData<T>(private val source: LiveData<T>, private val except
         return value as T
     }
 
-    override fun update() {
-        source.update()
+    override fun onUpdate(func: Consumer<T>) {
+        this.onUpdate = func
+    }
+
+    fun update(value: T) {
         try {
-            value = source.getValue()
+            this.value = value
         } catch (e: ConfigFieldReadException) {
             exceptionally.apply(e.cause as Exception)
         } catch (e: Exception) {
