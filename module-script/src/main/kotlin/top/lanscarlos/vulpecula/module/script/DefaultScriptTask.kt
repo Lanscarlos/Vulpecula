@@ -40,7 +40,6 @@ class DefaultScriptTask(
     override fun onFailure(func: Function<BacikalRuntimeException, Any?>): ScriptTask {
         future = future.exceptionally {
             val ex = it.cause as BacikalRuntimeException
-            ex.printKetherMessage()
             return@exceptionally func.apply(ex)
         }
         return this

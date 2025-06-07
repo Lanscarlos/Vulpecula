@@ -256,7 +256,7 @@ object ScriptService {
                     // 重新构建脚本任务
                     script.rebuild()
                 }
-                else -> InvalidTypeException(script)
+                else -> throw InvalidTypeException(script)
             }
         }
 
@@ -277,9 +277,8 @@ object ScriptService {
                         is BacikalCompileException -> cause.printLocalizedMessage(sender)
                     }
                 }
-                else -> {
-                    e.printStackTrace()
-                }
+                is BacikalCompileException -> e.printLocalizedMessage(sender)
+                else -> e.printStackTrace()
             }
         }
     }
