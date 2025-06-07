@@ -90,7 +90,7 @@ object CommandService {
         }
 
         override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
-            sender.info(sync = true) { asLang("module-command-service-load-succeeded", commands.size, time) }
+            sender.info(sync = true) { asLang("module-command-service-load-success", commands.size, time) }
         }
 
         override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
