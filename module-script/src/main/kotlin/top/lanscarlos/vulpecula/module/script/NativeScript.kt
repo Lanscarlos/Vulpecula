@@ -25,7 +25,7 @@ class NativeScript(override val id: String, source: String) : AbstractScript() {
 
     override val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
-    override fun run(
+    override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,
         variables: Map<String, Any>
@@ -36,10 +36,10 @@ class NativeScript(override val id: String, source: String) : AbstractScript() {
             wrappedArgs["arg$index"] = arg ?: continue
         }
         wrappedArgs.putAll(variables)
-        return run(sender, wrappedArgs)
+        return execute(sender, wrappedArgs)
     }
 
-    private fun run(
+    private fun execute(
         sender: ProxyCommandSender?,
         args: Map<String, Any>
     ): ScriptTask {

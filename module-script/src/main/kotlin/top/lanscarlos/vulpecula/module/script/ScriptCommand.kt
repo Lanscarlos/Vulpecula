@@ -36,61 +36,21 @@ object ScriptCommand {
         dynamic("id") {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                val task = try {
-                    ScriptService.run(
-                        id = id,
-                        sender = sender
-                    ).also {
-                        sender.info { asLang("module-script-command-run", id, sender.name, "[]") }
-                    }
-                } catch (e: Exception) {
-                    sender.error(sync = true) { asLang("module-script-command-run-failure", id, e.localizedMessage) }
-                    null
-                }
-                task?.onSuccess {
-                    sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                }
-                task?.onFailure { ex ->
-                    sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                    ex.printLocalizedMessage(sender)
-                }
+                runScript(sender, id, sender, emptyList())
             }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
-                val runtimeSender = value.toSender(sender)
-                sender.info { asLang("module-script-command-run", id, runtimeSender?.name ?: "null", "[]") }
-                ScriptService.run(
-                    id = id,
-                    sender = runtimeSender
-                ).onSuccess {
-                    sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                }.onFailure { ex ->
-                    sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                    sender.error(sync = true) { ex.getActionMessage() }
-                    sender.error(sync = true) { ex.getReasonMessage() }
-                    sender.error(sync = true) { ex.getDetailMessage() }
-                }
+                val scriptSender = value.toSender(sender)
+                runScript(sender, id, scriptSender, emptyList())
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
-                val runtimeSender = context["sender"].toSender(sender)
+                val scriptSender = context["sender"].toSender(sender)
                 val args = value.split(' ')
-                sender.info { asLang("module-script-command-run", id, runtimeSender?.name ?: "null", args) }
-                ScriptService.run(
-                    id = id,
-                    sender = runtimeSender,
-                    args = args
-                ).onSuccess {
-                    sender.info { asLang("module-script-command-run-success", id, it.toString()) }
-                }.onFailure { ex ->
-                    sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-                    sender.error(sync = true) { ex.getActionMessage() }
-                    sender.error(sync = true) { ex.getReasonMessage() }
-                    sender.error(sync = true) { ex.getDetailMessage() }
-                }
+                runScript(sender, id, scriptSender, args)
             }
         }
     }
@@ -102,31 +62,21 @@ object ScriptCommand {
         dynamic("id") {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                ScriptService.run(
-                    id = id,
-                    sender = sender
-                )
+                runScriptSilent(sender, id, sender, emptyList())
             }
         }.dynamic("sender") {
             suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
-                val runtimeSender = value.toSender(sender)
-                ScriptService.run(
-                    id = id,
-                    sender = runtimeSender
-                )
+                val scriptSender = value.toSender(sender)
+                runScriptSilent(sender, id, scriptSender, emptyList())
             }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
-                val runtimeSender = context["sender"].toSender(sender)
+                val scriptSender = context["sender"].toSender(sender)
                 val args = value.split(' ')
-                ScriptService.run(
-                    id = id,
-                    sender = runtimeSender,
-                    args = args
-                )
+                runScriptSilent(sender, id, scriptSender, args)
             }
         }
     }
@@ -169,6 +119,45 @@ object ScriptCommand {
     private val reload: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
             ScriptService.reload(sender)
+        }
+    }
+
+    private fun runScript(sender: ProxyCommandSender, id: String, scriptSender: ProxyCommandSender?, args: List<String>) {
+        val task = try {
+            ScriptService.run(
+                id = id,
+                sender = scriptSender,
+                args = args
+            ).also {
+                sender.info { asLang("module-script-command-run", id, scriptSender?.name ?: "null", args) }
+            }
+        } catch (e: Exception) {
+            sender.error(sync = true) { e.localizedMessage }
+            null
+        }
+        task?.onSuccess {
+            sender.info { asLang("module-script-command-run-success", id, it.toString()) }
+        }
+        task?.onFailure { ex ->
+            sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+            ex.printLocalizedMessage(sender)
+        }
+    }
+
+    private fun runScriptSilent(sender: ProxyCommandSender, id: String, scriptSender: ProxyCommandSender?, args: List<String>) {
+        val task = try {
+            ScriptService.run(
+                id = id,
+                sender = scriptSender,
+                args = args
+            )
+        } catch (e: Exception) {
+            console().error(sync = true) { e.localizedMessage }
+            null
+        }
+        task?.onFailure { ex ->
+            console().error(sync = true) { asLang("module-script-command-run-failure", id) }
+            ex.printLocalizedMessage(sender)
         }
     }
 

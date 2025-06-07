@@ -14,5 +14,6 @@ module-script-command-task-list-footer: ''
 
 module-script-exception-script-not-found: '脚本 &c{0}&7 不存在.'
 module-script-exception-task-not-found: '脚本任务 &c{0}&7 不存在.'
-module-script-exception-argument-missing: '脚本 &c{0}&7 运行失败. 位置 &c{1}&7 缺失所需的参数 &c{2}&7.'
+module-script-exception-argument-missing: '位置 &c{0}&7 缺失所需的参数 &c{1}&7.'
+module-script-exception-script-execute-failure: '脚本 &c{0}&7 运行异常. {1}'
 

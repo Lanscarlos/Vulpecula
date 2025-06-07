@@ -49,7 +49,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
         quest = buildQuest()
     }
 
-    override fun run(
+    override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,
         variables: Map<String, Any>
@@ -73,10 +73,10 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
             wrappedArgs[parameter.name] = parameter.applicative.convert(arg)
         }
 
-        return run(sender, wrappedArgs + variables)
+        return execute(sender, wrappedArgs + variables)
     }
 
-    private fun run(
+    private fun execute(
         sender: ProxyCommandSender?,
         args: Map<String, Any>
     ): ScriptTask {
