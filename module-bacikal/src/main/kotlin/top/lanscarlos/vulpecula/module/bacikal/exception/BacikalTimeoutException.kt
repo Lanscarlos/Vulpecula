@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
 import taboolib.library.kether.Quest
-import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.common.lang.asLang
 
 /**
@@ -22,10 +21,6 @@ class BacikalTimeoutException(
 
     override fun getLocalizedMessage(): String {
         return message
-    }
-
-    override fun printKetherMessage(detailError: Boolean) {
-        this.printKetherErrorMessage(detailError)
     }
 
 }
