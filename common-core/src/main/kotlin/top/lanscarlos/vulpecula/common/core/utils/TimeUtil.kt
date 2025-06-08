@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils
+package top.lanscarlos.vulpecula.common.core.utils
 
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTimeFormatException
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTimeUnitException

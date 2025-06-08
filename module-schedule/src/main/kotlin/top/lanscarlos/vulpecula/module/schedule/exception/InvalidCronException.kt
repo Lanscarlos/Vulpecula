@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.schedule.exception
 
-import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 
 /**
  * Vulpecula

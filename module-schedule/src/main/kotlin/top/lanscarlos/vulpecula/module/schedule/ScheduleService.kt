@@ -11,7 +11,10 @@ import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
-import top.lanscarlos.vulpecula.common.lang.*
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.debug
+import top.lanscarlos.vulpecula.common.core.utils.error
+import top.lanscarlos.vulpecula.common.core.utils.info
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
 
@@ -23,6 +26,8 @@ import java.io.File
  * @since 2025/5/12 9:57
  */
 object ScheduleService {
+
+    internal val module: String by lazy { asLang("module-schedule-service-name") }
 
     private val directory: File = File(getDataFolder(), "schedule")
 
@@ -103,12 +108,12 @@ object ScheduleService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
-            sender.error(sync = true) { asLang("module-schedule-service-file-load-failure", id, e.localizedMessage) }
+            sender.error(module, sync = true) { asLang("module-schedule-service-file-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is BacikalCompileException -> cause.printLocalizedMessage(sender)
+                        is BacikalCompileException -> cause.printLocalizedMessage(sender, module)
                     }
                 }
                 else -> {
@@ -121,13 +126,14 @@ object ScheduleService {
             releaseResourceFolder("schedule")
         }
 
-        override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
-            sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
+        override fun onLoadSuccess(sender: ProxyCommandSender, detail: String, time: Double) {
+            sender.debug(module, sync = true) { asLang("module-schedule-service-load-detail", detail) }
+            sender.info(module, sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
         }
 
         override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
             e.printStackTrace()
-            sender.error(sync = true) { asLang("module-schedule-service-load-failure", e.localizedMessage) }
+            sender.error(module, sync = true) { asLang("module-schedule-service-load-failure", e.localizedMessage) }
         }
 
     }

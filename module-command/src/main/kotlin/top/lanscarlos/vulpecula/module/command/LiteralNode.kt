@@ -8,8 +8,8 @@ import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.applicative.applicativeStringList
-import top.lanscarlos.vulpecula.common.lang.asLang
-import top.lanscarlos.vulpecula.common.lang.error
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.error
 import java.util.*
 
 /**
@@ -50,7 +50,7 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
     override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
         if (parameters.isNotEmpty() && !parameters.first().optional) {
             warning("LiteralNode 缺失必要参数: ${parameters.first().name}")
-            sender.error(sync = true) { asLang("module-command-exception-missing-argument", parameters.first().name) }
+            sender.error(CommandService.module, sync = true) { asLang("module-command-exception-missing-argument", parameters.first().name) }
             return
         }
         super.execute(sender, context, argument)
@@ -80,7 +80,7 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
         override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
             if (children.isNotEmpty() && !children.single().optional) {
                 warning("ParameterNode 缺失必要参数: ${children.single().name}")
-                sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
+                sender.error(CommandService.module, sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
                 return
             }
             super.execute(sender, context, argument)

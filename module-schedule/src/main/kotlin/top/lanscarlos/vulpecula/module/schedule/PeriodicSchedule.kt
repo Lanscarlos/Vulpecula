@@ -8,7 +8,7 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTimeFormatException
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId

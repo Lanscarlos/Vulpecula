@@ -8,9 +8,7 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
-import top.lanscarlos.vulpecula.common.lang.asLang
-import top.lanscarlos.vulpecula.common.lang.error
-import top.lanscarlos.vulpecula.common.lang.info
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -140,7 +138,7 @@ object ScriptCommand {
         }
         task?.onFailure { ex ->
             sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-            ex.printLocalizedMessage(sender)
+            ex.printLocalizedMessage(sender, ScriptService.module)
         }
     }
 
@@ -157,7 +155,7 @@ object ScriptCommand {
         }
         task?.onFailure { ex ->
             console().error(sync = true) { asLang("module-script-command-run-failure", id) }
-            ex.printLocalizedMessage(sender)
+            ex.printLocalizedMessage(sender, ScriptService.module)
         }
     }
 

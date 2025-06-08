@@ -1,8 +1,9 @@
 
 
 # 命令模块
-
-module-command-service-load-success: '成功加载 &a{0}&7 个命令 &8({1} ms)'
+module-command-service-name: '命令'
+module-command-service-load-detail: '命令模块变动: {0}'
+module-command-service-load-success: '命令模块加载成功. 已载入 &a{0}&7 个命令 &8({1} ms)'
 module-command-service-load-failure: '命令模块加载失败!'
 module-command-service-file-load-failure: '命令 &c{0}&7 加载失败! {1}'
 

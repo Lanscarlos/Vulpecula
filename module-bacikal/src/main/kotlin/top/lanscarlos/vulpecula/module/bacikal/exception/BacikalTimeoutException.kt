@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
 import taboolib.library.kether.Quest
-import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 
 /**
  * Vulpecula

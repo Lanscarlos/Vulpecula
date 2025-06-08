@@ -5,6 +5,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
@@ -76,13 +77,21 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             }
             val cacheFiles = HashSet(cache)
 
+            var created = 0
+            var modified = 0
+            var deleted = 0
+            var failed = 0
+
+
             // 处理被移除的文件
             for (file in cacheFiles - loadedFiles) {
                 try {
                     callback.onFileDeleted(sender, buildFileId(file), file)
                     cache.remove(file)
                     hash.remove(file)
+                    deleted += 1
                 } catch (e: Exception) {
+                    failed += 1
                     callback.onFileException(sender, buildFileId(file), file, e)
                 }
             }
@@ -93,7 +102,9 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                     callback.onFileCreated(sender, buildFileId(file), file)
                     cache += file
                     hash[file] = file.digest("SHA-256")
+                    created += 1
                 } catch (e: Exception) {
+                    failed += 1
                     callback.onFileException(sender, buildFileId(file), file, e)
                 }
             }
@@ -109,13 +120,15 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                 try {
                     callback.onFileModified(sender, buildFileId(file), file)
                     this.hash[file] = hash
+                    modified += 1
                 } catch (e: Exception) {
+                    failed += 1
                     callback.onFileException(sender, buildFileId(file), file, e)
                 }
             }
 
             // 重载完成
-            callback.onLoadSuccess(sender, timing(startTime))
+            callback.onLoadSuccess(sender, buildDetailMessage(created, modified, deleted, failed), timing(startTime))
         } catch (e: Throwable) {
             // 加载失败, 重置缓存
             reset()
@@ -123,6 +136,32 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 计算耗时, 单位毫秒
             callback.onLoadFailure(sender, timing(startTime), e)
         }
+    }
+
+    private fun buildDetailMessage(created: Int, modified: Int, deleted: Int, failed: Int): String {
+        val builder = StringBuilder()
+        if (created > 0) {
+            builder.append(asLang("common-config-service-load-detail-created", created))
+        }
+        if (modified > 0) {
+            if (builder.isNotEmpty()) {
+                builder.append("; ")
+            }
+            builder.append(asLang("common-config-service-load-detail-modified", modified))
+        }
+        if (deleted > 0) {
+            if (builder.isNotEmpty()) {
+                builder.append("; ")
+            }
+            builder.append(asLang("common-config-service-load-detail-deleted", deleted))
+        }
+        if (failed > 0) {
+            if (builder.isNotEmpty()) {
+                builder.append("; ")
+                builder.append(asLang("common-config-service-load-detail-failed", failed))
+            }
+        }
+        return builder.toString()
     }
 
     private fun timing(time: Long): Double {

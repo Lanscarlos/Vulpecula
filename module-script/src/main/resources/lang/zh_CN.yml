@@ -1,7 +1,9 @@
 
 
 # 脚本模块
-module-script-service-load-success: '成功加载 &a{0}&7 个脚本 &8({0}ms)'
+module-script-service-name: '脚本'
+module-script-service-load-detail: '脚本模块变动: {0}'
+module-script-service-load-success: '脚本模块加载成功. 已载入 &a{0}&7 个脚本 &8({1}ms)'
 module-script-service-load-failure: '脚本模块加载失败!'
 module-script-service-file-load-failure: '脚本 &c{0}&7 加载失败! {1}'
 module-script-command-run: '正在运行脚本 &a{0}&7. 执行者 &a{1}&7, 参数 &a{2}&7'

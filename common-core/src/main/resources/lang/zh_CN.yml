@@ -1,5 +1,11 @@
 
 # 通用
+common-core-message-module: '消息'
+common-core-message-info: '&8[&3Vul&bpecula&8] &a{0} &8|&7 {1}'
+common-core-message-warning: '&8[&3Vul&bpecula&8] &e{0} &8|&7 {1}'
+common-core-message-error: '&8[&3Vul&bpecula&8] &c{0} &8|&7 {1}'
+common-core-message-debug: '&8[&3Vul&bpecula&8] &e{0} &8|&7 {1}'
+
 common-core-exception-invalid-time-format: '时间格式错误: &e{0}&7.'
 common-core-exception-invalid-time-unit: '时间单位错误: &e{0}&7.'
 common-core-exception-invalid-type: '类型错误: &e{0}&7.'

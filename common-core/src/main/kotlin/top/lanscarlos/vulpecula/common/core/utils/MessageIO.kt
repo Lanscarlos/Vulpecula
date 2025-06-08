@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.common.lang
+package top.lanscarlos.vulpecula.common.core.utils
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
@@ -7,7 +7,7 @@ import taboolib.module.lang.asLangText
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.common.message
+ * top.lanscarlos.vulpecula.common.core.utils
  *
  * @author Lanscarlos
  * @since 2025/5/6 15:44
@@ -27,14 +27,16 @@ fun asLang(node: String, vararg args: Any): String {
 
 /**
  * 发送信息消息
+ * @param module 模块名
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
 fun ProxyCommandSender.info(
+    module: String,
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-lang-info", message())
+    val msg = asLang("common-core-message-info", module, message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
@@ -43,14 +45,16 @@ fun ProxyCommandSender.info(
 
 /**
  * 发送警告消息
+ * @param module 模块名
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
 fun ProxyCommandSender.warning(
+    module: String,
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-lang-warning", message())
+    val msg = asLang("common-core-message-warning", module, message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
@@ -59,14 +63,16 @@ fun ProxyCommandSender.warning(
 
 /**
  * 发送错误消息
+ * @param module 模块名
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
 fun ProxyCommandSender.error(
+    module: String,
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-lang-error", message())
+    val msg = asLang("common-core-message-error", module, message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)
@@ -75,14 +81,16 @@ fun ProxyCommandSender.error(
 
 /**
  * 发送调试消息
+ * @param module 模块名
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
 fun ProxyCommandSender.debug(
+    module: String,
     sync: Boolean = false,
     message: () -> String
 ) {
-    val msg = asLang("common-lang-debug", message())
+    val msg = asLang("common-core-message-debug", module, message())
     sendMessage(msg)
     if (sync && this is ProxyPlayer) {
         console.sendMessage(msg)

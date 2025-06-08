@@ -5,7 +5,7 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
-import top.lanscarlos.vulpecula.common.lang.asLang
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 
 /**
  * Vulpecula

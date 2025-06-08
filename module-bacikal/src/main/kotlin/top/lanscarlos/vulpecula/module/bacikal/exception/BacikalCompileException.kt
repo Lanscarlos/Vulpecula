@@ -5,9 +5,9 @@ import taboolib.library.kether.ParsedAction
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionLiteral
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.error
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.lang.asLang
-import top.lanscarlos.vulpecula.common.lang.error
 
 /**
  * Vulpecula
@@ -30,9 +30,9 @@ class BacikalCompileException(
 
     override val message: String = asLang("module-bacikal-exception-compile-failure")
 
-    fun printLocalizedMessage(sender: ProxyCommandSender) {
-        sender.error(sync = true) { getErrorReasonMessage() }
-        sender.error(sync = true) { getErrorDetailMessage() }
+    fun printLocalizedMessage(sender: ProxyCommandSender, module: String) {
+        sender.error(module, sync = true) { getErrorReasonMessage() }
+        sender.error(module, sync = true) { getErrorDetailMessage() }
     }
 
     /**

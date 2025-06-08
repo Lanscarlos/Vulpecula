@@ -6,12 +6,13 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
 import top.lanscarlos.vulpecula.common.config.*
-import top.lanscarlos.vulpecula.common.lang.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.schedule.exception.TaskNotFoundException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
-import top.lanscarlos.vulpecula.utils.TimeUtil
+import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.error
 
 /**
  * Vulpecula
@@ -199,8 +200,8 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         fun onFailure(ex: BacikalRuntimeException) {
             // 脚本运行异常时, 暂停任务
             pause()
-            console().error { asLang("module-schedule-run-failure", id, pid) }
-            ex.printLocalizedMessage(console())
+            console().error(ScheduleService.module) { asLang("module-schedule-run-failure", id, pid) }
+            ex.printLocalizedMessage(console(), ScheduleService.module)
         }
 
         override fun start() {

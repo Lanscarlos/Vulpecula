@@ -4,6 +4,6 @@ taboolib {
 }
 
 dependencies {
-    compileOnly(project(":common-lang"))
+    compileOnly(project(":common-core"))
     compileOnly("ink.ptms.core:v12004:12004:mapped")
 }

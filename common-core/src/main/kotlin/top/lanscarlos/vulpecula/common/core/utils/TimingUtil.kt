@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.utils
+package top.lanscarlos.vulpecula.common.core.utils
 
 import taboolib.common5.Coerce
 

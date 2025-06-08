@@ -29,7 +29,13 @@ interface ConfigServiceCallback {
 
     fun onLoadStarted(sender: ProxyCommandSender) {}
 
-    fun onLoadSuccess(sender: ProxyCommandSender, time: Double)
+    /**
+     * 加载成功时调用
+     *
+     * @param detail 变动详情
+     * @param time 耗时, 单位毫秒
+     * */
+    fun onLoadSuccess(sender: ProxyCommandSender, detail: String, time: Double)
 
     fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable)
 

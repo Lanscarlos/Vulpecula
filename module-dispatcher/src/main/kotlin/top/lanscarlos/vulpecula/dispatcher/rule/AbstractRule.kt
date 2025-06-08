@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.dispatcher.Context
 import top.lanscarlos.vulpecula.dispatcher.Rule
-import top.lanscarlos.vulpecula.utils.TimeUtil
+import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import java.util.concurrent.TimeUnit
 
 /**

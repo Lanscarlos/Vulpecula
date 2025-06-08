@@ -13,9 +13,7 @@ import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundExcep
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.lang.asLang
-import top.lanscarlos.vulpecula.common.lang.error
-import top.lanscarlos.vulpecula.common.lang.info
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
 import java.io.File
@@ -28,6 +26,8 @@ import java.io.File
  * @since 2025/4/25 10:00
  */
 object ScriptService {
+
+    internal val module: String by lazy { asLang("module-script-service-name") }
 
     private val directory: File = File(getDataFolder(), "script")
 
@@ -266,10 +266,10 @@ object ScriptService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is BacikalCompileException -> cause.printLocalizedMessage(sender)
+                        is BacikalCompileException -> cause.printLocalizedMessage(sender, module)
                     }
                 }
-                is BacikalCompileException -> e.printLocalizedMessage(sender)
+                is BacikalCompileException -> e.printLocalizedMessage(sender, module)
                 else -> e.printStackTrace()
             }
         }
@@ -278,7 +278,8 @@ object ScriptService {
             releaseResourceFolder("script")
         }
 
-        override fun onLoadSuccess(sender: ProxyCommandSender, time: Double) {
+        override fun onLoadSuccess(sender: ProxyCommandSender, detail: String, time: Double) {
+            sender.debug(sync = true) { asLang("module-script-service-load-detail", detail) }
             sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
         }
 

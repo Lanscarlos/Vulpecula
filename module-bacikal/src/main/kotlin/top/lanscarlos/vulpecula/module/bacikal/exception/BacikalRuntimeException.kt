@@ -4,10 +4,9 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.chat.colored
-import taboolib.module.kether.printKetherErrorMessage
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.error
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.lang.asLang
-import top.lanscarlos.vulpecula.common.lang.error
 
 /**
  * Vulpecula
@@ -32,10 +31,10 @@ open class BacikalRuntimeException(
     private val colorWarning: String = "&e".colored()
     private val colorError: String = "&c".colored()
 
-    fun printLocalizedMessage(sender: ProxyCommandSender) {
-        sender.error(sync = true) { getActionMessage() }
-        sender.error(sync = true) { getReasonMessage() }
-        sender.error(sync = true) { getDetailMessage() }
+    fun printLocalizedMessage(sender: ProxyCommandSender, module: String) {
+        sender.error(module, sync = true) { getActionMessage() }
+        sender.error(module, sync = true) { getReasonMessage() }
+        sender.error(module, sync = true) { getDetailMessage() }
     }
 
     fun getActionMessage(): String {

@@ -9,8 +9,8 @@ import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.lang.asLang
-import top.lanscarlos.vulpecula.utils.TimeUtil
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import java.io.File
 import java.util.concurrent.CompletableFuture
 

@@ -1,6 +1,8 @@
 
 # 日程模块
-module-schedule-service-load-success: '成功加载 &a{0}&7 个日程 &8({0}ms)'
+module-schedule-service-name: '日程'
+module-schedule-service-load-detail: '日程模块变动: {0}'
+module-schedule-service-load-success: '日程模块加载成功. 已载入 &a{0}&7 个日程 &8({0}ms)'
 module-schedule-service-load-failure: '日程模块加载失败!'
 module-schedule-service-file-load-failure: '日程 &c{0}&7 加载失败! {1}'
 module-schedule-command-start-success: '启动日程 &a{0}&7. PID &a{1}&7, 执行者 &a{2}&7, 参数 &a{3}&7'
