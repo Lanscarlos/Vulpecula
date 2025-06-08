@@ -115,7 +115,7 @@ object DispatcherService {
                 sender.info(sync = true) { asLang("module-dispatcher-service-load-detail-deleted", deleted) }
             }
             if (failed > 0) {
-                sender.warning(sync = true) { asLang("module-dispatcher-service-load-detail-deleted", failed) }
+                sender.warning(sync = true) { asLang("module-dispatcher-service-load-detail-failed", failed) }
             }
             sender.info(sync = true) { asLang("module-dispatcher-service-load-success", registry.size, time) }
         }

@@ -134,7 +134,7 @@ object ScheduleService {
                 sender.info(sync = true) { asLang("module-schedule-service-load-detail-deleted", deleted) }
             }
             if (failed > 0) {
-                sender.warning(sync = true) { asLang("module-schedule-service-load-detail-deleted", failed) }
+                sender.warning(sync = true) { asLang("module-schedule-service-load-detail-failed", failed) }
             }
             sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
         }

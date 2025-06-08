@@ -289,7 +289,7 @@ object ScriptService {
                 sender.info(sync = true) { asLang("module-script-service-load-detail-deleted", deleted) }
             }
             if (failed > 0) {
-                sender.warning(sync = true) { asLang("module-script-service-load-detail-deleted", failed) }
+                sender.warning(sync = true) { asLang("module-script-service-load-detail-failed", failed) }
             }
             sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
         }

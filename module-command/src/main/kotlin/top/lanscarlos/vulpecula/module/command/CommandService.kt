@@ -101,7 +101,7 @@ object CommandService {
                 sender.info(sync = true) { asLang("module-command-service-load-detail-deleted", deleted) }
             }
             if (failed > 0) {
-                sender.warning(sync = true) { asLang("module-command-service-load-detail-deleted", failed) }
+                sender.warning(sync = true) { asLang("module-command-service-load-detail-failed", failed) }
             }
             sender.info(sync = true) { asLang("module-command-service-load-success", registry.size, time) }
         }
