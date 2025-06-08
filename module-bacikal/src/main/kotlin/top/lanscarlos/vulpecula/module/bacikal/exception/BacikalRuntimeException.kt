@@ -32,10 +32,6 @@ open class BacikalRuntimeException(
     private val colorWarning: String = "&e".colored()
     private val colorError: String = "&c".colored()
 
-    open fun printKetherMessage(detailError: Boolean = false) {
-        cause.printKetherErrorMessage(detailError)
-    }
-
     fun printLocalizedMessage(sender: ProxyCommandSender) {
         sender.error(sync = true) { getActionMessage() }
         sender.error(sync = true) { getReasonMessage() }
@@ -43,25 +39,29 @@ open class BacikalRuntimeException(
     }
 
     fun getActionMessage(): String {
-        return asLang("module-bacikal-service-execute-failure-action", content)
+        return asLang("module-bacikal-exception-action", content)
     }
 
     /**
      * 获取报错原因信息
      * */
     fun getReasonMessage(): String {
-        return asLang("module-bacikal-service-execute-failure-reason", cause.localizedMessage)
+        return asLang("module-bacikal-exception-reason", cause.localizedMessage)
     }
 
     fun getDetailMessage(): String {
         val lines = quest.getProperty<CharArray>("content")?.let(::String)?.split('\n')
-        val builder = StringBuilder(asLang("module-bacikal-service-execute-failure-detail-header"))
+        val builder = StringBuilder(asLang("module-bacikal-exception-detail-header"))
         if (lines == null) {
             listOf(
                 "&c# 无法查看当前任务的全部源码",
                 "&c# Unable to view all source code of the current task."
             ).forEach {
-                builder.appendLine(asLang("module-bacikal-service-execute-failure-detail-item", 1.formatIndex(), it.colored()))
+                builder.appendLine(asLang("module-bacikal-exception-detail-item", 1.formatIndex(), it.colored()))
+            }
+            val footer = asLang("module-bacikal-exception-detail-footer")
+            if (footer.isNotBlank()) {
+                builder.append('\n').append(footer)
             }
             return builder.toString()
         }
@@ -73,8 +73,12 @@ open class BacikalRuntimeException(
                 else -> colorWarning
             }
             val line = lines.getOrNull(index) ?: break
-            val content = asLang("module-bacikal-service-execute-failure-detail-item", (index + 1).formatIndex(), color + line)
+            val content = asLang("module-bacikal-exception-detail-item", (index + 1).formatIndex(), color + line)
             builder.append('\n').append(content)
+        }
+        val footer = asLang("module-bacikal-exception-detail-footer")
+        if (footer.isNotBlank()) {
+            builder.append('\n').append(footer)
         }
         return builder.toString()
     }

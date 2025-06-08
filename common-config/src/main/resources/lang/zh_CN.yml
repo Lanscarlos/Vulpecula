@@ -5,4 +5,4 @@ common-config-main-load-succeeded: '主配置加载成功 &8({0} ms)'
 common-config-main-load-failed: '主配置加载失败！'
 
 common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
-common-config-exception-field-read-failure: '字段 &e{0}&7 读取异常. {1}'
+common-config-exception-field-read-failure: '字段 &e{0}&7 {1}'

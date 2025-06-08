@@ -39,7 +39,7 @@ class BacikalCompileException(
      * 获取报错原因信息
      * */
     fun getErrorReasonMessage(): String {
-        return asLang("module-bacikal-service-compile-failure-reason", cause.localizedMessage)
+        return asLang("module-bacikal-exception-reason", cause.localizedMessage)
     }
 
     /**
@@ -132,11 +132,15 @@ class BacikalCompileException(
     }
 
     private fun buildErrorDetailMessage(lines: List<String>, startLine: Int, endLine: Int): String {
-        val builder = StringBuilder(asLang("module-bacikal-service-compile-failure-detail-header"))
+        val builder = StringBuilder(asLang("module-bacikal-exception-detail-header"))
         for (index in startLine until endLine) {
             val line = lines.getOrNull(index) ?: break
-            val content = asLang("module-bacikal-service-compile-failure-detail-item", (index + 1).formatIndex(), line)
+            val content = asLang("module-bacikal-exception-detail-item", (index + 1).formatIndex(), line)
             builder.append('\n').append(content)
+        }
+        val footer = asLang("module-bacikal-exception-detail-footer")
+        if (footer.isNotBlank()) {
+            builder.append('\n').append(footer)
         }
         return builder.toString()
     }
