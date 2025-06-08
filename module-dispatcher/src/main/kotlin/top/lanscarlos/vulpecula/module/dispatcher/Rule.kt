@@ -1,10 +1,10 @@
-package top.lanscarlos.vulpecula.dispatcher
+package top.lanscarlos.vulpecula.module.dispatcher
 
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.dispatcher.rule.RuleRegistry
+import top.lanscarlos.vulpecula.module.dispatcher.rule.RuleRegistry
 
 /**
  * Vulpecula

@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.dispatcher.rule
+package top.lanscarlos.vulpecula.module.dispatcher.rule
 
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
@@ -6,7 +6,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.dispatcher.Rule
+import top.lanscarlos.vulpecula.module.dispatcher.Rule
 import java.lang.reflect.ParameterizedType
 
 /**

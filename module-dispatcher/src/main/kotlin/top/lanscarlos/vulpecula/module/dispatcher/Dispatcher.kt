@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.dispatcher
+package top.lanscarlos.vulpecula.module.dispatcher
 
 import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority

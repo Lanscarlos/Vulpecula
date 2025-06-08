@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.dispatcher
+package top.lanscarlos.vulpecula.module.dispatcher
 
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
@@ -13,7 +13,6 @@ import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.core.utils.error
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptFlow

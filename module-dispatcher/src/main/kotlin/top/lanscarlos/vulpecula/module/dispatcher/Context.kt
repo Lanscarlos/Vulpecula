@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.dispatcher
+package top.lanscarlos.vulpecula.module.dispatcher
 
 import org.bukkit.entity.Player
 import org.bukkit.event.Event

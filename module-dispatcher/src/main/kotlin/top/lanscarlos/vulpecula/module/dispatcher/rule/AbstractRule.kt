@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.dispatcher.rule
+package top.lanscarlos.vulpecula.module.dispatcher.rule
 
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
@@ -13,8 +13,8 @@ import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.dispatcher.Context
-import top.lanscarlos.vulpecula.dispatcher.Rule
+import top.lanscarlos.vulpecula.module.dispatcher.Context
+import top.lanscarlos.vulpecula.module.dispatcher.Rule
 import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import java.util.concurrent.TimeUnit
 
