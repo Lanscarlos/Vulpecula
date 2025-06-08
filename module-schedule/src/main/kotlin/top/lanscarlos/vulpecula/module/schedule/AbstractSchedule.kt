@@ -12,7 +12,6 @@ import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.core.utils.error
 
 /**
  * Vulpecula
@@ -200,7 +199,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         fun onFailure(ex: BacikalRuntimeException) {
             // 脚本运行异常时, 暂停任务
             pause()
-            console().error(ScheduleService.module) { asLang("module-schedule-run-failure", id, pid) }
+            console().error { asLang("module-schedule-run-failure", id, pid) }
             ex.printLocalizedMessage(console(), ScheduleService.module)
         }
 

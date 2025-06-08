@@ -12,9 +12,6 @@ import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.core.utils.debug
-import top.lanscarlos.vulpecula.common.core.utils.error
-import top.lanscarlos.vulpecula.common.core.utils.info
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
 
@@ -108,7 +105,7 @@ object ScheduleService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
-            sender.error(module, sync = true) { asLang("module-schedule-service-file-load-failure", id, e.localizedMessage) }
+            sender.error(sync = true) { asLang("module-schedule-service-file-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
@@ -127,13 +124,13 @@ object ScheduleService {
         }
 
         override fun onLoadSuccess(sender: ProxyCommandSender, detail: String, time: Double) {
-            sender.debug(module, sync = true) { asLang("module-schedule-service-load-detail", detail) }
-            sender.info(module, sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
+            sender.debug(sync = true) { asLang("module-schedule-service-load-detail", detail) }
+            sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
         }
 
         override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
             e.printStackTrace()
-            sender.error(module, sync = true) { asLang("module-schedule-service-load-failure", e.localizedMessage) }
+            sender.error(sync = true) { asLang("module-schedule-service-load-failure", e.localizedMessage) }
         }
 
     }
