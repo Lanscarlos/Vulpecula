@@ -128,7 +128,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             }
 
             // 重载完成
-            callback.onLoadSuccess(sender, buildDetailMessage(created, modified, deleted, failed), timing(startTime))
+            callback.onLoadSuccess(sender, created, modified, deleted, failed, timing(startTime))
         } catch (e: Throwable) {
             // 加载失败, 重置缓存
             reset()

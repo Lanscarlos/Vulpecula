@@ -278,8 +278,19 @@ object ScriptService {
             releaseResourceFolder("script")
         }
 
-        override fun onLoadSuccess(sender: ProxyCommandSender, detail: String, time: Double) {
-            sender.debug(sync = true) { asLang("module-script-service-load-detail", detail) }
+        override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {
+            if (created > 0) {
+                sender.info(sync = true) { asLang("module-script-service-load-detail-created", created) }
+            }
+            if (modified > 0) {
+                sender.info(sync = true) { asLang("module-script-service-load-detail-modified", modified) }
+            }
+            if (deleted > 0) {
+                sender.info(sync = true) { asLang("module-script-service-load-detail-deleted", deleted) }
+            }
+            if (failed > 0) {
+                sender.warning(sync = true) { asLang("module-script-service-load-detail-deleted", failed) }
+            }
             sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
         }
 

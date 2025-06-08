@@ -123,8 +123,19 @@ object ScheduleService {
             releaseResourceFolder("schedule")
         }
 
-        override fun onLoadSuccess(sender: ProxyCommandSender, detail: String, time: Double) {
-            sender.debug(sync = true) { asLang("module-schedule-service-load-detail", detail) }
+        override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {
+            if (created > 0) {
+                sender.info(sync = true) { asLang("module-schedule-service-load-detail-created", created) }
+            }
+            if (modified > 0) {
+                sender.info(sync = true) { asLang("module-schedule-service-load-detail-modified", modified) }
+            }
+            if (deleted > 0) {
+                sender.info(sync = true) { asLang("module-schedule-service-load-detail-deleted", deleted) }
+            }
+            if (failed > 0) {
+                sender.warning(sync = true) { asLang("module-schedule-service-load-detail-deleted", failed) }
+            }
             sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
         }
 
