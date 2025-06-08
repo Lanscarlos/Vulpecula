@@ -239,7 +239,7 @@ object ScheduleCommand {
         // 尾部
         val footer = asLang("module-schedule-command-detail-footer")
         if (footer.isNotEmpty()) {
-            builder.append(footer)
+            builder.newLine().append(footer)
         }
 
         // 发送消息

@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.schedule.selector
 
 import org.bukkit.Bukkit
+import org.bukkit.World
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import top.lanscarlos.vulpecula.module.schedule.SenderSelector
@@ -14,9 +15,9 @@ import top.lanscarlos.vulpecula.module.schedule.SenderSelector
  */
 class WorldSelector(val name: String) : SenderSelector {
 
+    val world: World = Bukkit.getWorld(name) ?: error("无法解析世界 $name")
+
     override fun select(sender: ProxyCommandSender?): List<ProxyCommandSender> {
-        val world = Bukkit.getWorld(name)
-            ?: error("无法解析世界 $name")
         return world.players.map(::adaptPlayer)
     }
 }
