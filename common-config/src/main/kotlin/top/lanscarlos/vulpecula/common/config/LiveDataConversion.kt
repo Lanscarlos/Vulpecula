@@ -32,7 +32,12 @@ fun <T> LiveData<T>.boolean(): LiveData<Boolean> {
 }
 
 fun <T> LiveData<T>.boolean(defaultValue: Boolean): LiveData<Boolean> {
-    return LiveDataTransformer(this) { BooleanApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        BooleanApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.intOrNull(): LiveData<Int?> {
@@ -44,7 +49,12 @@ fun <T> LiveData<T>.int(): LiveData<Int> {
 }
 
 fun <T> LiveData<T>.int(defaultValue: Int): LiveData<Int> {
-    return LiveDataTransformer(this) { IntApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        IntApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.longOrNull(): LiveData<Long?> {
@@ -56,7 +66,12 @@ fun <T> LiveData<T>.long(): LiveData<Long> {
 }
 
 fun <T> LiveData<T>.long(defaultValue: Long): LiveData<Long> {
-    return LiveDataTransformer(this) { LongApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        LongApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.floatOrNull(): LiveData<Float?> {
@@ -68,7 +83,12 @@ fun <T> LiveData<T>.float(): LiveData<Float> {
 }
 
 fun <T> LiveData<T>.float(defaultValue: Float): LiveData<Float> {
-    return LiveDataTransformer(this) { FloatApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        FloatApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.doubleOrNull(): LiveData<Double?> {
@@ -80,7 +100,12 @@ fun <T> LiveData<T>.double(): LiveData<Double> {
 }
 
 fun <T> LiveData<T>.double(defaultValue: Double): LiveData<Double> {
-    return LiveDataTransformer(this) { DoubleApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        DoubleApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.stringOrNull(): LiveData<String?> {
@@ -92,7 +117,12 @@ fun <T> LiveData<T>.string(): LiveData<String> {
 }
 
 fun <T> LiveData<T>.string(defaultValue: String): LiveData<String> {
-    return LiveDataTransformer(this) { StringApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        StringApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.listOrNull(): LiveData<List<*>?> {
@@ -104,7 +134,12 @@ fun <T> LiveData<T>.list(): LiveData<List<*>> {
 }
 
 fun <T> LiveData<T>.list(defaultValue: List<*>): LiveData<List<*>> {
-    return LiveDataTransformer(this) { ListApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        ListApplicative.convert(it)
+    }
 }
 
 fun <T> LiveData<T>.mapOrNull(): LiveData<Map<*, *>?> {
@@ -116,7 +151,12 @@ fun <T> LiveData<T>.map(): LiveData<Map<*, *>> {
 }
 
 fun <T> LiveData<T>.map(defaultValue: Map<*, *>): LiveData<Map<*, *>> {
-    return LiveDataTransformer(this) { MapApplicative.convertOrNull(it) ?: defaultValue }
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        MapApplicative.convert(it)
+    }
 }
 
 @JvmName("mapToNonNullList")
@@ -184,7 +224,12 @@ fun <T> LiveData<T>.stringList(): LiveData<List<String>> {
 }
 
 fun <T> LiveData<T>.stringList(defaultValue: List<String>): LiveData<List<String>> {
-    return list(defaultValue).mapTo(StringApplicative::convert)
+    return LiveDataTransformer(this) {
+        if (it == null) {
+            return@LiveDataTransformer defaultValue
+        }
+        ListApplicative.convert(it)?.map(StringApplicative::convert) ?: defaultValue
+    }
 }
 
 fun <T> LiveData<T>.mapList(): LiveData<List<Map<*, *>>> {
