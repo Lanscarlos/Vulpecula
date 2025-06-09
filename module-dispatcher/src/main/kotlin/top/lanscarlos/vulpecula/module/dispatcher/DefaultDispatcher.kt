@@ -42,8 +42,15 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     val rule: DispatcherRule<Event> by config.read("rule").convert(::parseRule)
 
+    init {
+        Listener.register(this)
+    }
+
     override fun reload(file: File) {
+        // 先注销监听器, 再加载配置, 否则会丢失原有的事件类和事件优先级数据
+        Listener.unregister(this)
         config.loadFromFile(file)
+        Listener.register(this)
     }
 
     override fun accept(event: Event) {

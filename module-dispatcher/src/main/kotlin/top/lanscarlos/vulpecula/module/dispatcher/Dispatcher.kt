@@ -5,6 +5,7 @@ import taboolib.common.platform.event.EventPriority
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.module.script.Script
 import java.io.File
+import java.util.function.Consumer
 
 /**
  * Vulpecula
@@ -13,7 +14,7 @@ import java.io.File
  * @author Lanscarlos
  * @since 2025/6/4 9:22
  */
-interface Dispatcher {
+interface Dispatcher : Consumer<Event> {
 
     val id: String
 
@@ -28,8 +29,6 @@ interface Dispatcher {
     val postprocessing: Script?
 
     val executable: Script
-
-    fun accept(event: Event)
 
     fun reload(file: File)
 
