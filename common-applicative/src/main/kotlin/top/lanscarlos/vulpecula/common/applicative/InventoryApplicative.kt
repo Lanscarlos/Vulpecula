@@ -5,8 +5,8 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import taboolib.common.platform.ProxyPlayer
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -22,8 +22,8 @@ object InventoryApplicative : AbstractApplicative<Inventory>(Inventory::class.ja
             is Inventory -> instance
             is HumanEntity -> instance.inventory
             is ProxyPlayer -> instance.cast<Player>().inventory
-            is String -> Bukkit.getPlayerExact(instance)?.inventory ?: throw InvalidValueException(instance, Inventory::class.java)
-            else -> throw UnsupportedTypeException(instance::class.java, Inventory::class.java)
+            is String -> Bukkit.getPlayerExact(instance)?.inventory ?: throw ValueConversionException(instance, Inventory::class.java)
+            else -> throw TypeConversionException(instance::class.java, Inventory::class.java)
         }
     }
 

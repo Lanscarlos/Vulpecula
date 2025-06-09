@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.ProxyCommandSender
+import top.lanscarlos.vulpecula.common.core.exception.InvalidArgumentFormatException
 import top.lanscarlos.vulpecula.module.schedule.selector.*
 
 /**
@@ -32,11 +33,17 @@ interface SenderSelector {
                     WorldSelector(selector[1])
                 }
                 "range" -> {
-                    require(selector.size == 3) { "不合法" }
+                    if (selector.size != 3) {
+                        // 参数个数不匹配
+                        throw InvalidArgumentFormatException(value)
+                    }
                     RangeSelector(selector[1], selector[2])
                 }
                 "area" -> {
-                    require(selector.size == 3) { "不合法" }
+                    if (selector.size != 3) {
+                        // 参数个数不匹配
+                        throw InvalidArgumentFormatException(value)
+                    }
                     AreaSelector(selector[1], selector[2])
                 }
                 else -> error("Unknown sender: $value")

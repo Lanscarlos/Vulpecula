@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 import java.awt.Color
 
 /**
@@ -37,12 +37,12 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
                         }
                     }
                     else -> {
-                        val rgb = instance.toIntOrNull() ?: throw InvalidValueException(instance, Color::class.java)
+                        val rgb = instance.toIntOrNull() ?: throw ValueConversionException(instance, Color::class.java)
                         Color(rgb)
                     }
                 }
             }
-            else -> throw UnsupportedTypeException(instance::class.java, Color::class.java)
+            else -> throw TypeConversionException(instance::class.java, Color::class.java)
         }
     }
 

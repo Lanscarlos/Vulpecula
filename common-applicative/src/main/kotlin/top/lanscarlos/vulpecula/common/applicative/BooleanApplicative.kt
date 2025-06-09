@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -19,8 +19,8 @@ object BooleanApplicative : AbstractApplicative<Boolean>(Boolean::class.java) {
             is Boolean -> instance
             "true", "True", "TRUE" -> true
             "false", "False", "FALSE" -> false
-            is String -> throw InvalidValueException(instance, Boolean::class.java)
-            else -> throw UnsupportedTypeException(instance::class.java, Boolean::class.java)
+            is String -> throw ValueConversionException(instance, Boolean::class.java)
+            else -> throw TypeConversionException(instance::class.java, Boolean::class.java)
         }
     }
 

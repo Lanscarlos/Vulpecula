@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -16,8 +16,8 @@ object DoubleApplicative : AbstractApplicative<Double>(Double::class.java) {
         return when (instance) {
             is Double -> instance
             is Number -> instance.toDouble()
-            is String -> instance.toDoubleOrNull() ?: throw InvalidValueException(instance, Double::class.java)
-            else -> throw UnsupportedTypeException(instance::class.java, Double::class.java)
+            is String -> instance.toDoubleOrNull() ?: throw ValueConversionException(instance, Double::class.java)
+            else -> throw TypeConversionException(instance::class.java, Double::class.java)
         }
     }
 

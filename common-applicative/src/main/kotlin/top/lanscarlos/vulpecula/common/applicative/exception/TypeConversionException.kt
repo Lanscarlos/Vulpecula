@@ -9,7 +9,7 @@ import top.lanscarlos.vulpecula.common.core.utils.asLang
  * @author Lanscarlos
  * @since 2025/5/29 10:50
  */
-class UnsupportedTypeException(val source: Class<*>, val target: Class<*>) : RuntimeException() {
+class TypeConversionException(val source: Class<*>, val target: Class<*>) : RuntimeException() {
 
     override val message: String = asLang("common-applicative-exception-unsupported-type", source.name, target.name)
 

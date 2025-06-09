@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -16,7 +16,7 @@ object MapApplicative : AbstractApplicative<Map<*, *>>(Map::class.java) {
             is Map<*, *> -> instance
             is taboolib.library.configuration.ConfigurationSection -> instance.getValues(false)
             is org.bukkit.configuration.ConfigurationSection -> instance.getValues(false)
-            else -> throw UnsupportedTypeException(instance::class.java, Map::class.java)
+            else -> throw TypeConversionException(instance::class.java, Map::class.java)
         }
     }
 

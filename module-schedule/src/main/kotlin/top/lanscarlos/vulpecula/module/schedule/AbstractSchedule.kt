@@ -4,7 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 import top.lanscarlos.vulpecula.common.config.*
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.schedule.exception.TaskNotFoundException
@@ -104,7 +104,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             is Int -> value.toLong() * 50L
             is Long -> value * 50L
             is String -> TimeUtil.parse(value)
-            else -> throw UnsupportedTypeException(value::class.java, Long::class.java)
+            else -> throw TypeConversionException(value::class.java, Long::class.java)
         }
     }
 

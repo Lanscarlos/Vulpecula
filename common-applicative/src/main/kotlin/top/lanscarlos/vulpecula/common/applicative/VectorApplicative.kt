@@ -3,8 +3,8 @@ package top.lanscarlos.vulpecula.common.applicative
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
 import taboolib.platform.util.toProxyLocation
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -40,10 +40,10 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
                         val demand = instance.split(",").map { it.toDouble() }
                         Vector(demand[0], demand[1], demand[2])
                     }
-                    else -> throw InvalidValueException(instance, Vector::class.java)
+                    else -> throw ValueConversionException(instance, Vector::class.java)
                 }
             }
-            else -> throw UnsupportedTypeException(instance::class.java, Vector::class.java)
+            else -> throw TypeConversionException(instance::class.java, Vector::class.java)
         }
     }
 

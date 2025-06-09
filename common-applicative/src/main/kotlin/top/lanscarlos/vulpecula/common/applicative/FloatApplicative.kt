@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative
 
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -16,8 +16,8 @@ object FloatApplicative : AbstractApplicative<Float>(Float::class.java) {
         return when (instance) {
             is Float -> instance
             is Number -> instance.toFloat()
-            is String -> instance.toFloatOrNull() ?: throw InvalidValueException(instance, Float::class.java)
-            else -> throw UnsupportedTypeException(instance::class.java, Float::class.java)
+            is String -> instance.toFloatOrNull() ?: throw ValueConversionException(instance, Float::class.java)
+            else -> throw TypeConversionException(instance::class.java, Float::class.java)
         }
     }
 

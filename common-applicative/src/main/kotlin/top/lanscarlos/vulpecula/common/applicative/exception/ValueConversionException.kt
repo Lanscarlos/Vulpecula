@@ -9,7 +9,7 @@ import top.lanscarlos.vulpecula.common.core.utils.asLang
  * @author Lanscarlos
  * @since 2025/5/29 11:54
  */
-class InvalidValueException(val value: String, val target: Class<*>) : RuntimeException() {
+class ValueConversionException(val value: String, val target: Class<*>) : RuntimeException() {
 
     override val message: String = asLang("common-applicative-exception-invalid-value", value, target.name)
 

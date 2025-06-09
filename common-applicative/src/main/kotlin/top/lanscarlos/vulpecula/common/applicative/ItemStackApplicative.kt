@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.function.warning
 import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 import kotlin.jvm.optionals.getOrNull
 
 /**
@@ -32,12 +32,12 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
                         mat.get()
                     } else {
                         warning("ItemStackApplicative#apply >> Instance cannot transform to material. $instance")
-                        throw InvalidValueException(instance, ItemStack::class.java)
+                        throw ValueConversionException(instance, ItemStack::class.java)
                     }
                 }
                 buildItem(material)
             }
-            else -> throw UnsupportedTypeException(instance::class.java, ItemStack::class.java)
+            else -> throw TypeConversionException(instance::class.java, ItemStack::class.java)
         }
     }
 

@@ -6,8 +6,8 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Vector
 import taboolib.platform.util.toProxyLocation
-import top.lanscarlos.vulpecula.common.applicative.exception.InvalidValueException
-import top.lanscarlos.vulpecula.common.applicative.exception.UnsupportedTypeException
+import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 
 /**
  * Vulpecula
@@ -33,7 +33,7 @@ object LocationApplicative : AbstractApplicative<Location>(Location::class.java)
             is Vector -> Location(null, instance.x, instance.y, instance.z)
             is org.bukkit.util.Vector -> Location(null, instance.x, instance.y, instance.z)
             is String -> convert(instance)
-            else -> throw UnsupportedTypeException(instance::class.java, String::class.java)
+            else -> throw TypeConversionException(instance::class.java, String::class.java)
         }
     }
 
@@ -79,7 +79,7 @@ object LocationApplicative : AbstractApplicative<Location>(Location::class.java)
                     demand.getOrNull(5)?.toFloatOrNull() ?: 0f
                 )
             }
-            else -> throw InvalidValueException(instance, Player::class.java)
+            else -> throw ValueConversionException(instance, Player::class.java)
         }
     }
 
