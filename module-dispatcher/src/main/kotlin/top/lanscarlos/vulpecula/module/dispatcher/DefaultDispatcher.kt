@@ -40,7 +40,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override val executable: Script by config.read("execute").convert(::parseScript)
 
-    val rule: Rule<Event> by config.read("rule").convert(::parseRule)
+    val rule: DispatcherRule<Event> by config.read("rule").convert(::parseRule)
 
     override fun reload(file: File) {
         config.loadFromFile(file)
@@ -101,12 +101,12 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         console().error { ex.getDetailMessage() }
     }
 
-    private fun parseRule(value: Any?): Rule<Event> {
+    private fun parseRule(value: Any?): DispatcherRule<Event> {
         if (value == null) {
-            return Rule.of(clazz, Configuration.empty())
+            return DispatcherRule.of(clazz, Configuration.empty())
         }
         require(value is ConfigurationSection) { "Invalid configuration section: $value" }
-        return Rule.of(clazz, value)
+        return DispatcherRule.of(clazz, value)
     }
 
     private fun parseScript(value: Any?): Script {

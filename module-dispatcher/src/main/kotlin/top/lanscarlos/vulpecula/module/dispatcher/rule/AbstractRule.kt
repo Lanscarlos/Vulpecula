@@ -14,7 +14,7 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.module.dispatcher.Context
-import top.lanscarlos.vulpecula.module.dispatcher.Rule
+import top.lanscarlos.vulpecula.module.dispatcher.DispatcherRule
 import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import java.util.concurrent.TimeUnit
 
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * @author Lanscarlos
  * @since 2025/6/4 12:00
  */
-abstract class AbstractRule<T: Event>(val clazz: ReflexClass, val config: ConfigurationSection) : Rule<T> {
+abstract class AbstractRule<T: Event>(val clazz: ReflexClass, val config: ConfigurationSection) : DispatcherRule<T> {
 
     val playerField: ClassField? by config.read("player-field").string("~").convert(::parsePlayerField)
 

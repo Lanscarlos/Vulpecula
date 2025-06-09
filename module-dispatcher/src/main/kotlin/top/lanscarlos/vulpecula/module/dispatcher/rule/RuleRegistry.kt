@@ -6,7 +6,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.module.dispatcher.Rule
+import top.lanscarlos.vulpecula.module.dispatcher.DispatcherRule
 import java.lang.reflect.ParameterizedType
 
 /**
@@ -37,7 +37,7 @@ object RuleRegistry : ClassVisitor() {
             // 非实现类
             return
         }
-        if (!owner.hasInterface(Rule::class.java)) {
+        if (!owner.hasInterface(DispatcherRule::class.java)) {
             warning("Class ${owner.name} does not implement Rule<T>")
             return
         }

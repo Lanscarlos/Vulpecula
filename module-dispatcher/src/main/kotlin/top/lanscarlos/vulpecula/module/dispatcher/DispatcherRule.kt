@@ -13,7 +13,7 @@ import top.lanscarlos.vulpecula.module.dispatcher.rule.RuleRegistry
  * @author Lanscarlos
  * @since 2025/6/4 11:24
  */
-interface Rule<T: Event> {
+interface DispatcherRule<T: Event> {
 
     /**
      * 从事件中解析出玩家主体
@@ -38,8 +38,8 @@ interface Rule<T: Event> {
     companion object {
 
         @Suppress("UNCHECKED_CAST")
-        fun <T: Event> of(clazz: ReflexClass, section: ConfigurationSection): Rule<T> {
-            return RuleRegistry.get(clazz).newInstance(clazz, section) as Rule<T>
+        fun <T: Event> of(clazz: ReflexClass, section: ConfigurationSection): DispatcherRule<T> {
+            return RuleRegistry.get(clazz).newInstance(clazz, section) as DispatcherRule<T>
         }
 
     }
