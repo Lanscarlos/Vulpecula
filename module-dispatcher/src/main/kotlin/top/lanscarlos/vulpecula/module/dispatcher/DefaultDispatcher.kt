@@ -53,6 +53,18 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         Listener.register(this)
     }
 
+    override fun enable() {
+        TODO("Not yet implemented")
+    }
+
+    override fun disable() {
+        TODO("Not yet implemented")
+    }
+
+    override fun dispose() {
+        TODO("Not yet implemented")
+    }
+
     override fun accept(event: Event) {
         val player = rule.parsePlayer(event)
         val context = Context(event, player)

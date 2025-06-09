@@ -14,11 +14,11 @@ import java.io.File
  */
 interface ConfigServiceCallback {
 
-    fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File)
-
     fun onFileCreated(sender: ProxyCommandSender, id: String, file: File)
 
     fun onFileModified(sender: ProxyCommandSender, id: String, file: File)
+
+    fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File)
 
     fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception)
 

@@ -55,10 +55,6 @@ object CommandService {
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
-            registry.remove(id)?.unregister()
-        }
-
         override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val command = CustomCommand(id, Configuration.loadFromFile(file))
             command.register()
@@ -69,6 +65,10 @@ object CommandService {
             val command = registry[id]!!
             command.config.loadFromFile(file)
             command.rebuild()
+        }
+
+        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
+            registry.remove(id)?.unregister()
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {

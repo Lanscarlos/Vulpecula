@@ -5,7 +5,6 @@ import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.ProxyListener
 import taboolib.common.platform.function.registerBukkitListener
 import taboolib.library.reflex.ReflexClass
-import java.io.Closeable
 import java.util.EnumMap
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap

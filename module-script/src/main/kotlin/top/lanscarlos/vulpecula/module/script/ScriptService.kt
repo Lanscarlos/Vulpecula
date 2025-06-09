@@ -231,10 +231,6 @@ object ScriptService {
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
-            scripts.remove(id)
-        }
-
         override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val script = when (file.extension) {
                 "ks" -> NativeScript(id, file)
@@ -258,6 +254,10 @@ object ScriptService {
                 }
                 else -> throw InvalidTypeException(script)
             }
+        }
+
+        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
+            scripts.remove(id)
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {

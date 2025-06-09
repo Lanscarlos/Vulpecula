@@ -81,10 +81,6 @@ object ScheduleService {
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
-            registry.remove(id)
-        }
-
         override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val config = Configuration.loadFromFile(file)
             val schedule = when (val type = config.getString("type")?.lowercase()) {
@@ -102,6 +98,10 @@ object ScheduleService {
             if (schedule.isAutoStart) {
                 schedule.start()
             }
+        }
+
+        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
+            registry.remove(id)
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {

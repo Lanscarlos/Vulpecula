@@ -32,4 +32,10 @@ interface Dispatcher : Consumer<Event> {
 
     fun reload(file: File)
 
+    fun enable()
+
+    fun disable()
+
+    fun dispose()
+
 }

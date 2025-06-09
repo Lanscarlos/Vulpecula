@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.dispatcher
 
 import taboolib.common.LifeCycle
+import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
@@ -70,19 +71,23 @@ object DispatcherService {
 
     private object Callback : ConfigServiceCallback {
 
-        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
-            registry.remove(id)
-        }
-
         override fun onFileCreated(sender: ProxyCommandSender, id: String, file: File) {
             val config = Configuration.loadFromFile(file)
             val dispatcher = DefaultDispatcher(id, config)
             registry[id] = dispatcher
+
+            if (TabooLib.getCurrentLifeCycle() == LifeCycle.ACTIVE) {
+                // 重载, 直接启用
+                dispatcher.enable()
+            }
         }
 
         override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
-            val dispatcher = (registry[id] as DefaultDispatcher)
-            dispatcher.config.loadFromFile(file)
+            registry[id]!!.reload(file)
+        }
+
+        override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
+            registry.remove(id)?.dispose()
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
