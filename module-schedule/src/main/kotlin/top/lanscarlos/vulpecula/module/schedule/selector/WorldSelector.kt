@@ -4,6 +4,8 @@ import org.bukkit.Bukkit
 import org.bukkit.World
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
+import top.lanscarlos.vulpecula.common.core.exception.WorldNotFoundException
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.schedule.SenderSelector
 
 /**
@@ -15,7 +17,7 @@ import top.lanscarlos.vulpecula.module.schedule.SenderSelector
  */
 class WorldSelector(val name: String) : SenderSelector {
 
-    val world: World = Bukkit.getWorld(name) ?: error("无法解析世界 $name")
+    val world: World = Bukkit.getWorld(name) ?: throw WorldNotFoundException(name)
 
     override fun select(sender: ProxyCommandSender?): List<ProxyCommandSender> {
         return world.players.map(::adaptPlayer)

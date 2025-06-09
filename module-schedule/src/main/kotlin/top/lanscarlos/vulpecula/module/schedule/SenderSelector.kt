@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.ProxyCommandSender
 import top.lanscarlos.vulpecula.common.core.exception.InvalidArgumentFormatException
+import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.module.schedule.selector.*
 
 /**
@@ -23,7 +24,7 @@ interface SenderSelector {
                 return PlayerSelector(value)
             }
             val selector = value.substring(1).split(' ')
-            return when (selector.first().lowercase()) {
+            return when (val type = selector.first().lowercase()) {
                 "console" -> ConsoleSelector
                 "players" -> OnlinePlayerSelector
                 "world" -> {
@@ -46,7 +47,7 @@ interface SenderSelector {
                     }
                     AreaSelector(selector[1], selector[2])
                 }
-                else -> error("Unknown sender: $value")
+                else -> throw InvalidTypeException(type)
             }
         }
 
