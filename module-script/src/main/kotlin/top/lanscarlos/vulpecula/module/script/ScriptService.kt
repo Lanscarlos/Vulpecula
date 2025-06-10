@@ -117,7 +117,7 @@ object ScriptService {
             // 调用脚本
             val id = source.substring(7)
             get(id) // 检测 ID 是否存在
-            ProxyScript(source.substringBefore('@'))
+            ProxyScript(id)
         } else {
             NativeScript(source)
         }

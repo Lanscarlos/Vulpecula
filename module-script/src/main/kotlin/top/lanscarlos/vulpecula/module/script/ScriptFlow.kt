@@ -20,7 +20,7 @@ class ScriptFlow(
 
     private val scripts = mutableListOf<Script>()
     private var onFailure: Consumer<BacikalRuntimeException>? = null
-    private val preprocessMap = mutableMapOf<Script, Consumer<ScriptTask>>()
+    private val preprocessMap = mutableMapOf<Script, Consumer<Script>>()
     private val postprocessMap = mutableMapOf<Script, Consumer<ScriptTask>>()
 
     private var nextPointer: Int = -1
@@ -38,7 +38,7 @@ class ScriptFlow(
     /**
      * 设置最后一个 Script 的前置处理逻辑
      */
-    fun preprocess(preprocess: Consumer<ScriptTask>): ScriptFlow {
+    fun preprocess(preprocess: Consumer<Script>): ScriptFlow {
         require(scripts.isNotEmpty()) { "Scripts list is empty. Cannot set pre-process." }
         preprocessMap[scripts.last()] = preprocess
         return this
@@ -96,8 +96,6 @@ class ScriptFlow(
                 postprocessMap[scripts.getOrNull(nextPointer - 2)]?.accept(currentTask)
             }
             val task = nextTask() ?: return@thenCompose CompletableFuture.completedFuture(result)
-            // 执行该 Task 的前置处理
-            preprocessMap[scripts.getOrNull(nextPointer - 1)]?.accept(task)
             process(task.future)
         }
     }
@@ -107,6 +105,7 @@ class ScriptFlow(
             return null
         }
         val script = scripts.getOrNull(nextPointer++) ?: return null
+        preprocessMap[script]?.accept(script) // 前置处理
         val task = script.run(sender = sender, args = emptyList(), variables = variables)
         task.onSuccess {
             // 更新变量

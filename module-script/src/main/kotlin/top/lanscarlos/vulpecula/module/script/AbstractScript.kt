@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.info
 import taboolib.library.kether.Quest
 import top.lanscarlos.vulpecula.module.script.exception.ScriptExecuteException
 
@@ -20,6 +21,9 @@ abstract class AbstractScript : Script {
     override fun run(sender: ProxyCommandSender?, args: List<Any?>, variables: Map<String, Any>): ScriptTask {
         return try {
             execute(sender, args, variables)
+        } catch (e: ScriptExecuteException) {
+            // 消除重复嵌套
+            throw e
         } catch (e: Exception) {
             throw ScriptExecuteException(this, e)
         }
