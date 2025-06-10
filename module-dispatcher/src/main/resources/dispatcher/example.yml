@@ -1,5 +1,6 @@
+
 # 监听事件
-listen-event: 'org.bukkit.event.player.PlayerMoveEvent'
+listen-event: 'org.bukkit.event.entity.EntityShootBowEvent'
 # 监听优先级
 listen-priority: 'NORMAL'
 # 是否监听已取消的事件
