@@ -26,19 +26,21 @@ object RuleRegistry : ClassVisitor() {
     }
 
     override fun visitStart(owner: ReflexClass) {
-        if (owner.toClass().`package`.name != this.javaClass.`package`.name) {
+        val clazz = owner.toClass()
+        if (clazz.`package`.name != this.javaClass.`package`.name) {
             // 包路径不对
             return
         }
-        if (owner.toClass() == GenericEventRule::class.java) {
+        if (clazz == GenericEventRule::class.java) {
             return
         }
+        if (!DispatcherRule::class.java.isAssignableFrom(clazz)) {
+            warning("Class ${owner.name} does not implement DispatcherRule<T>")
+            return
+        }
+        clazz.isInterface
         if (owner.structure.isInterface || owner.structure.isAbstract) {
             // 非实现类
-            return
-        }
-        if (!owner.hasInterface(DispatcherRule::class.java)) {
-            warning("Class ${owner.name} does not implement Rule<T>")
             return
         }
 

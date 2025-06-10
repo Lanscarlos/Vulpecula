@@ -5,6 +5,7 @@ import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
@@ -43,26 +44,26 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     val rule: DispatcherRule<Event> by config.read("rule").convert(::parseRule)
 
     init {
-        Listener.register(this)
+        enable()
     }
 
     override fun reload(file: File) {
         // 先注销监听器, 再加载配置, 否则会丢失原有的事件类和事件优先级数据
-        Listener.unregister(this)
+        disable()
         config.loadFromFile(file)
-        Listener.register(this)
+        enable()
     }
 
     override fun enable() {
-        TODO("Not yet implemented")
+        Listener.register(this)
     }
 
     override fun disable() {
-        TODO("Not yet implemented")
+        Listener.unregister(this)
     }
 
     override fun dispose() {
-        TODO("Not yet implemented")
+        disable()
     }
 
     override fun accept(event: Event) {
@@ -88,11 +89,13 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
                     when (val status = task.variables()["@EVENT_STATUS"]) {
                         null -> {}
                         "CANCEL" -> {
+                            info("取消事件.")
                             require(event is Cancellable) { "Event $event is not Cancellable" }
                             event.isCancelled = true
                             flow.terminate()
                         }
                         "FILTER" -> {
+                            info("过滤事件.")
                             flow.terminate()
                         }
                         else -> error("Unknown event status $status")
@@ -102,17 +105,23 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
         flow.add(executable)
         if (postprocessing != null) {
-            flow.add(preprocessing!!)
+            flow.add(postprocessing!!)
         }
 
         // 处理异常
-        flow.onFailure(::onFailure)
+        flow.onFailure(::onScriptFailure)
 
         // 执行脚本流
-        flow.execute()
+        flow.execute().exceptionally {
+            onFailure(it.cause as Exception)
+        }
     }
 
-    fun onFailure(ex: BacikalRuntimeException) {
+    private fun onFailure(ex: Exception) {
+        ex.printStackTrace()
+    }
+
+    private fun onScriptFailure(ex: BacikalRuntimeException) {
         // 脚本运行异常时, 暂停任务
         console().error { asLang("module-dispatcher-run-failure", id) }
         console().error { ex.getActionMessage() }
