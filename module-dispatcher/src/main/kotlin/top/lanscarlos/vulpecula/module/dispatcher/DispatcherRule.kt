@@ -39,7 +39,7 @@ interface DispatcherRule<T: Event> {
 
         @Suppress("UNCHECKED_CAST")
         fun <T: Event> of(clazz: ReflexClass, section: ConfigurationSection): DispatcherRule<T> {
-            return RuleRegistry.get(clazz).newInstance(clazz, section) as DispatcherRule<T>
+            return RuleRegistry.get(clazz.name!!).newInstance(clazz, section) as DispatcherRule<T>
         }
 
     }

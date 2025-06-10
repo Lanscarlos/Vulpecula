@@ -74,9 +74,6 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
             return
         }
 
-        // 更新阻断
-        rule.updateBaffle(context)
-
         // 流式执行脚本
         val sender = context.player?.let(::adaptPlayer) ?: console()
         val variables = rule.parseVariables(event).mapNotNull { (k, v) -> v?.let { k to it } }.toMap()
@@ -85,22 +82,28 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         // 执行前置处理
         if (preprocessing != null) {
             flow.add(preprocessing!!)
-                .postprocess { task ->
-                    when (val status = task.variables()["@EVENT_STATUS"]) {
-                        null -> {}
-                        "CANCEL" -> {
-                            info("取消事件.")
-                            require(event is Cancellable) { "Event $event is not Cancellable" }
-                            event.isCancelled = true
-                            flow.terminate()
-                        }
-                        "FILTER" -> {
-                            info("过滤事件.")
-                            flow.terminate()
-                        }
-                        else -> error("Unknown event status $status")
+            flow.postprocess { task ->
+                when (val status = task.variables()["@EVENT_STATUS"]) {
+                    null -> {
+                        // 更新阻断
+                        rule.updateBaffle(context)
                     }
+                    "CANCEL" -> {
+                        info("取消事件.")
+                        require(event is Cancellable) { "Event $event is not Cancellable" }
+                        event.isCancelled = true
+                        flow.terminate()
+                    }
+                    "FILTER" -> {
+                        info("过滤事件.")
+                        flow.terminate()
+                    }
+                    else -> error("Unknown event status $status")
                 }
+            }
+        } else {
+            // 更新阻断
+            rule.updateBaffle(context)
         }
 
         flow.add(executable)

@@ -21,8 +21,8 @@ object RuleRegistry : ClassVisitor() {
 
     private val registry: HashMap<String, ReflexClass> = linkedMapOf()
 
-    fun get(clazz: ReflexClass): ReflexClass {
-        return registry[clazz.name!!] ?: ReflexClass.of(GenericEventRule::class.java)
+    fun get(name: String): ReflexClass {
+        return registry[name] ?: ReflexClass.of(GenericEventRule::class.java)
     }
 
     override fun visitStart(owner: ReflexClass) {
@@ -31,30 +31,35 @@ object RuleRegistry : ClassVisitor() {
             // 包路径不对
             return
         }
-        if (clazz == GenericEventRule::class.java) {
-            return
-        }
         if (!DispatcherRule::class.java.isAssignableFrom(clazz)) {
-            warning("Class ${owner.name} does not implement DispatcherRule<T>")
+            // 未继承接口
             return
         }
-        clazz.isInterface
-        if (owner.structure.isInterface || owner.structure.isAbstract) {
-            // 非实现类
+        if (!clazz.isAnnotationPresent(Rule::class.java)) {
+            // 没有 Rule 注解
+            return
+        }
+        if (clazz == GenericEventRule::class.java) {
+            // 排除泛型专用类
+            return
+        }
+
+        val annotation = clazz.getAnnotation(Rule::class.java)
+        if (annotation.value.isBlank()) {
+            registry[annotation.value] = owner
             return
         }
 
         // 获取事件类型
-        val type = when (val it = (owner.toClass().genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
+        val type = when (val it = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
             is Class<*> -> it
             is ParameterizedType -> it.rawType as Class<*>
             else -> {
-                warning("Property \"${owner.toClass().name}\" must have a generic type.")
+                warning("Property \"${clazz.name}\" must have a generic type.")
                 return
             }
         }
 
-        info("Registering Rule ${type.simpleName} for ${owner.name}")
         registry[type.name] = owner
     }
 

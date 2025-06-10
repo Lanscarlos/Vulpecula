@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.dispatcher.rule
 import org.bukkit.event.entity.EntityShootBowEvent
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ReflexClass
+import java.util.function.Consumer
 
 /**
  * Vulpecula
@@ -11,6 +12,7 @@ import taboolib.library.reflex.ReflexClass
  * @author Lanscarlos
  * @since 2025/6/6 22:39
  */
+@Rule
 class EntityShootBowEventRule(clazz: ReflexClass, config: ConfigurationSection) : EntityEventRule<EntityShootBowEvent>(clazz, config) {
 
     override fun parseVariables(event: EntityShootBowEvent): Map<String, Any?> {
@@ -22,4 +24,5 @@ class EntityShootBowEventRule(clazz: ReflexClass, config: ConfigurationSection) 
             )
         )
     }
+
 }
