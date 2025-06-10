@@ -59,7 +59,7 @@ abstract class AbstractRule<T: Event>(val clazz: ReflexClass, val config: Config
     }
 
     private fun parsePlayerField(value: String): ClassField? {
-        if (value != "@") {
+        if (value != "~") {
             return clazz.getField(value)
         }
 
