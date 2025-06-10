@@ -2,9 +2,7 @@ package top.lanscarlos.vulpecula.common.config
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.Reflex.Companion.getProperty
-import taboolib.module.configuration.ConfigSection
 import taboolib.module.configuration.Configuration
-import java.lang.reflect.Constructor
 import java.util.function.Consumer
 
 /**
@@ -18,8 +16,6 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
 
     override var id: String = keys.first()
 
-    private val root: Configuration
-
     private var onUpdate: Consumer<Any?>? = null
 
     private var value: Any? = null
@@ -28,27 +24,14 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
         // 初始化并读取值
         run()
 
-        // 获取根配置
-        var parent: ConfigurationSection = config
-        while (parent.parent != null) {
-            parent = parent.parent!!
+        if (config is Configuration) {
+            // 注册变动监听
+            config.onReload(this)
         }
-
-        // 注册变动监听
-        root = parent as? Configuration ?: error("Root configuration not found.")
-        root.onReload(this)
     }
 
     override fun run() {
-        val value = read()
-        if (value is ConfigSection) {
-            // 手动修复 ConfigurationSection 的父对象缺失问题
-            val root = value.getProperty<Any>("root")!!
-            val section = constructor.newInstance(root, value.name, config)
-            this.value = section
-        } else {
-            this.value = value
-        }
+        value = read()
         onUpdate?.accept(getValue())
     }
 
@@ -73,19 +56,12 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
 
     fun dispose() {
         // 移除监听器
-        val reloadCallback = root.getProperty<ArrayList<Runnable>>("reloadCallback")
-            ?: error("ReloadCallback does not exist.")
-        reloadCallback.removeIf { it == this }
-    }
-
-    companion object {
-
-        val constructor: Constructor<ConfigSection> by lazy {
-            val sectionClass = ConfigSection::class.java
-            val rootClass = sectionClass.getDeclaredField("root").type
-            sectionClass.getDeclaredConstructor(rootClass, String::class.java, ConfigurationSection::class.java)
+        if (config !is Configuration) {
+            return
         }
-
+        val reloadCallback = config.getProperty<ArrayList<Runnable>>("reloadCallback")
+            ?: error("DelegateConfigNode#dispose >> ReloadCallback does not exist.")
+        reloadCallback.removeIf { it == this }
     }
 
 }
