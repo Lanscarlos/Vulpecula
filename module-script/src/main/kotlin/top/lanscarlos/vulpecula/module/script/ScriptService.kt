@@ -115,7 +115,7 @@ object ScriptService {
     fun compile(source: String): Script {
         return if (source.getOrNull(6) == '@' && source.lowercase().startsWith("script@")) {
             // 调用脚本
-            val id = source.substring(6)
+            val id = source.substring(7)
             get(id) // 检测 ID 是否存在
             ProxyScript(source.substringBefore('@'))
         } else {

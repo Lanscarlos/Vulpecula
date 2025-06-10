@@ -47,7 +47,8 @@ class LiveDataTransformer<T, R>(val source: LiveData<T>, val transfer: Function<
                 // 重复包装
                 throw e
             }
-            throw ConfigFieldReadException("$id.${e.field}", e)
+            // 嵌套包装, 去除嵌套
+            throw ConfigFieldReadException("$id.${e.field}", e.cause)
         } catch (e: Exception) {
             throw ConfigFieldReadException(id, e)
         }

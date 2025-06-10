@@ -2,7 +2,9 @@ package top.lanscarlos.vulpecula.common.config
 
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.Reflex.Companion.getProperty
+import taboolib.module.configuration.ConfigSection
 import taboolib.module.configuration.Configuration
+import java.lang.reflect.Constructor
 import java.util.function.Consumer
 
 /**
@@ -38,7 +40,15 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
     }
 
     override fun run() {
-        value = read()
+        val value = read()
+        if (value is ConfigSection) {
+            // 手动修复 ConfigurationSection 的父对象缺失问题
+            val root = value.getProperty<Any>("root")!!
+            val section = constructor.newInstance(root, value.name, config)
+            this.value = section
+        } else {
+            this.value = value
+        }
         onUpdate?.accept(getValue())
     }
 
@@ -66,6 +76,16 @@ class DelegateConfigNode(val config: ConfigurationSection, private val keys: Arr
         val reloadCallback = root.getProperty<ArrayList<Runnable>>("reloadCallback")
             ?: error("ReloadCallback does not exist.")
         reloadCallback.removeIf { it == this }
+    }
+
+    companion object {
+
+        val constructor: Constructor<ConfigSection> by lazy {
+            val sectionClass = ConfigSection::class.java
+            val rootClass = sectionClass.getDeclaredField("root").type
+            sectionClass.getDeclaredConstructor(rootClass, String::class.java, ConfigurationSection::class.java)
+        }
+
     }
 
 }

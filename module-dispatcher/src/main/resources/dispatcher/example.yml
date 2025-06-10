@@ -21,7 +21,7 @@ post-processing: |-
     tell post-processing
 
 # 脚本
-script: 'script@example'
+execute: 'script@example'
 
 # 调试
 debug:

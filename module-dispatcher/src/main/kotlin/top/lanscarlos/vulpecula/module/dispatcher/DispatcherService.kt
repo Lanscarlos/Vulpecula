@@ -91,13 +91,14 @@ object DispatcherService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
-            sender.error(sync = true) { asLang("module-dispatcher-service-load-failure", id, e.localizedMessage) }
+            sender.error(sync = true) { asLang("module-dispatcher-service-file-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
                         is BacikalCompileException -> cause.printLocalizedMessage(sender, module)
                     }
+                    e.cause.printStackTrace()
                 }
                 else -> {
                     e.printStackTrace()
