@@ -93,7 +93,7 @@ class ScriptFlow(
         return source.thenCompose { result ->
             // 执行上一个 Task 的后置处理
             if (::currentTask.isInitialized) {
-                postprocessMap[scripts.getOrNull(nextPointer - 2)]?.accept(currentTask)
+                postprocessMap[scripts.getOrNull(nextPointer - 1)]?.accept(currentTask)
             }
             val task = nextTask() ?: return@thenCompose CompletableFuture.completedFuture(result)
             process(task.future)
