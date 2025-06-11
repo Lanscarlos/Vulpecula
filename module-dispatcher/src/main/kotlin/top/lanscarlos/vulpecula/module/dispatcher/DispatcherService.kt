@@ -98,7 +98,6 @@ object DispatcherService {
                     when (val cause = e.cause) {
                         is BacikalCompileException -> cause.printLocalizedMessage(sender, module)
                     }
-                    e.cause.printStackTrace()
                 }
                 else -> {
                     e.printStackTrace()
