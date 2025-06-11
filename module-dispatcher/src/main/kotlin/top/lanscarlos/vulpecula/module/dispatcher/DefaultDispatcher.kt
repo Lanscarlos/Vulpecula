@@ -134,7 +134,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     }
 
     private fun parseRule(value: Any?): DispatcherRule<Event> {
-        val name = config.getString("listen-class")!!
+        val name = config.getString("listen-event")!!
         if (value == null) {
             return DispatcherRule.of(name, clazz, Configuration.empty())
         }
@@ -173,7 +173,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
         val clazz = try {
             Class.forName(value)
-        } catch (e: ClassNotFoundException) {
+        } catch (_: ClassNotFoundException) {
             error("Event class not found: $value")
         }
         require(Event::class.java.isAssignableFrom(clazz)) { "Event class must be subclass of class ${Event::class.java.name}" }

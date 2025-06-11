@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.module.dispatcher.rule
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.module.dispatcher.DispatcherRule
@@ -57,13 +56,10 @@ object RuleRegistry : ClassVisitor() {
         }
 
         // 获取事件类型
-        val type = when (val it = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
-            is Class<*> -> it
-            is ParameterizedType -> it.rawType as Class<*>
-            else -> {
-                warning("Property \"${clazz.name}\" must have a generic type.")
-                return
-            }
+        val type = getParameterizedType(clazz)
+        if (type == null) {
+            warning("Property \"${clazz.name}\" must have a generic type.")
+            return
         }
 
         val annotation = clazz.getAnnotation(Rule::class.java)
@@ -76,6 +72,21 @@ object RuleRegistry : ClassVisitor() {
         }
 
         registry[type.name] = owner
+    }
+
+    /**
+     * 获取类的泛型
+     * */
+    private fun getParameterizedType(clazz: Class<*>): Class<*>? {
+        var cache: Class<*> = clazz
+        do {
+            when (val it = (cache.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
+                is Class<*> -> return it
+                is ParameterizedType -> return it.rawType as Class<*>
+                else -> cache = cache.superclass
+            }
+        } while (cache.isAnnotationPresent(Rule::class.java))
+        return null
     }
 
     override fun getLifeCycle(): LifeCycle = LifeCycle.LOAD
