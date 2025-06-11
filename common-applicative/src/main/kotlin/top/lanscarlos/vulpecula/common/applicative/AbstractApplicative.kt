@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.common.applicative
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.library.reflex.Reflex.Companion.setProperty
+import top.lanscarlos.vulpecula.common.applicative.exception.NullValueException
 
 /**
  * Vulpecula
@@ -59,7 +60,7 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
 
     override fun convert(instance: Any?): T {
         if (instance == null) {
-            throw NullPointerException("instance is null.")
+            throw NullValueException()
         }
         return convertOrThrow(instance)
     }
