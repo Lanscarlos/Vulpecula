@@ -27,11 +27,11 @@ import java.util.concurrent.TimeUnit
  */
 abstract class AbstractRule<T: Event>(val clazz: ReflexClass, val config: ConfigurationSection) : DispatcherRule<T> {
 
-    open val playerField: ClassField? by config.read("player-field").string("~").convert(::parsePlayerField)
+    open val baffle: Baffle? by config.read("baffle").convert(::parseBaffle)
 
     open val playerRequired: Boolean by config.read("player-required").boolean(false)
 
-    open val baffle: Baffle? by config.read("baffle").convert(::parseBaffle)
+    open val playerField: ClassField? by config.read("player-field").string("~").convert(::parsePlayerField)
 
     override fun parsePlayer(event: T): Player? {
         return playerField?.get(event) as? Player
