@@ -38,8 +38,8 @@ interface DispatcherRule<T: Event> {
     companion object {
 
         @Suppress("UNCHECKED_CAST")
-        fun <T: Event> of(clazz: ReflexClass, section: ConfigurationSection): DispatcherRule<T> {
-            return RuleRegistry.get(clazz.name!!).newInstance(clazz, section) as DispatcherRule<T>
+        fun <T: Event> of(name: String, clazz: ReflexClass, section: ConfigurationSection): DispatcherRule<T> {
+            return RuleRegistry.get(name).newInstance(clazz, section) as DispatcherRule<T>
         }
 
     }

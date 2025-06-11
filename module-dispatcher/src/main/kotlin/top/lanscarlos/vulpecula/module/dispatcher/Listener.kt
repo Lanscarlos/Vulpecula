@@ -51,14 +51,13 @@ class Listener(val clazz: ReflexClass) {
 
         private val cache = ConcurrentHashMap<ReflexClass, Listener>()
 
-        fun register(dispatcher: Dispatcher) {
-            val clazz = dispatcher.clazz
+        fun register(clazz: ReflexClass, dispatcher: Dispatcher) {
             val listener = cache.computeIfAbsent(clazz) { Listener(clazz) }
             listener.register(dispatcher)
         }
 
-        fun unregister(dispatcher: Dispatcher) {
-            cache[dispatcher.clazz]?.unregister(dispatcher)
+        fun unregister(clazz: ReflexClass, dispatcher: Dispatcher) {
+            cache[clazz]?.unregister(dispatcher)
         }
 
     }

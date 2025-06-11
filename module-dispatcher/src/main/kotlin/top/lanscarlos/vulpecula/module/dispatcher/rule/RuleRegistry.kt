@@ -19,10 +19,22 @@ import java.lang.reflect.ParameterizedType
 @Awake(LifeCycle.LOAD)
 object RuleRegistry : ClassVisitor() {
 
+    /**
+     * name -> Rule Class 映射
+     * */
     private val registry: HashMap<String, ReflexClass> = linkedMapOf()
+
+    /**
+     * name -> Event Class 映射
+     * */
+    private val mapping: HashMap<String, ReflexClass> = linkedMapOf()
 
     fun get(name: String): ReflexClass {
         return registry[name] ?: ReflexClass.of(GenericEventRule::class.java)
+    }
+
+    fun mapping(name: String): ReflexClass {
+        return mapping[name] ?: error("No event mapping \"$name\" found.")
     }
 
     override fun visitStart(owner: ReflexClass) {
@@ -44,12 +56,6 @@ object RuleRegistry : ClassVisitor() {
             return
         }
 
-        val annotation = clazz.getAnnotation(Rule::class.java)
-        if (annotation.value.isBlank()) {
-            registry[annotation.value] = owner
-            return
-        }
-
         // 获取事件类型
         val type = when (val it = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
             is Class<*> -> it
@@ -58,6 +64,15 @@ object RuleRegistry : ClassVisitor() {
                 warning("Property \"${clazz.name}\" must have a generic type.")
                 return
             }
+        }
+
+        val annotation = clazz.getAnnotation(Rule::class.java)
+        if (annotation.value.isNotBlank()) {
+            // 自定义名称不为空
+            val name = "@${annotation.value}"
+            mapping[name] = ReflexClass.of(type)
+            registry[name] = owner
+            return
         }
 
         registry[type.name] = owner

@@ -15,6 +15,7 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.dispatcher.rule.RuleRegistry
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptFlow
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -55,11 +56,11 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     }
 
     override fun enable() {
-        Listener.register(this)
+        Listener.register(clazz, this)
     }
 
     override fun disable() {
-        Listener.unregister(this)
+        Listener.unregister(clazz, this)
     }
 
     override fun dispose() {
@@ -133,11 +134,12 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     }
 
     private fun parseRule(value: Any?): DispatcherRule<Event> {
+        val name = config.getString("listen-class")!!
         if (value == null) {
-            return DispatcherRule.of(clazz, Configuration.empty())
+            return DispatcherRule.of(name, clazz, Configuration.empty())
         }
         require(value is ConfigurationSection) { "Invalid configuration section: $value" }
-        return DispatcherRule.of(clazz, value)
+        return DispatcherRule.of(name, clazz, value)
     }
 
     private fun parseScript(value: Any?): Script {
@@ -165,6 +167,10 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     private fun parseEventClass(value: String): ReflexClass {
         require(value.isNotBlank()) { "Event class cannot be null or blank." }
+        if (value[0] == '@') {
+            return RuleRegistry.mapping(value)
+        }
+
         val clazz = try {
             Class.forName(value)
         } catch (e: ClassNotFoundException) {
