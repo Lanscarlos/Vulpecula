@@ -22,20 +22,21 @@ abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
      * 关联的 Applicative
      * */
     @Suppress("UNCHECKED_CAST")
-    private val relatedApplicatives: List<Applicative<in T>> = ApplicativeRegistry.registry.filter {
-        it.value != this && it.key.isAssignableFrom(clazz)
-    }.map {
-        it.key to it.value
-    }.sortedWith { a, b ->
-        when {
-            a.first == clazz -> -1
-            b.first == clazz -> 1
-            a.first.isAssignableFrom(b.first) -> 1
-            else -> -1
+    private val relatedApplicatives: List<Applicative<in T>> = ApplicativeRegistry.registry
+        .filter {
+            it.value != this && it.key.isAssignableFrom(clazz)
+        }.map {
+            it.key to it.value
+        }.sortedWith { a, b ->
+            when {
+                a.first == clazz -> -1
+                b.first == clazz -> 1
+                a.first.isAssignableFrom(b.first) -> 1
+                else -> -1
+            }
+        }.map {
+            it.second as Applicative<in T>
         }
-    }.map {
-        it.second as Applicative<in T>
-    }
 
     /**
      * 缓存的关联属性, 获取属性过程中，如果调用了关联 Applicative, 那么就记录缓存
