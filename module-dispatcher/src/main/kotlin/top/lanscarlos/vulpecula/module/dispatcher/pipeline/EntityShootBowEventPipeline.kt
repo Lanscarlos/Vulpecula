@@ -1,0 +1,20 @@
+package top.lanscarlos.vulpecula.module.dispatcher.pipeline
+
+import org.bukkit.event.entity.EntityShootBowEvent
+import top.lanscarlos.vulpecula.module.dispatcher.Context
+
+/**
+ * Vulpecula
+ * top.lanscarlos.vulpecula.module.dispatcher.pipeline
+ *
+ * @author Lanscarlos
+ * @since 2025/6/12 9:01
+ */
+@Pipeline
+class EntityShootBowEventPipeline : AbstractEventPipeline<EntityShootBowEvent>() {
+
+    override fun process(context: Context) {
+        val event = getEvent(context)
+    }
+
+}
