@@ -13,6 +13,8 @@ import top.lanscarlos.vulpecula.module.dispatcher.EventPipeline
  */
 abstract class AbstractEventPipeline<T: Event> : EventPipeline<T> {
 
+    override val priority: Int = 8
+
     @Suppress("UNCHECKED_CAST")
     fun getEvent(context: Context): T {
         return context.event as T

@@ -12,7 +12,17 @@ import top.lanscarlos.vulpecula.module.dispatcher.Context
  */
 @Pipeline("PlayerShootBowEvent")
 class PlayerShootBowEventPipeline : AbstractEventPipeline<EntityShootBowEvent>() {
+
     override fun process(context: Context) {
         TODO("Not yet implemented")
     }
+
+    override fun preprocess(context: Context) {
+        TODO("Not yet implemented")
+    }
+
+    override fun postprocess(context: Context) {
+        TODO("Not yet implemented")
+    }
+
 }

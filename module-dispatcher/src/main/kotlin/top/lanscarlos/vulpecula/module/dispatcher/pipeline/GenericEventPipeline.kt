@@ -11,8 +11,19 @@ import top.lanscarlos.vulpecula.module.dispatcher.EventPipeline
  * @author Lanscarlos
  * @since 2025/6/12 10:11
  */
-class GenericEventPipeline : EventPipeline<Event> {
+@Pipeline
+class GenericEventPipeline : AbstractEventPipeline<Event>() {
+
     override fun process(context: Context) {
         TODO("Not yet implemented")
     }
+
+    override fun preprocess(context: Context) {
+        TODO("Not yet implemented")
+    }
+
+    override fun postprocess(context: Context) {
+        TODO("Not yet implemented")
+    }
+
 }

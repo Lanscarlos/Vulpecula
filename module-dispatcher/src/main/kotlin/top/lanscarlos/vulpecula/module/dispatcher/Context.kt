@@ -10,7 +10,13 @@ import org.bukkit.event.Event
  * @author Lanscarlos
  * @since 2025/6/4 11:30
  */
-data class Context(val event: Event, val player: Player?) {
+data class Context(val event: Event) {
+
+    var player: Player? = null
+
+    var isCancelled: Boolean = false
+
+    var isFiltered: Boolean = false
 
     val variables: HashMap<String, Any> = hashMapOf()
 

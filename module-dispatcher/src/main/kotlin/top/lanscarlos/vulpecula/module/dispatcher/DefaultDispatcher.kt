@@ -15,7 +15,8 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
-import top.lanscarlos.vulpecula.module.dispatcher.rule.RuleRegistry
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ListPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineRegistry
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptFlow
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -42,7 +43,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override val executable: Script by config.read("execute").convert(::parseScript)
 
-    val rule: DispatcherRule<Event> by config.read("rule").convert(::parseRule)
+    val pipeline: EventPipeline<*> by config.read("rule").convert(::parsePipeline)
 
     init {
         enable()
@@ -68,16 +69,24 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     }
 
     override fun accept(event: Event) {
-        val player = rule.parsePlayer(event)
-        val context = Context(event, player)
+        val context = Context(event)
+        pipeline.preprocess(context)
+        pipeline.process(context)
 
-        if (!rule.matches(context)) {
-            return
+        // 判断处理状态
+        when {
+            context.isCancelled -> {
+                (event as? Cancellable)?.isCancelled = true
+                return
+            }
+            context.isFiltered -> {
+                return
+            }
         }
 
         // 流式执行脚本
         val sender = context.player?.let(::adaptPlayer) ?: console()
-        val variables = rule.parseVariables(event).mapNotNull { (k, v) -> v?.let { k to it } }.toMap()
+        val variables = context.variables
         val flow = ScriptFlow(sender, variables)
 
         // 执行前置处理
@@ -87,7 +96,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
                 when (val status = task.variables()["@EVENT_STATUS"]) {
                     null -> {
                         // 更新阻断
-                        rule.updateBaffle(context)
+                        pipeline.postprocess(context)
                     }
                     "CANCEL" -> {
                         info("取消事件.")
@@ -104,7 +113,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
             }
         } else {
             // 更新阻断
-            rule.updateBaffle(context)
+            pipeline.postprocess(context)
         }
 
         flow.add(executable)
@@ -133,13 +142,14 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         console().error { ex.getDetailMessage() }
     }
 
-    private fun parseRule(value: Any?): DispatcherRule<Event> {
+    private fun parsePipeline(value: Any?): EventPipeline<*> {
         val name = config.getString("listen-event")!!
-        if (value == null) {
-            return DispatcherRule.of(name, clazz, Configuration.empty())
+        val config = if (value != null) {
+            value as ConfigurationSection
+        } else {
+            Configuration.empty()
         }
-        require(value is ConfigurationSection) { "Invalid configuration section: $value" }
-        return DispatcherRule.of(name, clazz, value)
+        return ListPipeline(name, clazz.toClass(), config)
     }
 
     private fun parseScript(value: Any?): Script {
@@ -167,17 +177,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     private fun parseEventClass(value: String): ReflexClass {
         require(value.isNotBlank()) { "Event class cannot be null or blank." }
-        if (value[0] == '@') {
-            return RuleRegistry.mapping(value)
-        }
-
-        val clazz = try {
-            Class.forName(value)
-        } catch (_: ClassNotFoundException) {
-            error("Event class not found: $value")
-        }
-        require(Event::class.java.isAssignableFrom(clazz)) { "Event class must be subclass of class ${Event::class.java.name}" }
-        return ReflexClass.of(clazz)
+        return ReflexClass.of(PipelineRegistry.mapping(value))
     }
 
 }

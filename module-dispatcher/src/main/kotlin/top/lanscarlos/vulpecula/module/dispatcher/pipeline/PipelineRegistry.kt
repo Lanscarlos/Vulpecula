@@ -26,23 +26,16 @@ object PipelineRegistry : ClassVisitor() {
 
     private val registry: HashMap<String, Registration> = linkedMapOf()
 
-    fun newRelativePipelines(name: String, section: ConfigurationSection): List<EventPipeline<*>> {
+    /**
+     * 获取相关联的处理流
+     * */
+    fun getRelatives(name: String): List<Class<*>> {
         val event = mapping(name)
-        return getRelativePipelineClasses(event).map {
-            it.getConstructor(Class::class.java, ConfigurationSection::class.java).newInstance(event, section) as EventPipeline<*>
-        }
-    }
-
-    fun getRelativePipelineClasses(event: Class<*>): List<Class<*>> {
         val registrations = LinkedList<Registration>()
-        var flag = false // 是否含有对应 event 的 rule
         for (registration in registry.values) {
             if (!registration.event.isAssignableFrom(event)) {
                 // 没有继承关系
                 continue
-            }
-            if (registration.event == event) {
-                flag = true
             }
             registrations.add(registration)
         }
@@ -55,11 +48,6 @@ object PipelineRegistry : ClassVisitor() {
                 a.event.isAssignableFrom(b.event) -> 1 // [b, a]
                 else -> -1 // [a, b]
             }
-        }
-
-        if (!flag) {
-            // 没有对应的处理流, 需要增加泛型事件处理流
-            registrations.add(Registration(Event::class.java.name, Event::class.java, GenericEventPipeline::class.java))
         }
 
         return registrations.map { it.pipeline }
@@ -121,10 +109,6 @@ object PipelineRegistry : ClassVisitor() {
         }
         if (!clazz.isAnnotationPresent(Pipeline::class.java)) {
             // 没有注解
-            return
-        }
-        if (clazz == GenericEventPipeline::class.java) {
-            // 排除泛型处理流
             return
         }
 
