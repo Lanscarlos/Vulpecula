@@ -7,4 +7,4 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline
  * @author Lanscarlos
  * @since 2025/6/12 9:26
  */
-annotation class Pipeline(val value: String = "")
+annotation class AutoRegistered(val value: String = "")

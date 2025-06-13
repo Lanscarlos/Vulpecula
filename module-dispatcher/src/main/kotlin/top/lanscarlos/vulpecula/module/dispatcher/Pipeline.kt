@@ -9,7 +9,7 @@ import org.bukkit.event.Event
  * @author Lanscarlos
  * @since 2025/6/12 8:57
  */
-interface EventPipeline<T: Event> {
+interface Pipeline<T: Event> {
 
     val priority: Int
 

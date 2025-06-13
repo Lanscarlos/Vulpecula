@@ -1,8 +1,9 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.event.Event
+import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
-import top.lanscarlos.vulpecula.module.dispatcher.EventPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
 
 /**
  * Vulpecula
@@ -11,7 +12,7 @@ import top.lanscarlos.vulpecula.module.dispatcher.EventPipeline
  * @author Lanscarlos
  * @since 2025/6/12 11:56
  */
-abstract class AbstractEventPipeline<T: Event> : EventPipeline<T> {
+abstract class AbstractPipeline<T: Event>(val clazz: Class<*>, val config: ConfigurationSection) : Pipeline<T> {
 
     override val priority: Int = 8
 

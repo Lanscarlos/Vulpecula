@@ -1,13 +1,11 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
-import org.bukkit.event.Event
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
-import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.module.dispatcher.EventPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
 import top.lanscarlos.vulpecula.module.dispatcher.rule.Rule
 import java.lang.reflect.ParameterizedType
 import java.util.LinkedList
@@ -103,11 +101,11 @@ object PipelineRegistry : ClassVisitor() {
             // 包路径不对
             return
         }
-        if (!EventPipeline::class.java.isAssignableFrom(clazz)) {
+        if (!Pipeline::class.java.isAssignableFrom(clazz)) {
             // 未继承接口
             return
         }
-        if (!clazz.isAnnotationPresent(Pipeline::class.java)) {
+        if (!clazz.isAnnotationPresent(AutoRegistered::class.java)) {
             // 没有注解
             return
         }
@@ -120,7 +118,7 @@ object PipelineRegistry : ClassVisitor() {
         }
 
         // 获取名称
-        val annotation = clazz.getAnnotation(Pipeline::class.java)
+        val annotation = clazz.getAnnotation(AutoRegistered::class.java)
         val name = if (annotation.value.isNotBlank()) {
             // 自定义名称不为空
             "@${annotation.value}"

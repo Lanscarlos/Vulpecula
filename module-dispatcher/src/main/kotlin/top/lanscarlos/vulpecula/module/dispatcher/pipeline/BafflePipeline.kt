@@ -1,0 +1,61 @@
+package top.lanscarlos.vulpecula.module.dispatcher.pipeline
+
+import org.bukkit.event.Event
+import taboolib.common5.Baffle
+import taboolib.common5.Baffle.BaffleCounter
+import taboolib.common5.Baffle.BaffleTime
+import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.config.convert
+import top.lanscarlos.vulpecula.common.config.read
+import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
+import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
+import top.lanscarlos.vulpecula.module.dispatcher.Context
+import java.util.concurrent.TimeUnit
+
+/**
+ * Vulpecula
+ * top.lanscarlos.vulpecula.module.dispatcher.pipeline
+ *
+ * 用于判断冷却是否通过
+ *
+ * @author Lanscarlos
+ * @since 2025/6/13
+ */
+@AutoRegistered
+class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<Event>(clazz, config) {
+
+    override val priority: Int = 128 // 分配较高的优先级用于优先处理冷却
+
+    val baffle: Baffle? by config.read("baffle").convert(::parseBaffle)
+
+    override fun process(context: Context) {
+        val baffle = this.baffle ?: return
+        if (baffle.hasNext("*", false)) {
+            // 冷却通过
+            return
+        }
+        // TODO 阻断还是过滤？
+        context.isFiltered = true
+        context.isCancelled = true
+        // TODO 阻断处理流的传播
+    }
+
+    override fun preprocess(context: Context) = Unit
+
+    override fun postprocess(context: Context) {
+        // 更新阻断器数据
+        baffle?.next()
+    }
+
+    private fun parseBaffle(value: Any?): Baffle? {
+        if (value == null) {
+            return null
+        }
+        return when (value) {
+            is Number -> BaffleCounter.of(value.toInt())
+            is String -> BaffleTime.of(TimeUtil.parse(value), TimeUnit.MILLISECONDS)
+            else -> throw InvalidTypeException(value)
+        }
+    }
+
+}

@@ -43,7 +43,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override val executable: Script by config.read("execute").convert(::parseScript)
 
-    val pipeline: EventPipeline<*> by config.read("rule").convert(::parsePipeline)
+    val pipeline: Pipeline<*> by config.read("rule").convert(::parsePipeline)
 
     init {
         enable()
@@ -142,7 +142,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         console().error { ex.getDetailMessage() }
     }
 
-    private fun parsePipeline(value: Any?): EventPipeline<*> {
+    private fun parsePipeline(value: Any?): Pipeline<*> {
         val name = config.getString("listen-event")!!
         val config = if (value != null) {
             value as ConfigurationSection
