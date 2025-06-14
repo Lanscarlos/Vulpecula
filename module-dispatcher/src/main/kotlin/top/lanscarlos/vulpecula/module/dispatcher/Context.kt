@@ -15,15 +15,14 @@ import taboolib.common.platform.function.console
  */
 data class Context(val event: Event) {
 
-    private var isPlayerInitialized: Boolean = false
-
-    var player: Player? = null
-
     var isCancelled: Boolean = false
-        private set
 
     var isFiltered: Boolean = false
+
+    var player: Player? = null
         private set
+
+    private var isPlayerInitialized: Boolean = false
 
     private val variables: HashMap<String, Any> = hashMapOf()
 
