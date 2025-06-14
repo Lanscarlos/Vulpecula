@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
-import org.bukkit.event.entity.EntityShootBowEvent
+import org.bukkit.event.player.PlayerEvent
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
 
@@ -9,16 +9,18 @@ import top.lanscarlos.vulpecula.module.dispatcher.Context
  * top.lanscarlos.vulpecula.module.dispatcher.pipeline
  *
  * @author Lanscarlos
- * @since 2025/6/12 9:01
+ * @since 2025/6/14 9:51
  */
 @AutoRegistered
-class EntityShootBowEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<EntityShootBowEvent>(clazz, config) {
+class PlayerEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<PlayerEvent>(clazz, config) {
+
+    override fun initPlayer(context: Context) {
+        context.setPlayer(getEvent(context).player)
+    }
 
     override fun initVariables(context: Context) {
         val event = getEvent(context)
-        context.setVariable("projectile", event.projectile)
-        context.setVariable("bow", event.bow)
-        context.setVariable("force", event.force)
+        context.setVariable("player", event.player)
     }
 
 }

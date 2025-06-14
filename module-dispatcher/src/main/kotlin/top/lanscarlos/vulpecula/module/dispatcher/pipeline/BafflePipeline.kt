@@ -5,12 +5,15 @@ import taboolib.common5.Baffle
 import taboolib.common5.Baffle.BaffleCounter
 import taboolib.common5.Baffle.BaffleTime
 import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
+import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import top.lanscarlos.vulpecula.module.dispatcher.Context
 import java.util.concurrent.TimeUnit
+import java.util.function.Consumer
 
 /**
  * Vulpecula
@@ -28,19 +31,21 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
 
     val baffle: Baffle? by config.read("baffle").convert(::parseBaffle)
 
-    override fun process(context: Context) {
+    val cancel: Boolean by config.read("baffle-cancel").boolean(false)
+
+    override fun filter(context: Context) {
         val baffle = this.baffle ?: return
         if (baffle.hasNext("*", false)) {
             // 冷却通过
             return
         }
-        // TODO 阻断还是过滤？
-        context.isFiltered = true
-        context.isCancelled = true
+        if (cancel) {
+            context.cancel()
+        } else {
+            context.filter()
+        }
         // TODO 阻断处理流的传播
     }
-
-    override fun preprocess(context: Context) = Unit
 
     override fun postprocess(context: Context) {
         // 更新阻断器数据

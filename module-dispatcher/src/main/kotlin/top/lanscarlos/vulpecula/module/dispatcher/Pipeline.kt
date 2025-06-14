@@ -14,14 +14,19 @@ interface Pipeline<T: Event> {
     val priority: Int
 
     /**
-     * 对事件进行处理, 处理结果需要置于 context 中
+     * 初始化玩家对象
      * */
-    fun process(context: Context)
+    fun initPlayer(context: Context)
 
     /**
-     * 对事件进行前置处理, 并做一定的解析操作等等
+     * 初始化变量
      * */
-    fun preprocess(context: Context)
+    fun initVariables(context: Context)
+
+    /**
+     * 对事件进行过滤或阻断处理, 处理结果直接填在 context 里
+     * */
+    fun filter(context: Context)
 
     /**
      * 后置处理

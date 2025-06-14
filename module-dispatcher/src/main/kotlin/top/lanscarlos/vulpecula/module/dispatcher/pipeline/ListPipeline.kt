@@ -24,15 +24,21 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
             it.priority
         }
 
-    override fun process(context: Context) {
+    override fun initPlayer(context: Context) {
         for (pipeline in pipelines) {
-            pipeline.process(context)
+            pipeline.initPlayer(context)
         }
     }
 
-    override fun preprocess(context: Context) {
+    override fun initVariables(context: Context) {
         for (pipeline in pipelines) {
-            pipeline.preprocess(context)
+            pipeline.initVariables(context)
+        }
+    }
+
+    override fun filter(context: Context) {
+        for (pipeline in pipelines) {
+            pipeline.filter(context)
         }
     }
 

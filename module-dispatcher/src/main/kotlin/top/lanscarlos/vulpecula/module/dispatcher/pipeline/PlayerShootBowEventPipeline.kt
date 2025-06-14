@@ -14,16 +14,11 @@ import top.lanscarlos.vulpecula.module.dispatcher.Context
 @AutoRegistered("PlayerShootBowEvent")
 class PlayerShootBowEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<EntityShootBowEvent>(clazz, config) {
 
-    override fun process(context: Context) {
-        TODO("Not yet implemented")
-    }
-
-    override fun preprocess(context: Context) {
-        TODO("Not yet implemented")
-    }
-
-    override fun postprocess(context: Context) {
-        TODO("Not yet implemented")
+    override fun filter(context: Context) {
+        if (context.player == null) {
+            // 玩家必须存在
+            context.filter()
+        }
     }
 
 }

@@ -6,7 +6,6 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
-import top.lanscarlos.vulpecula.module.dispatcher.rule.Rule
 import java.lang.reflect.ParameterizedType
 import java.util.LinkedList
 
@@ -140,7 +139,7 @@ object PipelineRegistry : ClassVisitor() {
                 is ParameterizedType -> return it.rawType as Class<*>
                 else -> cache = cache.superclass
             }
-        } while (cache.isAnnotationPresent(Rule::class.java))
+        } while (cache.isAnnotationPresent(AutoRegistered::class.java))
         return null
     }
 

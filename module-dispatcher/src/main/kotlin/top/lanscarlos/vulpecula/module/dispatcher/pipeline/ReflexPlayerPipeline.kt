@@ -23,24 +23,23 @@ import top.lanscarlos.vulpecula.module.dispatcher.Context
 @AutoRegistered
 class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<Event>(clazz, config) {
 
-    override val priority: Int = 0 // 通常置于最后做兜底处理
+    override val priority: Int = 0 // 反射性能消耗大, 通常置于最后做兜底处理
 
     val playerRequired: Boolean by config.read("player-required").boolean(false)
 
     val playerField: ClassField? by config.read("player-field").string("~").convert(::parsePlayerField)
 
-    override fun preprocess(context: Context) {
-        if (context.player != null) {
-            // 已有玩家对象
-            return
-        }
+    override fun initPlayer(context: Context) {
         // 解析玩家对象
-        context.player = playerField?.get(context.event) as? Player
+        context.setPlayer(playerField?.get(context.event) as? Player)
     }
 
-    override fun process(context: Context) = Unit
-
-    override fun postprocess(context: Context) = Unit
+    override fun filter(context: Context) {
+        if (playerRequired && context.player == null) {
+            // 玩家不存在, 过滤本次事件
+            context.filter()
+        }
+    }
 
     private fun parsePlayerField(value: String): ClassField? {
         val clazz = ReflexClass.of(this.clazz)

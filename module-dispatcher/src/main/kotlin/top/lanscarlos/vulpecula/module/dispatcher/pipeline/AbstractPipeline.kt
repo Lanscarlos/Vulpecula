@@ -21,4 +21,12 @@ abstract class AbstractPipeline<T: Event>(val clazz: Class<*>, val config: Confi
         return context.event as T
     }
 
+    override fun initPlayer(context: Context) = Unit
+
+    override fun initVariables(context: Context) = Unit
+
+    override fun filter(context: Context) = Unit
+
+    override fun postprocess(context: Context) = Unit
+
 }

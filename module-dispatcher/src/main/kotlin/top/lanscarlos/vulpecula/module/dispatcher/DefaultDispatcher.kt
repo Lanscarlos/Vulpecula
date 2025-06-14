@@ -70,8 +70,8 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override fun accept(event: Event) {
         val context = Context(event)
-        pipeline.preprocess(context)
-        pipeline.process(context)
+        pipeline.initPlayer(context)
+        pipeline.filter(context)
 
         // 判断处理状态
         when {
@@ -84,9 +84,12 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
             }
         }
 
+        // 初始化变量
+        pipeline.initVariables(context)
+
         // 流式执行脚本
-        val sender = context.player?.let(::adaptPlayer) ?: console()
-        val variables = context.variables
+        val sender = context.sender()
+        val variables = context.variables()
         val flow = ScriptFlow(sender, variables)
 
         // 执行前置处理
