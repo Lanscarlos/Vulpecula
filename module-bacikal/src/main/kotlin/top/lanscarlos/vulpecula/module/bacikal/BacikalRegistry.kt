@@ -9,6 +9,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
+import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.QuestActionParser
 import taboolib.library.reflex.ReflexClass
@@ -45,10 +46,18 @@ object BacikalRegistry : ClassVisitor(1) {
         // 注册拓展语句
         val folder = File(getDataFolder(), "action")
         if (!folder.exists()) {
-            folder.mkdirs()
-            return
+            releaseResourceFolder("action")
         }
 
+        for (file in folder.listFiles()) {
+            if (!file.exists() || !file.isFile || !file.canRead()) {
+                continue
+            }
+            if (file.extension != "jar") {
+                continue
+            }
+            registerAction(file)
+        }
     }
 
     @Awake(LifeCycle.ENABLE)
@@ -78,9 +87,8 @@ object BacikalRegistry : ClassVisitor(1) {
      * @param file 外置语句 Jar 包体
      * */
     fun registerAction(file: File) {
-        if (!file.exists() || !file.isFile || !file.canRead()) {
-            warning("Action file \"${file.name}\" is not valid.")
-            return
+        if (!file.exists() || !file.isFile || !file.canRead() || file.extension != "jar") {
+            error("Action file \"${file.name}\" is not valid.")
         }
 
         ClassAppender.addPath(file.toPath(), false, false)
