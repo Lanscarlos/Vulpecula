@@ -1,8 +1,11 @@
 package top.lanscarlos.vulpecula.module.bacikal
 
+import taboolib.common.ClassAppender
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
+import taboolib.common.io.getClasses
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
@@ -17,6 +20,7 @@ import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalComplexActionParser
+import java.io.File
 
 /**
  * Vulpecula
@@ -36,6 +40,24 @@ object BacikalRegistry : ClassVisitor(1) {
 
     val headers = mutableMapOf<String, BacikalComplexActionParser>()
 
+    @Awake(LifeCycle.LOAD)
+    fun onLoad() {
+        // 注册拓展语句
+        val folder = File(getDataFolder(), "action")
+        if (!folder.exists()) {
+            folder.mkdirs()
+            return
+        }
+
+    }
+
+    @Awake(LifeCycle.ENABLE)
+    fun onEnable() {
+        for ((id, parser) in headers) {
+            registerAction(id, parser)
+        }
+    }
+
     override fun visitStart(owner: ReflexClass) {
         if (!owner.hasAnnotation(BacikalParser::class.java)) {
             return
@@ -50,10 +72,27 @@ object BacikalRegistry : ClassVisitor(1) {
         registerAction(owner)
     }
 
-    @Awake(LifeCycle.ENABLE)
-    fun onEnable() {
-        for ((id, parser) in headers) {
-            registerAction(id, parser)
+    /**
+     * 外置语句注册
+     *
+     * @param file 外置语句 Jar 包体
+     * */
+    fun registerAction(file: File) {
+        if (!file.exists() || !file.isFile || !file.canRead()) {
+            warning("Action file \"${file.name}\" is not valid.")
+            return
+        }
+
+        ClassAppender.addPath(file.toPath(), false, false)
+        val owners = file.toURI().toURL().getClasses().values
+
+        // 遍历所有 class 对象
+        for (owner in owners) {
+            if (!owner.hasAnnotation(BacikalParser::class.java)) {
+                // 排除非注解类的注册
+                continue
+            }
+            registerAction(owner)
         }
     }
 

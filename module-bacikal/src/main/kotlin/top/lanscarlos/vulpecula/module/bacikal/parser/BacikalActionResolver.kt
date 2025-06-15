@@ -10,13 +10,13 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 interface BacikalActionResolver {
 
     /**
-     * 语句 ID
-     */
-    val id: String
-
-    /**
      * 绑定主体, 若为空则不绑定
      */
     val bind: String?
+
+    /**
+     * 语句 ID
+     */
+    val id: String
 
 }

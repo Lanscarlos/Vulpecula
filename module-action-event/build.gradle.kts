@@ -1,0 +1,33 @@
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+
+version = "1.0.0"
+
+taboolib {
+    subproject = false
+
+    description {
+        name("Vulpecula-Action-" + project.name.substringAfterLast('-').uppercaseFirstChar())
+        desc("Please put this action jar in directory `./plugins/Vulpecula/action/` of your server.")
+        contributors {
+            this.contributors.clear()
+            name("Lanscarlos")
+        }
+        dependencies {
+            this.dependencies.clear()
+            name("DISABLE")
+        }
+    }
+}
+
+dependencies {
+    compileOnly(project(":module-bacikal"))
+    compileOnly("ink.ptms.core:v12004:12004:mapped")
+}
+
+tasks {
+    jar {
+        archiveBaseName.set(project.name.substringAfter('-'))
+        archiveClassifier.set("")
+        destinationDirectory.set(file("${rootDir}/build/libs/action"))
+    }
+}
