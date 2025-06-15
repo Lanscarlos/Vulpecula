@@ -43,7 +43,7 @@ object BacikalRegistry : ClassVisitor(1) {
 
     val headers = mutableMapOf<String, BacikalComplexActionParser>()
 
-    val metadata = mutableMapOf<String, List<String>>()
+    val metadata = mutableMapOf<String, Array<String>>()
 
     @Awake(LifeCycle.LOAD)
     fun onLoad() {
@@ -96,22 +96,22 @@ object BacikalRegistry : ClassVisitor(1) {
         }
 
         ClassAppender.addPath(file.toPath(), false, false)
-        val owners = file.toURI().toURL().getClasses().values
 
         // 遍历资源
         for ((name, byteArray) in file.toURI().toURL().getResources()) {
             if (!name.endsWith(".metadata")) {
                 continue
             }
-            val array = byteArray.toString()
+            val key = name.substringAfterLast("/").substringBeforeLast('.')
+            val array = String(byteArray)
                 .split("\\R".toRegex())
                 .map { Base64.getDecoder().decode(it).toString(Charsets.ISO_8859_1) }
-//                .toTypedArray() TODO
-            metadata[name.substringBeforeLast('.')] = array
+                .toTypedArray()
+            metadata[key] = array
         }
 
         // 遍历所有 class 对象
-        for (owner in owners) {
+        for (owner in file.toURI().toURL().getClasses().values) {
             if (!owner.hasAnnotation(BacikalParser::class.java)) {
                 // 排除非注解类的注册
                 continue
