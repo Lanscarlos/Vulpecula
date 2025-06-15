@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
+import taboolib.common.io.digest
 import taboolib.common.platform.function.info
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
@@ -13,6 +14,7 @@ import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
+import top.lanscarlos.vulpecula.module.bacikal.reflex.MetadataParser
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.LinkedList
@@ -31,7 +33,7 @@ import java.util.concurrent.CompletableFuture
     relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
     transitive = false
 )
-class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) : QuestActionParser {
+class BacikalActionParser(javaClass: Class<*>, val instance: BacikalActionResolver) : QuestActionParser {
 
     companion object {
         const val MODIFIER_NONE = 0
@@ -62,37 +64,39 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
 
     init {
         // 类结构验证
-        if (!BacikalActionResolver::class.java.isAssignableFrom(owner)) {
+        if (!BacikalActionResolver::class.java.isAssignableFrom(javaClass)) {
             // 未实现 BacikalActionResolver 接口
-            error("BacikalActionParser#init >> ${owner.name} does not implement BacikalActionResolver.")
+            error("BacikalActionParser#init >> ${javaClass.name} does not implement BacikalActionResolver.")
         }
-        if (owner.declaredMethods.count { it.name == "resolve" } != 1) {
+        if (javaClass.declaredMethods.count { it.name == "resolve" } != 1) {
             // 仅允许定义一个 resolve 方法
-            error("BacikalActionParser#init >> ${owner.name} has more than one resolve method.")
+            error("BacikalActionParser#init >> ${javaClass.name} has more than one resolve method.")
         }
 
         // 获取函数
-        standardFunction = owner.declaredMethods.find { it.name == "resolve" }!!
-        defaultFunction = owner.declaredMethods.find { it.name == "resolve\$default" }
+        standardFunction = javaClass.declaredMethods.find { it.name == "resolve" }!!
+        defaultFunction = javaClass.declaredMethods.find { it.name == "resolve\$default" }
 
         // 使用 Reflex 解析参数
-        val rClass = ReflexClass.of(owner, AnalyseMode.ASM_ONLY)
-        val rMethod = rClass.structure.methods.find { it.name == "resolve" }!!
-        val rParameters = rMethod.parameter
+        val reflexClass = ReflexClass.of(javaClass, AnalyseMode.ASM_ONLY)
+        val reflexMethod = reflexClass.structure.methods.find { it.name == "resolve" }!!
+        val reflexParameters = reflexMethod.parameter
 
         // 使用 ProtoBuf 解析元信息
-        val metadata = rClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!
-        val data1 = metadata.list<String>("d1").toTypedArray()
-        val data2 = metadata.list<String>("d2").toTypedArray()
-        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1, data2)
+        val metadata = reflexClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!
+        val data1 = metadata.list<String>("d1")
+        val data2 = metadata.list<String>("d2")
+        info("data1 sha-256 >> ${data1.toString().digest("SHA-256")}")
+        info("data2 sha-256 >> ${data2.toString().digest("SHA-256")}")
+//        val (data1, data2) = MetadataParser.parse(metadata)
+        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1.toTypedArray(), data2.toTypedArray())
         val pbFunction = pbClass.functionList.find { resolver.getString(it.name) == "resolve" }!!
         val pbParameters = pbFunction.valueParameterList
-
 
         // 解析参数
         parameters = standardFunction.parameters.mapIndexed { index, parameter ->
             val name = resolver.getString(pbParameters[index].name)
-            val isNullable = rParameters[index].isAnnotationPresent(org.jetbrains.annotations.Nullable::class.java)
+            val isNullable = reflexParameters[index].isAnnotationPresent(org.jetbrains.annotations.Nullable::class.java)
             val hasDefaultValue = Flag.ValueParameter.DECLARES_DEFAULT_VALUE.invoke(pbParameters[index].flags)
             Parameter(index, name, isNullable, hasDefaultValue, parameter)
         }
