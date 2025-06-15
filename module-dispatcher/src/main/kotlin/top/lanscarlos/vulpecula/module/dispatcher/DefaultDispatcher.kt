@@ -101,14 +101,14 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
                         // 更新阻断
                         pipeline.postprocess(context)
                     }
-                    "CANCEL" -> {
+                    "CANCELED" -> {
                         info("取消事件.")
                         require(event is Cancellable) { "Event $event is not Cancellable" }
                         event.isCancelled = true
                         flow.terminate()
                     }
-                    "FILTER" -> {
-                        info("过滤事件.")
+                    "IGNORED" -> {
+                        info("忽略事件.")
                         flow.terminate()
                     }
                     else -> error("Unknown event status $status")
