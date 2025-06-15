@@ -4,6 +4,7 @@ import taboolib.common.ClassAppender
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.getClasses
+import taboolib.common.io.getResources
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.getOpenContainers
@@ -22,6 +23,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalComplexActionParser
 import java.io.File
+import java.util.Base64
 
 /**
  * Vulpecula
@@ -40,6 +42,8 @@ object BacikalRegistry : ClassVisitor(1) {
         private set
 
     val headers = mutableMapOf<String, BacikalComplexActionParser>()
+
+    val metadata = mutableMapOf<String, List<String>>()
 
     @Awake(LifeCycle.LOAD)
     fun onLoad() {
@@ -93,6 +97,18 @@ object BacikalRegistry : ClassVisitor(1) {
 
         ClassAppender.addPath(file.toPath(), false, false)
         val owners = file.toURI().toURL().getClasses().values
+
+        // 遍历资源
+        for ((name, byteArray) in file.toURI().toURL().getResources()) {
+            if (!name.endsWith(".metadata")) {
+                continue
+            }
+            val array = byteArray.toString()
+                .split("\\R".toRegex())
+                .map { Base64.getDecoder().decode(it).toString(Charsets.ISO_8859_1) }
+//                .toTypedArray() TODO
+            metadata[name.substringBeforeLast('.')] = array
+        }
 
         // 遍历所有 class 对象
         for (owner in owners) {

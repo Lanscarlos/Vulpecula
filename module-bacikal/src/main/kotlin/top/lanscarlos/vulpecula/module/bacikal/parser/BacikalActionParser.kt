@@ -11,12 +11,15 @@ import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
+import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.reflex.MetadataParser
+import java.io.FileInputStream
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.Base64
 import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
 
@@ -84,11 +87,10 @@ class BacikalActionParser(javaClass: Class<*>, val instance: BacikalActionResolv
 
         // 使用 ProtoBuf 解析元信息
         val metadata = reflexClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!
-        val data1 = metadata.list<String>("d1")
+        val data1 = BacikalRegistry.metadata[javaClass.name]!!
         val data2 = metadata.list<String>("d2")
         info("data1 sha-256 >> ${data1.toString().digest("SHA-256")}")
         info("data2 sha-256 >> ${data2.toString().digest("SHA-256")}")
-//        val (data1, data2) = MetadataParser.parse(metadata)
         val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1.toTypedArray(), data2.toTypedArray())
         val pbFunction = pbClass.functionList.find { resolver.getString(it.name) == "resolve" }!!
         val pbParameters = pbFunction.valueParameterList
