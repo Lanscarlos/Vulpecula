@@ -20,6 +20,10 @@ dependencies {
 }
 
 tasks {
+    register("clean-workspace") {
+        delete(layout.buildDirectory.dir("workspace"))
+    }
+
     register<Copy>("embed-action") {
         dependsOn(":module-action-event:jar")
         from(project(":module-action-event").tasks.getByName<Jar>("jar").archiveFile) // 获取 jar
@@ -42,13 +46,9 @@ tasks {
                 if (!resource.parentFile.exists()) {
                     resource.parentFile.mkdirs()
                 }
-                resource.appendText("\n\n\n")
+                resource.appendText("\n\n")
                 resource.appendBytes(file.readBytes())
             }
-        }
-
-        for (resource in resources) {
-            println("resource ${resource.key} >> \n" + resource.value.readText())
         }
     }
 
@@ -57,6 +57,7 @@ tasks {
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs"))
 
+        dependsOn("clean-workspace")
         dependsOn("embed-action")
         dependsOn("merge-resources")
 
@@ -77,8 +78,5 @@ tasks {
             }
         }
 
-        doLast {
-            delete(layout.buildDirectory)
-        }
     }
 }
