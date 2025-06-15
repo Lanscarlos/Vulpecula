@@ -1,3 +1,8 @@
+import org.objectweb.asm.AnnotationVisitor
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.Opcodes
+import java.util.Base64
 
 taboolib {
     subproject = false
@@ -10,6 +15,7 @@ dependencies {
     compileOnly(project(":common-applicative"))
     compileOnly(project(":common-config"))
     compileOnly(project(":common-core"))
+    compileOnly(project(":module-action-event"))
     compileOnly(project(":module-bacikal"))
     compileOnly(project(":module-command"))
     compileOnly(project(":module-core"))
@@ -26,8 +32,15 @@ tasks {
 
     register<Copy>("embed-action") {
         dependsOn(":module-action-event:jar")
-        from(project(":module-action-event").tasks.getByName<Jar>("jar").archiveFile) // 获取 jar
         into(layout.buildDirectory.dir("workspace/action"))
+        val dependencies = configurations["compileOnly"].dependencies.filterIsInstance<ProjectDependency>()
+        for (dependency in dependencies) {
+            if (!dependency.dependencyProject.name.startsWith("module-action-")) {
+                // 排除非拓展语句资源
+                continue
+            }
+            from(dependency.dependencyProject.tasks.getByName<Jar>("jar").archiveFile)
+        }
     }
 
     register("merge-resources") {
@@ -52,6 +65,53 @@ tasks {
         }
     }
 
+    register("asm-analyse") {
+        dependsOn(":module-action-event:jar")
+        doLast {
+            val workspace = file(layout.buildDirectory.dir("workspace/metadata")).also(File::mkdirs)
+            val files = configurations["compileOnly"].dependencies
+                .filterIsInstance<ProjectDependency>()
+                .filter { it.dependencyProject.name.startsWith("module-action-") }
+                .flatMap { it.dependencyProject.sourceSets["main"].output.classesDirs }
+                .filter { it.exists() }
+                .flatMap { it.walk().onEnter { file -> file.name != "META-INF" } }
+                .filter { it.isFile && it.extension == "class" }
+
+            // ASM 解析
+            for (file in files) {
+                val reader = ClassReader(file.readBytes())
+                val data = mutableListOf<String>()
+                reader.accept(object : ClassVisitor(Opcodes.ASM9) {
+                    override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor? {
+                        if (descriptor != "Lkotlin/Metadata;") {
+                            return null
+                        }
+                        return object : AnnotationVisitor(Opcodes.ASM9) {
+                            override fun visitArray(name: String?): AnnotationVisitor? {
+                                if (name != "d1") {
+                                    return null
+                                }
+                                return object : AnnotationVisitor(Opcodes.ASM9) {
+                                    override fun visit(name: String?, value: Any?) {
+                                        if (value !is String) {
+                                            data += ""
+                                            return
+                                        }
+                                        val base64 = Base64.getEncoder().encodeToString(value.toByteArray(Charsets.ISO_8859_1))
+                                        data += base64
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, 0)
+
+                val name = reader.className.replace('/', '.') + ".metadata"
+                File(workspace, name).writeText(data.joinToString("\n"))
+            }
+        }
+    }
+
     jar {
         archiveBaseName.set("${rootProject.name}-experiment")
         archiveClassifier.set("")
@@ -60,6 +120,7 @@ tasks {
         dependsOn("clean-workspace")
         dependsOn("embed-action")
         dependsOn("merge-resources")
+        dependsOn("asm-analyse")
 
         // 打包资源文件
         from(layout.buildDirectory.dir("workspace")) {
