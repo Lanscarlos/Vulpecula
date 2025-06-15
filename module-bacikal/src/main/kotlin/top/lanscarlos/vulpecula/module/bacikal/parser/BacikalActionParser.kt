@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
-import taboolib.common.io.digest
 import taboolib.common.platform.function.info
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
@@ -15,11 +14,8 @@ import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
-import top.lanscarlos.vulpecula.module.bacikal.reflex.MetadataParser
-import java.io.FileInputStream
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.util.Base64
 import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
 
