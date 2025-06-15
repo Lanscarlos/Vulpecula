@@ -120,7 +120,6 @@ tasks {
         dependsOn("clean-workspace")
         dependsOn("embed-action")
         dependsOn("merge-resources")
-        dependsOn("asm-analyse")
 
         // 打包资源文件
         from(layout.buildDirectory.dir("workspace")) {
