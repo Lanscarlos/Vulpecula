@@ -1,6 +1,6 @@
 
-
 # 命令模块
+
 module-command-service-name: '命令'
 module-command-service-load-detail-created: '本次加载有 &a{0}&7 个新增的命令'
 module-command-service-load-detail-modified: '本次加载有 &a{0}&7 个命令被修改'
