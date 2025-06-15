@@ -68,7 +68,4 @@ subprojects {
         compileOnly(kotlin("stdlib"))
     }
 
-    gradle.buildFinished {
-        buildDir.deleteRecursively()
-    }
 }

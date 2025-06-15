@@ -6,46 +6,79 @@ taboolib {
     relocate("io.foldright.cffu.", "io.foldright.cffu113.")
 }
 
+dependencies {
+    compileOnly(project(":common-applicative"))
+    compileOnly(project(":common-config"))
+    compileOnly(project(":common-core"))
+    compileOnly(project(":module-bacikal"))
+    compileOnly(project(":module-command"))
+    compileOnly(project(":module-core"))
+    compileOnly(project(":module-dispatcher"))
+    compileOnly(project(":module-schedule"))
+    compileOnly(project(":module-script"))
+    compileOnly(project(":platform-bukkit"))
+}
+
 tasks {
+    register<Copy>("embed-action") {
+        dependsOn(":module-action-event:jar")
+        from(project(":module-action-event").tasks.getByName<Jar>("jar").archiveFile) // 获取 jar
+        into(layout.buildDirectory.dir("workspace/action"))
+    }
+
+    register("merge-resources") {
+        val workspace = file(layout.buildDirectory.dir("workspace")).also(File::mkdirs)
+        val resources = mutableMapOf<String, File>()
+        val dependencies = configurations["compileOnly"].dependencies.filterIsInstance<ProjectDependency>()
+        for (dependency in dependencies) {
+            if (dependency.dependencyProject.name.startsWith("module-action-")) {
+                // 排除拓展语句资源
+                continue
+            }
+            val files = files(dependency.dependencyProject.sourceSets["main"].resources)
+            for (file in files) {
+                val name = file.absolutePath.substringAfter("resources\\")
+                val resource = resources.computeIfAbsent(name) { File(workspace, name) }
+                if (!resource.parentFile.exists()) {
+                    resource.parentFile.mkdirs()
+                }
+                resource.appendText("\n\n\n")
+                resource.appendBytes(file.readBytes())
+            }
+        }
+
+        for (resource in resources) {
+            println("resource ${resource.key} >> \n" + resource.value.readText())
+        }
+    }
+
     jar {
         archiveBaseName.set("${rootProject.name}-experiment")
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs"))
 
-        val subprojects = listOf(
-            project(":common-applicative"),
-            project(":common-config"),
-            project(":common-core"),
-            project(":module-bacikal"),
-            project(":module-command"),
-            project(":module-core"),
-            project(":module-dispatcher"),
-            project(":module-schedule"),
-            project(":module-script"),
-            project(":platform-bukkit")
-        )
+        dependsOn("embed-action")
+        dependsOn("merge-resources")
 
-        // 打包并合并子项目资源
-        val workspace = File(buildDir, "workspace")
-        val resources = files(*subprojects.map { it.sourceSets["main"].resources }.toTypedArray())
-        val artifacts = mutableMapOf<String, File>()
-        for (file in resources) {
-            val name = file.absolutePath.substringAfter("resources\\")
-            val artifact = artifacts.computeIfAbsent(name) { File(workspace, name) }
-            if (!artifact.parentFile.exists()) {
-                artifact.parentFile.mkdirs()
-            }
-            artifact.appendBytes(file.readBytes())
-        }
-        from(workspace) {
+        // 打包资源文件
+        from(layout.buildDirectory.dir("workspace")) {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
         // 打包子项目源码
-        for (subproject in subprojects) {
-            from(subproject.sourceSets["main"].output) {
+        val dependencies = configurations["compileOnly"].dependencies.filterIsInstance<ProjectDependency>()
+        for (dependency in dependencies) {
+            if (dependency.dependencyProject.name.startsWith("module-action-")) {
+                // 排除拓展语句
+                continue
+            }
+            from(dependency.dependencyProject.sourceSets["main"].output) {
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
+        }
+
+        doLast {
+            delete(layout.buildDirectory)
         }
     }
 }
