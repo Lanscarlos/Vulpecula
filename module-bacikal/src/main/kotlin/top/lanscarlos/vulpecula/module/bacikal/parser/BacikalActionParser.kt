@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture
 @RuntimeDependency(
     "!org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0",
     test = "!kotlinx.metadata.jvm.KotlinClassMetadata",
-    relocate = ["!kotlin.", "!kotlin2021.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
+    relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
     transitive = false
 )
 class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) : QuestActionParser {
@@ -137,7 +137,7 @@ class BacikalActionParser(owner: Class<*>, val instance: BacikalActionResolver) 
 
         // 无参数缺省
         try {
-            info("BacikalActionParser#execute >> Invoke standard function. parameters: ${parameters.joinToString()}")
+//            info("BacikalActionParser#execute >> Invoke standard function. parameters: ${parameters.joinToString()}")
             return standardFunction.invoke(instance, *parameters)
         } catch (e: Exception) {
             if (e is InvocationTargetException) {
