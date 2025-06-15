@@ -156,6 +156,8 @@ object BacikalRegistry : ClassVisitor(1) {
                 return@mapNotNull null
             }
             cache[0] to cache[1]
+        }.ifEmpty {
+            listOf("vulpecula" to id)
         }
 
         // 读取远程注册信息
@@ -166,6 +168,8 @@ object BacikalRegistry : ClassVisitor(1) {
                 return@mapNotNull null
             }
             cache[0] to cache[1]
+        }.ifEmpty {
+            listOf("vulpecula" to id)
         }
 
         registerAction(id, parser, local, remote)
