@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.action.event
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
-import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
+import top.lanscarlos.vulpecula.module.bacikal.parser.ReflexActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
 /**
@@ -14,7 +14,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
  * @since 2025/6/15
  */
 @BacikalParser
-object EventCancelAction : BacikalActionResolver {
+object EventCancelAction : ReflexActionResolver {
 
     override val bind: String = "event"
 

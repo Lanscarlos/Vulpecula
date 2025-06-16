@@ -5,7 +5,7 @@ import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
-import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
+import top.lanscarlos.vulpecula.module.bacikal.parser.ReflexActionResolver
 
 /**
  * Vulpecula
@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionResolver
  * @since 2024-11-20 20:39
  */
 @BacikalParser
-object ActionItemBuild : BacikalActionResolver {
+object ActionItemBuild : ReflexActionResolver {
 
     override val id: String = "build"
 
