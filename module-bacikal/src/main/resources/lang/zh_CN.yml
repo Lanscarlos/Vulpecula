@@ -1,10 +1,11 @@
 
 # Bacikal
 
+module-bacikal-service-name: '语句'
 module-bacikal-exception-action: '异常语句: &e{0}'
 module-bacikal-exception-reason: '异常原因: &e{0}'
 module-bacikal-exception-detail-header: '异常位置:'
-module-bacikal-exception-detail-item: '&7 {0} &8|&7 {1}:'
+module-bacikal-exception-detail-item: '&7 {0} &8|&7 {1}'
 module-bacikal-exception-detail-footer: ' '
 module-bacikal-exception-compile-failure: '脚本编译异常'
 module-bacikal-exception-execute-failure: '脚本运行异常'

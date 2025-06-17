@@ -4,7 +4,9 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.module.kether.printKetherErrorMessage
-import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestCompiler
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
+import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 
 /**
@@ -21,21 +23,21 @@ object BacikalCommand {
         dynamic("content") {
              execute<ProxyCommandSender> { sender, _, content ->
                  try {
-                     val source = if (!content.startsWith("def")) "def main = { $content }" else content
-                     val quest = BacikalQuestCompiler.compile(source, "eval", emptyList())
-                     BacikalQuestExecutor.execute(quest, "main", -1L, sender, emptyMap()).handle { result, ex ->
-                         if (ex != null) {
-                             sender.sendMessage(" §5§l‹ ›§r §cException: §f${ex.localizedMessage}")
-                             ex.printKetherErrorMessage()
-                             ex.printStackTrace()
-                             return@handle
+                     val quest = BacikalService.compile(content, "eval", emptyList())
+                     BacikalQuestExecutor.execute(quest, "main", -1L, sender, emptyMap())
+                         .handle { result, e ->
+                             if (e != null) {
+                                 val ex = e.cause as BacikalRuntimeException
+                                 ex.printLocalizedMessage(sender, asLang("module-bacikal-service-name"))
+                             } else {
+                                 sender.sendMessage(" §5§l‹ ›§r §aResult: §f$result")
+                             }
                          }
-                         sender.sendMessage(" §5§l‹ ›§r §aResult: §f$result")
-                     }
+                 } catch (ex: BacikalCompileException) {
+                     ex.printLocalizedMessage(sender, asLang("module-script-service-name"))
                  } catch (ex: Throwable) {
                      sender.sendMessage(" §5§l‹ ›§r §cException: §f${ex.localizedMessage}")
-                     ex.printKetherErrorMessage()
-                     ex.printStackTrace()
+                     ex.printKetherErrorMessage(true)
                  }
              }
         }

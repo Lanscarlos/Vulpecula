@@ -27,7 +27,7 @@ object BacikalQuestCompiler {
                 ScriptService,
                 "bacikal_$name",
                 content.toByteArray(StandardCharsets.UTF_8),
-                listOf("vulpecula", *namespace.toTypedArray()).distinct() // 命名空间去重
+                listOf("vulpecula").plus(namespace).distinct() // 命名空间去重
             )
         } catch (ex: Exception) {
             throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
