@@ -1,33 +1,37 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.library.kether.QuestAction
-import taboolib.library.kether.QuestActionParser
 import taboolib.library.kether.QuestReader
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.bacikal.parser
  *
+ * 复合语句解析器
+ *
  * @author Lanscarlos
  * @since 2024-05-13 17:02
  */
 class ComplexActionParser(
-    override val id: String,
-    override val aliases: Array<String>,
-    override val bind: String,
-    override val namespace: String,
-    override val description: String,
-) : BacikalActionParser {
+    id: String,
+    name: String,
+    aliases: Array<String>,
+    namespace: String,
+    description: String,
+) : AbstractActionParser(id, name, aliases, namespace, description) {
 
     internal val actions: HashMap<String, BacikalActionParser> = hashMapOf()
 
     internal var defaultAction: BacikalActionParser? = null
 
-    fun registerAction(id: String, parser: BacikalActionParser) {
-        actions[id] = parser
+    fun addActionParser(parser: BacikalActionParser) {
+        val names = listOf(parser.name).plus(parser.aliases)
+        for (name in names) {
+            actions[name] = parser
+        }
     }
 
-    fun registerDefault(parser: BacikalActionParser) {
+    fun addDefaultParser(parser: BacikalActionParser) {
         defaultAction = parser
     }
 

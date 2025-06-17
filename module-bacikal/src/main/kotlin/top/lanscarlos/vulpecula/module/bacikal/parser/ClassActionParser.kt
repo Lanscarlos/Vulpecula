@@ -10,7 +10,6 @@ import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
-import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
@@ -23,6 +22,8 @@ import java.util.concurrent.CompletableFuture
  * Vulpecula
  * top.lanscarlos.vulpecula.module.bacikal.parser
  *
+ * 类式语句解析器
+ *
  * @author Lanscarlos
  * @since 2024-11-20 11:11
  */
@@ -32,15 +33,16 @@ import java.util.concurrent.CompletableFuture
     relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
     transitive = false
 )
-class ReflexActionParser(
-    override val id: String,
-    override val aliases: Array<String>,
-    override val bind: String,
-    override val namespace: String,
-    override val description: String,
+class ClassActionParser(
+    id: String,
+    name: String,
+    aliases: Array<String>,
+    namespace: String,
+    description: String,
     javaClass: Class<*>,
-    val instance: ReflexActionResolver
-) : BacikalActionParser {
+    metadata: Array<String>,
+    private val resolver: ClassActionResolver
+) : AbstractActionParser(id, name, aliases, namespace, description) {
 
     companion object {
         const val MODIFIER_NONE = 0
@@ -71,7 +73,7 @@ class ReflexActionParser(
 
     init {
         // 类结构验证
-        if (!ReflexActionResolver::class.java.isAssignableFrom(javaClass)) {
+        if (!ClassActionResolver::class.java.isAssignableFrom(javaClass)) {
             // 未实现 BacikalActionResolver 接口
             error("BacikalActionParser#init >> ${javaClass.name} does not implement BacikalActionResolver.")
         }
@@ -90,10 +92,8 @@ class ReflexActionParser(
         val reflexParameters = reflexMethod.parameter
 
         // 使用 ProtoBuf 解析元信息
-        val metadata = reflexClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!
-        val data1 = BacikalRegistry.metadata[javaClass.name]!!
-        val data2 = metadata.list<String>("d2").toTypedArray()
-        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(data1, data2)
+        val data = reflexClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!.list<String>("d2").toTypedArray()
+        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(metadata, data)
         val pbFunction = pbClass.functionList.find { resolver.getString(it.name) == "resolve" }!!
         val pbParameters = pbFunction.valueParameterList
 
@@ -132,7 +132,7 @@ class ReflexActionParser(
         if (defaultFunction != null && mask != 0) {
             // 参数缺省
             try {
-                return defaultFunction.invoke(instance, instance, *parameters, mask, null)
+                return defaultFunction.invoke(resolver, resolver, *parameters, mask, null)
             } catch (e: Exception) {
                 if (e is InvocationTargetException) {
                     e.targetException.printStackTrace()
@@ -146,7 +146,7 @@ class ReflexActionParser(
         // 无参数缺省
         try {
 //            info("BacikalActionParser#execute >> Invoke standard function. parameters: ${parameters.joinToString()}")
-            return standardFunction.invoke(instance, *parameters)
+            return standardFunction.invoke(resolver, *parameters)
         } catch (e: Exception) {
             if (e is InvocationTargetException) {
                 e.targetException.printStackTrace()
@@ -271,7 +271,7 @@ class ReflexActionParser(
                     // 附加参数前面前缀在本函数调用前已经验证过了
                     reader.readAction()
                 }
-                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported modifier $modifier for parameter $name of action ${instance.id}")
+                else -> error("BacikalActionParser\$Parameter#accept >> Unsupported modifier $modifier for parameter $name of action $id")
             }
 
 //            val applicative = when (type) {

@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.action.event
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
-import top.lanscarlos.vulpecula.module.bacikal.parser.ReflexActionResolver
+import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
 /**
@@ -13,12 +13,8 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
  * @author Lanscarlos
  * @since 2025/6/15
  */
-@BacikalParser
-object EventCancelAction : ReflexActionResolver {
-
-    override val bind: String = "event"
-
-    override val id: String = "cancel"
+@BacikalParser("event.cancel")
+object EventCancelAction : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {
         frame.setVariable("@EVENT_STATUS", "CANCELED")

@@ -1,22 +1,16 @@
 package top.lanscarlos.vulpecula.module.bacikal
 
 import taboolib.common.LifeCycle
+import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.pluginId
-import taboolib.common.platform.function.releaseResourceFolder
-import taboolib.module.configuration.Config
-import taboolib.module.configuration.Configuration
+import taboolib.common.platform.function.registerLifeCycleTask
+import taboolib.library.kether.QuestActionParser
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionClassRegister
-import top.lanscarlos.vulpecula.module.bacikal.parser.ReflexActionParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
-import java.io.File
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.iterator
 
 /**
  * Vulpecula
@@ -27,40 +21,56 @@ import kotlin.collections.iterator
  * @author Lanscarlos
  * @since 2024-11-20 16:33
  */
-@Awake(LifeCycle.LOAD)
 object BacikalRegistry {
 
-    @Config("bacikal-registry.yml")
-    lateinit var registry: Configuration
-        private set
+    private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
 
-    val headers = mutableMapOf<String, ComplexActionParser>()
-
-    val metadata = mutableMapOf<String, Array<String>>()
-
-    @Awake(LifeCycle.LOAD)
-    fun onLoad() {
-        // 注册拓展语句
-        val folder = File(getDataFolder(), "action")
-        if (!folder.exists()) {
-            releaseResourceFolder("action")
-        }
-
-        for (file in folder.listFiles()) {
-            if (!file.exists() || !file.isFile || !file.canRead()) {
-                continue
+    @Awake(LifeCycle.INIT)
+    fun onInit() {
+        registerLifeCycleTask(LifeCycle.LOAD, 8) {
+            for (parser in parsers.values) {
+                registerAction(parser)
             }
-            if (file.extension != "jar") {
-                continue
-            }
-            ActionClassRegister.registerAction(file)
         }
     }
 
-    @Awake(LifeCycle.ENABLE)
-    fun onEnable() {
-        for ((id, parser) in headers) {
-            ActionClassRegister.registerAction(id, parser)
+    /**
+     * 注册语句解析器
+     *
+     * @param parser 语句解析器
+     * */
+    fun registerActionParser(parser: BacikalActionParser) {
+        parsers[parser.id] = parser
+
+        // 遍历层级并填充父节点
+        val newParents = mutableListOf<ComplexActionParser>()
+        if (parser.id.contains('.')) {
+            // 含层级
+            var parent: ComplexActionParser? = null
+            val array = parser.id.split('.').dropLast(1)
+            for (index in array.indices) {
+                val id = array.subList(0, index + 1).joinToString(".")
+                val name = array[index]
+                val parser = parsers.computeIfAbsent(id) {
+                    ComplexActionParser(id, name, emptyArray(), "vulpecula", "Description")
+                        .also(newParents::add)
+                }
+                parent?.addActionParser(parser) // 第一次遍历时无父节点
+                parent = parser as? ComplexActionParser ?: error("已存在 $id 的末端语句节点!")
+            }
+            parent?.addActionParser(parser) ?: error("解析 ${parser.id} 的父节点失败")
+        }
+
+        when (TabooLib.getCurrentLifeCycle()) {
+            LifeCycle.ENABLE,
+            LifeCycle.ACTIVE -> {
+                // 立刻注册
+                for (parent in newParents) {
+                    registerAction(parent)
+                }
+                registerAction(parser)
+            }
+            else -> {}
         }
     }
 
@@ -69,27 +79,34 @@ object BacikalRegistry {
      *
      * @param parser 语句解析器
      * */
-    fun registerAction(parser: ComplexActionParser) {
-        for (action in parser.actions.values) {
-            if (action is ComplexActionParser) {
-                registerAction(action)
-            } else {
-                registerAction(action)
-            }
+    private fun registerAction(parser: BacikalActionParser) {
+        if (parser.id.contains('.')) {
+            // 含层级
+            registerAction(
+                names = listOf(parser.id.replace('.', '-')),
+                namespace = parser.namespace,
+                parser = parser
+            )
+        } else {
+            registerAction(
+                names = listOf(parser.name).plus(parser.aliases),
+                namespace = parser.namespace,
+                parser = parser
+            )
         }
     }
 
     /**
      * 注册语句
      *
+     * @param names 语句头
+     * @param namespace 命名空间
      * @param parser 语句解析器
      * */
-    fun registerAction(parser: ReflexActionParser) {
-        val names = listOf(parser.id).plus(parser.aliases)
-
+    private fun registerAction(names: List<String>, namespace: String, parser: QuestActionParser) {
         // 本地注册
         for (name in names) {
-            Kether.scriptRegistry.registerAction("vulpecula", name, parser)
+            Kether.scriptRegistry.registerAction(namespace, name, parser)
         }
 
         // 远程注册
@@ -98,7 +115,7 @@ object BacikalRegistry {
                 // 过滤自身插件
                 continue
             }
-            connection.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, names, "vulpecula"))
+            connection.call(StandardChannel.REMOTE_ADD_ACTION, arrayOf(pluginId, names, namespace))
         }
     }
 

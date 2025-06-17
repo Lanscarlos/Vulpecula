@@ -9,8 +9,8 @@ package top.lanscarlos.vulpecula.module.bacikal.annotation
  */
 annotation class BacikalParser(
     val id: String,
+    val name: String = "",
     val aliases: Array<String> = [],
-    val bind: String = "",
     val namespace: String = "vulpecula",
     val description: String = ""
 )

@@ -13,9 +13,9 @@ interface BacikalActionParser : QuestActionParser {
 
     val id: String
 
-    val aliases: Array<String>
+    val name: String
 
-    val bind: String
+    val aliases: Array<String>
 
     val namespace: String
 
