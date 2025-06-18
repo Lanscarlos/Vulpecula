@@ -34,7 +34,7 @@ object BacikalCommand {
                              }
                          }
                  } catch (ex: BacikalCompileException) {
-                     ex.printLocalizedMessage(sender, asLang("module-script-service-name"))
+                     ex.printLocalizedMessage(sender, asLang("module-bacikal-service-name"))
                  } catch (ex: Throwable) {
                      sender.sendMessage(" §5§l‹ ›§r §cException: §f${ex.localizedMessage}")
                      ex.printKetherErrorMessage(true)
