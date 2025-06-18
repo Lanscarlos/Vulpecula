@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal.quest
 
 import taboolib.common.platform.function.warning
 import taboolib.library.kether.*
+import taboolib.library.reflex.Reflex.Companion.invokeMethod
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionGet
@@ -56,6 +57,38 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             val block = SimpleQuest.SimpleBlock(name, actions)
             this.processActions(block, actions)
             this.blocks[name] = block
+        }
+
+        override fun readActions(): MutableList<ParsedAction<*>> {
+            skipBlank()
+            val batch: Boolean = peek() == '{'
+            if (batch) {
+                skip(1)
+            }
+            val reader: SimpleReader = newActionReader(service, namespace)
+            try {
+                val list = ArrayList<ParsedAction<*>>()
+                while ((batch && reader.hasNext()) || list.isEmpty()) {
+                    if (batch && reader.peek() == '}') {
+                        reader.invokeMethod<Unit>("skip", 1)
+                        this.index = reader.index
+                        list.trimToSize()
+                        return list
+                    }
+                    list.add(reader.nextAction<Any?>())
+                    reader.mark()
+                }
+                return list
+            } catch (ex: LocalizedException) {
+                var source = String(this.content, reader.mark, this.content.size.coerceAtMost(reader.index) - reader.mark).trim()
+                // 优化 EOF 错误展示
+                if (batch && ex.error == LoadError.EOF) {
+                    source = source.substring(0, source.lastIndexOf('}') - 1)
+                }
+                throw LoadError.BLOCK_ERROR.create(this.currentBlock, lineOf(this.content, reader.mark), source).then(ex)
+            } catch (ex: Exception) {
+                throw ex
+            }
         }
 
     }
