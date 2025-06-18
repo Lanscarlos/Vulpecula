@@ -12,6 +12,8 @@ import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
+import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
+import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -56,12 +58,14 @@ object BacikalScanner : ClassVisitor(5) {
             ClassAppender.addPath(file.toPath(), false, false)
 
             // 遍历资源
+            var source: ExternalActionSource? = null
             for ((name, byteArray) in file.toURI().toURL().getResources()) {
                 when {
                     name == "plugin.yml" -> {
                         val config = Configuration.loadFromInputStream(byteArray.inputStream(), Type.YAML)
                         val version = config.getString("version") ?: "UNKNOWN_VERSION"
                         val authors = config.getStringList("authors")
+                        source = ExternalActionSource(file, version, authors)
                     }
                     name.endsWith(".metadata") -> {
                         val key = name.substringAfterLast("/").substringBefore('.')
@@ -77,7 +81,7 @@ object BacikalScanner : ClassVisitor(5) {
                     continue
                 }
                 val parser = buildClassActionParser(owner)
-                BacikalRegistry.registerActionParser(parser)
+                BacikalRegistry.registerActionParser(parser, source!!)
             }
         }
     }
@@ -90,7 +94,7 @@ object BacikalScanner : ClassVisitor(5) {
             return
         }
         val parser = buildClassActionParser(owner)
-        BacikalRegistry.registerActionParser(parser)
+        BacikalRegistry.registerActionParser(parser, BuiltInActionSource)
     }
 
     private fun buildClassActionParser(owner: ReflexClass): ClassActionParser {

@@ -8,6 +8,9 @@ import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
+import taboolib.module.chat.ComponentText
+import taboolib.module.chat.Components
+import taboolib.module.chat.StandardColors
 import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
@@ -109,6 +112,68 @@ class ClassActionParser(
         useFutureReturn = standardFunction.returnType == CompletableFuture::class.java
     }
 
+    override fun buildVisualizedStructure(): ComponentText {
+        val builder = Components
+            .text(name)
+            .color(StandardColors.RED)
+        builder.append(Components.text("").color(StandardColors.RESET))
+        for (parameter in parameters) {
+            if (parameter.type == BacikalFrame::class.java) {
+                continue
+            }
+
+            builder.append(" ")
+            when (parameter.modifier) {
+                MODIFIER_NONE -> {
+                    builder += Components
+                        .text("<${parameter.name}: ${parameter.type.simpleName}>")
+                        .color(StandardColors.WHITE)
+                }
+                MODIFIER_EXPECTED -> {
+                    builder += Components
+                        .text(parameter.prefix.first())
+                        .color(StandardColors.GRAY)
+                        .hoverText(parameter.prefix.toList().toString())
+                    builder.append(" ")
+                    builder += Components
+                        .text("<${parameter.name}: ${parameter.type.simpleName}>")
+                        .color(StandardColors.GRAY)
+                }
+                MODIFIER_OPTIONAL -> {
+                    builder += Components
+                        .text("[")
+                        .color(StandardColors.DARK_GRAY)
+                    builder += Components
+                        .text(parameter.prefix.first())
+                        .color(StandardColors.DARK_GRAY)
+                        .hoverText(parameter.prefix.toList().toString())
+                    builder.append(" ")
+                    builder += Components
+                        .text("<${parameter.name}: ${parameter.type.simpleName}>")
+                        .color(StandardColors.DARK_GRAY)
+                    builder += Components
+                        .text("]")
+                        .color(StandardColors.DARK_GRAY)
+                }
+                MODIFIER_ADDITIONAL -> {
+                    builder += Components
+                        .text("--")
+                        .color(StandardColors.DARK_PURPLE)
+                    builder += Components
+                        .text(parameter.prefix.first())
+                        .color(StandardColors.DARK_PURPLE)
+                        .hoverText(parameter.prefix.toList().toString())
+                    builder.append(" ")
+                    builder += Components
+                        .text("<${parameter.name}: ${parameter.type.simpleName}>")
+                        .color(StandardColors.DARK_PURPLE)
+                }
+            }
+            builder.append(Components.text("").color(StandardColors.RESET))
+        }
+        return builder
+    }
+
     /**
      * 执行函数
      *
@@ -188,7 +253,7 @@ class ClassActionParser(
 
         // 解析附加参数
         if (additional.isNotEmpty()) {
-            val regex = "-\\D+".toRegex()
+            val regex = "--\\D+".toRegex()
             while (reader.peekToken().matches(regex)) {
                 val prefix = reader.readToken().substring(1)
                 info("BacikalActionParser#resolve >> Additional parameter found. $prefix >> ${reader.peekToken()}")

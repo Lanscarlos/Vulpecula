@@ -8,8 +8,10 @@ import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.library.kether.QuestActionParser
+import taboolib.module.chat.Components
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
@@ -37,11 +39,44 @@ object BacikalRegistry {
         }
     }
 
+
+    fun get(id: String): BacikalActionParser {
+        return getOrNull(id) ?: error("Schedule $id not found.")
+    }
+
+    fun getOrNull(id: String): BacikalActionParser? {
+        return parsers[id]
+    }
+
+    /**
+     * 获取所有已注册的语句解析器 ID
+     * */
+    fun keys(): Set<String> = parsers.keys
+
+    /**
+     * 获取所有已注册的语句解析器
+     * */
+    fun values(): Collection<BacikalActionParser> = parsers.values
+
+    /**
+     * 获取所有已注册的语句解析器键值对
+     * */
+    fun entries(): Set<Map.Entry<String, BacikalActionParser>> = parsers.entries
+
     /**
      * 展示
      * */
     fun display(sender: ProxyCommandSender) {
+        val builder = Components.text(asLang("module-bacikal-registry-display-header"))
 
+        for (parser in parsers.values) {
+            if (parser.id.contains('.')) {
+                continue
+            }
+            builder.newLine()
+            builder += parser.buildStructure()
+        }
+        builder.sendTo(sender)
     }
 
     /**
@@ -51,6 +86,7 @@ object BacikalRegistry {
      * */
     fun registerActionParser(parser: BacikalActionParser, source: ActionSource) {
         parsers[parser.id] = parser
+        sources[parser.id] = source
 
         // 遍历层级并填充父节点
         val newParents = mutableListOf<ComplexActionParser>()

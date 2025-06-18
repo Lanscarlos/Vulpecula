@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.library.kether.QuestActionParser
+import taboolib.module.chat.ComponentText
 
 /**
  * Vulpecula
@@ -20,5 +21,12 @@ interface BacikalActionParser : QuestActionParser {
     val namespace: String
 
     val description: String
+
+    /**
+     * 构建可视化结构用于展示结构
+     *
+     * @param depth 层级, -1 为展开所有层级
+     * */
+    fun buildStructure(depth: Int = -1): ComponentText
 
 }

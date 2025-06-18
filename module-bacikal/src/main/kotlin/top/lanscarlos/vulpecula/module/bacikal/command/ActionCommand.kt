@@ -4,6 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
+import taboolib.common.platform.command.suggest
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
@@ -21,13 +22,18 @@ object ActionCommand {
 
     @CommandBody
     val action = subCommand {
-        literal("registry", literal = registry)
+        literal("registry", literal = structure)
         literal("timing", literal = timing)
     }
 
-    val registry: CommandComponent.() -> Unit = {
-        execute<ProxyCommandSender> { sender, _, _ ->
-            BacikalRegistry.display(sender)
+    val structure: CommandComponent.() -> Unit = {
+        dynamic("id") {
+            suggest { BacikalRegistry.keys().toList() }
+            execute<ProxyCommandSender> { sender, _, id ->
+                val parser = BacikalRegistry.get(id)
+                val component = parser.buildStructure()
+                component.sendTo(sender)
+            }
         }
     }
 

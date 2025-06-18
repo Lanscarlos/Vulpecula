@@ -9,5 +9,4 @@ package top.lanscarlos.vulpecula.module.bacikal.action
  * @author Lanscarlos
  * @since 2025/6/18 17:11
  */
-interface ActionSource {
-}
+interface ActionSource
