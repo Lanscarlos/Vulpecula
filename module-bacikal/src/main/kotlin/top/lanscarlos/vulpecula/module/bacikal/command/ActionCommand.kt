@@ -5,6 +5,7 @@ import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.info
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
@@ -20,7 +21,14 @@ object ActionCommand {
 
     @CommandBody
     val action = subCommand {
+        literal("registry", literal = registry)
         literal("timing", literal = timing)
+    }
+
+    val registry: CommandComponent.() -> Unit = {
+        execute<ProxyCommandSender> { sender, _, _ ->
+            BacikalRegistry.display(sender)
+        }
     }
 
     val timing: CommandComponent.() -> Unit = {
@@ -52,15 +60,6 @@ object ActionCommand {
                 sender.info { asLang("module-bacikal-command-timing-execute", averageCompleteTime) }
             }
         }
-    }
-
-    private fun timingMemory(): Long {
-        val runtime = Runtime.getRuntime()
-        return runtime.totalMemory() - runtime.freeMemory()
-    }
-
-    private fun timingMemory(start: Long): Double {
-        return (timingMemory() - start) / 1048576.0
     }
 
 }

@@ -3,12 +3,14 @@ package top.lanscarlos.vulpecula.module.bacikal
 import taboolib.common.LifeCycle
 import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.library.kether.QuestActionParser
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
+import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 
@@ -23,6 +25,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
  */
 object BacikalRegistry {
 
+    private val sources: HashMap<String, ActionSource> = hashMapOf()
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
 
     @Awake(LifeCycle.INIT)
@@ -35,11 +38,18 @@ object BacikalRegistry {
     }
 
     /**
+     * 展示
+     * */
+    fun display(sender: ProxyCommandSender) {
+
+    }
+
+    /**
      * 注册语句解析器
      *
      * @param parser 语句解析器
      * */
-    fun registerActionParser(parser: BacikalActionParser) {
+    fun registerActionParser(parser: BacikalActionParser, source: ActionSource) {
         parsers[parser.id] = parser
 
         // 遍历层级并填充父节点
@@ -51,12 +61,12 @@ object BacikalRegistry {
             for (index in array.indices) {
                 val id = array.subList(0, index + 1).joinToString(".")
                 val name = array[index]
-                val parser = parsers.computeIfAbsent(id) {
+                val complex = parsers.computeIfAbsent(id) {
                     ComplexActionParser(id, name, emptyArray(), "vulpecula", "Description")
                         .also(newParents::add)
                 }
-                parent?.addActionParser(parser) // 第一次遍历时无父节点
-                parent = parser as? ComplexActionParser ?: error("已存在 $id 的末端语句节点!")
+                parent?.addActionParser(complex) // 第一次遍历时无父节点
+                parent = complex as? ComplexActionParser ?: error("已存在 $id 的末端语句节点!")
             }
             parent?.addActionParser(parser) ?: error("解析 ${parser.id} 的父节点失败")
         }
