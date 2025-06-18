@@ -24,7 +24,7 @@ max-replication: 10
 
 # [选填] 自启动, 默认为 false
 # 是否在服务器启动后自动激活日程
-auto-start: true
+auto-start: false
 
 # [选填] 原型模式
 # 启用后允许该日程多次执行

@@ -40,7 +40,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     /**
      * 是否自启动
      * */
-    override val isAutoStart: Boolean by config.read("auto-start").boolean(false)
+    final override val isAutoStart: Boolean by config.read("auto-start").boolean(false)
 
     /**
      * 是否允许多任务
@@ -68,6 +68,10 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     val onResumeScript: Script? by config.read("on-resume").convert(::parseScriptOrNull)
 
     private var currentPid: Long = 0
+
+    init {
+        require(!isAutoStart || !prototype) { asLang("module-schedule-exception-conflict-autostart") }
+    }
 
     override fun pause(pid: String) {
         if (pid == "*") {
