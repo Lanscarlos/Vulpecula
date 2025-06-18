@@ -1,7 +1,0 @@
-
-# Bacikal.Registry.Config
-
-actions:
-  item:
-    local: [ 'vulpecula:item' ]
-    remote: [ 'vulpecula:item' ]
