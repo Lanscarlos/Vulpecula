@@ -27,7 +27,7 @@ import java.io.File
  */
 object ScriptService {
 
-    internal val module: String by lazy { asLang("module-script-service-name") }
+    internal val module: String get() = asLang("module-script-service-name")
 
     private val directory: File = File(getDataFolder(), "script")
 

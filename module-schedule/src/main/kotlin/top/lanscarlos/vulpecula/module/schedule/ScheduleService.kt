@@ -24,7 +24,7 @@ import java.io.File
  */
 object ScheduleService {
 
-    internal val module: String by lazy { asLang("module-schedule-service-name") }
+    internal val module: String get() = asLang("module-schedule-service-name")
 
     private val directory: File = File(getDataFolder(), "schedule")
 

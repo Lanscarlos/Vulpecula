@@ -24,7 +24,7 @@ import java.io.File
  */
 object CommandService {
 
-    internal val module: String by lazy { asLang("module-command-service-name") }
+    internal val module: String get() = asLang("module-command-service-name")
 
     private val directory: File = File(getDataFolder(), "command")
 

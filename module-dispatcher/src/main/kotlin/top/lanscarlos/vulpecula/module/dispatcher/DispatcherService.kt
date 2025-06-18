@@ -25,7 +25,7 @@ import java.io.File
  */
 object DispatcherService {
 
-    internal val module: String by lazy { asLang("module-dispatcher-service-name") }
+    internal val module: String get() = asLang("module-dispatcher-service-name")
 
     private val directory: File = File(getDataFolder(), "dispatcher")
 

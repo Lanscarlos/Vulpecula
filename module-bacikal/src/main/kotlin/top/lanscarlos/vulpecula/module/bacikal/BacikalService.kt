@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.kether.ScriptContext
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestCompiler
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
@@ -17,6 +18,8 @@ import java.util.concurrent.CompletableFuture
  * @since 2025/4/25 17:02
  */
 object BacikalService {
+
+    internal val module: String get() = asLang("module-bacikal-service-name")
 
     /**
      * 编译 Kether 任务
