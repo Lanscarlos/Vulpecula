@@ -42,9 +42,14 @@ tasks {
             // ASM 解析
             for (file in files) {
                 val reader = ClassReader(file.readBytes())
+                var hasParserAnnotation = false
                 val data = mutableListOf<String>()
                 reader.accept(object : ClassVisitor(Opcodes.ASM9) {
                     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor? {
+                        if (descriptor == "Ltop/lanscarlos/vulpecula/module/bacikal/annotation/BacikalParser;") {
+                            hasParserAnnotation = true
+                            return null
+                        }
                         if (descriptor != "Lkotlin/Metadata;") {
                             return null
                         }
@@ -68,6 +73,9 @@ tasks {
                     }
                 }, 0)
 
+                if (!hasParserAnnotation) {
+                    continue
+                }
                 val name = reader.className.replace('/', '.') + ".metadata"
                 File(workspace, name).writeText(data.joinToString("\n"))
             }

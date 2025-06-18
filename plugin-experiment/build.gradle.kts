@@ -66,12 +66,16 @@ tasks {
     }
 
     register("asm-analyse") {
-        dependsOn(":module-action-event:jar")
+        val dependencies = configurations["compileOnly"].dependencies
+            .filterIsInstance<ProjectDependency>()
+            .map { ":${it.dependencyProject.name}:jar" }
+        dependsOn(*dependencies.toTypedArray())
+
         doLast {
             val workspace = file(layout.buildDirectory.dir("workspace/metadata")).also(File::mkdirs)
             val files = configurations["compileOnly"].dependencies
                 .filterIsInstance<ProjectDependency>()
-                .filter { it.dependencyProject.name.startsWith("module-action-") }
+                .filter { !it.dependencyProject.name.startsWith("module-action-") }
                 .flatMap { it.dependencyProject.sourceSets["main"].output.classesDirs }
                 .filter { it.exists() }
                 .flatMap { it.walk().onEnter { file -> file.name != "META-INF" } }
@@ -80,9 +84,14 @@ tasks {
             // ASM 解析
             for (file in files) {
                 val reader = ClassReader(file.readBytes())
+                var hasParserAnnotation = false
                 val data = mutableListOf<String>()
                 reader.accept(object : ClassVisitor(Opcodes.ASM9) {
                     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor? {
+                        if (descriptor == "Ltop/lanscarlos/vulpecula/module/bacikal/annotation/BacikalParser;") {
+                            hasParserAnnotation = true
+                            return null
+                        }
                         if (descriptor != "Lkotlin/Metadata;") {
                             return null
                         }
@@ -106,6 +115,9 @@ tasks {
                     }
                 }, 0)
 
+                if (!hasParserAnnotation) {
+                    continue
+                }
                 val name = reader.className.replace('/', '.') + ".metadata"
                 File(workspace, name).writeText(data.joinToString("\n"))
             }
@@ -120,6 +132,7 @@ tasks {
         dependsOn("clean-workspace")
         dependsOn("embed-action")
         dependsOn("merge-resources")
+        dependsOn("asm-analyse")
 
         // 打包资源文件
         from(layout.buildDirectory.dir("workspace")) {
