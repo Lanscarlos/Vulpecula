@@ -56,7 +56,7 @@ class ComplexActionParser(
             lines.first().append(" ...")
             return lines
         }
-        val indent = " ".repeat(name.length - 3)
+        val indent = " ".repeat(if (name.contains('-')) name.indexOf('-') else name.length.minus(3).coerceAtLeast(0))
         val children = actions.values.toList()
         for ((index, child) in children.withIndex()) {
             val header = if (index != children.lastIndex) TAB_BRANCH_NODE else TAB_BRANCH_END
