@@ -112,7 +112,7 @@ class ClassActionParser(
         useFutureReturn = standardFunction.returnType == CompletableFuture::class.java
     }
 
-    override fun buildVisualizedStructure(): ComponentText {
+    override fun buildStructure(depth: Int): ComponentText {
         val builder = Components
             .text(name)
             .color(StandardColors.RED)

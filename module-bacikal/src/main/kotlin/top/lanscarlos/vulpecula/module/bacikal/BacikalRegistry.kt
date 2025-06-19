@@ -64,22 +64,6 @@ object BacikalRegistry {
     fun entries(): Set<Map.Entry<String, BacikalActionParser>> = parsers.entries
 
     /**
-     * 展示
-     * */
-    fun display(sender: ProxyCommandSender) {
-        val builder = Components.text(asLang("module-bacikal-registry-display-header"))
-
-        for (parser in parsers.values) {
-            if (parser.id.contains('.')) {
-                continue
-            }
-            builder.newLine()
-            builder += parser.buildStructure()
-        }
-        builder.sendTo(sender)
-    }
-
-    /**
      * 注册语句解析器
      *
      * @param parser 语句解析器

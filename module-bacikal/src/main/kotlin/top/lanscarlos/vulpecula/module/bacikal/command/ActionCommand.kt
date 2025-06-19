@@ -22,7 +22,7 @@ object ActionCommand {
 
     @CommandBody
     val action = subCommand {
-        literal("registry", literal = structure)
+        literal("structure", literal = structure)
         literal("timing", literal = timing)
     }
 
@@ -31,7 +31,7 @@ object ActionCommand {
             suggest { BacikalRegistry.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 val parser = BacikalRegistry.get(id)
-                val component = parser.buildStructure()
+                val component = parser.buildStructure(0)
                 component.sendTo(sender)
             }
         }

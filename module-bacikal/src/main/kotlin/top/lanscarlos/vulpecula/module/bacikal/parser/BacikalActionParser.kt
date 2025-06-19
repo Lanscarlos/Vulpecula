@@ -27,6 +27,6 @@ interface BacikalActionParser : QuestActionParser {
      *
      * @param depth 层级, -1 为展开所有层级
      * */
-    fun buildStructure(depth: Int = -1): ComponentText
+    fun buildStructure(depth: Int): ComponentText
 
 }
