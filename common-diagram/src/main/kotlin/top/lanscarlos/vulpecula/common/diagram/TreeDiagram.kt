@@ -4,7 +4,6 @@ import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
 import java.util.function.BiFunction
-import java.util.function.Function
 
 /**
  * Vulpecula
@@ -28,17 +27,17 @@ class TreeDiagram<T>(
         const val TAB_BRANCH_END = "└" // 末端分支
     }
 
-    private lateinit var onDrawHandler: Function<T, ComponentText>
+    private lateinit var onDrawHandler: BiFunction<Int, T, ComponentText>
 
-    private lateinit var onIndentHandler: Function<T, Int>
+    private lateinit var onIndentHandler: BiFunction<Int, T, Int>
 
     private lateinit var onTraversalHandler: BiFunction<Int, T, List<T>> // 层级, 遍历对象 -> 子对象列表
 
-    fun onDraw(func: Function<T, ComponentText>) {
+    fun onDraw(func: BiFunction<Int, T, ComponentText>) {
         this.onDrawHandler = func
     }
 
-    fun onIndent(func: Function<T, Int>) {
+    fun onIndent(func: BiFunction<Int, T, Int>) {
         this.onIndentHandler = func
     }
 
@@ -65,7 +64,7 @@ class TreeDiagram<T>(
         val lines = mutableListOf<ComponentText>()
 
         // 绘制当前节点
-        lines += onDrawHandler.apply(node)
+        lines += onDrawHandler.apply(depth, node)
             .resetColor()
 
         // 尝试遍历子节点并绘制
@@ -73,7 +72,7 @@ class TreeDiagram<T>(
         if (children.isEmpty()) {
             return lines
         }
-        val indent = onIndentHandler.apply(node).coerceAtLeast(0).let(" "::repeat)
+        val indent = onIndentHandler.apply(depth, node).coerceAtLeast(0).let(" "::repeat)
         for ((index, child) in children.withIndex()) {
             val header = if (index != children.lastIndex) tabBranch else tabBranchEnd
             val body = if (index == children.lastIndex) tabEmpty else tabIndicator
