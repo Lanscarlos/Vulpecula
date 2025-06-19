@@ -2,6 +2,7 @@ rootProject.name = "Vulpecula"
 include("common-applicative")
 include("common-config")
 include("common-core")
+include("common-diagram")
 include("module-action-event")
 include("module-bacikal")
 include("module-command")

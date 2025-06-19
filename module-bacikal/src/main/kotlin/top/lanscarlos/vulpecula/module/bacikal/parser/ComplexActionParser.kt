@@ -5,7 +5,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
-import top.lanscarlos.vulpecula.module.bacikal.diagram.TreeDiagram
+import top.lanscarlos.vulpecula.common.diagram.TreeDiagram
 
 /**
  * Vulpecula

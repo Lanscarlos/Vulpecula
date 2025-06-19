@@ -6,6 +6,7 @@ taboolib {
 dependencies {
     compileOnly(project(":common-applicative"))
     compileOnly(project(":common-core"))
+    compileOnly(project(":common-diagram"))
     compileOnly("ink.ptms.core:v12004:12004:mapped")
     compileOnly("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0")
 

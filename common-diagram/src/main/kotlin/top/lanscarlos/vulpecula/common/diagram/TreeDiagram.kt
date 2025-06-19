@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.module.bacikal.diagram
+package top.lanscarlos.vulpecula.common.diagram
 
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
