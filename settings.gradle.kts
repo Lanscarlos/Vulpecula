@@ -16,6 +16,7 @@ include("module-script")
 include("module-wireshark")
 include("platform-bukkit")
 include("plugin-experiment")
+include("task-metadata")
 
 include("project:common")
 include("project:common-core")
