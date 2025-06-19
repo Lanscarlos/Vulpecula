@@ -13,7 +13,12 @@ import java.util.function.Function
  * @author Lanscarlos
  * @since 2025/6/19
  */
-class TreeDiagram<T> {
+class TreeDiagram<T>(
+    val tabBranch: String = TAB_BRANCH + TAB_CONNECTOR_HORIZONTAL.repeat(2) + TAB_SPACE,
+    val tabBranchEnd: String = TAB_BRANCH_END + TAB_CONNECTOR_HORIZONTAL.repeat(2) + TAB_SPACE,
+    val tabIndicator: String = TAB_CONNECTOR_VERTICAL + TAB_SPACE.repeat(3),
+    val tabEmpty: String = TAB_SPACE.repeat(4)
+) {
 
     companion object {
         const val TAB_SPACE = " " // 空白符
@@ -70,8 +75,8 @@ class TreeDiagram<T> {
         }
         val indent = onIndentHandler.apply(node).coerceAtLeast(0).let(" "::repeat)
         for ((index, child) in children.withIndex()) {
-            val header = if (index == children.lastIndex) "└── " else "├── "
-            val body = if (index == children.lastIndex) "    " else "│   "
+            val header = if (index != children.lastIndex) tabBranch else tabBranchEnd
+            val body = if (index == children.lastIndex) tabEmpty else tabIndicator
 
             // 获取子节点的绘图
             val components = draw(depth + 1, child)
