@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal.command
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
+import taboolib.common.platform.command.restrictInt
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
 import top.lanscarlos.vulpecula.common.core.utils.asLang
@@ -31,7 +32,15 @@ object ActionCommand {
             suggest { BacikalRegistry.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 val parser = BacikalRegistry.get(id)
-                val component = parser.buildStructure(0)
+                val component = parser.buildStructure(-1)
+                component.sendTo(sender)
+            }
+        }.dynamic("depth") {
+            restrictInt()
+            execute<ProxyCommandSender> { sender, context, depth ->
+                val id = context["id"]
+                val parser = BacikalRegistry.get(id)
+                val component = parser.buildStructure(depth.toInt())
                 component.sendTo(sender)
             }
         }

@@ -113,65 +113,76 @@ class ClassActionParser(
     }
 
     override fun buildStructure(depth: Int): ComponentText {
-        val builder = Components
-            .text(name)
-            .color(StandardColors.RED)
-        builder.append(Components.text("").color(StandardColors.RESET))
-        for (parameter in parameters) {
+        return onDrawStructure(depth, 0).first()
+    }
+
+    override fun onDrawStructure(maxDepth: Int, currentDepth: Int): List<ComponentText> {
+        val depth = maxDepth - currentDepth
+
+        // 绘制语句头
+        val name = if (currentDepth == 0) id.replace('.', '-') else name
+        val component = Components.text(name).color(StandardColors.RED).resetColor()
+        // TODO 增加悬浮参数
+
+        // 绘制参数
+        for ((index, parameter) in parameters.withIndex()) {
+            if (maxDepth >= 0 && index + currentDepth >= maxDepth) {
+                component.append(" ...")
+                break
+            }
             if (parameter.type == BacikalFrame::class.java) {
                 continue
             }
-
-            builder.append(" ")
+            component.append(" ")
             when (parameter.modifier) {
                 MODIFIER_NONE -> {
-                    builder += Components
+                    component += Components
                         .text("<${parameter.name}: ${parameter.type.simpleName}>")
                         .color(StandardColors.WHITE)
                 }
                 MODIFIER_EXPECTED -> {
-                    builder += Components
+                    component += Components
                         .text(parameter.prefix.first())
                         .color(StandardColors.GRAY)
                         .hoverText(parameter.prefix.toList().toString())
-                    builder.append(" ")
-                    builder += Components
+                    component.append(" ")
+                    component += Components
                         .text("<${parameter.name}: ${parameter.type.simpleName}>")
                         .color(StandardColors.GRAY)
                 }
                 MODIFIER_OPTIONAL -> {
-                    builder += Components
+                    component += Components
                         .text("[")
                         .color(StandardColors.DARK_GRAY)
-                    builder += Components
+                    component += Components
                         .text(parameter.prefix.first())
                         .color(StandardColors.DARK_GRAY)
                         .hoverText(parameter.prefix.toList().toString())
-                    builder.append(" ")
-                    builder += Components
+                    component.append(" ")
+                    component += Components
                         .text("<${parameter.name}: ${parameter.type.simpleName}>")
                         .color(StandardColors.DARK_GRAY)
-                    builder += Components
+                    component += Components
                         .text("]")
                         .color(StandardColors.DARK_GRAY)
                 }
                 MODIFIER_ADDITIONAL -> {
-                    builder += Components
+                    component += Components
                         .text("--")
                         .color(StandardColors.DARK_PURPLE)
-                    builder += Components
+                    component += Components
                         .text(parameter.prefix.first())
                         .color(StandardColors.DARK_PURPLE)
                         .hoverText(parameter.prefix.toList().toString())
-                    builder.append(" ")
-                    builder += Components
+                    component.append(" ")
+                    component += Components
                         .text("<${parameter.name}: ${parameter.type.simpleName}>")
                         .color(StandardColors.DARK_PURPLE)
                 }
             }
-            builder.append(Components.text("").color(StandardColors.RESET))
+            component.resetColor()
         }
-        return builder
+        return listOf(component)
     }
 
     /**

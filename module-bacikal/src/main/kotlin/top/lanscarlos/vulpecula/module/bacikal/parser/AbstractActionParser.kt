@@ -1,5 +1,9 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
+import taboolib.module.chat.ComponentText
+import taboolib.module.chat.Components
+import taboolib.module.chat.StandardColors
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.bacikal.parser
@@ -16,5 +20,11 @@ abstract class AbstractActionParser(
 ) : BacikalActionParser {
 
     override val name: String = name.ifBlank { id.substringAfterLast('.') }
+
+    abstract fun onDrawStructure(maxDepth: Int, currentDepth: Int): List<ComponentText>
+
+    protected fun ComponentText.resetColor(): ComponentText {
+        return append(Components.text("").color(StandardColors.RESET))
+    }
 
 }
