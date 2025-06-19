@@ -7,6 +7,7 @@ import taboolib.common.platform.command.restrictInt
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.diagram.TableDiagram
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.info
@@ -23,8 +24,24 @@ object ActionCommand {
 
     @CommandBody
     val action = subCommand {
+        literal("registry", literal = registry)
         literal("structure", literal = structure)
         literal("timing", literal = timing)
+    }
+
+    val registry: CommandComponent.() -> Unit = {
+        execute<ProxyCommandSender> { sender, _, _ ->
+            val diagram = TableDiagram()
+            diagram.addHeader("语句")
+            diagram.addHeader("命名空间")
+            diagram.addHeader("版本")
+            diagram.addHeader("来源")
+            diagram.addRow(listOf("command", "vulpecula", "v1.0.0", "内置"))
+            diagram.addRow(listOf("dispatcher", "vulpecula", "v1.0.0", "内置"))
+            diagram.addRow(listOf("schedule", "vulpecula", "v1.0.0", "内置"))
+            diagram.addRow(listOf("script", "vulpecula", "v1.0.0", "内置"))
+            diagram.build().sendTo(sender)
+        }
     }
 
     val structure: CommandComponent.() -> Unit = {
