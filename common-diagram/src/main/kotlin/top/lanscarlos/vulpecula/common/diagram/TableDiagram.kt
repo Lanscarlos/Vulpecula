@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.common.diagram
 
-import taboolib.common.platform.function.info
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 
@@ -17,38 +16,74 @@ class TableDiagram(val padding: Int = 2) {
         LEFT, CENTER, RIGHT
     }
 
-    class Header(val index: Int, val content: String)
+    private inner class Header(val index: Int, val component: ComponentText, val align: Align) {
 
-    class Row(val index: Int, val content: List<Data>)
+        val plainText = component.toPlainText()
 
-    class Data(val index: Int, val content: String)
+        val length = plainText.fixedLength()
 
-    val align: Align = Align.CENTER
+        var adaptiveWidth: Int = -1
 
-    val headers = mutableListOf<Header>() // 表头
-
-    val rows = mutableListOf<Row>() // 行
-
-    fun addHeader(content: String) {
-        headers += Header(headers.size, content)
     }
 
-    fun addRow(content: List<String>) {
-        rows += Row(rows.size, content.mapIndexed(::Data))
+    private inner class Row(val index: Int) {
+        val cells = mutableListOf<Cell>()
+    }
+
+    private inner class Cell(val header: Header, val row: Row, val component: ComponentText) {
+
+        val plainText = component.toPlainText()
+
+        val length = plainText.fixedLength()
+
+        val align: Align get() = header.align
+
+    }
+
+    private val headers = mutableListOf<Header>() // 表头
+
+    private val rows = mutableListOf<Row>() // 行
+
+    fun addHeader(content: String, align: Align = Align.CENTER) {
+        headers += Header(headers.size, Components.text(content), align)
+    }
+
+    fun addHeader(component: ComponentText, align: Align = Align.CENTER) {
+        headers += Header(headers.size, component, align)
+    }
+
+    fun addTextRow(content: List<String>) {
+        val row = Row(rows.size)
+        for (header in headers) {
+            val cell = Cell(header, row, Components.text(content.getOrNull(header.index) ?: ""))
+            row.cells += cell
+        }
+        rows += row
+
+    }
+
+    fun addComponentRow(components: List<ComponentText>) {
+        val row = Row(rows.size)
+        for (header in headers) {
+            val cell = Cell(header, row, components.getOrNull(header.index) ?: Components.text(""))
+            row.cells += cell
+        }
+        rows += row
+
     }
 
     fun build(): ComponentText {
         // 计算每一列的自适应宽度
-        val adaptiveWidth = headers.map(::calculateAdaptiveWidth)
+        calculateAdaptiveWidth()
 
         val lines = mutableListOf<ComponentText>()
 
         // 绘制表头
-        lines += drawHeaders(adaptiveWidth)
+        lines += drawHeaders()
 
         // 绘制数据
         for (row in rows) {
-            lines += drawRow(row, adaptiveWidth)
+            lines += drawRow(row)
         }
 
         val builder = Components.empty()
@@ -58,116 +93,105 @@ class TableDiagram(val padding: Int = 2) {
         return builder
     }
 
-    fun drawHeaders(adaptiveWidth: List<Int>): List<ComponentText> {
-        val top = Components.empty()
-        val body = Components.empty()
-        val bottom = Components.empty()
+    private fun drawHeaders(): List<ComponentText> {
+        // 渲染上下边框
+        val topBorder = "┌" + headers.joinToString(separator = "┬") { "─".repeat(it.adaptiveWidth + padding.times(2)) } + "┐"
+        val bottomBorder = "├" + headers.joinToString(separator = "┼") { "─".repeat(it.adaptiveWidth + padding.times(2)) } + "┤"
 
-        for ((index, header) in headers.withIndex()) {
-            val width = adaptiveWidth[index]
-            if (index == 0) {
-                top.append("┌")
-                body.append("│")
-                bottom.append("├")
-            }
-            top.append("─".repeat(width + padding * 2))
-            bottom.append("─".repeat(width + padding * 2))
-            if (index == headers.lastIndex) {
-                top.append("┐")
-                bottom.append("┤")
-            } else {
-                top.append("┬")
-                bottom.append("┼")
-            }
-
-            when (align) {
+        val builder = ComponentBuilder()
+        for (header in headers) {
+            builder.append("│")
+            builder.append(" ".repeat(padding))
+            when (header.align) {
                 Align.LEFT -> {
-                    body.append(" ".repeat(padding))
-                    body.append(header.content)
-                    val offset = width - header.content.fixedLength()
-                    body.append(" ".repeat(padding + offset))
+                    val offset = header.adaptiveWidth - header.length
+                    builder.append(header.component)
+                    builder.append(" ".repeat(offset))
                 }
                 Align.RIGHT -> {
-                    val offset = width - header.content.fixedLength()
-                    body.append(" ".repeat(padding + offset))
-                    body.append(header.content)
-                    body.append(" ".repeat(padding))
+                    val offset = header.adaptiveWidth - header.length
+                    builder.append(" ".repeat(offset))
+                    builder.append(header.component)
                 }
                 Align.CENTER -> {
-                    val length = header.content.fixedLength()
-                    if (length % 2 == 0) {
-                        // 双数长度
-                        val offset = (width - length) / 2
-                        val padding = this.padding + offset
-                        body.append(" ".repeat(padding))
-                        body.append(header.content)
-                        body.append(" ".repeat(padding))
+                    val offset = (header.adaptiveWidth - header.length) / 2
+                    builder.append(" ".repeat(offset))
+                    builder.append(header.component)
+                    builder.append(" ".repeat(offset))
+                    if (header.length % 2 != 0) {
+                        builder.append(" ")
                     }
                 }
             }
-            body.append("│")
+            builder.append(" ".repeat(padding))
         }
-
-        return listOf(top, body, bottom)
+        builder.append("│")
+        return listOf(
+            Components.text(topBorder),
+            builder.build(),
+            Components.text(bottomBorder)
+        )
     }
 
-    fun drawRow(row: Row, adaptiveWidth: List<Int>): List<ComponentText> {
-        val body = Components.empty()
-        val bottom = Components.empty()
+    private fun drawRow(row: Row): List<ComponentText> {
+        // 渲染底部边框
+        val border = if (row.index != rows.lastIndex) {
+            "├" + headers.joinToString(separator = "┼") { "─".repeat(it.adaptiveWidth + padding.times(2)) } + "┤"
+        } else {
+            "└" + headers.joinToString(separator = "┴") { "─".repeat(it.adaptiveWidth + padding.times(2)) } + "┘"
+        }
 
-        for ((index, column) in row.content.withIndex()) {
-            val width = adaptiveWidth[index]
-            if (index == 0) {
-                body.append("│")
-                bottom.append(if (row.index != rows.lastIndex) "├" else "└")
+        // 渲染数据体
+        val builder = ComponentBuilder()
+        for (cell in row.cells) {
+            val adaptiveWidth = cell.header.adaptiveWidth
+            builder.append("│")
+            builder.append(" ".repeat(padding))
+            if (cell.length == 0) {
+                builder.append(" ".repeat(adaptiveWidth))
+                builder.append(" ".repeat(padding))
+                continue
             }
-            bottom.append("─".repeat(width + padding * 2))
-            if (index == headers.lastIndex) {
-                bottom.append(if (row.index != rows.lastIndex) "┤" else "┘")
-            } else {
-                bottom.append(if (row.index != rows.lastIndex) "┼" else "┴")
-            }
-
-            when (align) {
+            when (cell.align) {
                 Align.LEFT -> {
-                    body.append(" ".repeat(padding))
-                    body.append(column.content)
-                    val offset = width - column.content.fixedLength()
-                    body.append(" ".repeat(padding + offset))
+                    val offset = adaptiveWidth - cell.length
+                    builder.append(cell.component)
+                    builder.append(" ".repeat(offset))
                 }
                 Align.RIGHT -> {
-                    val offset = width - column.content.fixedLength()
-                    body.append(" ".repeat(padding + offset))
-                    body.append(column.content)
-                    body.append(" ".repeat(padding))
+                    val offset = adaptiveWidth - cell.length
+                    builder.append(" ".repeat(offset))
+                    builder.append(cell.component)
                 }
                 Align.CENTER -> {
-                    val length = column.content.fixedLength()
-                    val offset = (width - length) / 2
-                    if (length % 2 == 0) {
-                        // 双数长度
-                        val padding = this.padding + offset
-                        body.append(" ".repeat(padding))
-                        body.append(column.content)
-                        body.append(" ".repeat(padding))
-                    } else {
-                        val padding = this.padding + offset
-                        body.append(" ".repeat(padding))
-                        body.append(column.content)
-                        body.append(" ".repeat(padding + 1))
+                    val offset = (adaptiveWidth - cell.length) / 2
+                    builder.append(" ".repeat(offset))
+                    builder.append(cell.component)
+                    builder.append(" ".repeat(offset))
+                    if (cell.length % 2 != 0) {
+                        builder.append(" ")
                     }
                 }
             }
-            body.append("│")
+            builder.append(" ".repeat(padding))
         }
-
-        return listOf(body, bottom)
+        builder.append("│")
+        return listOf(
+            builder.build(),
+            Components.text(border)
+        )
     }
 
-    fun calculateAdaptiveWidth(header: Header): Int {
-        var width = header.content.fixedLength()
+    private fun calculateAdaptiveWidth() {
+        for (header in headers) {
+            calculateAdaptiveWidth(header)
+        }
+    }
+
+    private fun calculateAdaptiveWidth(header: Header) {
+        var width = header.length
         for (row in rows) {
-            val length = row.content.getOrNull(header.index)?.content?.fixedLength() ?: continue
+            val length = row.cells.getOrNull(header.index)?.length ?: continue
             if (length > width) {
                 width = length
             }
@@ -175,8 +199,7 @@ class TableDiagram(val padding: Int = 2) {
         if (width % 2 != 0) {
             width += 1
         }
-        info("header ${header.content} >> $width")
-        return width
+        header.adaptiveWidth = width
     }
 
     private fun String.fixedLength(): Int {

@@ -6,6 +6,7 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.restrictInt
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
+import taboolib.module.chat.colored
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.common.diagram.TableDiagram
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
@@ -34,12 +35,14 @@ object ActionCommand {
             val diagram = TableDiagram()
             diagram.addHeader("语句")
             diagram.addHeader("命名空间")
+            diagram.addHeader("状态")
             diagram.addHeader("版本")
             diagram.addHeader("来源")
-            diagram.addRow(listOf("command", "vulpecula", "v1.0.0", "内置"))
-            diagram.addRow(listOf("dispatcher", "vulpecula", "v1.0.0", "内置"))
-            diagram.addRow(listOf("schedule", "vulpecula", "v1.0.0", "内置"))
-            diagram.addRow(listOf("script", "vulpecula", "v1.0.0", "内置"))
+            diagram.addTextRow(listOf("command", "vulpecula", "&c已禁用".colored(), "v3.0.0", "内置"))
+            diagram.addTextRow(listOf("dispatcher", "vulpecula", "&a启用".colored(), "v3.0.0", "内置"))
+            diagram.addTextRow(listOf("schedule", "vulpecula", "&a已启用".colored(), "v3.0.0", "内置"))
+            diagram.addTextRow(listOf("script", "vulpecula", "&c已禁用".colored(), "v3.0.0", "内置"))
+            diagram.addTextRow(listOf("event", "vulpecula", "&a已启用".colored(), "v1.0.0", "action-event.jar"))
             diagram.build().sendTo(sender)
         }
     }
