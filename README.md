@@ -1,4 +1,4 @@
-![img](https://cdn.nlark.com/yuque/0/2023/png/26025412/1698222669523-ed1bbe38-abb4-42ed-bbbc-c37ffc1e499b.png)
+![img](.assets/header.png)
 
 ## Vulpecula
 
@@ -19,10 +19,20 @@ Vulpecula 是基于 [TabooLib 6.0](https://github.com/TabooLib/taboolib) 开发�
 
 <br>
 
-### 相关链接
+## 相关链接
 
-[Vulpecula 文档](https://www.yuque.com/lanscarlos/vulpecula-doc)
+[![img](.assets/document.png)](https://www.yuque.com/lanscarlos/vulpecula-doc)
+
+[![imag](.assets/qq.png)](https://qm.qq.com/cgi-bin/qm/qr?k=vVP1cAuLlLbqjXGXkfTFH0RSma6wEVgO&jump_from=webapi&authKey=ZUgddursAqJI8tRm4MnKtr2cEUrDc0ZEasB5motBJv/igZ19T48pS/XDXStXWT53)
+
+[![img](.assets/afdian.png)](https://afdian.tv/a/lanscarlos)
+
+## 其他链接
 
 [Kether 烹饪食用指南](https://www.yuque.com/sacredcraft/kether)
 
 [枫溪大佬的 Aboleth 插件](https://xv5zac7cto.feishu.cn/docx/doxcnP4k0XN7IK7pcugdodQlJLh)
+
+## 使用统计
+
+![img](https://bstats.org/signatures/bukkit/Vulpecula.svg)
