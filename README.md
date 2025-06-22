@@ -1,4 +1,4 @@
-![img](https://cdn.nlark.com/yuque/0/2022/png/26025412/1662111393286-4c9dd5ef-6472-4baa-8b11-d6b0f66aee94.png)
+![img](https://cdn.nlark.com/yuque/0/2023/png/26025412/1698222669523-ed1bbe38-abb4-42ed-bbbc-c37ffc1e499b.png)
 
 ## Vulpecula
 
