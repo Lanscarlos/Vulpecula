@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
-import taboolib.common.platform.function.info
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.*
 import taboolib.library.reflex.AnalyseMode
@@ -221,7 +220,6 @@ class ClassActionParser(
 
         // 无参数缺省
         try {
-//            info("BacikalActionParser#execute >> Invoke standard function. parameters: ${parameters.joinToString()}")
             return standardFunction.invoke(resolver, *parameters)
         } catch (e: Exception) {
             if (e is InvocationTargetException) {
@@ -267,7 +265,6 @@ class ClassActionParser(
             val regex = "--\\D+".toRegex()
             while (reader.peekToken().matches(regex)) {
                 val prefix = reader.readToken().substring(1)
-                info("BacikalActionParser#resolve >> Additional parameter found. $prefix >> ${reader.peekToken()}")
                 val (index, parameter) = additional[prefix] ?: error("BacikalActionParser#resolve >> Unknown additional parameter $prefix")
                 actions[index] = parameter.parse(reader)
             }
@@ -301,7 +298,6 @@ class ClassActionParser(
         val modifier: Int
 
         init {
-            info("Parameter index=$index; name=$name; type=${type.simpleName}; nullable=$isNullable; hasDefaultValue=$hasDefaultValue")
             prefix = when {
                 source.hasAnnotation(Expected::class.java) -> {
                     modifier = MODIFIER_EXPECTED
