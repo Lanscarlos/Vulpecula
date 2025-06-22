@@ -22,36 +22,8 @@ dependencies {
 }
 
 tasks {
-    register("clean-workspace") {
-        delete(layout.buildDirectory.dir("workspace"))
-    }
-
     jar {
-        archiveBaseName.set("${rootProject.name}-experiment")
-        archiveClassifier.set("")
-        destinationDirectory.set(file("${rootDir}/build/libs"))
-
-        dependsOn("clean-workspace")
-        dependsOn(":task-generate-metadata:resolve")
-        dependsOn("embedActions")
-        dependsOn("mergeResources")
-
-        // 打包资源文件
-        from(layout.buildDirectory.dir("workspace")) {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-
-        // 打包子项目源码
-        val dependencies = configurations["compileOnly"].dependencies.filterIsInstance<ProjectDependency>()
-        for (dependency in dependencies) {
-            if (dependency.dependencyProject.name.startsWith("module-action-")) {
-                // 排除拓展语句
-                continue
-            }
-            from(dependency.dependencyProject.sourceSets["main"].output) {
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            }
-        }
-
+        archiveBaseName.set("${rootProject.name}-${project.name.substringAfter('-')}")
+        destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
     }
 }

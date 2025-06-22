@@ -8,21 +8,17 @@ taboolib {
     subproject = true
 }
 
-tasks.register("resolve") {
-    val projects = rootProject.subprojects
-        .filter { it.depth == 1 }
-        .filter { !it.name.startsWith("plugin-") }
-        .flatMap { project ->
-            project.configurations["compileOnly"].dependencies
-                .filterIsInstance<ProjectDependency>()
-                .map { it.dependencyProject }
-        }
-    for (project in projects) {
-        dependsOn(":${project.name}:classes")
+val projects = rootProject.subprojects
+    .filter { it.depth == 1 && it.name.startsWith("plugin-") }
+    .flatMap { project ->
+        project.configurations["compileOnly"].dependencies
+            .filterIsInstance<ProjectDependency>()
+            .map { it.dependencyProject }
     }
-
-    doLast {
-        for (project in projects) {
+for (project in projects) {
+    project.tasks.register("generateMetadata") {
+        dependsOn("classes")
+        doLast {
             val workspace = file(project.layout.buildDirectory.dir("resources/main/metadata"))
                 .also(File::mkdirs)
             val files = project.sourceSets["main"].output.classesDirs

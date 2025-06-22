@@ -22,13 +22,6 @@ dependencies {
 tasks {
     jar {
         archiveBaseName.set(project.name.substringAfter('-'))
-        archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs/action"))
-
-        dependsOn(":task-generate-metadata:resolve")
-
-        from(layout.buildDirectory.dir("workspace")) {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
     }
 }

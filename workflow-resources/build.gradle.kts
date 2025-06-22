@@ -5,6 +5,7 @@ taboolib {
 
 for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.startsWith("plugin-") }) {
     project.tasks.register("mergeResources") {
+        dependsOn("cleanResources")
         val dependencies = project.configurations["compileOnly"].dependencies
             .filterIsInstance<ProjectDependency>()
             .filter { !it.name.startsWith("module-action-") }
@@ -14,7 +15,7 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
         }
 
         doLast {
-            val workspace = file(project.layout.buildDirectory.dir("workspace")).also(File::mkdirs)
+            val workspace = file(project.layout.buildDirectory.dir("resources/main")).also(File::mkdirs)
             val resources = mutableMapOf<String, File>()
             for (dependency in dependencies) {
                 for (file in files(dependency.sourceSets["main"].resources)) {
