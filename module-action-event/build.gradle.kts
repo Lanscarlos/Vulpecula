@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 version = "1.0.0"
 
@@ -6,12 +5,8 @@ taboolib {
     subproject = false
 
     description {
-        name("Vulpecula-Action-" + project.name.substringAfterLast('-').uppercaseFirstChar())
+        name(project.name.substringAfter('-'))
         desc("Please put this action jar in directory `./plugins/Vulpecula/action/` of your server.")
-        contributors {
-            this.contributors.clear()
-            name("Lanscarlos")
-        }
         dependencies {
             this.dependencies.clear()
             name("DISABLE")
