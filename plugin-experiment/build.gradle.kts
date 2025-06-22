@@ -29,19 +29,16 @@ tasks {
     register<Copy>("embed-action") {
         val dependencies = configurations["compileOnly"].dependencies
             .filterIsInstance<ProjectDependency>()
-            .filter { !it.dependencyProject.name.startsWith("module-action-") }
+            .filter { it.dependencyProject.name.startsWith("module-action-") }
         dependsOn(
             *dependencies
                 .map { ":${it.dependencyProject.name}:jar" }
                 .toTypedArray()
         )
-
-        doLast {
-            into(layout.buildDirectory.dir("workspace/action"))
-            for (dependency in dependencies) {
-                from(dependency.dependencyProject.tasks.getByName<Jar>("jar").archiveFile)
-            }
+        for (dependency in dependencies) {
+            from(dependency.dependencyProject.tasks.getByName<Jar>("jar").archiveFile)
         }
+        into(layout.buildDirectory.dir("workspace/action"))
     }
 
     register("merge-resources") {
