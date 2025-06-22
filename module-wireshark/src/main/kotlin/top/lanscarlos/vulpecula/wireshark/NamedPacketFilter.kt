@@ -59,7 +59,7 @@ class NamedPacketFilter() : PacketFilter {
      *
      * @param regexes 正则表达式
      */
-    fun addRule(regexes: List<Regex>) {
+    fun addRules(regexes: List<Regex>) {
         this.regexes += regexes
     }
 

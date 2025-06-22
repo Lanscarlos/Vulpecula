@@ -53,8 +53,8 @@ class ComplexPacketFilter(var rule: Int, filters: List<PacketFilter>) : PacketFi
      *
      * @param regexes 正则表达式
      */
-    fun addNamedRule(regexes: List<Regex>) {
-        computeIfAbsent(NamedPacketFilter::class.java) { NamedPacketFilter() }.addRule(regexes)
+    fun addNamedRules(regexes: List<Regex>) {
+        computeIfAbsent(NamedPacketFilter::class.java) { NamedPacketFilter() }.addRules(regexes)
     }
 
     /**
