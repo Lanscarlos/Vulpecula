@@ -1,4 +1,5 @@
 rootProject.name = "Vulpecula"
+
 include("common-applicative")
 include("common-config")
 include("common-core")
@@ -17,15 +18,6 @@ include("module-wireshark")
 include("platform-bukkit")
 include("plugin-experiment")
 include("workflow-action")
+include("workflow-build")
 include("workflow-metadata")
 include("workflow-resources")
-
-include("project:common")
-include("project:common-core")
-include("project:common-legacy")
-include("project:extension-anser")
-include("project:module-applicative")
-include("project:module-bacikal")
-include("project:module-config")
-include("project:module-volatile")
-include("workflow-build")
