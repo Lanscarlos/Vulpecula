@@ -9,4 +9,4 @@ import java.io.File
  * @author Lanscarlos
  * @since 2025/6/18 17:23
  */
-class ExternalActionSource(val file: File, val version: String, val authors: List<String>) : ActionSource
+class ExternalActionSource(override val name: String, override val version: String, override val authors: List<String>) : ActionSource

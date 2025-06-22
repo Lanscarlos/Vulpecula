@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.action
 
+import java.io.File
+
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.bacikal.action
@@ -9,4 +11,12 @@ package top.lanscarlos.vulpecula.module.bacikal.action
  * @author Lanscarlos
  * @since 2025/6/18 17:11
  */
-interface ActionSource
+interface ActionSource {
+
+    val name: String
+
+    val version: String
+
+    val authors: List<String>
+
+}

@@ -27,7 +27,6 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
  */
 object BacikalRegistry {
 
-    private val sources: HashMap<String, ActionSource> = hashMapOf()
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
 
     @Awake(LifeCycle.INIT)
@@ -68,9 +67,8 @@ object BacikalRegistry {
      *
      * @param parser 语句解析器
      * */
-    fun registerActionParser(parser: BacikalActionParser, source: ActionSource) {
+    fun registerActionParser(parser: BacikalActionParser) {
         parsers[parser.id] = parser
-        sources[parser.id] = source
 
         // 遍历层级并填充父节点
         val newParents = mutableListOf<ComplexActionParser>()
@@ -82,7 +80,7 @@ object BacikalRegistry {
                 val id = array.subList(0, index + 1).joinToString(".")
                 val name = array[index]
                 val complex = parsers.computeIfAbsent(id) {
-                    ComplexActionParser(id, name, emptyArray(), "vulpecula", "Description")
+                    ComplexActionParser(id, name, emptyArray(), "vulpecula", "Description", parser.source)
                         .also(newParents::add)
                 }
                 parent?.addActionParser(complex) // 第一次遍历时无父节点

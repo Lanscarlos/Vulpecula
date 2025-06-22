@@ -2,7 +2,12 @@
 # Bacikal
 
 module-bacikal-service-name: '语句'
-module-bacikal-registry-display-header: '已注册的语句:'
+module-bacikal-registry-display-all: '当前注册了 &a{0}&7 个语句, 分别来自:'
+module-bacikal-registry-display-bacikal: '当前注册了 &a{0}&7 个拓展语句, 分别来自:'
+module-bacikal-registry-display-remote: '当前注册了 &a{0}&7 个第三方语句, 分别来自:'
+module-bacikal-registry-display-remote-empty: '当前注册了 &a{0}&7 个第三方语句'
+module-bacikal-registry-display-local: '当前注册了 &a{0}&7 个原生语句:'
+module-bacikal-registry-display-item: ' - {0} &8v{1}&7: {2}'
 module-bacikal-command-eval-success: '运行结果: &r{0}'
 module-bacikal-command-eval-failure: '运行异常: &e{0}'
 module-bacikal-command-timing-repeat: '运行次数: &a{0}'

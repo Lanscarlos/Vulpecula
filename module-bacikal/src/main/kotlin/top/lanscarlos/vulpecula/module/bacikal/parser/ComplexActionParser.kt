@@ -5,6 +5,7 @@ import taboolib.library.kether.QuestReader
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
+import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 
 /**
  * Vulpecula
@@ -21,6 +22,7 @@ class ComplexActionParser(
     aliases: Array<String>,
     namespace: String,
     description: String,
+    override val source: ActionSource
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
 
     companion object {

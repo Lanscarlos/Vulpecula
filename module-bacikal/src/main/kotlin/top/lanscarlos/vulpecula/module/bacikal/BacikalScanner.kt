@@ -12,6 +12,7 @@ import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
+import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
@@ -63,9 +64,10 @@ object BacikalScanner : ClassVisitor(5) {
                 when {
                     name == "plugin.yml" -> {
                         val config = Configuration.loadFromInputStream(byteArray.inputStream(), Type.YAML)
+                        val name = config.getString("name") ?: "UNKNOWN_NAME"
                         val version = config.getString("version") ?: "UNKNOWN_VERSION"
                         val authors = config.getStringList("authors")
-                        source = ExternalActionSource(file, version, authors)
+                        source = ExternalActionSource(name, version, authors)
                     }
                     name.endsWith(".metadata") -> {
                         val key = name.substringAfterLast("/").substringBefore('.')
@@ -80,8 +82,8 @@ object BacikalScanner : ClassVisitor(5) {
                 if (!owner.hasAnnotation(BacikalParser::class.java)) {
                     continue
                 }
-                val parser = buildClassActionParser(owner)
-                BacikalRegistry.registerActionParser(parser, source!!)
+                val parser = buildClassActionParser(owner, source!!)
+                BacikalRegistry.registerActionParser(parser)
             }
         }
     }
@@ -93,11 +95,11 @@ object BacikalScanner : ClassVisitor(5) {
         if (!owner.hasAnnotation(BacikalParser::class.java)) {
             return
         }
-        val parser = buildClassActionParser(owner)
-        BacikalRegistry.registerActionParser(parser, BuiltInActionSource)
+        val parser = buildClassActionParser(owner, BuiltInActionSource)
+        BacikalRegistry.registerActionParser(parser)
     }
 
-    private fun buildClassActionParser(owner: ReflexClass): ClassActionParser {
+    private fun buildClassActionParser(owner: ReflexClass, source: ActionSource): ClassActionParser {
         if (!owner.hasInterface(ClassActionResolver::class.java)) {
             error("Cannot register class ${owner.name} without BacikalActionResolver interface.")
         }
@@ -117,6 +119,7 @@ object BacikalScanner : ClassVisitor(5) {
             annotation.description,
             clazz,
             metadata,
+            source,
             resolver
         )
         return parser

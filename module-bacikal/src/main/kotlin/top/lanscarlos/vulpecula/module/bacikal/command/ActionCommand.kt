@@ -1,17 +1,22 @@
 package top.lanscarlos.vulpecula.module.bacikal.command
 
+import org.bukkit.Bukkit
+import taboolib.common.io.taboolibId
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.restrictInt
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
-import taboolib.module.chat.colored
+import taboolib.library.kether.QuestActionParser
+import taboolib.library.reflex.Reflex.Companion.getProperty
+import taboolib.module.kether.Kether
+import taboolib.module.kether.RemoteActionParser
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.diagram.TableDiagram
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.info
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 
 /**
@@ -32,18 +37,35 @@ object ActionCommand {
 
     val registry: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val diagram = TableDiagram()
-            diagram.addHeader("语句")
-            diagram.addHeader("命名空间")
-            diagram.addHeader("状态")
-            diagram.addHeader("版本")
-            diagram.addHeader("来源")
-            diagram.addTextRow(listOf("command", "vulpecula", "&c已禁用".colored(), "v3.0.0", "内置"))
-            diagram.addTextRow(listOf("dispatcher", "vulpecula", "&a启用".colored(), "v3.0.0", "内置"))
-            diagram.addTextRow(listOf("schedule", "vulpecula", "&a已启用".colored(), "v3.0.0", "内置"))
-            diagram.addTextRow(listOf("script", "vulpecula", "&c已禁用".colored(), "v3.0.0", "内置"))
-            diagram.addTextRow(listOf("event", "vulpecula", "&a已启用".colored(), "v1.0.0", "action-event.jar"))
-            diagram.build().sendTo(sender)
+            val bacikalCount = BacikalRegistry.values()
+                .filter { !it.id.contains('.') }
+                .size
+            val ketherCount = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
+                .flatMap { it.value.values }
+                .filter { it !is BacikalActionParser }
+                .size
+            sender.info {
+                asLang("module-bacikal-registry-display-all", bacikalCount + ketherCount)
+            }
+            displayBacikalActions(sender, false)
+            displayRemoteActions(sender, false)
+            displayLocalActions(sender, false)
+        }
+
+        literal("bacikal") {
+            execute<ProxyCommandSender> { sender, _, _ ->
+                displayBacikalActions(sender, true)
+            }
+        }
+        literal("remote") {
+            execute<ProxyCommandSender> { sender, _, _ ->
+                displayRemoteActions(sender, true)
+            }
+        }
+        literal("local") {
+            execute<ProxyCommandSender> { sender, _, _ ->
+                displayLocalActions(sender, true)
+            }
         }
     }
 
@@ -94,6 +116,65 @@ object ActionCommand {
                 sender.info { asLang("module-bacikal-command-timing-compile", compileTime) }
                 sender.info { asLang("module-bacikal-command-timing-execute", averageCompleteTime) }
             }
+        }
+    }
+
+    private fun displayBacikalActions(sender: ProxyCommandSender, header: Boolean) {
+        val bacikalParsers = BacikalRegistry.values().filter { !it.id.contains('.') }
+        if (header) {
+            sender.info { asLang("module-bacikal-registry-display-bacikal", bacikalParsers.size) }
+        }
+        for ((source, parsers) in bacikalParsers.groupBy { it.source }) {
+            sender.info {
+                asLang(
+                    "module-bacikal-registry-display-item",
+                    source.name,
+                    source.version,
+                    parsers.joinToString("§7, ") { "§b${it.id}" }
+                )
+            }
+        }
+    }
+
+    private fun displayRemoteActions(sender: ProxyCommandSender, header: Boolean) {
+        val remoteParsers = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
+            .flatMap { it.value.values }
+            .filterIsInstance<RemoteActionParser>()
+        if (header) {
+            sender.info {
+                asLang(
+                    "module-bacikal-registry-display-remote${if (remoteParsers.isEmpty()) "-empty" else ""}",
+                    remoteParsers.size
+                )
+            }
+        }
+        for ((pluginId, parsers) in remoteParsers.groupBy { it.remote.name }) {
+            val plugin = Bukkit.getPluginManager().getPlugin(pluginId) ?: error("Unknown plugin id: $pluginId")
+            val version = plugin.description.version
+            sender.info {
+                asLang(
+                    "module-bacikal-registry-display-item",
+                    pluginId,
+                    version,
+                    parsers.joinToString("§7, ") { "§a${it.action}" }
+                )
+            }
+        }
+    }
+
+    private fun displayLocalActions(sender: ProxyCommandSender, header: Boolean) {
+        val parsers = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
+            .flatMap { it.value.entries }.filter { it.value !is BacikalActionParser && it.value !is RemoteActionParser }
+        if (header) {
+            sender.info { asLang("module-bacikal-registry-display-local", parsers.size) }
+        }
+        sender.info {
+            asLang(
+                "module-bacikal-registry-display-item",
+                taboolibId,
+                "6",
+                parsers.joinToString("§7, ") { "§c${it.key}" }
+            )
         }
     }
 

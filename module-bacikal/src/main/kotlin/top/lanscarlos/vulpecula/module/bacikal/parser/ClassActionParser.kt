@@ -13,6 +13,7 @@ import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
 import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
+import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
@@ -44,6 +45,7 @@ class ClassActionParser(
     description: String,
     javaClass: Class<*>,
     metadata: Array<String>,
+    override val source: ActionSource,
     private val resolver: ClassActionResolver
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
 
