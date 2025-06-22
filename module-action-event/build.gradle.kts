@@ -25,7 +25,7 @@ tasks {
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs/action"))
 
-        dependsOn(":task-metadata:resolve")
+        dependsOn(":task-generate-metadata:resolve")
 
         from(layout.buildDirectory.dir("workspace")) {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE

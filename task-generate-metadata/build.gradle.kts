@@ -8,34 +8,24 @@ taboolib {
     subproject = true
 }
 
-dependencies {
-    compileOnly(project(":common-applicative"))
-    compileOnly(project(":common-config"))
-    compileOnly(project(":common-core"))
-    compileOnly(project(":common-diagram"))
-    compileOnly(project(":module-action-event"))
-    compileOnly(project(":module-bacikal"))
-    compileOnly(project(":module-command"))
-    compileOnly(project(":module-core"))
-    compileOnly(project(":module-dispatcher"))
-    compileOnly(project(":module-schedule"))
-    compileOnly(project(":module-script"))
-    compileOnly(project(":platform-bukkit"))
-}
-
 tasks.register("resolve") {
-    val dependencies = configurations["compileOnly"].dependencies
-        .filterIsInstance<ProjectDependency>()
-    dependsOn(
-        *dependencies
-            .map { ":${it.dependencyProject.name}:classes" }
-            .toTypedArray()
-    )
+    val projects = rootProject.subprojects
+        .filter { it.depth == 1 }
+        .filter { !it.name.startsWith("plugin-") }
+        .flatMap { project ->
+            project.configurations["compileOnly"].dependencies
+                .filterIsInstance<ProjectDependency>()
+                .map { it.dependencyProject }
+        }
+    for (project in projects) {
+        dependsOn(":${project.name}:classes")
+    }
+
     doLast {
-        for (dependency in dependencies) {
-            val workspace = file(dependency.dependencyProject.layout.buildDirectory.dir("resources/main/metadata"))
+        for (project in projects) {
+            val workspace = file(project.layout.buildDirectory.dir("resources/main/metadata"))
                 .also(File::mkdirs)
-            val files = dependency.dependencyProject.sourceSets["main"].output.classesDirs
+            val files = project.sourceSets["main"].output.classesDirs
                 .filter { it.exists() }
                 .flatMap { it.walk().onEnter { file -> file.name != "META-INF" } }
                 .filter { it.isFile && it.extension == "class" }

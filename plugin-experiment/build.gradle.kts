@@ -26,52 +26,15 @@ tasks {
         delete(layout.buildDirectory.dir("workspace"))
     }
 
-    register<Copy>("embed-action") {
-        val dependencies = configurations["compileOnly"].dependencies
-            .filterIsInstance<ProjectDependency>()
-            .filter { it.dependencyProject.name.startsWith("module-action-") }
-        dependsOn(
-            *dependencies
-                .map { ":${it.dependencyProject.name}:jar" }
-                .toTypedArray()
-        )
-        for (dependency in dependencies) {
-            from(dependency.dependencyProject.tasks.getByName<Jar>("jar").archiveFile)
-        }
-        into(layout.buildDirectory.dir("workspace/action"))
-    }
-
-    register("merge-resources") {
-        val workspace = file(layout.buildDirectory.dir("workspace")).also(File::mkdirs)
-        val resources = mutableMapOf<String, File>()
-        val dependencies = configurations["compileOnly"].dependencies.filterIsInstance<ProjectDependency>()
-        for (dependency in dependencies) {
-            if (dependency.dependencyProject.name.startsWith("module-action-")) {
-                // 排除拓展语句资源
-                continue
-            }
-            val files = files(dependency.dependencyProject.sourceSets["main"].resources)
-            for (file in files) {
-                val name = file.absolutePath.substringAfter("resources\\")
-                val resource = resources.computeIfAbsent(name) { File(workspace, name) }
-                if (!resource.parentFile.exists()) {
-                    resource.parentFile.mkdirs()
-                }
-                resource.appendText("\n\n")
-                resource.appendBytes(file.readBytes())
-            }
-        }
-    }
-
     jar {
         archiveBaseName.set("${rootProject.name}-experiment")
         archiveClassifier.set("")
         destinationDirectory.set(file("${rootDir}/build/libs"))
 
         dependsOn("clean-workspace")
-        dependsOn(":task-metadata:resolve")
-        dependsOn("embed-action")
-        dependsOn("merge-resources")
+        dependsOn(":task-generate-metadata:resolve")
+        dependsOn("embedActions")
+        dependsOn("mergeResources")
 
         // 打包资源文件
         from(layout.buildDirectory.dir("workspace")) {
