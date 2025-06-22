@@ -1,7 +1,5 @@
 package top.lanscarlos.vulpecula.module.bacikal.action
 
-import java.io.File
-
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.bacikal.action

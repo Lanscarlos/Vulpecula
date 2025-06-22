@@ -3,16 +3,12 @@ package top.lanscarlos.vulpecula.module.bacikal
 import taboolib.common.LifeCycle
 import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
-import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.library.kether.QuestActionParser
-import taboolib.module.chat.Components
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
-import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 

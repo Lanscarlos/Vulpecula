@@ -119,8 +119,6 @@ class ClassActionParser(
     }
 
     override fun onDrawStructure(maxDepth: Int, currentDepth: Int): List<ComponentText> {
-        val depth = maxDepth - currentDepth
-
         // 绘制语句头
         val name = if (currentDepth == 0) id.replace('.', '-') else name
         val component = Components.text(name).color(StandardColors.RED).resetColor()
