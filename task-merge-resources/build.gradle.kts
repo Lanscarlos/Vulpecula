@@ -9,8 +9,8 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
             .filterIsInstance<ProjectDependency>()
             .filter { !it.name.startsWith("module-action-") }
             .map { it.dependencyProject }
-        for (project in dependencies) {
-            dependsOn(":${project.name}:processResources")
+        for (dependency in dependencies) {
+            dependsOn(":${dependency.name}:processResources")
         }
 
         doLast {
