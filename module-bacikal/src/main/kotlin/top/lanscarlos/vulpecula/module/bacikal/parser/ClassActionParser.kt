@@ -183,16 +183,13 @@ class ClassActionParser(
         @Suppress("UNCHECKED_CAST")
         override fun process(source: QuestContext.Frame): CompletableFuture<T> {
             val frame = DefaultFrame(source)
-            val parameters = process(actions, frame).exceptionally { ex ->
-                ex.printStackTrace()
-                throw ex
-            }
+            val future = process(actions, frame)
             return if (function.isUseFutureReturn) {
-                parameters.thenCompose {
+                future.thenCompose {
                     function.invoke(mask, it.toTypedArray()) as CompletableFuture<T>
                 }
             } else {
-                parameters.thenApply {
+                future.thenApply {
                     function.invoke(mask, it.toTypedArray()) as T
                 }
             }
