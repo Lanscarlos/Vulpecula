@@ -5,7 +5,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
@@ -266,10 +266,10 @@ object ScriptService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is BacikalCompileException -> cause.printLocalizedMessage(sender, module)
+                        is QuestCompileException -> cause.printLocalizedMessage(sender, module)
                     }
                 }
-                is BacikalCompileException -> e.printLocalizedMessage(sender, module)
+                is QuestCompileException -> e.printLocalizedMessage(sender, module)
                 else -> e.printStackTrace()
             }
         }

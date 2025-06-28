@@ -10,12 +10,12 @@ import top.lanscarlos.vulpecula.common.core.utils.asLang
  * @author Lanscarlos
  * @since 2025-05-02 20:04
  */
-class BacikalTimeoutException(
+class QuestTimeoutException(
     cause: Throwable,
     quest: Quest,
     properties: Map<String, Any>,
     timeout: Long
-) : BacikalRuntimeException(cause, quest, properties) {
+) : QuestRuntimeException(cause, quest, properties) {
 
     override val message: String = asLang("module-bacikal-exception-execute-timeout", timeout)
 

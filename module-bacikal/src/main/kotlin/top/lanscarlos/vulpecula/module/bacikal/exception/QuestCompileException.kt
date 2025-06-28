@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.common.applicative.IntApplicative
  * @author Lanscarlos
  * @since 2025-05-03 13:18
  */
-class BacikalCompileException(
+class QuestCompileException(
     cause: Throwable,
     private val parsedContent: String,
     private val unparseContent: String,

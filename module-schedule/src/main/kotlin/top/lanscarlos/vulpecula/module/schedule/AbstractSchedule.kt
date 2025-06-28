@@ -6,7 +6,7 @@ import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 import top.lanscarlos.vulpecula.common.config.*
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.schedule.exception.TaskNotFoundException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -200,7 +200,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             )
         }
 
-        fun onFailure(ex: BacikalRuntimeException) {
+        fun onFailure(ex: QuestRuntimeException) {
             // 脚本运行异常时, 暂停任务
             pause()
             console().error { asLang("module-schedule-run-failure", id, pid) }

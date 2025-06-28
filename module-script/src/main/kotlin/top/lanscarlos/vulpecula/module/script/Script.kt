@@ -1,9 +1,6 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
-import java.util.function.Consumer
-import java.util.function.Function
 
 /**
  * Vulpecula

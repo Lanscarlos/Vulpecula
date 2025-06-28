@@ -5,6 +5,7 @@ import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.concurrent.CompletableFuture
@@ -53,11 +54,11 @@ class ClassActionFunction(
         // 类结构验证
         require(ClassActionResolver::class.java.isAssignableFrom(javaClass)) {
             // 未实现 ClassActionResolver 接口
-            "BacikalActionParser#init >> ${javaClass.name} does not implement BacikalActionResolver."
+            asLang("module-bacikal-exception-invalid-class-action-resolver", javaClass.name, ClassActionResolver::class.java.simpleName)
         }
         require(javaClass.declaredMethods.count { it.name == "resolve" } == 1) {
             // 仅允许定义一个 resolve 方法
-            "BacikalActionParser#init >> ${javaClass.name} has more than one resolve method."
+            asLang("module-bacikal-exception-invalid-resolve-function", javaClass.name, "resolve")
         }
 
         // 获取函数
@@ -103,7 +104,7 @@ class ClassActionFunction(
         for (parameter in parameters) {
             require(parameter.isNullable || arguments[parameter.index] != null) {
                 // 参数非空性检查失败
-                "BacikalActionParser#invoke >> Parameter ${parameter.type.name} at index ${parameter.index} is not nullable."
+                asLang("module-bacikal-exception-invalid-argument", parameter.index, parameter.name)
             }
         }
 

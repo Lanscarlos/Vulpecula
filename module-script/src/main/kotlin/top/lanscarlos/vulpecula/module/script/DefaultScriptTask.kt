@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.module.kether.ScriptContext
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
@@ -37,9 +37,9 @@ class DefaultScriptTask(
         return this
     }
 
-    override fun onFailure(func: Function<BacikalRuntimeException, Any?>): ScriptTask {
+    override fun onFailure(func: Function<QuestRuntimeException, Any?>): ScriptTask {
         future = future.exceptionally {
-            val ex = it.cause as BacikalRuntimeException
+            val ex = it.cause as QuestRuntimeException
             return@exceptionally func.apply(ex)
         }
         return this

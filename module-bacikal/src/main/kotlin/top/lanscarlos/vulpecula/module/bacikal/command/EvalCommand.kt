@@ -7,8 +7,8 @@ import taboolib.module.kether.printKetherErrorMessage
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.error
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.bacikal.info
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 
@@ -38,13 +38,13 @@ object EvalCommand {
             BacikalQuestExecutor.execute(quest, "main", -1L, sender, emptyMap())
                 .handle { result, e ->
                     if (e != null) {
-                        val ex = e.cause as BacikalRuntimeException
+                        val ex = e.cause as QuestRuntimeException
                         ex.printLocalizedMessage(sender, module)
                     } else {
                         sender.info { asLang("module-bacikal-command-eval-success", result ?: "null") }
                     }
                 }
-        } catch (ex: BacikalCompileException) {
+        } catch (ex: QuestCompileException) {
             ex.printLocalizedMessage(sender, module)
         } catch (ex: Throwable) {
             ex.printKetherErrorMessage(true)

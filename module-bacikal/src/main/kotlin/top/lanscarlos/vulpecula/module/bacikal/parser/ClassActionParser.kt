@@ -4,7 +4,10 @@ import taboolib.library.kether.*
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
+import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionExecuteException
+import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionRegisterException
 import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
 
@@ -28,9 +31,17 @@ class ClassActionParser(
     resolver: ClassActionResolver
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
 
-    private val function: ClassActionFunction = ClassActionFunction(metadata, resolver)
+    private val function: ClassActionFunction
 
     private val parameters: List<ClassActionParameter> get() = function.parameters
+
+    init {
+        try {
+            function = ClassActionFunction(metadata, resolver)
+        } catch (cause: Exception) {
+            throw ClassActionRegisterException(id, cause)
+        }
+    }
 
     override fun buildStructure(depth: Int): ComponentText {
         return onDrawStructure(depth, 0).first()
@@ -139,7 +150,8 @@ class ClassActionParser(
             val regex = "--\\D+".toRegex()
             while (reader.peekToken().matches(regex)) {
                 val prefix = reader.readToken().substring(1)
-                val parameter = additional[prefix] ?: error("BacikalActionParser#resolve >> Unknown additional parameter $prefix")
+                val parameter = additional[prefix]
+                    ?: throw ClassActionExecuteException(id, IllegalArgumentException(asLang("module-bacikal-exception-unknown-additional-parameter", prefix)))
                 actions[parameter.index] = parameter.read(reader)
             }
 
@@ -179,11 +191,19 @@ class ClassActionParser(
             val future = process(actions, frame)
             return if (function.isUseFutureReturn) {
                 future.thenCompose {
-                    function.invoke(mask, it.toTypedArray()) as CompletableFuture<T>
+                    try {
+                        function.invoke(mask, it.toTypedArray()) as CompletableFuture<T>
+                    } catch (cause: Exception) {
+                        throw ClassActionExecuteException(id, cause)
+                    }
                 }
             } else {
                 future.thenApply {
-                    function.invoke(mask, it.toTypedArray()) as T
+                    try {
+                        function.invoke(mask, it.toTypedArray()) as T
+                    } catch (cause: Exception) {
+                        throw ClassActionExecuteException(id, cause)
+                    }
                 }
             }
         }

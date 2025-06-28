@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import java.io.File
 
 /**
@@ -77,7 +77,7 @@ object CommandService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is BacikalCompileException -> cause.printLocalizedMessage(sender, module)
+                        is QuestCompileException -> cause.printLocalizedMessage(sender, module)
                     }
                 }
                 else -> {

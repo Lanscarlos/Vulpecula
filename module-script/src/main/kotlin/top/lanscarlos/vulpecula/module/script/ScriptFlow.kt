@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.script.exception.ScriptExecuteException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -19,7 +19,7 @@ class ScriptFlow(
 ) {
 
     private val scripts = mutableListOf<Script>()
-    private var onFailure: Consumer<BacikalRuntimeException>? = null
+    private var onFailure: Consumer<QuestRuntimeException>? = null
     private val preprocessMap = mutableMapOf<Script, Consumer<Script>>()
     private val postprocessMap = mutableMapOf<Script, Consumer<ScriptTask>>()
 
@@ -55,12 +55,12 @@ class ScriptFlow(
 
     /**
      * 设置当脚本执行失败时的处理逻辑。
-     * 当 [ScriptFlow] 中的某个脚本抛出 [BacikalRuntimeException] 异常时，
+     * 当 [ScriptFlow] 中的某个脚本抛出 [QuestRuntimeException] 异常时，
      * 将调用此方法设置的处理逻辑来处理异常。
      *
-     * @param func 处理异常的函数，接收 [BacikalRuntimeException] 参数
+     * @param func 处理异常的函数，接收 [QuestRuntimeException] 参数
      */
-    fun onFailure(func: Consumer<BacikalRuntimeException>) {
+    fun onFailure(func: Consumer<QuestRuntimeException>) {
         onFailure = func
     }
 

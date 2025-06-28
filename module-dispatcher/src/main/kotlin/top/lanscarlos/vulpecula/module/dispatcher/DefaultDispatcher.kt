@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.module.dispatcher
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import taboolib.common.platform.event.EventPriority
-import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
@@ -14,7 +13,7 @@ import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ListPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineRegistry
 import top.lanscarlos.vulpecula.module.script.Script
@@ -137,7 +136,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         ex.printStackTrace()
     }
 
-    private fun onScriptFailure(ex: BacikalRuntimeException) {
+    private fun onScriptFailure(ex: QuestRuntimeException) {
         // 脚本运行异常时, 暂停任务
         console().error { asLang("module-dispatcher-run-failure", id) }
         console().error { ex.getActionMessage() }

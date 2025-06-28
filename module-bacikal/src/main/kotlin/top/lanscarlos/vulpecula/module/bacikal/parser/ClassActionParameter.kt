@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.ParsedAction
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
@@ -61,8 +62,12 @@ class ClassActionParameter(
 
         // 检查前缀
         if (modifier != Modifier.NONE) {
-            require(prefix.isNotEmpty()) { "前缀不能为空" }
-            require(prefix.all { it.toIntOrNull() == null }) { "修饰符前缀不能为数字" }
+            require(prefix.isNotEmpty()) {
+                asLang("module-bacikal-exception-empty-modifier-prefix", index, name)
+            }
+            require(prefix.all { it.toIntOrNull() == null }) {
+                asLang("module-bacikal-exception-invalid-modifier-prefix", index, name)
+            }
         }
     }
 

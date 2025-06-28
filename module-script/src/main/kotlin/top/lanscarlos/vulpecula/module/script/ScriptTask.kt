@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.script
 
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
@@ -35,7 +35,7 @@ interface ScriptTask {
 
     fun onSuccess(func: Consumer<Any?>): ScriptTask
 
-    fun onFailure(func: Function<BacikalRuntimeException, Any?>): ScriptTask
+    fun onFailure(func: Function<QuestRuntimeException, Any?>): ScriptTask
 
     fun getNow(): Any?
 

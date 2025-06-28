@@ -3,8 +3,8 @@ package top.lanscarlos.vulpecula.module.bacikal.quest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.*
 import taboolib.module.kether.*
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalTimeoutException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestTimeoutException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
@@ -118,12 +118,12 @@ object BacikalQuestExecutor {
                     is TimeoutException -> {
                         val action = currentAction().get()
                         val properties = action.properties
-                        throw BacikalTimeoutException(ex, context().quest, properties, timeout)
+                        throw QuestTimeoutException(ex, context().quest, properties, timeout)
                     }
                     is CompletionException -> {
                         val action = currentAction().get()
                         val properties = action.properties
-                        throw BacikalRuntimeException(ex.cause!!, context().quest, properties)
+                        throw QuestRuntimeException(ex.cause!!, context().quest, properties)
                     }
                     else -> {
                         error("Unexpected exception: ${ex.javaClass.name}")

@@ -7,7 +7,7 @@ import taboolib.library.kether.*
 import taboolib.module.kether.ScriptService
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import java.io.File
 import java.nio.charset.StandardCharsets
 
@@ -58,7 +58,7 @@ object BacikalQuestCompiler {
             statistic[id] = loader.getStatistic()
             quest
         } catch (ex: Exception) {
-            throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
+            throw QuestCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
         }
     }
 

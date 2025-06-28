@@ -4,7 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalRuntimeException
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
@@ -105,7 +105,7 @@ class ScriptExecutor(
         sender: ProxyCommandSender,
         args: Map<String, Any>,
         onSuccess: Consumer<Any?>,
-        onFailure: Function<BacikalRuntimeException, Any?>
+        onFailure: Function<QuestRuntimeException, Any?>
     ): CompletableFuture<Any?> {
         return when (script) {
             is String -> {
@@ -128,7 +128,7 @@ class ScriptExecutor(
         sender.info { asLang("module-command-execute-success", command, value.toString()) }
     }
 
-    private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: BacikalRuntimeException): Any? {
+    private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: QuestRuntimeException): Any? {
         sender.error(sync = true) { asLang("module-command-$action-failure", command) }
         sender.error(sync = true) { exception.getActionMessage() }
         sender.error(sync = true) { exception.getReasonMessage() }

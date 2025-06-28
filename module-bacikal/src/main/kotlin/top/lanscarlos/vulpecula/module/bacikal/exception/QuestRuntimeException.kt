@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.common.applicative.IntApplicative
  * @author Lanscarlos
  * @since 2025-05-02 10:54
  */
-open class BacikalRuntimeException(
+open class QuestRuntimeException(
     cause: Throwable,
     val quest: Quest,
     properties: Map<String, Any>,
