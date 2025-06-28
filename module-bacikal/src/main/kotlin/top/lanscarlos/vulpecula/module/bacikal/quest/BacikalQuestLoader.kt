@@ -5,9 +5,11 @@ import taboolib.library.kether.*
 import taboolib.library.reflex.Reflex.Companion.invokeMethod
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.kether.Kether
+import taboolib.module.kether.RemoteActionParser
 import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import java.util.LinkedList
 
 /**
@@ -202,8 +204,17 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             if (parser != null) {
                 properties["BACIKAL_PARSER"] = parser.javaClass.name
             }
-            statistic.compute(header) { _, value ->
-                value?.plus(1) ?: 1
+            when (parser) {
+                null -> {}
+                is BacikalActionParser -> {
+                    statistic.compute(parser.id) { _, value -> value?.plus(1) ?: 1 }
+                }
+                is RemoteActionParser -> {
+                    statistic.compute(parser.action) { _, value -> value?.plus(1) ?: 1 }
+                }
+                else -> {
+                    statistic.compute(header) { _, value -> value?.plus(1) ?: 1 }
+                }
             }
             return wrap(action, properties)
         }

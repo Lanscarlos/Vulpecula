@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal.quest
 
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.info
 import taboolib.library.kether.*
 import taboolib.module.kether.ScriptService
 import taboolib.module.metrics.charts.AdvancedPie
@@ -35,6 +36,7 @@ object BacikalQuestCompiler {
                 }
             }
         }
+        info("Submit data to actionUsage")
         return map
     }
 
