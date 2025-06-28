@@ -17,11 +17,11 @@ import taboolib.platform.BukkitPlugin
  */
 object VulpeculaMetrics {
 
-    private lateinit var metrics: Metrics
+//    private lateinit var metrics: Metrics
 
     @Awake(LifeCycle.ACTIVE)
     fun onActive() {
-        metrics = Metrics(17183, BukkitPlugin.getInstance().description.version, Platform.BUKKIT)
+//        metrics = Metrics(17183, BukkitPlugin.getInstance().description.version, Platform.BUKKIT)
 //        metrics.addCustomChart(SingleLineChart("event-mapping") {
 //            EventMapper.cache.size
 //        })
