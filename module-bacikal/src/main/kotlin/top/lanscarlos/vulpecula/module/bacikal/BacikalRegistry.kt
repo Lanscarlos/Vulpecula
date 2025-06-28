@@ -4,11 +4,15 @@ import taboolib.common.LifeCycle
 import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getOpenContainers
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.library.kether.QuestActionParser
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
+import taboolib.module.metrics.charts.DrilldownPie
+import top.lanscarlos.vulpecula.Vulpecula
+import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 
@@ -28,12 +32,59 @@ object BacikalRegistry {
     @Awake(LifeCycle.INIT)
     fun onInit() {
         registerLifeCycleTask(LifeCycle.LOAD, 8) {
-            for (parser in parsers.values) {
-                registerAction(parser)
-            }
+            registerActions()
+            registerMetrics()
         }
     }
 
+    private fun registerActions() {
+        for (parser in parsers.values) {
+            registerAction(parser)
+        }
+    }
+
+    private fun registerMetrics() {
+        Vulpecula.addMetricsChart(DrilldownPie("actionVersion") {
+            val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
+            val sources = parsers.values.map { it.source }.distinct()
+            for (source in sources) {
+                val innerMap = outerMap.computeIfAbsent(source.name) { hashMapOf() }
+                innerMap.compute(source.version) { _, value ->
+                    value?.plus(1) ?: 1
+                }
+            }
+            info("Submit data to actionVersion")
+            return@DrilldownPie outerMap
+        })
+        Vulpecula.addMetricsChart(DrilldownPie("actionToAuthors") {
+            val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
+            val sources = parsers.values.map { it.source }.distinct()
+            for (source in sources) {
+                val innerMap = outerMap.computeIfAbsent(source.name) { hashMapOf() }
+                for (author in source.authors) {
+                    innerMap.compute(author) { _, value ->
+                        value?.plus(1) ?: 1
+                    }
+                }
+            }
+            info("Submit data to actionToAuthors")
+            return@DrilldownPie outerMap
+        })
+        Vulpecula.addMetricsChart(DrilldownPie("authorToActions") {
+            val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
+            val sources = parsers.values.map { it.source }.distinct()
+            for (source in sources) {
+                for (author in source.authors) {
+                    val innerMap = outerMap.computeIfAbsent(author) { hashMapOf() }
+                    innerMap.compute(source.name) { _, value ->
+                        value?.plus(1) ?: 1
+                    }
+                }
+            }
+            info("Submit data to authorToActions")
+            return@DrilldownPie outerMap
+        })
+    }
 
     fun get(id: String): BacikalActionParser {
         return getOrNull(id) ?: error("Schedule $id not found.")
