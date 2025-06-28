@@ -6,6 +6,7 @@ import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.getClasses
 import taboolib.common.io.getResources
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.common.platform.function.releaseResourceFolder
@@ -82,8 +83,12 @@ object BacikalScanner : ClassVisitor(5) {
                 if (!owner.hasAnnotation(BacikalParser::class.java)) {
                     continue
                 }
-                val parser = buildClassActionParser(owner, source!!)
-                BacikalRegistry.registerActionParser(parser)
+                try {
+                    val parser = buildClassActionParser(owner, source!!)
+                    BacikalRegistry.registerActionParser(parser)
+                } catch (e: Exception) {
+                    console().error { e.localizedMessage }
+                }
             }
         }
     }
@@ -95,16 +100,18 @@ object BacikalScanner : ClassVisitor(5) {
         if (!owner.hasAnnotation(BacikalParser::class.java)) {
             return
         }
-        val parser = buildClassActionParser(owner, BuiltInActionSource)
-        BacikalRegistry.registerActionParser(parser)
+        try {
+            val parser = buildClassActionParser(owner, BuiltInActionSource)
+            BacikalRegistry.registerActionParser(parser)
+        } catch (e: Exception) {
+            console().error { e.localizedMessage }
+        }
     }
 
     private fun buildClassActionParser(owner: ReflexClass, source: ActionSource): ClassActionParser {
         if (!owner.hasInterface(ClassActionResolver::class.java)) {
             error("Cannot register class ${owner.name} without BacikalActionResolver interface.")
         }
-        val resolver = (findInstance(owner) ?: owner.newInstance()) as? ClassActionResolver
-            ?: error("Cannot create instance of ${owner.name}")
 
         val clazz = owner.toClass()
         val annotation = owner.toClass().getAnnotation(BacikalParser::class.java)
@@ -119,8 +126,7 @@ object BacikalScanner : ClassVisitor(5) {
             annotation.description,
             clazz,
             metadata,
-            source,
-            resolver
+            source
         )
         return parser
     }

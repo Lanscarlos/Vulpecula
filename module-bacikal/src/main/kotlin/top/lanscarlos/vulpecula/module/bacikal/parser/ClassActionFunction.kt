@@ -23,10 +23,7 @@ import java.util.concurrent.CompletableFuture
     relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
     transitive = false
 )
-class ClassActionFunction(
-    javaClass: Class<*>,
-    metadata: Array<String>
-) {
+class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
 
     /**
      * 标准函数, 参数不缺省时调用
@@ -50,10 +47,6 @@ class ClassActionFunction(
 
     init {
         // 类结构验证
-        require(ClassActionResolver::class.java.isAssignableFrom(javaClass)) {
-            // 未实现 ClassActionResolver 接口
-            asLang("module-bacikal-exception-invalid-class-action-resolver", javaClass.name, ClassActionResolver::class.java.simpleName)
-        }
         require(javaClass.declaredMethods.count { it.name == "resolve" } == 1) {
             // 仅允许定义一个 resolve 方法
             asLang("module-bacikal-exception-invalid-resolve-function", javaClass.name, "resolve")
@@ -62,6 +55,8 @@ class ClassActionFunction(
         // 获取函数
         standardMethod = javaClass.declaredMethods.find { it.name == "resolve" }!!
         defaultMethod = javaClass.declaredMethods.find { it.name == "resolve\$default" }
+        standardMethod.isAccessible = true
+        defaultMethod?.isAccessible = true
 
         // 检查返回值
         isUseFutureReturn = standardMethod.returnType == CompletableFuture::class.java

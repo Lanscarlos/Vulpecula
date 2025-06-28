@@ -27,9 +27,10 @@ class ClassActionParser(
     description: String,
     javaClass: Class<*>,
     metadata: Array<String>,
-    override val source: ActionSource,
-    val resolver: ClassActionResolver
+    override val source: ActionSource
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
+
+    private val constructor: ClassActionConstructor
 
     private val function: ClassActionFunction
 
@@ -37,6 +38,7 @@ class ClassActionParser(
 
     init {
         try {
+            constructor = ClassActionConstructor(javaClass)
             function = ClassActionFunction(javaClass, metadata)
         } catch (cause: Exception) {
             throw ClassActionRegisterException(id, cause)
@@ -118,9 +120,11 @@ class ClassActionParser(
      * 解析语句
      * */
     override fun <T : Any?> resolve(source: QuestReader): QuestAction<T> {
+        val reader = DefaultReader(source)
+        val instance = constructor.getOrNewInstance(reader)
+
         // 编译为可执行的 QuestAction
         val actions: Array<BacikalAction<*>> = Array(parameters.size) { UninitializedAction }
-        val reader = DefaultReader(source)
         val additional = mutableMapOf<String, ClassActionParameter>()
         var breakIndex = 0 // 断点索引
 
@@ -172,10 +176,10 @@ class ClassActionParser(
             }
         }
 
-        return QuestActionResolver(actions)
+        return QuestActionResolver(instance, actions)
     }
 
-    inner class QuestActionResolver<T>(val actions: Array<BacikalAction<*>>) : QuestAction<T>() {
+    inner class QuestActionResolver<T>(val instance: ClassActionResolver, val actions: Array<BacikalAction<*>>) : QuestAction<T>() {
 
         // 计算缺省掩码值
         val mask: Int = actions.fold(0) { acc, action ->
@@ -191,11 +195,11 @@ class ClassActionParser(
             val future = process(actions, frame)
             return if (function.isUseFutureReturn) {
                 future.thenCompose {
-                    function.invoke(resolver, mask, it.toTypedArray()) as CompletableFuture<T>
+                    function.invoke(instance, mask, it.toTypedArray()) as CompletableFuture<T>
                 }
             } else {
                 future.thenApply {
-                    function.invoke(resolver, mask, it.toTypedArray()) as T
+                    function.invoke(instance, mask, it.toTypedArray()) as T
                 }
             }
         }
