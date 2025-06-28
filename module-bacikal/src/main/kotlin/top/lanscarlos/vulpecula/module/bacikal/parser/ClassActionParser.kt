@@ -6,7 +6,6 @@ import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
-import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionExecuteException
 import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionRegisterException
 import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
@@ -151,7 +150,7 @@ class ClassActionParser(
             while (reader.peekToken().matches(regex)) {
                 val prefix = reader.readToken().substring(1)
                 val parameter = additional[prefix]
-                    ?: throw ClassActionExecuteException(id, IllegalArgumentException(asLang("module-bacikal-exception-unknown-additional-parameter", prefix)))
+                    ?: error(asLang("module-bacikal-exception-unknown-additional-parameter", prefix))
                 actions[parameter.index] = parameter.read(reader)
             }
 
@@ -191,19 +190,11 @@ class ClassActionParser(
             val future = process(actions, frame)
             return if (function.isUseFutureReturn) {
                 future.thenCompose {
-                    try {
-                        function.invoke(mask, it.toTypedArray()) as CompletableFuture<T>
-                    } catch (cause: Exception) {
-                        throw ClassActionExecuteException(id, cause)
-                    }
+                    function.invoke(mask, it.toTypedArray()) as CompletableFuture<T>
                 }
             } else {
                 future.thenApply {
-                    try {
-                        function.invoke(mask, it.toTypedArray()) as T
-                    } catch (cause: Exception) {
-                        throw ClassActionExecuteException(id, cause)
-                    }
+                    function.invoke(mask, it.toTypedArray()) as T
                 }
             }
         }
