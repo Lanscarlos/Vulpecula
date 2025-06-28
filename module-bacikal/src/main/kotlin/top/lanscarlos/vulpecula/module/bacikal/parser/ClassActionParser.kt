@@ -25,9 +25,10 @@ class ClassActionParser(
     aliases: Array<String>,
     namespace: String,
     description: String,
+    javaClass: Class<*>,
     metadata: Array<String>,
     override val source: ActionSource,
-    resolver: ClassActionResolver
+    val resolver: ClassActionResolver
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
 
     private val function: ClassActionFunction
@@ -36,7 +37,7 @@ class ClassActionParser(
 
     init {
         try {
-            function = ClassActionFunction(metadata, resolver)
+            function = ClassActionFunction(javaClass, metadata)
         } catch (cause: Exception) {
             throw ClassActionRegisterException(id, cause)
         }
@@ -190,11 +191,11 @@ class ClassActionParser(
             val future = process(actions, frame)
             return if (function.isUseFutureReturn) {
                 future.thenCompose {
-                    function.invoke(mask, it.toTypedArray()) as CompletableFuture<T>
+                    function.invoke(resolver, mask, it.toTypedArray()) as CompletableFuture<T>
                 }
             } else {
                 future.thenApply {
-                    function.invoke(mask, it.toTypedArray()) as T
+                    function.invoke(resolver, mask, it.toTypedArray()) as T
                 }
             }
         }

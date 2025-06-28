@@ -24,8 +24,8 @@ import java.util.concurrent.CompletableFuture
     transitive = false
 )
 class ClassActionFunction(
-    metadata: Array<String>,
-    val resolver: ClassActionResolver
+    javaClass: Class<*>,
+    metadata: Array<String>
 ) {
 
     /**
@@ -49,8 +49,6 @@ class ClassActionFunction(
     internal val isUseFutureReturn: Boolean
 
     init {
-        val javaClass = resolver::class.java
-
         // 类结构验证
         require(ClassActionResolver::class.java.isAssignableFrom(javaClass)) {
             // 未实现 ClassActionResolver 接口
@@ -91,10 +89,11 @@ class ClassActionFunction(
     /**
      * 执行函数
      *
+     * @param instance 实例
      * @param mask 缺省参数掩码
      * @param parameters 参数列表
      * */
-    fun invoke(mask: Int, arguments: Array<Any?>): Any? {
+    fun invoke(instance: ClassActionResolver, mask: Int, arguments: Array<Any?>): Any? {
         require(parameters.size == arguments.size) {
             // 参数数量不匹配
             "BacikalActionParser#invoke >> Argument count mismatch."
@@ -111,7 +110,7 @@ class ClassActionFunction(
         if (mask == 0 || defaultMethod == null) {
             // 无缺省实参
             try {
-                return standardMethod.invoke(resolver, *arguments)
+                return standardMethod.invoke(instance, *arguments)
             } catch (e: InvocationTargetException) {
                 throw e.targetException
             }
@@ -119,7 +118,7 @@ class ClassActionFunction(
 
         // 实参缺省
         try {
-            return defaultMethod.invoke(resolver, resolver, *arguments, mask, null)
+            return defaultMethod.invoke(instance, instance, *arguments, mask, null)
         } catch (e: InvocationTargetException) {
             throw e.targetException
         }
