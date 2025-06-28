@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.common.applicative.exception.NullValueException
  * @author Lanscarlos
  * @since 2023-08-21 13:57
  */
-abstract class AbstractApplicative<T>(clazz: Class<T>) : Applicative<T> {
+abstract class AbstractApplicative<T>(val clazz: Class<T>) : Applicative<T> {
 
     override val name: String = clazz.simpleName.lowercase()
 

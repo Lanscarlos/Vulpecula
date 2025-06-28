@@ -85,24 +85,14 @@ object ApplicativeRegistry : ClassVisitor(-4) {
         // 获取实例
         val applicative = try {
             // 尝试实例化
-            (owner.getInstance() ?: clazz.getDeclaredConstructor().newInstance()) as Applicative<*>
-        } catch (ex: Exception) {
+            (owner.getInstance() ?: clazz.getDeclaredConstructor().newInstance()) as AbstractApplicative<*>
+        } catch (_: Exception) {
             warning("Property \"${clazz.name}\" must have a empty constructor.")
             return
         }
 
-        // 获取泛型类型
-        val type = when (val it = (clazz.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
-            is Class<*> -> it
-            is ParameterizedType -> it.rawType as Class<*>
-            else -> {
-                warning("Property \"${clazz.name}\" must have a generic type.")
-                return
-            }
-        }
-
         // 注册
-        registerApplicative(type, applicative)
+        registerApplicative(applicative.clazz, applicative)
     }
 
 }
