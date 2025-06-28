@@ -5,7 +5,6 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
 import taboolib.library.kether.*
 import taboolib.module.kether.ScriptService
-import taboolib.module.metrics.charts.AdvancedPie
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
