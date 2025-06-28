@@ -153,7 +153,7 @@ class ClassActionParser(
         if (additional.isNotEmpty()) {
             val regex = "--\\D+".toRegex()
             while (reader.peekToken().matches(regex)) {
-                val prefix = reader.readToken().substring(1)
+                val prefix = reader.readToken().substring(2)
                 val parameter = additional[prefix]
                     ?: error(asLang("module-bacikal-exception-unknown-additional-parameter", prefix))
                 actions[parameter.index] = parameter.read(reader)

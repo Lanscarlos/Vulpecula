@@ -30,4 +30,4 @@ module-bacikal-exception-invalid-resolve-function: '类 {0} 含有多个名为 {
 module-bacikal-exception-empty-modifier-prefix: '参数 {1} 修饰符内容为空'
 module-bacikal-exception-invalid-modifier-prefix: '参数 {1} 修饰符不能为数字'
 module-bacikal-exception-invalid-null-argument: '传入的参数 &c{1}&7 值为空'
-module-bacikal-exception-unknown-additional-prefix: '未知的附加参数 &c{0}'
+module-bacikal-exception-unknown-additional-parameter: '未知的附加参数 &c{0}'
