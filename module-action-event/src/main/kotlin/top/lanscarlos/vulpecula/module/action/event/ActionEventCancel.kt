@@ -14,7 +14,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
  * @since 2025/6/15
  */
 @BacikalParser("event.cancel")
-object EventCancelAction : ClassActionResolver {
+object ActionEventCancel : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {
         frame.setVariable("@EVENT_STATUS", "CANCELED")
