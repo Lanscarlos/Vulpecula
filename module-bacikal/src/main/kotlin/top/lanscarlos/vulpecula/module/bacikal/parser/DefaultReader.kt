@@ -56,6 +56,10 @@ class DefaultReader(val source: QuestReader) : BacikalReader {
         source.expects(*expect)
     }
 
+    override fun expectToken(expects: List<String>) {
+        this.expectToken(*expects.toTypedArray())
+    }
+
     override fun hasToken(vararg expect: String): Boolean {
         source.mark()
         val token = source.nextToken()
@@ -65,6 +69,10 @@ class DefaultReader(val source: QuestReader) : BacikalReader {
             source.reset()
             false
         }
+    }
+
+    override fun hasToken(expects: List<String>): Boolean {
+        return this.hasToken(*expects.toTypedArray())
     }
 
     override fun mark(): Int {
