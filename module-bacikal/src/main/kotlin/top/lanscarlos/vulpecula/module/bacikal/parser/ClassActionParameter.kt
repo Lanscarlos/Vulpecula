@@ -62,6 +62,7 @@ class ClassActionParameter(
         // 检查前缀
         if (modifier != Modifier.NONE) {
             require(prefix.isNotEmpty()) { "前缀不能为空" }
+            require(prefix.all { it.toIntOrNull() == null }) { "修饰符前缀不能为数字" }
         }
     }
 

@@ -18,12 +18,6 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2024-11-20 11:11
  */
-@RuntimeDependency(
-    "!org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0",
-    test = "!kotlinx.metadata.jvm.KotlinClassMetadata",
-    relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
-    transitive = false
-)
 class ClassActionParser(
     id: String,
     name: String,

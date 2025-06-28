@@ -45,7 +45,7 @@ object ActionCommand {
                 .filter { it !is BacikalActionParser }
                 .size
             sender.info {
-                asLang("module-bacikal-registry-display-all", bacikalCount + ketherCount)
+                asLang("module-bacikal-command-registry-display-all", bacikalCount + ketherCount)
             }
             displayBacikalActions(sender, false)
             displayRemoteActions(sender, false)
@@ -122,12 +122,12 @@ object ActionCommand {
     private fun displayBacikalActions(sender: ProxyCommandSender, header: Boolean) {
         val bacikalParsers = BacikalRegistry.values().filter { !it.id.contains('.') }
         if (header) {
-            sender.info { asLang("module-bacikal-registry-display-bacikal", bacikalParsers.size) }
+            sender.info { asLang("module-bacikal-command-registry-display-bacikal", bacikalParsers.size) }
         }
         for ((source, parsers) in bacikalParsers.groupBy { it.source }) {
             sender.info {
                 asLang(
-                    "module-bacikal-registry-display-item",
+                    "module-bacikal-command-registry-display-item",
                     source.name,
                     source.version,
                     parsers.joinToString("§7, ") { "§b${it.id}" }
@@ -143,7 +143,7 @@ object ActionCommand {
         if (header) {
             sender.info {
                 asLang(
-                    "module-bacikal-registry-display-remote${if (remoteParsers.isEmpty()) "-empty" else ""}",
+                    "module-bacikal-command-registry-display-remote${if (remoteParsers.isEmpty()) "-empty" else ""}",
                     remoteParsers.size
                 )
             }
@@ -153,7 +153,7 @@ object ActionCommand {
             val version = plugin.description.version
             sender.info {
                 asLang(
-                    "module-bacikal-registry-display-item",
+                    "module-bacikal-command-registry-display-item",
                     pluginId,
                     version,
                     parsers.joinToString("§7, ") { "§a${it.action}" }
@@ -166,11 +166,11 @@ object ActionCommand {
         val parsers = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
             .flatMap { it.value.entries }.filter { it.value !is BacikalActionParser && it.value !is RemoteActionParser }
         if (header) {
-            sender.info { asLang("module-bacikal-registry-display-local", parsers.size) }
+            sender.info { asLang("module-bacikal-command-registry-display-local", parsers.size) }
         }
         sender.info {
             asLang(
-                "module-bacikal-registry-display-item",
+                "module-bacikal-command-registry-display-item",
                 taboolibId,
                 "6",
                 parsers.joinToString("§7, ") { "§c${it.key}" }

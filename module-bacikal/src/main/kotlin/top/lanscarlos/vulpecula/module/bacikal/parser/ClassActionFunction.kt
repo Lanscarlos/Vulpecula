@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
+import taboolib.common.env.RuntimeDependency
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import java.lang.reflect.InvocationTargetException
@@ -15,6 +16,12 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2025/6/28
  */
+@RuntimeDependency(
+    "!org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0",
+    test = "!kotlinx.metadata.jvm.KotlinClassMetadata",
+    relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
+    transitive = false
+)
 class ClassActionFunction(
     metadata: Array<String>,
     val resolver: ClassActionResolver
