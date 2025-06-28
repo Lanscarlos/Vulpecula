@@ -12,7 +12,6 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 
@@ -35,10 +34,8 @@ object BacikalRegistry {
             for (parser in parsers.values) {
                 registerAction(parser)
             }
-            Vulpecula.addMetricsChart(DrilldownPie("registeredActions", ::metricsRegisteredActions))
-            Vulpecula.addMetricsChart(DrilldownPie("actionSourceVersion", ::metricsActionSourceVersion))
-            Vulpecula.addMetricsChart(DrilldownPie("actionSourceToAuthors", ::metricsActionSourceToAuthors))
-            Vulpecula.addMetricsChart(DrilldownPie("authorToActionSources", ::metricsAuthorToActionSources))
+            Vulpecula.addMetricsChart(DrilldownPie("actionExtension", ::metricsActionExtension))
+            Vulpecula.addMetricsChart(DrilldownPie("extensionAuthor", ::metricsExtensionAuthor))
         }
     }
 
@@ -150,23 +147,7 @@ object BacikalRegistry {
         }
     }
 
-    private fun metricsRegisteredActions(): Map<String, Map<String, Int>> {
-        val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
-        val mainParsers = parsers.values.filter { !it.id.contains('.') }
-        for (main in mainParsers) {
-            val innerMap = outerMap.computeIfAbsent(main.id) { hashMapOf() }
-            val subParsers = parsers.values.filter { it.id.startsWith("${main.id}.") }
-            for (sub in subParsers) {
-                innerMap.compute(sub.id) { _, value ->
-                    value?.plus(1) ?: 1
-                }
-            }
-        }
-        info("Submit data to registeredActions")
-        return outerMap
-    }
-
-    private fun metricsActionSourceVersion(): Map<String, Map<String, Int>> {
+    private fun metricsActionExtension(): Map<String, Map<String, Int>> {
         val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
         val sources = parsers.values.map { it.source }.distinct()
         for (source in sources) {
@@ -179,22 +160,7 @@ object BacikalRegistry {
         return outerMap
     }
 
-    private fun metricsActionSourceToAuthors(): Map<String, Map<String, Int>> {
-        val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
-        val sources = parsers.values.map { it.source }.distinct()
-        for (source in sources) {
-            val innerMap = outerMap.computeIfAbsent(source.name) { hashMapOf() }
-            for (author in source.authors) {
-                innerMap.compute(author) { _, value ->
-                    value?.plus(1) ?: 1
-                }
-            }
-        }
-        info("Submit data to actionSourceToAuthors")
-        return outerMap
-    }
-
-    private fun metricsAuthorToActionSources(): Map<String, Map<String, Int>> {
+    private fun metricsExtensionAuthor(): Map<String, Map<String, Int>> {
         val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
         val sources = parsers.values.map { it.source }.distinct()
         for (source in sources) {
