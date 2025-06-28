@@ -40,7 +40,7 @@ object BacikalRegistry {
     }
 
     fun get(id: String): BacikalActionParser {
-        return getOrNull(id) ?: error("Schedule $id not found.")
+        return getOrNull(id) ?: error("Parser $id not found.")
     }
 
     fun getOrNull(id: String): BacikalActionParser? {
