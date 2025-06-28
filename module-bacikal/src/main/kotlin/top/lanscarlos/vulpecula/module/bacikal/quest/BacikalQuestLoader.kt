@@ -23,9 +23,9 @@ class BacikalQuestLoader : SimpleQuestLoader() {
 
     private lateinit var innerReader: InnerReader
     private lateinit var innerBlockReader: InnerBlockReader
-    private val statistic: HashMap<String, Int> = hashMapOf()
+    private val statistic: HashMap<String, HashMap<String, Int>> = hashMapOf()
 
-    fun getStatistic(): Map<String, Int> {
+    fun getStatistic(): HashMap<String, HashMap<String, Int>> {
         return statistic
     }
 
@@ -207,13 +207,22 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             when (parser) {
                 null -> {}
                 is BacikalActionParser -> {
-                    statistic.compute(parser.id) { _, value -> value?.plus(1) ?: 1 }
+                    val innerMap = statistic.computeIfAbsent("Bacikal") { hashMapOf() }
+                    innerMap.compute(parser.id) { _, value ->
+                        value?.plus(1) ?: 1
+                    }
                 }
                 is RemoteActionParser -> {
-                    statistic.compute(parser.action) { _, value -> value?.plus(1) ?: 1 }
+                    val innerMap = statistic.computeIfAbsent("Remote") { hashMapOf() }
+                    innerMap.compute(parser.action) { _, value ->
+                        value?.plus(1) ?: 1
+                    }
                 }
                 else -> {
-                    statistic.compute(header) { _, value -> value?.plus(1) ?: 1 }
+                    val innerMap = statistic.computeIfAbsent("Local") { hashMapOf() }
+                    innerMap.compute(header) { _, value ->
+                        value?.plus(1) ?: 1
+                    }
                 }
             }
             return wrap(action, properties)

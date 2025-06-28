@@ -6,6 +6,7 @@ import taboolib.common.platform.function.info
 import taboolib.library.kether.*
 import taboolib.module.kether.ScriptService
 import taboolib.module.metrics.charts.AdvancedPie
+import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
@@ -20,19 +21,22 @@ import java.nio.charset.StandardCharsets
  */
 object BacikalQuestCompiler {
 
-    private val statistic: HashMap<String, Map<String, Int>> = hashMapOf()
+    private val statistic: HashMap<String, Map<String, Map<String, Int>>> = hashMapOf()
 
     @Awake(LifeCycle.LOAD)
     fun onLoad() {
-        Vulpecula.addMetricsChart(AdvancedPie("actionUsage", ::metricsActionUsage))
+        Vulpecula.addMetricsChart(DrilldownPie("actionUsage", ::metricsActionUsage))
     }
 
-    private fun metricsActionUsage(): Map<String, Int> {
-        val map: HashMap<String, Int> = hashMapOf()
-        for (data in statistic.values) {
-            for ((key, count) in data) {
-                map.compute(key) { _, value ->
-                    value?.plus(count) ?: count
+    private fun metricsActionUsage(): Map<String, Map<String, Int>> {
+        val map: HashMap<String, HashMap<String, Int>> = hashMapOf()
+        for (element in statistic.values) {
+            for ((parserType, data) in element) {
+                val innerMap = map.computeIfAbsent(parserType) { hashMapOf() }
+                for ((key, count) in data) {
+                    innerMap.compute(key) { _, value ->
+                        value?.plus(count) ?: count
+                    }
                 }
             }
         }
