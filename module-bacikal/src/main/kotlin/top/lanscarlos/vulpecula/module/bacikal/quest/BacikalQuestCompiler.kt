@@ -1,7 +1,11 @@
 package top.lanscarlos.vulpecula.module.bacikal.quest
 
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.library.kether.*
 import taboolib.module.kether.ScriptService
+import taboolib.module.metrics.charts.AdvancedPie
+import top.lanscarlos.vulpecula.Vulpecula
 import top.lanscarlos.vulpecula.module.bacikal.exception.BacikalCompileException
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -15,20 +19,39 @@ import java.nio.charset.StandardCharsets
  */
 object BacikalQuestCompiler {
 
+    private val statistic: HashMap<String, Map<String, Int>> = hashMapOf()
+
+    @Awake(LifeCycle.LOAD)
+    fun onLoad() {
+        Vulpecula.addMetricsChart(AdvancedPie("actionUsage", ::metricsActionUsage))
+    }
+
+    private fun metricsActionUsage(): Map<String, Int> {
+        val map: HashMap<String, Int> = hashMapOf()
+        for (data in statistic.values) {
+            for ((key, count) in data) {
+                map.compute(key) { _, value ->
+                    value?.plus(count) ?: count
+                }
+            }
+        }
+        return map
+    }
+
     fun compile(source: File, namespace: List<String>): Quest {
         return compile(source.readText(StandardCharsets.UTF_8), source.name, namespace)
     }
 
     fun compile(source: String, name: String, namespace: List<String>): Quest {
-        val content = if (source.trim().startsWith("def")) source else format(source)
         val loader = BacikalQuestLoader()
         return try {
-            loader.load(
-                ScriptService,
-                "bacikal_$name",
-                content.toByteArray(StandardCharsets.UTF_8),
-                listOf("vulpecula").plus(namespace).distinct() // 命名空间去重
-            )
+            val content = if (source.trim().startsWith("def")) source else format(source)
+            val id = "bacikal_$name"
+            val bytes = content.toByteArray(StandardCharsets.UTF_8)
+            val namespace = listOf("vulpecula").plus(namespace).distinct() // 命名空间去重
+            val quest = loader.load(ScriptService, id, bytes, namespace)
+            statistic[id] = loader.getStatistic()
+            quest
         } catch (ex: Exception) {
             throw BacikalCompileException(ex, loader.getParsedMessage(), loader.getUnparseMessage(), loader.getParsedActions())
         }

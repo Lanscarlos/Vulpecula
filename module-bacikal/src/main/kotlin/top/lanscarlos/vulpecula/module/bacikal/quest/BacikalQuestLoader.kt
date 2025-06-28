@@ -21,6 +21,11 @@ class BacikalQuestLoader : SimpleQuestLoader() {
 
     private lateinit var innerReader: InnerReader
     private lateinit var innerBlockReader: InnerBlockReader
+    private val statistic: HashMap<String, Int> = hashMapOf()
+
+    fun getStatistic(): Map<String, Int> {
+        return statistic
+    }
 
     fun getParsedMessage(): String {
         return innerReader.parsedContent()
@@ -196,6 +201,9 @@ class BacikalQuestLoader : SimpleQuestLoader() {
             properties["BACIKAL_END_LINE"] = lineOf(this.content, index)
             if (parser != null) {
                 properties["BACIKAL_PARSER"] = parser.javaClass.name
+            }
+            statistic.compute(header) { _, value ->
+                value?.plus(1) ?: 1
             }
             return wrap(action, properties)
         }
