@@ -21,3 +21,5 @@ include("workflow-action")
 include("workflow-build")
 include("workflow-metadata")
 include("workflow-resources")
+
+include("module-action-item")
