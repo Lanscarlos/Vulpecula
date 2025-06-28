@@ -33,10 +33,21 @@ interface BacikalReader {
     fun expectToken(vararg expect: String)
 
     /**
+     * 读取下一个标记并判断是否符合预期，若不符合预期则抛出异常
+     * */
+    fun expectToken(expects: List<String>)
+
+    /**
      * 读取一个标记并判断是否符合预期
      * 若不符合预期则重置位置
      * */
     fun hasToken(vararg expect: String): Boolean
+
+    /**
+     * 读取一个标记并判断是否符合预期
+     * 若不符合预期则重置位置
+     * */
+    fun hasToken(expects: List<String>): Boolean
 
     /**
      * 标记位置

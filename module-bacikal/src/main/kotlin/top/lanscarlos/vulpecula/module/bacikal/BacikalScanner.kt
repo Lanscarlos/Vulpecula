@@ -117,7 +117,6 @@ object BacikalScanner : ClassVisitor(5) {
             annotation.aliases,
             annotation.namespace,
             annotation.description,
-            clazz,
             metadata,
             source,
             resolver
