@@ -8,7 +8,6 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
         dependsOn("cleanResources")
         val dependencies = project.configurations["compileOnly"].dependencies
             .filterIsInstance<ProjectDependency>()
-            .filter { !it.name.startsWith("module-action-") }
             .map { it.dependencyProject }
         for (dependency in dependencies) {
             dependsOn(":${dependency.name}:processResources")
