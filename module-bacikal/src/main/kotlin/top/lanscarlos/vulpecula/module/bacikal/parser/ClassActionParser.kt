@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
-import taboolib.common.env.RuntimeDependency
 import taboolib.library.kether.*
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
