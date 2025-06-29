@@ -38,8 +38,8 @@ class ActionItemLoreGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.add")
-class ActionItemLoreAdd : ClassActionResolver {
+@BacikalParser("item.lore.insert")
+class ActionItemLoreInsert : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: Int, content: String) {
         val item = ActionItem.getContext(frame)
@@ -57,8 +57,8 @@ class ActionItemLoreAdd : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.append")
-class ActionItemLoreAppend : ClassActionResolver {
+@BacikalParser("item.lore.add")
+class ActionItemLoreAdd : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, content: String) {
         val item = ActionItem.getContext(frame)
@@ -77,7 +77,7 @@ class ActionItemLoreSet : ClassActionResolver {
     fun resolve(frame: BacikalFrame, line: String, content: String) {
         val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
-        val lore = itemMeta.lore ?: mutableListOf<String>()
+        val lore = ArrayList(itemMeta.lore ?: mutableListOf<String>())
         if (line == "*" || line == "all") {
             for (index in lore.indices) {
                 lore[index] = content
@@ -96,6 +96,29 @@ class ActionItemLoreSet : ClassActionResolver {
 
 }
 
+@BacikalParser("item.lore.remove")
+class ActionItemLoreRemove : ClassActionResolver {
+
+    fun resolve(frame: BacikalFrame, line: String, content: String) {
+        val item = ActionItem.getContext(frame)
+        val itemMeta = item.itemMeta!!
+        val lore = LinkedList(itemMeta.lore ?: mutableListOf<String>())
+        if (line == "*" || line == "all") {
+            lore.clear()
+        } else {
+            val index = line.toInt() - 1
+            require(index in lore.indices) {
+                val indices = "[1, ${lore.size}]"
+                asLang("module-action-item-exception-lore-out-of-bounds", line, indices)
+            }
+            lore.removeAt(index)
+        }
+        itemMeta.lore = lore
+        item.itemMeta = itemMeta
+    }
+
+}
+
 @BacikalParser("item.lore.override")
 class ActionItemLoreOverride : ClassActionResolver {
 
@@ -103,6 +126,18 @@ class ActionItemLoreOverride : ClassActionResolver {
         val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
         itemMeta.lore = lore
+        item.itemMeta = itemMeta
+    }
+
+}
+
+@BacikalParser("item.lore.clear")
+class ActionItemLoreClear : ClassActionResolver {
+
+    fun resolve(frame: BacikalFrame) {
+        val item = ActionItem.getContext(frame)
+        val itemMeta = item.itemMeta!!
+        itemMeta.lore = emptyList<String>()
         item.itemMeta = itemMeta
     }
 
