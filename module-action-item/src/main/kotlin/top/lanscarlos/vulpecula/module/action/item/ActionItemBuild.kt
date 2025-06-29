@@ -51,7 +51,7 @@ object ActionItemBuild : ClassActionResolver {
                 this.customModelData = model
             }
         }
-        ActionItem.setItem(frame, item)
+        ActionItem.setContext(frame, item)
         return item
     }
 

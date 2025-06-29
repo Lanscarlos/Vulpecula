@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 object ActionItemSwitch : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, item: ItemStack) {
-        ActionItem.setItem(frame, item)
+        ActionItem.setContext(frame, item)
     }
 
 }

@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 object ActionItemNameGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): String? {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         return item.itemMeta?.displayName
     }
 
@@ -25,7 +25,7 @@ object ActionItemNameGet : ClassActionResolver {
 object ActionItemNameSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, name: String?) {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         item.itemMeta = item.itemMeta!!.also {
             it.setDisplayName(name)
         }

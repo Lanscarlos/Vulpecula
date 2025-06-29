@@ -17,7 +17,7 @@ import java.util.LinkedList
 class ActionItemLoreSize : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         return item.itemMeta?.lore?.size ?: 0
     }
 
@@ -27,7 +27,7 @@ class ActionItemLoreSize : ClassActionResolver {
 class ActionItemLoreGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: String): Any? {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         val lore = item.itemMeta?.lore ?: emptyList<String>()
         if (line == "*" || line == "all") {
             return lore
@@ -42,7 +42,7 @@ class ActionItemLoreGet : ClassActionResolver {
 class ActionItemLoreAdd : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: Int, content: String) {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
         val lore = LinkedList(itemMeta.lore ?: mutableListOf<String>())
         val index = line - 1
@@ -61,7 +61,7 @@ class ActionItemLoreAdd : ClassActionResolver {
 class ActionItemLoreAppend : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, content: String) {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
         val lore = itemMeta.lore ?: mutableListOf<String>()
         lore.add(content)
@@ -75,7 +75,7 @@ class ActionItemLoreAppend : ClassActionResolver {
 class ActionItemLoreSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: String, content: String) {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
         val lore = itemMeta.lore ?: mutableListOf<String>()
         if (line == "*" || line == "all") {
@@ -100,7 +100,7 @@ class ActionItemLoreSet : ClassActionResolver {
 class ActionItemLoreOverride : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, lore: List<String>) {
-        val item = ActionItem.getItem(frame)
+        val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
         itemMeta.lore = lore
         item.itemMeta = itemMeta

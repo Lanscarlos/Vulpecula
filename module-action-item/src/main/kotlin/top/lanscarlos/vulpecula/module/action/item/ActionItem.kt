@@ -23,11 +23,11 @@ object ActionItem {
         info("我擦测试！！！")
     }
 
-    fun getItem(frame: BacikalFrame): ItemStack {
+    fun getContext(frame: BacikalFrame): ItemStack {
         return frame.getVariable<ItemStack>(CONTEXT) ?: error(asLang("module-action-item-exception-item-not-found"))
     }
 
-    fun setItem(frame: BacikalFrame, item: ItemStack) {
+    fun setContext(frame: BacikalFrame, item: ItemStack) {
         frame.setVariable(CONTEXT, item)
     }
 
