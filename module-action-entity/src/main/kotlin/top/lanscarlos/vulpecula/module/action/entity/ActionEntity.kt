@@ -15,7 +15,7 @@ object ActionEntity {
 
     private const val CONTEXT = "@ENTITY"
 
-    fun getEntity(frame: BacikalFrame): Entity {
+    fun getContext(frame: BacikalFrame): Entity {
         val value = frame.getVariable<Entity>(CONTEXT)
         if (value != null) {
             return value
@@ -25,11 +25,11 @@ object ActionEntity {
         require(player != null) {
             asLang("module-action-entity-exception-entity-not-found")
         }
-        setEntity(frame, player)
+        setContext(frame, player)
         return player
     }
 
-    fun setEntity(frame: BacikalFrame, entity: Entity) {
+    fun setContext(frame: BacikalFrame, entity: Entity) {
         frame.setVariable(CONTEXT, entity)
     }
 
