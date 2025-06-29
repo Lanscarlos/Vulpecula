@@ -24,7 +24,7 @@ abstract class AbstractActionParser(
     abstract fun onDrawStructure(maxDepth: Int, currentDepth: Int): List<ComponentText>
 
     protected fun ComponentText.resetColor(): ComponentText {
-        return append(Components.text("").color(StandardColors.RESET))
+        return append(Components.text("&7"))
     }
 
 }
