@@ -40,16 +40,15 @@ object ActionCommand {
             val bacikalCount = BacikalRegistry.values()
                 .filter { !it.id.contains('.') }
                 .size
-            val ketherCount = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
+            val remoteCount = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
                 .flatMap { it.value.values }
-                .filter { it !is BacikalActionParser }
+                .filterIsInstance<RemoteActionParser>()
                 .size
             sender.info {
-                asLang("module-bacikal-command-registry-display-all", bacikalCount + ketherCount)
+                asLang("module-bacikal-command-registry-display-all", bacikalCount + remoteCount)
             }
             displayBacikalActions(sender, false)
             displayRemoteActions(sender, false)
-            displayLocalActions(sender, false)
         }
 
         literal("bacikal") {
