@@ -1,0 +1,4 @@
+
+# Action Item
+module-action-item-exception-item-not-found: '当前脚本上下文中无物品对象'
+module-action-item-exception-invalid-material-type: '未知的物品类型 {0}'

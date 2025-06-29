@@ -17,7 +17,6 @@ dependencies {
     compileOnly(project(":module-command"))
     compileOnly(project(":module-core"))
     compileOnly(project(":module-dispatcher"))
-    compileOnly(project(":module-item"))
     compileOnly(project(":module-schedule"))
     compileOnly(project(":module-script"))
     compileOnly(project(":platform-bukkit"))
