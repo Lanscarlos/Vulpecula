@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
-import taboolib.module.chat.StandardColors
 
 /**
  * Vulpecula
