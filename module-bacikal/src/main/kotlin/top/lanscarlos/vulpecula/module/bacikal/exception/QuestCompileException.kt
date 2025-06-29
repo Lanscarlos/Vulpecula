@@ -39,7 +39,11 @@ class QuestCompileException(
      * 获取报错原因信息
      * */
     fun getErrorReasonMessage(): String {
-        return asLang("module-bacikal-exception-reason", cause.localizedMessage)
+        val reason = cause.localizedMessage
+        if (reason.isBlank()) {
+            cause.printStackTrace()
+        }
+        return asLang("module-bacikal-exception-reason", reason)
     }
 
     /**
