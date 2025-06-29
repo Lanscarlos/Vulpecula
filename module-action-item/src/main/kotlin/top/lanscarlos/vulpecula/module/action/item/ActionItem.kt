@@ -1,9 +1,6 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
-import taboolib.common.LifeCycle
-import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
 import taboolib.platform.util.isNotAir
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -18,11 +15,6 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 object ActionItem {
 
     private const val CONTEXT = "@ITEM"
-
-    @Awake(LifeCycle.ACTIVE)
-    fun onActive() {
-        info("我擦测试！！！")
-    }
 
     fun getContext(frame: BacikalFrame): ItemStack {
         val item = frame.getVariable<ItemStack>(CONTEXT)
