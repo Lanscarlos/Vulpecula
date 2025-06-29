@@ -204,6 +204,10 @@ class ClassActionParser(
             }
         }
 
+        fun getParser(): ClassActionParser {
+            return this@ClassActionParser
+        }
+
     }
 
     private fun process(queue: Array<BacikalAction<*>>, frame: BacikalFrame): CompletableFuture<out List<Any?>> {

@@ -10,6 +10,7 @@ import taboolib.module.kether.action.ActionGet
 import taboolib.module.kether.action.ActionLiteral
 import taboolib.module.kether.action.ActionProperty
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import java.util.LinkedList
 
 /**
@@ -208,7 +209,12 @@ class BacikalQuestLoader : SimpleQuestLoader() {
                 null -> {}
                 is BacikalActionParser -> {
                     val innerMap = statistic.computeIfAbsent("Bacikal") { hashMapOf() }
-                    innerMap.compute(parser.id) { _, value ->
+                    val key = if (action is ClassActionParser.ClassAction<*>) {
+                        action.getParser().id
+                    } else {
+                        parser.id
+                    }
+                    innerMap.compute(key) { _, value ->
                         value?.plus(1) ?: 1
                     }
                 }
