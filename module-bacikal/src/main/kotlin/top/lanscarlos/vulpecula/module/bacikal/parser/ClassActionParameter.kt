@@ -49,10 +49,16 @@ class ClassActionParameter(
                 prefix = source.getAnnotation(Expected::class.java).values.toList()
             }
             source.hasAnnotation(Optional::class.java) -> {
+                require(isNullable || hasDefaultValue) {
+                    asLang("module-bacikal-exception-invalid-parameter-defined", Optional::class.java.simpleName, index, name)
+                }
                 modifier = Modifier.OPTIONAL
                 prefix = source.getAnnotation(Optional::class.java).values.toList()
             }
             source.hasAnnotation(Additional::class.java) -> {
+                require(isNullable || hasDefaultValue) {
+                    asLang("module-bacikal-exception-invalid-parameter-defined", Additional::class.java.simpleName, index, name)
+                }
                 modifier = Modifier.ADDITIONAL
                 prefix = source.getAnnotation(Additional::class.java).values.toList()
             }
