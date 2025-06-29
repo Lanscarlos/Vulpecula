@@ -238,4 +238,11 @@ class ClassActionParser(
         }
     }
 
+    object UninitializedAction : BacikalAction<Unit> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<Unit> {
+            return CompletableFuture.completedFuture(Unit)
+        }
+    }
+
+
 }

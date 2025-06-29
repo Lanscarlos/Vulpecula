@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
+import org.bukkit.entity.Player
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.ParsedAction
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
@@ -8,6 +9,7 @@ import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import java.lang.reflect.Parameter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Vulpecula
@@ -72,8 +74,9 @@ class ClassActionParameter(
     }
 
     fun read(reader: BacikalReader): BacikalAction<*> {
-        if (type == BacikalFrame::class.java) {
-            return FrameAction
+        when (type) {
+            BacikalFrame::class.java -> return FrameAction
+            Player::class.java -> return PlayerAction(isNullable)
         }
         val action: ParsedAction<*> = when (modifier) {
             Modifier.NONE,
@@ -92,9 +95,10 @@ class ClassActionParameter(
                 reader.readAction()
             }
         }
-
-        val applicative = ApplicativeRegistry.getApplicative(type)
-        return ApplicativeAction(action, applicative)
+        return when (type) {
+            ParsedAction::class.java -> WrappedAction(action)
+            else -> ApplicativeAction(action, type, index, name, isNullable)
+        }
     }
 
     /**
@@ -102,6 +106,45 @@ class ClassActionParameter(
      * */
     enum class Modifier {
         NONE, EXPECTED, OPTIONAL, ADDITIONAL
+    }
+
+    object FrameAction : BacikalAction<BacikalFrame> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<BacikalFrame> {
+            return CompletableFuture.completedFuture(frame)
+        }
+    }
+
+    class PlayerAction(val isNullable: Boolean) : BacikalAction<Player> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<Player> {
+            val player = frame.senderAsPlayer
+            require(isNullable || player != null) {
+                asLang("module-bacikal-exception-script-player-not-found")
+            }
+            return CompletableFuture.completedFuture(player)
+        }
+    }
+
+    class WrappedAction(val action: ParsedAction<*>) : BacikalAction<ParsedAction<*>> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<ParsedAction<*>> {
+            return CompletableFuture.completedFuture(action)
+        }
+    }
+
+    class ApplicativeAction<T: Any>(val source: ParsedAction<*>, type: Class<T>, val index: Int, val name: String, val isNullable: Boolean) : BacikalAction<T> {
+
+        val applicative = ApplicativeRegistry.getApplicative(type)
+
+        override fun execute(frame: BacikalFrame): CompletableFuture<T> {
+            return frame.runAction(source).thenApply { it ->
+                if (it == null) {
+                    require(isNullable) {
+                        asLang("module-bacikal-exception-invalid-null-argument", index, name)
+                    }
+                    return@thenApply null
+                }
+                return@thenApply applicative.convert(it)
+            }
+        }
     }
 
 }

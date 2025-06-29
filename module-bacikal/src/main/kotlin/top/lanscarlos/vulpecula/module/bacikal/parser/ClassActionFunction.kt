@@ -98,7 +98,7 @@ class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
         for (parameter in parameters) {
             require(parameter.isNullable || arguments[parameter.index] != null) {
                 // 参数非空性检查失败
-                asLang("module-bacikal-exception-invalid-argument", parameter.index, parameter.name)
+                asLang("module-bacikal-exception-invalid-null-argument", parameter.index, parameter.name)
             }
         }
 
@@ -118,6 +118,5 @@ class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
             throw e.targetException
         }
     }
-
 
 }
