@@ -7,4 +7,5 @@ module-action-item-exception-lore-out-of-bounds: '行号 {0} 不能超过 {1} �
 module-action-item-exception-invalid-flag: '未知的物品标识 {0}'
 module-action-item-exception-invalid-enchantment-type: '未知的物品附魔 {0}'
 module-action-item-exception-invalid-enchantment-level: '物品附魔等级 {0} 必须要大于等于零'
+module-action-item-exception-invalid-amount: '数量 {0} 不能小于 1 且不能大于最大堆叠数量'
 module-action-item-exception-unbreakable-unsupported: '当前 Minecraft 版本不支持操作物品无损属性'
