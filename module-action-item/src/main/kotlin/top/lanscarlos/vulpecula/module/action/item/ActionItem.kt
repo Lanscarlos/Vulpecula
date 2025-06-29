@@ -4,6 +4,7 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
+import taboolib.platform.util.isNotAir
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
@@ -24,7 +25,12 @@ object ActionItem {
     }
 
     fun getContext(frame: BacikalFrame): ItemStack {
-        return frame.getVariable<ItemStack>(CONTEXT) ?: error(asLang("module-action-item-exception-item-not-found"))
+        val item = frame.getVariable<ItemStack>(CONTEXT)
+            ?: error(asLang("module-action-item-exception-item-not-found"))
+        require(item.isNotAir()) {
+            asLang("module-action-item-exception-item-is-air")
+        }
+        return item
     }
 
     fun setContext(frame: BacikalFrame, item: ItemStack) {

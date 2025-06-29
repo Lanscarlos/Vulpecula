@@ -1,5 +1,6 @@
 
 # Action Item
 module-action-item-exception-item-not-found: '当前脚本上下文中无物品对象'
+module-action-item-exception-item-is-air: '不能对空气物品进行操作'
 module-action-item-exception-invalid-material-type: '未知的物品类型 {0}'
 module-action-item-exception-lore-out-of-bounds: '行号 {0} 不能超过 {1} 范围'
