@@ -176,10 +176,10 @@ class ClassActionParser(
             }
         }
 
-        return QuestActionResolver(instance, actions)
+        return ClassAction(instance, actions)
     }
 
-    inner class QuestActionResolver<T>(val instance: ClassActionResolver, val actions: Array<BacikalAction<*>>) : QuestAction<T>() {
+    inner class ClassAction<T>(val instance: ClassActionResolver, val actions: Array<BacikalAction<*>>) : QuestAction<T>() {
 
         // 计算缺省掩码值
         val mask: Int = actions.fold(0) { acc, action ->
