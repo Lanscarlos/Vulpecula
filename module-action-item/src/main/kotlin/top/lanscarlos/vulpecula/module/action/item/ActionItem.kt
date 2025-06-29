@@ -24,7 +24,7 @@ object ActionItem {
     }
 
     fun getItem(frame: BacikalFrame): ItemStack {
-        return frame.getVariable<ItemStack>(CONTEXT) ?: error(asLang("module-item-exception-null-item"))
+        return frame.getVariable<ItemStack>(CONTEXT) ?: error(asLang("module-action-item-exception-item-not-found"))
     }
 
     fun setItem(frame: BacikalFrame, item: ItemStack) {
