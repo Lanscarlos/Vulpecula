@@ -14,6 +14,8 @@ import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
+import java.util.LinkedList
 
 /**
  * Vulpecula
@@ -27,6 +29,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 object BacikalRegistry {
 
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
+    private val exceptionalParsers: LinkedList<ExceptionalActionParser> = LinkedList()
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
@@ -63,11 +66,20 @@ object BacikalRegistry {
     fun entries(): Set<Map.Entry<String, BacikalActionParser>> = parsers.entries
 
     /**
+     * 注册异常的语句
+     * */
+    internal fun getExceptionalParsers(): List<ExceptionalActionParser> = exceptionalParsers
+
+    /**
      * 注册语句解析器
      *
      * @param parser 语句解析器
      * */
     fun registerActionParser(parser: BacikalActionParser) {
+        if (parser is ExceptionalActionParser) {
+            exceptionalParsers.add(parser)
+            return
+        }
         parsers[parser.id] = parser
 
         // 遍历层级并填充父节点

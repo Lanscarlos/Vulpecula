@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
  * @author Lanscarlos
  * @since 2025/6/29
  */
-class ExceptionalActionParser(val exception: Exception) : BacikalActionParser {
+class ExceptionalActionParser(val exception: Exception, override val source: ActionSource) : BacikalActionParser {
 
     override val id: String get() = throw exception
 
@@ -23,8 +23,6 @@ class ExceptionalActionParser(val exception: Exception) : BacikalActionParser {
     override val namespace: String get() = throw exception
 
     override val description: String get() = throw exception
-
-    override val source: ActionSource get() = throw exception
 
     override fun buildStructure(depth: Int): ComponentText = throw exception
 

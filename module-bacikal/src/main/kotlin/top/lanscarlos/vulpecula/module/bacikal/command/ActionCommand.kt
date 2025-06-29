@@ -139,7 +139,7 @@ object ActionCommand {
         }
 
         // 显示注册异常的信息
-        for (parser in BacikalRegistry.values().filterIsInstance<ExceptionalActionParser>()) {
+        for (parser in BacikalRegistry.getExceptionalParsers()) {
             sender.error { parser.exception.localizedMessage }
         }
     }

@@ -88,7 +88,7 @@ object BacikalScanner : ClassVisitor(5) {
                     buildClassActionParser(owner, source!!)
                 } catch (ex: Exception) {
                     console().error { ex.localizedMessage }
-                    ExceptionalActionParser(ex)
+                    ExceptionalActionParser(ex, source!!)
                 }
                 BacikalRegistry.registerActionParser(parser)
             }
@@ -106,7 +106,7 @@ object BacikalScanner : ClassVisitor(5) {
             buildClassActionParser(owner, BuiltInActionSource)
         } catch (ex: Exception) {
             console().error { ex.localizedMessage }
-            ExceptionalActionParser(ex)
+            ExceptionalActionParser(ex, BuiltInActionSource)
         }
         BacikalRegistry.registerActionParser(parser)
     }
