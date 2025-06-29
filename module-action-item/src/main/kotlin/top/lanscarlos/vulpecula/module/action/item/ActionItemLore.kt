@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.action.item
 
+import top.lanscarlos.vulpecula.common.applicative.IntApplicative
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -32,7 +33,7 @@ class ActionItemLoreGet : ClassActionResolver {
         if (line == "*" || line == "all") {
             return lore
         }
-        val index = line.toInt()
+        val index = IntApplicative.convert(line) - 1
         return lore.getOrNull(index)
     }
 
@@ -83,7 +84,7 @@ class ActionItemLoreSet : ClassActionResolver {
                 lore[index] = content
             }
         } else {
-            val index = line.toInt() - 1
+            val index = IntApplicative.convert(line) - 1
             require(index in lore.indices) {
                 val indices = "[1, ${lore.size}]"
                 asLang("module-action-item-exception-lore-out-of-bounds", line, indices)
@@ -106,7 +107,7 @@ class ActionItemLoreRemove : ClassActionResolver {
         if (line == "*" || line == "all") {
             lore.clear()
         } else {
-            val index = line.toInt() - 1
+            val index = IntApplicative.convert(line) - 1
             require(index in lore.indices) {
                 val indices = "[1, ${lore.size}]"
                 asLang("module-action-item-exception-lore-out-of-bounds", line, indices)
