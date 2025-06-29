@@ -1,0 +1,5 @@
+
+# Action Item
+module-action-entity-exception-entity-not-found: '当前脚本上下文中无物品对象'
+module-action-entity-exception-equipment-not-found: '实体 {0} 无装备栏'
+module-action-entity-exception-invalid-slot: '未知的装备槽位 {0}'
