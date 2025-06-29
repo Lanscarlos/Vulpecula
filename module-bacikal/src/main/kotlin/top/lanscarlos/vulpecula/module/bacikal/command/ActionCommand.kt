@@ -15,8 +15,11 @@ import taboolib.module.kether.RemoteActionParser
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
+import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
+import top.lanscarlos.vulpecula.module.bacikal.error
 import top.lanscarlos.vulpecula.module.bacikal.info
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 
 /**
@@ -38,7 +41,7 @@ object ActionCommand {
     val registry: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
             val bacikalCount = BacikalRegistry.values()
-                .filter { !it.id.contains('.') }
+                .filter { it !is ExceptionalActionParser && !it.id.contains('.') }
                 .size
             val remoteCount = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
                 .flatMap { it.value.values }
@@ -63,7 +66,7 @@ object ActionCommand {
         }
         literal("local") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                displayLocalActions(sender, true)
+                displayLocalActions(sender)
             }
         }
     }
@@ -119,19 +122,25 @@ object ActionCommand {
     }
 
     private fun displayBacikalActions(sender: ProxyCommandSender, header: Boolean) {
-        val bacikalParsers = BacikalRegistry.values().filter { !it.id.contains('.') }
+        val bacikalParsers = BacikalRegistry.values().filter { it !is ExceptionalActionParser && !it.id.contains('.') }
         if (header) {
             sender.info { asLang("module-bacikal-command-registry-display-bacikal", bacikalParsers.size) }
         }
         for ((source, parsers) in bacikalParsers.groupBy { it.source }) {
+            val color = if (source is BuiltInActionSource) "§3" else "§b"
             sender.info {
                 asLang(
                     "module-bacikal-command-registry-display-item",
                     source.name,
                     source.version,
-                    parsers.joinToString("§7, ") { "§b${it.id}" }
+                    parsers.joinToString("§7, ") { "$color${it.id}" }
                 )
             }
+        }
+
+        // 显示注册异常的信息
+        for (parser in BacikalRegistry.values().filterIsInstance<ExceptionalActionParser>()) {
+            sender.error { parser.exception.localizedMessage }
         }
     }
 
@@ -161,12 +170,10 @@ object ActionCommand {
         }
     }
 
-    private fun displayLocalActions(sender: ProxyCommandSender, header: Boolean) {
+    private fun displayLocalActions(sender: ProxyCommandSender) {
         val parsers = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
             .flatMap { it.value.entries }.filter { it.value !is BacikalActionParser && it.value !is RemoteActionParser }
-        if (header) {
-            sender.info { asLang("module-bacikal-command-registry-display-local", parsers.size) }
-        }
+        sender.info { asLang("module-bacikal-command-registry-display-local", parsers.size) }
         sender.info {
             asLang(
                 "module-bacikal-command-registry-display-item",

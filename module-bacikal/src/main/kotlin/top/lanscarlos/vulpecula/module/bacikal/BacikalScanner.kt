@@ -19,6 +19,7 @@ import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
+import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
 import java.io.File
 import java.io.InputStream
 import java.util.Base64
@@ -83,12 +84,22 @@ object BacikalScanner : ClassVisitor(5) {
                 if (!owner.hasAnnotation(BacikalParser::class.java)) {
                     continue
                 }
-                try {
-                    val parser = buildClassActionParser(owner, source!!)
-                    BacikalRegistry.registerActionParser(parser)
-                } catch (e: Exception) {
-                    console().error { e.localizedMessage }
+                val parser = try {
+                    buildClassActionParser(owner, source!!)
+                } catch (exception: Exception) {
+                    console().error { exception.localizedMessage }
+                    val annotation = owner.toClass().getAnnotation(BacikalParser::class.java)
+                    ExceptionalActionParser(
+                        annotation.id,
+                        annotation.name,
+                        annotation.aliases,
+                        annotation.namespace,
+                        annotation.description,
+                        source!!,
+                        exception
+                    )
                 }
+                BacikalRegistry.registerActionParser(parser)
             }
         }
     }
@@ -100,12 +111,22 @@ object BacikalScanner : ClassVisitor(5) {
         if (!owner.hasAnnotation(BacikalParser::class.java)) {
             return
         }
-        try {
-            val parser = buildClassActionParser(owner, BuiltInActionSource)
-            BacikalRegistry.registerActionParser(parser)
-        } catch (e: Exception) {
-            console().error { e.localizedMessage }
+        val parser = try {
+            buildClassActionParser(owner, BuiltInActionSource)
+        } catch (exception: Exception) {
+            console().error { exception.localizedMessage }
+            val annotation = owner.toClass().getAnnotation(BacikalParser::class.java)
+            ExceptionalActionParser(
+                annotation.id,
+                annotation.name,
+                annotation.aliases,
+                annotation.namespace,
+                annotation.description,
+                BuiltInActionSource,
+                exception
+            )
         }
+        BacikalRegistry.registerActionParser(parser)
     }
 
     private fun buildClassActionParser(owner: ReflexClass, source: ActionSource): ClassActionParser {
