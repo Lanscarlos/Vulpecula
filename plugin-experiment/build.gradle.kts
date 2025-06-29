@@ -11,6 +11,7 @@ dependencies {
     compileOnly(project(":common-config"))
     compileOnly(project(":common-core"))
     compileOnly(project(":common-diagram"))
+    compileOnly(project(":module-action-entity"))
     compileOnly(project(":module-action-event"))
     compileOnly(project(":module-action-item"))
     compileOnly(project(":module-bacikal"))
