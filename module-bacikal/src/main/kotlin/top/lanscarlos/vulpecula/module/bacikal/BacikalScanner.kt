@@ -86,18 +86,9 @@ object BacikalScanner : ClassVisitor(5) {
                 }
                 val parser = try {
                     buildClassActionParser(owner, source!!)
-                } catch (exception: Exception) {
-                    console().error { exception.localizedMessage }
-                    val annotation = owner.toClass().getAnnotation(BacikalParser::class.java)
-                    ExceptionalActionParser(
-                        annotation.id,
-                        annotation.name,
-                        annotation.aliases,
-                        annotation.namespace,
-                        annotation.description,
-                        source!!,
-                        exception
-                    )
+                } catch (ex: Exception) {
+                    console().error { ex.localizedMessage }
+                    ExceptionalActionParser(ex)
                 }
                 BacikalRegistry.registerActionParser(parser)
             }
@@ -113,18 +104,9 @@ object BacikalScanner : ClassVisitor(5) {
         }
         val parser = try {
             buildClassActionParser(owner, BuiltInActionSource)
-        } catch (exception: Exception) {
-            console().error { exception.localizedMessage }
-            val annotation = owner.toClass().getAnnotation(BacikalParser::class.java)
-            ExceptionalActionParser(
-                annotation.id,
-                annotation.name,
-                annotation.aliases,
-                annotation.namespace,
-                annotation.description,
-                BuiltInActionSource,
-                exception
-            )
+        } catch (ex: Exception) {
+            console().error { ex.localizedMessage }
+            ExceptionalActionParser(ex)
         }
         BacikalRegistry.registerActionParser(parser)
     }
