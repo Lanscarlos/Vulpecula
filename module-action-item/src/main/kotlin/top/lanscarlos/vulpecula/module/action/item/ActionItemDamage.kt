@@ -89,8 +89,8 @@ internal fun setDamage(item: ItemStack, damage: Int) {
     if (MinecraftVersion.major >= MinecraftVersion.V1_13) {
         val itemMeta = item.itemMeta as? Damageable
             ?: error(asLang("module-action-item-exception-durability-unsupported", item.type.name))
-        itemMeta.damage = damage.coerceIn(0, getMaxDurability(item))
+        itemMeta.damage = damage
     } else {
-        item.durability = damage.coerceIn(0, getMaxDurability(item)).toShort()
+        item.durability = damage.toShort()
     }
 }
