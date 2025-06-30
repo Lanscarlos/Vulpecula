@@ -17,6 +17,26 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
 
     private val REGEX_RGB = "^\\d+-\\d+-\\d+(-\\d+)?\$".toRegex()
 
+    private val bukkitColors = mapOf(
+        "BLACK" to org.bukkit.Color.BLACK, // &0
+        "NAVY" to org.bukkit.Color.NAVY, // &1
+        "GREEN" to org.bukkit.Color.GREEN, // &2
+        "TEAL" to org.bukkit.Color.TEAL, // &3
+        "MAROON" to org.bukkit.Color.MAROON, // &4
+        "PURPLE" to org.bukkit.Color.PURPLE, // &5
+        "ORANGE" to org.bukkit.Color.ORANGE, // &6
+        "SILVER" to org.bukkit.Color.SILVER, // &7
+        "GRAY" to org.bukkit.Color.GRAY, // &8
+        "BLUE" to org.bukkit.Color.BLUE, // &9
+        "LIME" to org.bukkit.Color.LIME, // &a
+        "AQUA" to org.bukkit.Color.AQUA, // &b
+        "YELLOW" to org.bukkit.Color.YELLOW, // &e
+        "RED" to org.bukkit.Color.RED, // &c
+        "FUCHSIA" to org.bukkit.Color.FUCHSIA, // &d
+        "WHITE" to org.bukkit.Color.WHITE, // &f
+        "OLIVE" to org.bukkit.Color.OLIVE
+    )
+
     override fun convertOrThrow(instance: Any): Color {
         return when (instance) {
             is Color -> instance
@@ -34,6 +54,14 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
                             Color(demand[0], demand[1], demand[2], demand[3])
                         } else {
                             Color(demand[0], demand[1], demand[2])
+                        }
+                    }
+                    bukkitColors.contains(instance.uppercase()) -> {
+                        val bukkitColor = bukkitColors[instance.uppercase()]!!
+                        try {
+                            Color(bukkitColor.red, bukkitColor.green, bukkitColor.blue, bukkitColor.alpha)
+                        } catch (_: NoSuchMethodError) {
+                            Color(bukkitColor.red, bukkitColor.green, bukkitColor.blue)
                         }
                     }
                     else -> {
