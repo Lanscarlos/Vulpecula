@@ -13,7 +13,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @since 2025/6/29
  */
 @BacikalParser("item.amount.maximum", aliases = ["max"])
-object ActionItemAmountMaximum: ClassActionResolver {
+object ActionItemAmountMaximum : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
         val item = ActionItem.getContext(frame)
