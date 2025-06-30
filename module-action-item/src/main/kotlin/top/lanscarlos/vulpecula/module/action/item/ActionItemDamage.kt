@@ -55,7 +55,7 @@ object ActionItemDamageIncrease : ClassActionResolver {
 
 }
 
-@BacikalParser("item.damage.increase", aliases = ["dec"])
+@BacikalParser("item.damage.decrease", aliases = ["dec"])
 object ActionItemDamageDecrease : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, damage: Int) {
