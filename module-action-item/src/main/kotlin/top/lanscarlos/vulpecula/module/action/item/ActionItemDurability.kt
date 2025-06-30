@@ -76,34 +76,6 @@ object ActionItemDurabilityRepair : ClassActionResolver {
 }
 
 /**
- * 物品损耗值
- * */
-
-@Suppress("DEPRECATION")
-private fun getDamage(item: ItemStack): Int {
-    if (MinecraftVersion.major >= MinecraftVersion.V1_13) {
-        val itemMeta = item.itemMeta as? Damageable ?: return 0
-        return itemMeta.damage
-    } else {
-        return item.durability.toInt()
-    }
-}
-
-@Suppress("DEPRECATION")
-private fun setDamage(item: ItemStack, damage: Int) {
-    if (MinecraftVersion.major >= MinecraftVersion.V1_13) {
-        val itemMeta = item.itemMeta as? Damageable
-            ?: error(asLang("module-action-item-exception-durability-unsupported", item.type.name))
-        itemMeta.damage = damage
-    } else {
-        require(damage <= Short.MAX_VALUE) {
-            asLang("module-action-item-exception-invalid-damage", damage)
-        }
-        item.durability = damage.toShort()
-    }
-}
-
-/**
  * 物品剩余耐久度
  * */
 private fun getDurability(item: ItemStack): Int {
@@ -114,13 +86,15 @@ private fun getDurability(item: ItemStack): Int {
  * 设置物品剩余耐久度
  * */
 private fun setDurability(item: ItemStack, durability: Int) {
-    val damage = getMaxDurability(item) - durability
-    setDamage(item, damage.coerceIn(0, Short.MAX_VALUE.toInt()))
+    require(durability in 0..getMaxDurability(item)) {
+        asLang("module-action-item-exception-invalid-durability", durability)
+    }
+    setDamage(item, getMaxDurability(item) - durability)
 }
 
 /**
  * 获取物品最大耐久度
  * */
-private fun getMaxDurability(item: ItemStack): Int {
+internal fun getMaxDurability(item: ItemStack): Int {
     return item.type.maxDurability.toInt()
 }
