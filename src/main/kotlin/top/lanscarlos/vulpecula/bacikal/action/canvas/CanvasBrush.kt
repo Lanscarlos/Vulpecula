@@ -1,9 +1,9 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
-import taboolib.common.platform.ProxyParticle
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Location
 import taboolib.common.util.Vector
+import taboolib.library.xseries.ProxyParticle
 import taboolib.module.nms.MinecraftVersion
 import java.awt.Color
 
@@ -55,18 +55,17 @@ class CanvasBrush {
         if (viewers.isEmpty()) return
 
         val meta = when (particle) {
-            ProxyParticle.BLOCK_DUST -> ProxyParticle.BlockData(material, data)
-            ProxyParticle.DUST_COLOR_TRANSITION -> ProxyParticle.DustTransitionData(color, transition, size)
-            ProxyParticle.ITEM_CRACK -> ProxyParticle.ItemData(material, data, name, lore, model)
-            ProxyParticle.SPELL_MOB,
-            ProxyParticle.SPELL_MOB_AMBIENT -> {
+//            ProxyParticle.BLOCK -> ProxyParticle.BlockData(material, data) // 报废了
+//            ProxyParticle.DUST_COLOR_TRANSITION -> ProxyParticle.DustTransitionData(color, transition, size) // 报废了
+//            ProxyParticle.ITEM -> ProxyParticle.ItemData(material, data, name, lore, model) // 报废了
+            ProxyParticle.ENTITY_EFFECT -> {
                 if (speed < 0) {
                     // 默认调整为彩色粒子
                     speed = 1.0
                 }
                 null
             }
-            ProxyParticle.REDSTONE -> {
+            ProxyParticle.DUST -> {
                 if (speed < 0) {
                     // 默认调整为彩色粒子
                     speed = 1.0
@@ -74,7 +73,8 @@ class CanvasBrush {
 
                 if (MinecraftVersion.major >= 5) {
                     // v1.13+
-                    ProxyParticle.DustData(color, size)
+//                    ProxyParticle.DustData(color, size) // 报废了
+                    null
                 } else {
                     // v1.12 及以下
                     null
@@ -85,11 +85,11 @@ class CanvasBrush {
 
         if ((offset.x == 0.0) && (offset.y == 0.0) && (offset.z == 0.0)) {
             viewers.forEach {
-                it.sendParticle(particle, location, vector, count, speed.coerceAtLeast(0.0), meta)
+                it.sendParticle(particle.name, location, vector, count, speed.coerceAtLeast(0.0), meta)
             }
         } else {
             viewers.forEach {
-                it.sendParticle(particle, location.clone().add(offset), vector, count, speed.coerceAtLeast(0.0), meta)
+                it.sendParticle(particle.name, location.clone().add(offset), vector, count, speed.coerceAtLeast(0.0), meta)
             }
         }
     }

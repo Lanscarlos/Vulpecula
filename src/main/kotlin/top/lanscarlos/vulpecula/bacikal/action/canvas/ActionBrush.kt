@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.bacikal.action.canvas
 
-import taboolib.common.platform.ProxyParticle
 import taboolib.common.util.Vector
+import taboolib.library.xseries.ProxyParticle
 import top.lanscarlos.vulpecula.bacikal.BacikalParser
 import top.lanscarlos.vulpecula.bacikal.bacikal
 import top.lanscarlos.vulpecula.utils.*
