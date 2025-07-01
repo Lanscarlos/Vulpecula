@@ -13,17 +13,23 @@ interface MemoryStorage {
 
     /**
      * 获取数据
+     *
+     * @param owner 数据所属对象
      * */
-    fun get(key: String, namespace: String): Any?
+    fun get(key: String, owner: Any): Any?
 
     /**
      * 设置数据
+     *
+     * @param owner 数据所属对象
      * */
-    fun set(key: String, value: Any, namespace: String): Boolean
+    fun set(key: String, value: Any, owner: Any): Boolean
 
     /**
      * 移除数据
+     *
+     * @param owner 数据所属对象
      * */
-    fun remove(key: String, namespace: String): Any?
+    fun remove(key: String, owner: Any): Any?
 
 }

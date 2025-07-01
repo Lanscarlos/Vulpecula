@@ -1,3 +1,4 @@
 
 # Action Memory
 module-action-memory-exception-invalid-storage: '未知的存储容器 {0}'
+module-action-memory-exception-unsupported-owner-type: '暂不不支持 {0} 数据挂载类型'

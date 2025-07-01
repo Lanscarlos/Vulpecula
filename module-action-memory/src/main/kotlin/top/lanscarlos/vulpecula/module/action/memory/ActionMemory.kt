@@ -13,7 +13,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @since 2025/6/30
  */
 
-const val DEFAULT_NAMESPACE = "@"
+const val DEFAULT_OWNER = "@"
 const val DEFAULT_STORAGE = "vulpecula"
 
 @BacikalParser("memory.get")
@@ -21,11 +21,10 @@ object ActionMemoryGet : ClassActionResolver {
 
     fun resolve(
         key: String,
-        @Additional(["namespace"]) namespace: String = DEFAULT_NAMESPACE,
+        @Additional(["owner"]) owner: String = DEFAULT_OWNER,
         @Additional(["storage"]) storage: String = DEFAULT_STORAGE,
     ): Any? {
-        val storage = getStorage(storage)
-        return storage.get(key, namespace)
+        return getStorage(storage).get(key, owner)
     }
 
 }
@@ -36,14 +35,13 @@ object ActionMemorySet : ClassActionResolver {
     fun resolve(
         key: String,
         value: Any?,
-        @Additional(["namespace"]) namespace: String = DEFAULT_NAMESPACE,
+        @Additional(["owner"]) owner: String = DEFAULT_OWNER,
         @Additional(["storage"]) storage: String = DEFAULT_STORAGE,
     ): Any? {
-        val storage = getStorage(storage)
         if (value == null) {
-            return storage.remove(key, namespace)
+            return getStorage(storage).remove(key, owner)
         }
-        return storage.set(key, value, namespace)
+        return getStorage(storage).set(key, value, owner)
     }
 
 }
@@ -53,18 +51,17 @@ object ActionMemoryRemove : ClassActionResolver {
 
     fun resolve(
         key: String,
-        @Additional(["namespace"]) namespace: String = DEFAULT_NAMESPACE,
+        @Additional(["owner"]) owner: String = DEFAULT_OWNER,
         @Additional(["storage"]) storage: String = DEFAULT_STORAGE,
     ): Any? {
-        val storage = getStorage(storage)
-        return storage.remove(key, namespace)
+        return getStorage(storage).remove(key, owner)
     }
 
 }
 
 private fun getStorage(storage: String): MemoryStorage {
     return when (storage) {
-        "vulpecula" -> VulpeculaMemoryStorage
+        "vulpecula" -> VulpeculaStorage
         else -> error(asLang("module-action-memory-exception-invalid-storage", storage))
     }
 }
