@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.action
 
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
@@ -24,11 +25,17 @@ abstract class ExternalAction : ActionSource {
     val config: Configuration
 
     init {
-        val registry = getRegistry()
+        val registry = getActionRegistry()
         name = registry.getString("name") ?: "UNKNOWN_NAME"
         version = registry.getString("version") ?: "UNKNOWN_VERSION"
         authors = registry.getStringList("authors")
-        config = getConfig()
+
+        info("${this.javaClass.simpleName} name >> $name")
+        info("${this.javaClass.simpleName} version >> $version")
+        info("${this.javaClass.simpleName} authors >> $authors")
+
+//        config = getActionConfig()
+        config = Configuration.empty()
     }
 
     open fun onInit() = Unit
@@ -39,7 +46,7 @@ abstract class ExternalAction : ActionSource {
 
     open fun onDisable() = Unit
 
-    private fun getConfig(): Configuration {
+    private fun getActionConfig(): Configuration {
         val file = File(getDataFolder(), "config/${name}.yml")
         if (file.exists()) {
             return Configuration.loadFromFile(file)
@@ -56,7 +63,7 @@ abstract class ExternalAction : ActionSource {
         return Configuration.loadFromInputStream(inputStream)
     }
 
-    private fun getRegistry(): Configuration {
+    private fun getActionRegistry(): Configuration {
         val inputStream = this.javaClass.classLoader.getResourceAsStream("plugin.yml")!!
         return Configuration.loadFromInputStream(inputStream, Type.YAML)
     }
