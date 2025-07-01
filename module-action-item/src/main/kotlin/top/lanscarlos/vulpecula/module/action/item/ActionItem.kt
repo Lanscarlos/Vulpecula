@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.action.item
 import org.bukkit.inventory.ItemStack
 import taboolib.platform.util.isNotAir
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.module.bacikal.action.ExternalAction
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
 /**
@@ -12,7 +13,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
  * @author Lanscarlos
  * @since 2025/6/28
  */
-object ActionItem {
+object ActionItem : ExternalAction() {
 
     private const val CONTEXT = "@ITEM"
 

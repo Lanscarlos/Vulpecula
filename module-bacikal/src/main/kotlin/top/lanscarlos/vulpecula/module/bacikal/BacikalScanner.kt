@@ -11,11 +11,9 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
-import taboolib.module.configuration.Configuration
-import taboolib.module.configuration.Type
+import top.lanscarlos.vulpecula.module.bacikal.action.ExternalAction
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -60,23 +58,21 @@ object BacikalScanner : ClassVisitor(5) {
             // 载入类
             ClassAppender.addPath(file.toPath(), false, false)
 
+            val source = file.toURI().toURL().getClasses().values
+                .single { ExternalAction::class.java.isAssignableFrom(it.toClass()) }
+                .getInstance() as ExternalAction
+
             // 遍历资源
-            var source: ExternalActionSource? = null
             for ((name, byteArray) in file.toURI().toURL().getResources()) {
-                when {
-                    name == "plugin.yml" -> {
-                        val config = Configuration.loadFromInputStream(byteArray.inputStream(), Type.YAML)
-                        val name = config.getString("name") ?: "UNKNOWN_NAME"
-                        val version = config.getString("version") ?: "UNKNOWN_VERSION"
-                        val authors = config.getStringList("authors")
-                        source = ExternalActionSource(name, version, authors)
-                    }
-                    name.endsWith(".metadata") -> {
-                        val key = name.substringAfterLast("/").substringBefore('.')
-                        val array = decodeMetadata(byteArray)
-                        metadata[key] = array
-                    }
+                if (!name.startsWith("metadata/")) {
+                    continue
                 }
+                if (!name.endsWith(".metadata")) {
+                    continue
+                }
+                val key = name.substringAfterLast("/").substringBefore('.')
+                val array = decodeMetadata(byteArray)
+                metadata[key] = array
             }
 
             // 遍历 class 对象
@@ -85,10 +81,10 @@ object BacikalScanner : ClassVisitor(5) {
                     continue
                 }
                 val parser = try {
-                    buildClassActionParser(owner, source!!)
+                    buildClassActionParser(owner, source)
                 } catch (ex: Exception) {
                     console().error { ex.localizedMessage }
-                    ExceptionalActionParser(ex, source!!)
+                    ExceptionalActionParser(ex, source)
                 }
                 BacikalRegistry.registerActionParser(parser)
             }
