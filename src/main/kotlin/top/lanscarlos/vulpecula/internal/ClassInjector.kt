@@ -4,6 +4,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.library.reflex.ClassMethod
+import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.bacikal.BacikalRegistry
 import java.util.function.Supplier
 
@@ -31,12 +32,14 @@ abstract class ClassInjector {
 
         override fun getLifeCycle() = LifeCycle.LOAD
 
-        override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
-            if (!clazz.packageName().startsWith(ketherRegistry.packageName)) return
-            ketherRegistry.visit(method, clazz, supplier)
+        override fun visit(method: ClassMethod, owner: ReflexClass) {
+            if (!owner.toClass().packageName().startsWith(ketherRegistry.packageName)) return
+            ketherRegistry.visit(method, owner.toClass()) { owner.getInstance() }
         }
 
-        override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
+        override fun visitStart(owner: ReflexClass) {
+            val clazz = owner.toClass()
+            val supplier = Supplier { owner.getInstance() }
             if (!clazz.packageName().startsWith(ketherRegistry.packageName)) return
             ketherRegistry.visitStart(clazz, supplier)
 
@@ -45,7 +48,7 @@ abstract class ClassInjector {
             if (ketherRegistry::class.java.isAssignableFrom(clazz)) return
 
             injectors += let {
-                if (supplier?.get() != null) {
+                if (supplier.get() != null) {
                     supplier.get()
                 } else try {
                     clazz.getDeclaredConstructor().newInstance()
@@ -63,17 +66,19 @@ abstract class ClassInjector {
 
         override fun getLifeCycle() = LifeCycle.LOAD
 
-        override fun visit(method: ClassMethod, clazz: Class<*>, supplier: Supplier<*>?) {
+        override fun visit(method: ClassMethod, owner: ReflexClass) {
+            val clazz = owner.toClass()
             injectors.forEach {
                 if (!clazz.packageName().startsWith(it.packageName)) return@forEach
-                it.visit(method, clazz, supplier)
+                it.visit(method, clazz) { owner.getInstance() }
             }
         }
 
-        override fun visitStart(clazz: Class<*>, supplier: Supplier<*>?) {
+        override fun visitStart(owner: ReflexClass) {
+            val clazz = owner.toClass()
             injectors.forEach {
                 if (!clazz.packageName().startsWith(it.packageName)) return@forEach
-                it.visitStart(clazz, supplier)
+                it.visitStart(clazz) { owner.getInstance() }
             }
         }
 
