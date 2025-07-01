@@ -2,27 +2,29 @@ import io.izzel.taboolib.gradle.*
 
 plugins {
     java
-    id("io.izzel.taboolib") version "2.0.11"
+    id("io.izzel.taboolib") version "2.0.23"
     id("org.jetbrains.kotlin.jvm") version "1.8.22"
 }
 
 taboolib {
     env {
-        install(
-            UNIVERSAL,
-            DATABASE,
-            EFFECT,
-            NMS,
-            NMS_UTIL,
-            KETHER,
-            UI,
-            METRICS,
-            BUKKIT_ALL,
-            EXPANSION_JAVASCRIPT
-        )
+        install(Basic)
+        install(Bukkit)
+        install(BukkitUI)
+        install(BukkitUtil)
+        install(BukkitNMS)
+        install(BukkitNMSUtil)
+        install(CommandHelper)
+        install(Database)
+        install(I18n)
+        install(JavaScript)
+        install(Kether)
+        install(Metrics)
+        install(MinecraftChat)
+        install(MinecraftEffect)
     }
     version {
-        taboolib = "6.1.1-beta27"
+        taboolib = "6.2.3-8cc2f66"
     }
     description {
         contributors {
@@ -45,8 +47,8 @@ taboolib {
 
 repositories {
     mavenLocal()
-    maven("https://repo.spongepowered.org/maven")
-    maven("https://repo.tabooproject.org/repository/releases")
+//    maven("https://repo.spongepowered.org/maven")
+//    maven("https://repo.tabooproject.org/repository/releases")
     mavenCentral()
 }
 
