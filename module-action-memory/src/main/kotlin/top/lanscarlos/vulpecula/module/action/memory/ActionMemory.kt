@@ -60,7 +60,7 @@ object ActionMemoryRemove : ClassActionResolver {
 }
 
 private fun getStorage(storage: String): MemoryStorage {
-    return when (storage) {
+    return when (storage.lowercase()) {
         "vulpecula" -> VulpeculaStorage
         else -> error(asLang("module-action-memory-exception-invalid-storage", storage))
     }
