@@ -98,7 +98,8 @@ class CustomCommand(
                 permission,
                 permissionMessage,
                 permissionDefault,
-                permissionChildren = emptyMap()
+                permissionChildren = emptyMap(),
+                newParser = newParser
             ),
             // 创建执行器
             executor = object : CommandExecutor {
