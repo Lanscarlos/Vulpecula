@@ -62,6 +62,8 @@ object BacikalScanner : ClassVisitor(5) {
                 .single { ExternalAction::class.java.isAssignableFrom(it.toClass()) }
                 .getInstance() as ExternalAction
 
+            source.onInit()
+
             // 遍历资源
             for ((name, byteArray) in file.toURI().toURL().getResources()) {
                 if (!name.startsWith("metadata/")) {
