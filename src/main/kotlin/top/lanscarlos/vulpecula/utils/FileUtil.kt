@@ -4,6 +4,8 @@ import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
 import java.io.File
 
+val listeners = hashSetOf<File>()
+
 inline fun File.ifNotExists(func: ((file: File) -> Unit)): File {
     if (!exists()) func(this)
     return this
@@ -33,9 +35,14 @@ fun File.toConfig(): Configuration {
 }
 
 inline fun File.addWatcher(runFirst: Boolean = false, crossinline func: (File.() -> Unit)): File {
-    if (FileWatcher.INSTANCE.hasListener(this)) return this
+    if (hasListener(this)) return this
     FileWatcher.INSTANCE.addSimpleListener(this, { func(this) }, runFirst)
+    listeners += this
     return this
+}
+
+fun hasListener(file: File): Boolean {
+    return listeners.contains(file)
 }
 
 fun File.removeWatcher() {
