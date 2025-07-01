@@ -22,7 +22,7 @@ object ActionMemoryGet : ClassActionResolver {
     fun resolve(
         key: String,
         @Additional(["owner"]) owner: String = DEFAULT_OWNER,
-        @Additional(["storage"]) storage: String = DEFAULT_STORAGE,
+        @Additional(["storage"]) storage: String = DEFAULT_STORAGE
     ): Any? {
         return getStorage(storage).get(key, owner)
     }
@@ -36,7 +36,7 @@ object ActionMemorySet : ClassActionResolver {
         key: String,
         value: Any?,
         @Additional(["owner"]) owner: String = DEFAULT_OWNER,
-        @Additional(["storage"]) storage: String = DEFAULT_STORAGE,
+        @Additional(["storage"]) storage: String = DEFAULT_STORAGE
     ): Any? {
         if (value == null) {
             return getStorage(storage).remove(key, owner)
@@ -52,7 +52,7 @@ object ActionMemoryRemove : ClassActionResolver {
     fun resolve(
         key: String,
         @Additional(["owner"]) owner: String = DEFAULT_OWNER,
-        @Additional(["storage"]) storage: String = DEFAULT_STORAGE,
+        @Additional(["storage"]) storage: String = DEFAULT_STORAGE
     ): Any? {
         return getStorage(storage).remove(key, owner)
     }
