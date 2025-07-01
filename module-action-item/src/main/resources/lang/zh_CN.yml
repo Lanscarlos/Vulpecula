@@ -10,5 +10,6 @@ module-action-item-exception-invalid-enchantment-level: '物品附魔等级 {0} 
 module-action-item-exception-invalid-amount: '数量 {0} 不能小于 1 且不能大于最大堆叠数量'
 module-action-item-exception-invalid-damage: '物品磨损度 {0} 不能小于 0 且不能大于物品最大耐久度'
 module-action-item-exception-invalid-durability: '物品耐久度 {0} 不能小于 0 且不能大于物品最大耐久度'
-module-action-item-exception-durability-unsupported: '物品 {0} 不支持设置耐久度'
+module-action-item-exception-durability-unsupported: '物品 {0} 不支持操作耐久度属性'
+module-action-item-exception-color-unsupported: '物品 {0} 不支持操作颜色属性'
 module-action-item-exception-unbreakable-unsupported: '当前 Minecraft 版本不支持操作物品无损属性'
