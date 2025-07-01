@@ -47,7 +47,7 @@ object VulpeculaStorage : MemoryStorage {
         return when (owner) {
             is String -> owner
             is Entity -> owner.uniqueId.toString()
-            else -> error(asLang("module-action-memory-exception-unsupported-owner-type", owner::class.java.name))
+            else -> error(asLang("module-action-memory-exception-unsupported-owner-type", "Vulpecula", owner::class.java.name))
         }
     }
 
