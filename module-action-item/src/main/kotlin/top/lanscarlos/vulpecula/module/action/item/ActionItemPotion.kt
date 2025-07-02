@@ -2,8 +2,6 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.PotionMeta
-import org.bukkit.potion.PotionEffectType
-import org.bukkit.potion.PotionType
 import taboolib.library.xseries.XPotion
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
