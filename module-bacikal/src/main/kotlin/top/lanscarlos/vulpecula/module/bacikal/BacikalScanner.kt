@@ -11,19 +11,14 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalAction
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
+import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
 import java.io.File
-import java.io.InputStream
-import java.util.Base64
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.iterator
 
 /**
  * Vulpecula
@@ -34,8 +29,6 @@ import kotlin.collections.iterator
  */
 @Awake(LifeCycle.LOAD)
 object BacikalScanner : ClassVisitor(5) {
-
-    private val metadata = mutableMapOf<String, Array<String>>()
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
@@ -55,30 +48,19 @@ object BacikalScanner : ClassVisitor(5) {
                 continue
             }
 
-            // 载入类
+            // 载入包体
             ClassAppender.addPath(file.toPath(), false, false)
 
-            val source = file.toURI().toURL().getClasses().values
-                .single { ExternalAction::class.java.isAssignableFrom(it.toClass()) }
-                .getInstance() as ExternalAction
+            val source = ExternalActionSource(file.toURI().toURL().getResources())
+            val classes = file.toURI().toURL().getClasses()
 
-            source.onInit()
-
-            // 遍历资源
-            for ((name, byteArray) in file.toURI().toURL().getResources()) {
-                if (!name.startsWith("metadata/")) {
-                    continue
-                }
-                if (!name.endsWith(".metadata")) {
-                    continue
-                }
-                val key = name.substringAfterLast("/").substringBefore('.')
-                val array = decodeMetadata(byteArray)
-                metadata[key] = array
+            for (name in classes.keys) {
+                BacikalRegistry.sources[name] = source
+                // TODO 遍历 @Awake 注解激活对应的功能
             }
 
             // 遍历 class 对象
-            for (owner in file.toURI().toURL().getClasses().values) {
+            for (owner in classes.values) {
                 if (!owner.hasAnnotation(BacikalParser::class.java)) {
                     continue
                 }
@@ -113,12 +95,8 @@ object BacikalScanner : ClassVisitor(5) {
         if (!owner.hasInterface(ClassActionResolver::class.java)) {
             error("Cannot register class ${owner.name} without BacikalActionResolver interface.")
         }
-
         val clazz = owner.toClass()
         val annotation = owner.toClass().getAnnotation(BacikalParser::class.java)
-        val metadata = metadata[clazz.name]
-            ?: this.javaClass.classLoader.getResourceAsStream("metadata/${clazz.name}.metadata")?.let(::decodeMetadata)
-            ?: error("Cannot load metadata for ${clazz.name}")
         val parser = ClassActionParser(
             annotation.id,
             annotation.name,
@@ -126,21 +104,9 @@ object BacikalScanner : ClassVisitor(5) {
             annotation.namespace,
             annotation.description,
             clazz,
-            metadata,
             source
         )
         return parser
-    }
-
-    private fun decodeMetadata(stream: InputStream): Array<String> {
-        return decodeMetadata(byteArray = stream.readAllBytes())
-    }
-
-    private fun decodeMetadata(byteArray: ByteArray): Array<String> {
-        return String(byteArray)
-            .split("\\R".toRegex())
-            .map { Base64.getDecoder().decode(it).toString(Charsets.ISO_8859_1) }
-            .toTypedArray()
     }
 
     override fun getLifeCycle(): LifeCycle {

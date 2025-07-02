@@ -17,4 +17,6 @@ interface ActionSource {
 
     val authors: List<String>
 
+    fun getActionMetadata(name: String): Array<String>
+
 }

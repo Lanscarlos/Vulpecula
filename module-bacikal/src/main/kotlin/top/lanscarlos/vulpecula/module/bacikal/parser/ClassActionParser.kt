@@ -26,7 +26,6 @@ class ClassActionParser(
     namespace: String,
     description: String,
     javaClass: Class<*>,
-    metadata: Array<String>,
     override val source: ActionSource
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
 
@@ -39,7 +38,7 @@ class ClassActionParser(
     init {
         try {
             constructor = ClassActionConstructor(javaClass)
-            function = ClassActionFunction(javaClass, metadata)
+            function = ClassActionFunction(javaClass, source.getActionMetadata(javaClass.name))
         } catch (cause: Exception) {
             throw ClassActionRegisterException(id, cause)
         }

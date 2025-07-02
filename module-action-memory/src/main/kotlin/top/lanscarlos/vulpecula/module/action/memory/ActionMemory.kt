@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.action.memory
 
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalAction
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -16,8 +15,6 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
 const val DEFAULT_OWNER = "@"
 const val DEFAULT_STORAGE = "vulpecula"
-
-object ActionMemory : ExternalAction()
 
 @BacikalParser("memory.get")
 object ActionMemoryGet : ClassActionResolver {

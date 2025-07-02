@@ -12,7 +12,7 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalAction
+import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
@@ -29,6 +29,7 @@ import java.util.LinkedList
  */
 object BacikalRegistry {
 
+    internal val sources: HashMap<String, ExternalActionSource> = hashMapOf() // Class#name -> ActionSource
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
     private val exceptionalParsers: LinkedList<ExceptionalActionParser> = LinkedList()
 
@@ -40,27 +41,6 @@ object BacikalRegistry {
             }
             Vulpecula.addMetricsChart(DrilldownPie("actionExtension", ::metricsActionExtension))
             Vulpecula.addMetricsChart(DrilldownPie("extensionAuthor", ::metricsExtensionAuthor))
-        }
-    }
-
-    @Awake(LifeCycle.ENABLE)
-    fun onEnable() {
-        for (source in parsers.values.map { it.source }.filterIsInstance<ExternalAction>().distinct()) {
-            source.onEnable()
-        }
-    }
-
-    @Awake(LifeCycle.ACTIVE)
-    fun onActive() {
-        for (source in parsers.values.map { it.source }.filterIsInstance<ExternalAction>().distinct()) {
-            source.onActive()
-        }
-    }
-
-    @Awake(LifeCycle.DISABLE)
-    fun onDisable() {
-        for (source in parsers.values.map { it.source }.filterIsInstance<ExternalAction>().distinct()) {
-            source.onDisable()
         }
     }
 
