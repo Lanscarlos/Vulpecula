@@ -97,7 +97,7 @@ class ClassActionFunction(javaClass: Class<*>) {
 
         // 检查参数非空性
         for (parameter in parameters) {
-            require(parameter.isNullable || arguments[parameter.index] != null) {
+            require(parameter.isNullable || parameter.hasDefaultValue || arguments[parameter.index] != null) {
                 // 参数非空性检查失败
                 asLang("module-bacikal-exception-invalid-null-argument", parameter.index, parameter.name)
             }

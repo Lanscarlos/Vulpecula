@@ -33,5 +33,5 @@ module-bacikal-exception-invalid-parameter-defined: '使用 {0} 修饰符的参�
 module-bacikal-exception-empty-modifier-prefix: '参数 &e{1}&7 修饰符内容为空'
 module-bacikal-exception-invalid-modifier-prefix: '参数 &e{1}&7 修饰符不能为数字'
 module-bacikal-exception-unknown-additional-parameter: '未知的附加参数 &e{0}'
-module-bacikal-exception-invalid-null-argument: '传入的参数 &e{0}&7 值为空'
+module-bacikal-exception-invalid-null-argument: '传入的参数 &e{1}&7 值为空'
 module-bacikal-exception-script-player-not-found: '当前脚本上下文中无玩家对象'
