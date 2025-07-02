@@ -74,13 +74,13 @@ object ActionCommand {
 
     val reload: CommandComponent.() -> Unit = {
         dynamic("source") {
-            suggest { BacikalRegistry.sources.keys.toList() }
-            execute<ProxyCommandSender> { sender, _, sourceName ->
+            suggest { BacikalRegistry.getActionSourceKeys().toList() }
+            execute<ProxyCommandSender> { sender, _, name ->
                 try {
-                    BacikalRegistry.sources[sourceName]!!.reload()
-                    sender.info { asLang("module-bacikal-command-reload-success", sourceName) }
+                    BacikalRegistry.getActionSource(name).reload()
+                    sender.info { asLang("module-bacikal-command-reload-success", name) }
                 } catch (e: Exception) {
-                    sender.error { asLang("module-bacikal-command-reload-failure", sourceName, e.localizedMessage) }
+                    sender.error { asLang("module-bacikal-command-reload-failure", name, e.localizedMessage) }
                 }
             }
         }
