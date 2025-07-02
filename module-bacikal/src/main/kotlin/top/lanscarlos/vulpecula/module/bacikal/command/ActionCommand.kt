@@ -73,13 +73,13 @@ object ActionCommand {
     }
 
     val reload: CommandComponent.() -> Unit = {
-        execute<ProxyCommandSender> { sender, _, name ->
+        execute<ProxyCommandSender> { sender, _, _ ->
             for (source in BacikalRegistry.getActionSourceValues()) {
                 try {
                     source.reload()
-                    sender.info { asLang("module-bacikal-command-reload-success", name) }
+                    sender.info { asLang("module-bacikal-command-reload-success", source.name) }
                 } catch (e: Exception) {
-                    sender.error { asLang("module-bacikal-command-reload-failure", name, e.localizedMessage) }
+                    sender.error { asLang("module-bacikal-command-reload-failure", source.name, e.localizedMessage) }
                 }
             }
         }
