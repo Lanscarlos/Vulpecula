@@ -10,6 +10,8 @@ module-bacikal-command-registry-display-remote: '当前注册了 &a{0}&7 个第�
 module-bacikal-command-registry-display-remote-empty: '当前注册了 &a{0}&7 个第三方语句'
 module-bacikal-command-registry-display-local: '当前注册了 &a{0}&7 个原生语句:'
 module-bacikal-command-registry-display-item: ' - {0} &8v{1}&7: {2}'
+module-bacikal-command-reload-success: '重载语句 &a{0}&7 配置成功'
+module-bacikal-command-reload-failure: '重载语句 &a{0}&7 配置失败！{1}'
 module-bacikal-command-timing-repeat: '运行次数: &a{0}'
 module-bacikal-command-timing-group: '分组数量: &a{0}'
 module-bacikal-command-timing-compile: '编译用时: &a{0}ms'

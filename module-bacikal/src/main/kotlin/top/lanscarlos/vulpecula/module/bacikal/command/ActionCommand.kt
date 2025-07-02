@@ -34,6 +34,7 @@ object ActionCommand {
     @CommandBody
     val action = subCommand {
         literal("registry", literal = registry)
+        literal("reload", literal = reload)
         literal("structure", literal = structure)
         literal("timing", literal = timing)
     }
@@ -67,6 +68,20 @@ object ActionCommand {
         literal("local") {
             execute<ProxyCommandSender> { sender, _, _ ->
                 displayLocalActions(sender)
+            }
+        }
+    }
+
+    val reload: CommandComponent.() -> Unit = {
+        dynamic("source") {
+            suggest { BacikalRegistry.sources.keys.toList() }
+            execute<ProxyCommandSender> { sender, _, sourceName ->
+                try {
+                    BacikalRegistry.sources[sourceName]!!.reload()
+                    sender.info { asLang("module-bacikal-command-reload-success", sourceName) }
+                } catch (e: Exception) {
+                    sender.error { asLang("module-bacikal-command-reload-failure", sourceName, e.localizedMessage) }
+                }
             }
         }
     }

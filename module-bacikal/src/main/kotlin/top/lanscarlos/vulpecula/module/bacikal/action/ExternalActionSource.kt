@@ -32,6 +32,10 @@ class ExternalActionSource(resources: Map<String, ByteArray>) : ActionSource {
         config = initActionConfig(resources)
     }
 
+    fun reload() {
+        config.reload()
+    }
+
     private fun initActionConfig(resources: Map<String, ByteArray>): Configuration {
         val file = File(getDataFolder(), "config/${name}.yml")
         if (file.exists()) {
