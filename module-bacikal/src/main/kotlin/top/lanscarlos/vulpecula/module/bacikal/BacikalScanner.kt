@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.module.bacikal
 
 import taboolib.common.ClassAppender
 import taboolib.common.LifeCycle
-import taboolib.common.TabooLib
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.io.getClasses
 import taboolib.common.io.getResources
@@ -54,11 +53,9 @@ object BacikalScanner : ClassVisitor(5) {
 
             val classes = file.toURI().toURL().getClasses()
             val source = ExternalActionSource(classes, file.toURI().toURL().getResources())
-            BacikalRegistry.registerActionSource(source)
 
             // 遍历 class 对象
             for (owner in classes.values) {
-                scanAwakeMethod(owner)
                 if (!owner.hasAnnotation(BacikalParser::class.java)) {
                     continue
                 }
@@ -69,24 +66,6 @@ object BacikalScanner : ClassVisitor(5) {
                     ExceptionalActionParser(ex, source)
                 }
                 BacikalRegistry.registerActionParser(parser)
-            }
-        }
-    }
-
-    private fun scanAwakeMethod(clazz: ReflexClass) {
-        for (method in clazz.structure.methods) {
-            if (!method.isAnnotationPresent(Awake::class.java)) {
-                continue
-            }
-            val instance = clazz.getInstance()
-            val awake = method.getAnnotation(Awake::class.java)
-            val lifeCycle = awake.enum("value", LifeCycle.CONST)
-            TabooLib.registerLifeCycleTask(lifeCycle, 0) {
-                if (instance != null) {
-                    method.invoke(instance)
-                } else {
-                    method.invokeStatic()
-                }
             }
         }
     }
