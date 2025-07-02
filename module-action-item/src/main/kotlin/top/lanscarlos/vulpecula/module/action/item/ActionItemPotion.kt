@@ -2,9 +2,12 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.PotionMeta
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import taboolib.library.xseries.XPotion
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -19,48 +22,100 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 @BacikalParser("item.potion.size")
 object ActionItemPotionSize : ClassActionResolver {
 
-    @Suppress("DEPRECATION")
     fun resolve(frame: BacikalFrame): Int {
         val item = ActionItem.getContext(frame)
         val itemMeta = getPotionMeta(item)
-        return try {
-            itemMeta.customEffects.size + 1
-        } catch (_: Exception) {
-            1
+        if (!itemMeta.hasCustomEffects()) {
+            return 0
         }
+        return itemMeta.customEffects.size
     }
 
 }
 
-@BacikalParser("item.potion.has")
 object ActionItemPotionHas : ClassActionResolver {
 
     @Suppress("DEPRECATION")
     fun resolve(frame: BacikalFrame, type: String): Boolean {
         val item = ActionItem.getContext(frame)
         val itemMeta = getPotionMeta(item)
-        val xPotion = getXPotion(type)
+        val potionEffectType = getPotionEffectType(type)
+        return itemMeta.hasCustomEffect(potionEffectType)
+    }
 
-        // 判断药水自定义类型
-        val potionEffectType = xPotion.potionEffectType!!
-        if (itemMeta.hasCustomEffect(potionEffectType)) {
-            return true
-        }
+}
 
-        // 判断药水主类型
-        val potionType = xPotion.potionType
-        return if (MinecraftVersion.versionId >= 12002) {
-            // v1.20.2+
-            potionType == itemMeta.basePotionType
-        } else {
-            potionType == itemMeta.basePotionData.type
+@BacikalParser("item.potion.set", aliases = ["add"])
+object ActionItemPotionSet : ClassActionResolver {
+
+    fun resolve(
+        frame: BacikalFrame,
+        type: String,
+        duration: Int,
+        level: Int,
+        @Additional(["ambient", "amb", "a"]) ambient: Boolean = false,
+        @Additional(["particles", "particle", "p"]) particles: Boolean = true,
+        @Additional(["icon", "i"]) icon: Boolean = true
+    ): Boolean {
+        val item = ActionItem.getContext(frame)
+        val itemMeta = getPotionMeta(item)
+        val potionEffectType = getPotionEffectType(type)
+        val amplifier = level - 1
+        val potionEffect = try {
+            PotionEffect(potionEffectType, duration, amplifier, ambient, particles, icon)
+        } catch (_: NoSuchMethodError) {
+            // 兼容 v1.12.2
+            PotionEffect(potionEffectType, duration, amplifier, ambient, particles)
         }
+        val exist = itemMeta.hasCustomEffect(potionEffectType)
+        itemMeta.addCustomEffect(potionEffect, true)
+        item.itemMeta = itemMeta
+        return exist
+    }
+
+}
+
+@BacikalParser("item.potion.remove")
+object ActionItemPotionRemove : ClassActionResolver {
+
+    fun resolve(frame: BacikalFrame, type: String): Boolean {
+        val item = ActionItem.getContext(frame)
+        val itemMeta = getPotionMeta(item)
+        val potionEffectType = getPotionEffectType(type)
+        if (!itemMeta.hasCustomEffect(potionEffectType)) {
+            return false
+        }
+        itemMeta.removeCustomEffect(potionEffectType)
+        item.itemMeta = itemMeta
+        return true
+    }
+
+}
+
+@BacikalParser("item.potion.clear")
+object ActionItemPotionClear : ClassActionResolver {
+
+    fun resolve(frame: BacikalFrame): Boolean {
+        val item = ActionItem.getContext(frame)
+        val itemMeta = getPotionMeta(item)
+        if (!itemMeta.hasCustomEffects()) {
+            return false
+        }
+        for (effect in itemMeta.customEffects) {
+            itemMeta.removeCustomEffect(effect.type)
+        }
+        item.itemMeta = itemMeta
+        return true
     }
 
 }
 
 private fun getPotionMeta(item: ItemStack): PotionMeta {
     return item.itemMeta as? PotionMeta ?: error(asLang("module-action-item-exception-potion-unsupported", item.type.name))
+}
+
+private fun getPotionEffectType(type: String): PotionEffectType {
+    return getXPotion(type).potionEffectType!!
 }
 
 private fun getXPotion(type: String): XPotion {
