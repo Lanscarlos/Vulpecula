@@ -38,7 +38,7 @@ class ClassActionParser(
     init {
         try {
             constructor = ClassActionConstructor(javaClass)
-            function = ClassActionFunction(javaClass, source.getActionMetadata(javaClass.name))
+            function = ClassActionFunction(javaClass)
         } catch (cause: Exception) {
             throw ClassActionRegisterException(id, cause)
         }
