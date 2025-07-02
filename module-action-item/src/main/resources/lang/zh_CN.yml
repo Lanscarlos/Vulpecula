@@ -11,6 +11,7 @@ module-action-item-exception-invalid-amount: '数量 {0} 不能小于 1 且不�
 module-action-item-exception-invalid-damage: '物品磨损度 {0} 不能小于 0 且不能大于物品最大耐久度'
 module-action-item-exception-invalid-durability: '物品耐久度 {0} 不能小于 0 且不能大于物品最大耐久度'
 module-action-item-exception-invalid-potion-type: '未知的药水类型 {0}'
+module-action-item-exception-invalid-tag-type: '未知的转换类型 {0}'
 module-action-item-exception-unsupported-enchantment-type: '当前 {0} 版本并不支持 {1} 附魔类型'
 module-action-item-exception-unsupported-potion-type: '当前 {0} 版本并不支持 {1} 药水类型'
 module-action-item-exception-durability-unsupported: '物品 {0} 不支持操作耐久度属性'
