@@ -13,7 +13,6 @@ import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
  */
 
 fun Any.bindActionConfig(vararg path: String): LiveData<Any?> {
-    val name = this.javaClass.name
-    val source = BacikalRegistry.sources[name] ?: error("Source $name not found")
+    val source = BacikalRegistry.getActionSourceByClass(this.javaClass)
     return source.config.read(*path)
 }

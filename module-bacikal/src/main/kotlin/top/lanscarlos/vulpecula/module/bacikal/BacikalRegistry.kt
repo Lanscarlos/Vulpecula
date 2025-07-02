@@ -87,8 +87,8 @@ object BacikalRegistry {
      * */
     internal fun getExceptionalParsers(): List<ExceptionalActionParser> = exceptionalParsers
 
-    fun getActionSourceByClassName(clazz: Class<*>): ExternalActionSource {
-        return sourceByClass[clazz] ?: error("Source contained")
+    fun getActionSourceByClass(clazz: Class<*>): ExternalActionSource {
+        return sourceByClass[clazz] ?: error("No Source registered for class: ${clazz.name}")
     }
 
     /**
@@ -98,6 +98,9 @@ object BacikalRegistry {
      * */
     fun registerActionSource(source: ExternalActionSource) {
         sources[source.name] = source
+        for (clazz in source.classes.values) {
+            sourceByClass[clazz.toClass()] = source
+        }
     }
 
     /**

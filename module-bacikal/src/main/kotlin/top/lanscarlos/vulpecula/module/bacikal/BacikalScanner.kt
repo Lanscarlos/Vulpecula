@@ -53,9 +53,9 @@ object BacikalScanner : ClassVisitor(5) {
 
             val classes = file.toURI().toURL().getClasses()
             val source = ExternalActionSource(classes, file.toURI().toURL().getResources())
+            BacikalRegistry.registerActionSource(source)
 
             for (name in classes.keys) {
-                BacikalRegistry.sources[name] = source
                 // TODO 遍历 @Awake 注解激活对应的功能
             }
 
