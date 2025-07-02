@@ -5,6 +5,7 @@ import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.action.bindActionConfig
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
 /**
@@ -17,9 +18,20 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
 object ActionMemory {
 
-    val defaultOwner: String by bindActionConfig("default-owner").string("@")
+    internal const val CONTEXT = "@ITEM"
 
-    val defaultStorage: String by bindActionConfig("default-storage").string("vulpecula")
+    internal val defaultOwner: String by bindActionConfig("default-owner").string("@")
+
+    internal val defaultStorage: String by bindActionConfig("default-storage").string("vulpecula")
+
+}
+
+@BacikalParser("memory.switch")
+object ActionMemorySwitch : ClassActionResolver {
+
+    fun resolve(frame: BacikalFrame, storage: String) {
+        frame.setVariable(ActionMemory.CONTEXT, getStorageByName(storage))
+    }
 
 }
 
@@ -27,11 +39,12 @@ object ActionMemory {
 object ActionMemoryGet : ClassActionResolver {
 
     fun resolve(
+        frame: BacikalFrame,
         key: String,
         @Additional(["owner"]) owner: String = ActionMemory.defaultOwner,
         @Additional(["storage"]) storage: String = ActionMemory.defaultStorage
     ): Any? {
-        return getStorage(storage).get(key, owner)
+        return getStorage(frame, storage).get(key, owner)
     }
 
 }
@@ -40,15 +53,16 @@ object ActionMemoryGet : ClassActionResolver {
 object ActionMemorySet : ClassActionResolver {
 
     fun resolve(
+        frame: BacikalFrame,
         key: String,
         value: Any?,
         @Additional(["owner"]) owner: String = ActionMemory.defaultOwner,
         @Additional(["storage"]) storage: String = ActionMemory.defaultStorage
     ): Any? {
         if (value == null) {
-            return getStorage(storage).remove(key, owner)
+            return getStorage(frame, storage).remove(key, owner)
         }
-        return getStorage(storage).set(key, value, owner)
+        return getStorage(frame, storage).set(key, value, owner)
     }
 
 }
@@ -57,18 +71,24 @@ object ActionMemorySet : ClassActionResolver {
 object ActionMemoryRemove : ClassActionResolver {
 
     fun resolve(
+        frame: BacikalFrame,
         key: String,
         @Additional(["owner"]) owner: String = ActionMemory.defaultOwner,
         @Additional(["storage"]) storage: String = ActionMemory.defaultStorage
     ): Any? {
-        return getStorage(storage).remove(key, owner)
+        return getStorage(frame, storage).remove(key, owner)
     }
 
 }
 
-private fun getStorage(storage: String): MemoryStorage {
-    return when (storage.lowercase()) {
+private fun getStorage(frame: BacikalFrame, storage: String): MemoryStorage {
+    return frame.getVariable<MemoryStorage>(ActionMemory.CONTEXT)
+        ?: getStorageByName(storage)
+}
+
+private fun getStorageByName(name: String): MemoryStorage {
+    return when (name.lowercase()) {
         "vulpecula" -> VulpeculaStorage
-        else -> error(asLang("module-action-memory-exception-invalid-storage", storage))
+        else -> error(asLang("module-action-memory-exception-invalid-storage", name))
     }
 }
