@@ -103,6 +103,7 @@ class ClassActionParameter(
         }
         return when (type) {
             ParsedAction::class.java -> WrappedAction(action)
+            Any::class.java -> GenericAction(action, index, name, isNullable)
             else -> ApplicativeAction(action, type, index, name, isNullable)
         }
     }
@@ -134,6 +135,22 @@ class ClassActionParameter(
         override fun execute(frame: BacikalFrame): CompletableFuture<ParsedAction<*>> {
             return CompletableFuture.completedFuture(action)
         }
+    }
+
+    class GenericAction(val source: ParsedAction<*>, val index: Int, val name: String, val isNullable: Boolean) : BacikalAction<Any> {
+
+        override fun execute(frame: BacikalFrame): CompletableFuture<Any> {
+            return frame.runAction(source).thenApply { it ->
+                if (it == null) {
+                    require(isNullable) {
+                        asLang("module-bacikal-exception-invalid-null-argument", index, name)
+                    }
+                    return@thenApply null
+                }
+                return@thenApply it
+            }
+        }
+
     }
 
     class ApplicativeAction<T: Any>(val source: ParsedAction<*>, type: Class<T>, val index: Int, val name: String, val isNullable: Boolean) : BacikalAction<T> {
