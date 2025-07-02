@@ -6,7 +6,6 @@ import taboolib.common.env.RuntimeDependency
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import java.io.InputStream
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.*
