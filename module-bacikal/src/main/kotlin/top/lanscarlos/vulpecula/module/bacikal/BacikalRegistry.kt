@@ -29,9 +29,10 @@ import java.util.LinkedList
  */
 object BacikalRegistry {
 
-    internal val sources: HashMap<String, ExternalActionSource> = hashMapOf() // Class#name -> ActionSource
+    private val sources: HashMap<String, ExternalActionSource> = hashMapOf()
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
     private val exceptionalParsers: LinkedList<ExceptionalActionParser> = LinkedList()
+    private val sourceByClass: HashMap<Class<*>, ExternalActionSource> = hashMapOf()
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
@@ -44,33 +45,60 @@ object BacikalRegistry {
         }
     }
 
-    fun get(id: String): BacikalActionParser {
-        return getOrNull(id) ?: error("Parser $id not found.")
+    fun getActionParser(id: String): BacikalActionParser {
+        return getActionParserOrNull(id) ?: error("Parser $id not found.")
     }
 
-    fun getOrNull(id: String): BacikalActionParser? {
+    fun getActionParserOrNull(id: String): BacikalActionParser? {
         return parsers[id]
     }
 
     /**
      * 获取所有已注册的语句解析器 ID
      * */
-    fun keys(): Set<String> = parsers.keys
+    fun getActionParserKeys(): Set<String> = parsers.keys
 
     /**
      * 获取所有已注册的语句解析器
      * */
-    fun values(): Collection<BacikalActionParser> = parsers.values
+    fun getActionParserValues(): Collection<BacikalActionParser> = parsers.values
 
     /**
      * 获取所有已注册的语句解析器键值对
      * */
-    fun entries(): Set<Map.Entry<String, BacikalActionParser>> = parsers.entries
+    fun getActionParserEntries(): Set<Map.Entry<String, BacikalActionParser>> = parsers.entries
+
+    fun getActionSource(name: String): ExternalActionSource {
+        return getActionSourceOrNull(name) ?: error("Source $name not found.")
+    }
+
+    fun getActionSourceOrNull(name: String): ExternalActionSource? {
+        return sources[name]
+    }
+
+    fun getActionSourceKeys(): Set<String> = sources.keys
+
+    fun getActionSourceValues(): Collection<ExternalActionSource> = sources.values
+
+    fun getActionSourceEntries(): Set<Map.Entry<String, ExternalActionSource>> = sources.entries
 
     /**
      * 注册异常的语句
      * */
     internal fun getExceptionalParsers(): List<ExceptionalActionParser> = exceptionalParsers
+
+    fun getActionSourceByClassName(clazz: Class<*>): ExternalActionSource {
+        return sourceByClass[clazz] ?: error("Source contained")
+    }
+
+    /**
+     * 注册语句来源
+     *
+     * @param source 语句来源
+     * */
+    fun registerActionSource(source: ExternalActionSource) {
+        sources[source.name] = source
+    }
 
     /**
      * 注册语句解析器

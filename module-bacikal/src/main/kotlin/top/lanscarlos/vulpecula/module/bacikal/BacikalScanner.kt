@@ -51,8 +51,8 @@ object BacikalScanner : ClassVisitor(5) {
             // 载入包体
             ClassAppender.addPath(file.toPath(), false, false)
 
-            val source = ExternalActionSource(file.toURI().toURL().getResources())
             val classes = file.toURI().toURL().getClasses()
+            val source = ExternalActionSource(classes, file.toURI().toURL().getResources())
 
             for (name in classes.keys) {
                 BacikalRegistry.sources[name] = source

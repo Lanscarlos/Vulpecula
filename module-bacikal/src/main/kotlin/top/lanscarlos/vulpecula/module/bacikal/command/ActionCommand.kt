@@ -41,7 +41,7 @@ object ActionCommand {
 
     val registry: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val bacikalCount = BacikalRegistry.values()
+            val bacikalCount = BacikalRegistry.getActionParserValues()
                 .filter { it !is ExceptionalActionParser && !it.id.contains('.') }
                 .size
             val remoteCount = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
@@ -88,9 +88,9 @@ object ActionCommand {
 
     val structure: CommandComponent.() -> Unit = {
         dynamic("id") {
-            suggest { BacikalRegistry.keys().toList() }
+            suggest { BacikalRegistry.getActionParserKeys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
-                val parser = BacikalRegistry.get(id)
+                val parser = BacikalRegistry.getActionParser(id)
                 val component = parser.buildStructure(-1)
                 component.sendTo(sender)
             }
@@ -98,7 +98,7 @@ object ActionCommand {
             restrictInt()
             execute<ProxyCommandSender> { sender, context, depth ->
                 val id = context["id"]
-                val parser = BacikalRegistry.get(id)
+                val parser = BacikalRegistry.getActionParser(id)
                 val component = parser.buildStructure(depth.toInt())
                 component.sendTo(sender)
             }
@@ -137,7 +137,7 @@ object ActionCommand {
     }
 
     private fun displayBacikalActions(sender: ProxyCommandSender, header: Boolean) {
-        val bacikalParsers = BacikalRegistry.values().filter { it !is ExceptionalActionParser && !it.id.contains('.') }
+        val bacikalParsers = BacikalRegistry.getActionParserValues().filter { it !is ExceptionalActionParser && !it.id.contains('.') }
         if (header) {
             sender.info { asLang("module-bacikal-command-registry-display-bacikal", bacikalParsers.size) }
         }

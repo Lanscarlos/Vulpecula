@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.action
 
 import taboolib.common.platform.function.getDataFolder
+import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import top.lanscarlos.vulpecula.common.core.utils.asLang
@@ -14,7 +15,7 @@ import java.io.FileOutputStream
  * @author Lanscarlos
  * @since 2025/7/2 10:12
  */
-class ExternalActionSource(resources: Map<String, ByteArray>) : ActionSource {
+class ExternalActionSource(val classes: Map<String, ReflexClass>, resources: Map<String, ByteArray>) : ActionSource {
 
     override val name: String
 
