@@ -6,8 +6,10 @@ import taboolib.common.env.RuntimeDependency
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import java.io.InputStream
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -23,7 +25,7 @@ import java.util.concurrent.CompletableFuture
     relocate = ["!kotlin.", "!kotlin210.", "!kotlinx.metadata.", "!kotlinx.metadata060."],
     transitive = false
 )
-class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
+class ClassActionFunction(javaClass: Class<*>) {
 
     /**
      * 标准函数, 参数不缺省时调用
@@ -68,7 +70,7 @@ class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
 
         // 使用 ProtoBuf 解析元信息
         val data = reflexClass.structure.annotations.find { it.source.simpleName == "Metadata" }!!.list<String>("d2").toTypedArray()
-        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(metadata, data)
+        val (resolver, pbClass) = JvmProtoBufUtil.readClassDataFrom(getMetadata(javaClass), data)
         val pbFunction = pbClass.functionList.find { resolver.getString(it.name) == "resolve" }!!
         val pbParameters = pbFunction.valueParameterList
 
@@ -86,7 +88,7 @@ class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
      *
      * @param instance 实例
      * @param mask 缺省参数掩码
-     * @param parameters 参数列表
+     * @param arguments 参数列表
      * */
     fun invoke(instance: ClassActionResolver, mask: Int, arguments: Array<Any?>): Any? {
         require(parameters.size == arguments.size) {
@@ -117,6 +119,16 @@ class ClassActionFunction(javaClass: Class<*>, metadata: Array<String>) {
         } catch (e: InvocationTargetException) {
             throw e.targetException
         }
+    }
+
+    private fun getMetadata(javaClass: Class<*>): Array<String> {
+        val name = javaClass.name
+        val stream = this.javaClass.classLoader.getResourceAsStream("metadata/${name}.metadata")
+            ?: error("Metadata $name not found.")
+        return String(stream.readAllBytes())
+            .split("\\R".toRegex())
+            .map { Base64.getDecoder().decode(it).toString(Charsets.ISO_8859_1) }
+            .toTypedArray()
     }
 
 }

@@ -24,31 +24,12 @@ class ExternalActionSource(resources: Map<String, ByteArray>) : ActionSource {
 
     val config: Configuration
 
-    private val metadata: HashMap<String, Array<String>> = hashMapOf()
-
     init {
         val registry = initActionRegistry(resources)
         name = registry.getString("name") ?: "UNKNOWN_NAME"
         version = registry.getString("version") ?: "UNKNOWN_VERSION"
         authors = registry.getStringList("authors")
         config = initActionConfig(resources)
-
-        // 解析 metadata
-        for ((name, byteArray) in resources) {
-            if (!name.startsWith("metadata/")) {
-                continue
-            }
-            if (!name.endsWith(".metadata")) {
-                continue
-            }
-            val key = name.substringAfterLast("/").substringBefore('.')
-            val array = BuiltInActionSource.decodeMetadata(byteArray)
-            metadata[key] = array
-        }
-    }
-
-    override fun getActionMetadata(name: String): Array<String> {
-        return metadata[name] ?: error("Metadata $name not found.")
     }
 
     private fun initActionConfig(resources: Map<String, ByteArray>): Configuration {
