@@ -1,3 +1,4 @@
+import io.izzel.taboolib.gradle.AfyBroker
 import io.izzel.taboolib.gradle.Porticus
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
@@ -6,6 +7,7 @@ version = "1.0.0"
 taboolib {
     subproject = false
     env {
+        install(AfyBroker)
         install(Porticus)
     }
     description {
