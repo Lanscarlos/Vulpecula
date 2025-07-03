@@ -33,6 +33,7 @@ object ActionItemPotionSize : ClassActionResolver {
 
 }
 
+@BacikalParser("item.potion.has")
 object ActionItemPotionHas : ClassActionResolver {
 
     @Suppress("DEPRECATION")
@@ -111,7 +112,7 @@ object ActionItemPotionClear : ClassActionResolver {
 }
 
 private fun getPotionMeta(item: ItemStack): PotionMeta {
-    return item.itemMeta as? PotionMeta ?: error(asLang("module-action-item-exception-potion-unsupported", item.type.name))
+    return item.itemMeta as? PotionMeta ?: error(asLang("module-action-item-exception-item-unsupported-potion", item.type.name))
 }
 
 private fun getPotionEffectType(type: String): PotionEffectType {

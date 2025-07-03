@@ -27,7 +27,7 @@ object ActionItemColorGet : ClassActionResolver {
         val color =  when (val itemMeta = item.itemMeta) {
             is LeatherArmorMeta -> toStandardColor(itemMeta.color)
             is PotionMeta -> itemMeta.color?.let(::toStandardColor)
-            else -> error(asLang("module-action-item-exception-color-unsupported", item.type.name))
+            else -> error(asLang("module-action-item-exception-item-unsupported-color", item.type.name))
         }
         return when {
             color == null -> null
@@ -49,7 +49,7 @@ object ActionItemColorSet : ClassActionResolver {
         when (itemMeta) {
             is LeatherArmorMeta -> itemMeta.setColor(bukkitColor)
             is PotionMeta -> itemMeta.color = bukkitColor
-            else -> error(asLang("module-action-item-exception-color-unsupported", item.type.name))
+            else -> error(asLang("module-action-item-exception-item-unsupported-color", item.type.name))
         }
         item.itemMeta = itemMeta
     }
@@ -66,7 +66,7 @@ object ActionItemColorMix : ClassActionResolver {
         when (itemMeta) {
             is LeatherArmorMeta -> itemMeta.setColor(itemMeta.color.mixColors(bukkitColor))
             is PotionMeta -> itemMeta.color = itemMeta.color?.mixColors(bukkitColor) ?: bukkitColor
-            else -> error(asLang("module-action-item-exception-color-unsupported", item.type.name))
+            else -> error(asLang("module-action-item-exception-item-unsupported-color", item.type.name))
         }
         item.itemMeta = itemMeta
     }

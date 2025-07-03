@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.Reflex.Companion.invokeMethod
+import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -27,8 +28,7 @@ object ActionItemUnbreakableState : ClassActionResolver {
                 itemMeta.invokeMethod<Any>("spigot")!!
                     .invokeMethod<Boolean>("isUnbreakable") == true
             } catch (_: NoSuchMethodException) {
-                warning(asLang("module-action-item-exception-unbreakable-unsupported"))
-                false
+                error(asLang("module-action-item-exception-unsupported-unbreakable", MinecraftVersion.runningVersion))
             }
         }
     }
@@ -48,8 +48,7 @@ object ActionItemUnbreakableEnable : ClassActionResolver {
                 itemMeta.invokeMethod<Any>("spigot")!!
                     .invokeMethod<Boolean>("setUnbreakable", true)
             } catch (_: NoSuchMethodException) {
-                warning(asLang("module-action-item-exception-unbreakable-unsupported"))
-                false
+                error(asLang("module-action-item-exception-unsupported-unbreakable", MinecraftVersion.runningVersion))
             }
         }
         item.itemMeta = itemMeta
@@ -70,8 +69,7 @@ object ActionItemUnbreakableDisable : ClassActionResolver {
                 itemMeta.invokeMethod<Any>("spigot")!!
                     .invokeMethod<Boolean>("setUnbreakable", false)
             } catch (_: NoSuchMethodException) {
-                warning(asLang("module-action-item-exception-unbreakable-unsupported"))
-                false
+                error(asLang("module-action-item-exception-unsupported-unbreakable", MinecraftVersion.runningVersion))
             }
         }
         item.itemMeta = itemMeta
