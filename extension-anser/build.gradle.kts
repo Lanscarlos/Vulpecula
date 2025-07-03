@@ -1,4 +1,5 @@
 import io.izzel.taboolib.gradle.AfyBroker
+import io.izzel.taboolib.gradle.BungeeCord
 import io.izzel.taboolib.gradle.Porticus
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
@@ -8,6 +9,7 @@ taboolib {
     subproject = false
     env {
         install(AfyBroker)
+        install(BungeeCord)
         install(Porticus)
     }
     description {
