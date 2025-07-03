@@ -3,3 +3,5 @@
 module-action-entity-exception-entity-not-found: '当前脚本上下文中无物品对象'
 module-action-entity-exception-equipment-not-found: '实体 {0} 无装备栏'
 module-action-entity-exception-invalid-slot: '未知的装备槽位 {0}'
+module-action-entity-exception-entity-unsupported-damage: '实体 {0} 不支持 damage 操作'
+module-action-entity-exception-entity-unsupported-potion: '实体 {0} 必须为生物才能使用 potion 语句'
