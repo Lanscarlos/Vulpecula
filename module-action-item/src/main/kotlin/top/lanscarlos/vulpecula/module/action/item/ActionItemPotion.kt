@@ -36,7 +36,6 @@ object ActionItemPotionSize : ClassActionResolver {
 @BacikalParser("item.potion.has")
 object ActionItemPotionHas : ClassActionResolver {
 
-    @Suppress("DEPRECATION")
     fun resolve(frame: BacikalFrame, type: String): Boolean {
         val item = ActionItem.getContext(frame)
         val itemMeta = getPotionMeta(item)
