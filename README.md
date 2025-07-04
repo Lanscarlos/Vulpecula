@@ -22,8 +22,10 @@ Vulpecula 是基于 [TabooLib 6.0](https://github.com/TabooLib/taboolib) 开发�
 ## 相关链接
 
 [![img](.assets/Wiki.png)](https://www.yuque.com/lanscarlos/vulpecula-doc)
-[![img](.assets/Afdian.png)](https://qm.qq.com/cgi-bin/qm/qr?k=vVP1cAuLlLbqjXGXkfTFH0RSma6wEVgO&jump_from=webapi&authKey=ZUgddursAqJI8tRm4MnKtr2cEUrDc0ZEasB5motBJv/igZ19T48pS/XDXStXWT53)
-[![img](.assets/QQ.png)](https://afdian.tv/a/lanscarlos)
+
+[![img](.assets/Afdian.png)](https://afdian.tv/a/lanscarlos)
+
+[![img](.assets/QQ.png)](https://qm.qq.com/cgi-bin/qm/qr?k=vVP1cAuLlLbqjXGXkfTFH0RSma6wEVgO&jump_from=webapi&authKey=ZUgddursAqJI8tRm4MnKtr2cEUrDc0ZEasB5motBJv/igZ19T48pS/XDXStXWT53)
 
 ## 其他链接
 
