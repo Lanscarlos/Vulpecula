@@ -3,7 +3,6 @@ package top.lanscarlos.vulpecula.common.config
 import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
 import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
@@ -22,12 +21,12 @@ import kotlin.collections.HashSet
  * @author Lanscarlos
  * @since 2025/4/25 11:11
  */
-class ConfigService(val id: String, val directory: File, val priority: Int, val callback: ConfigServiceCallback) {
+class ConfigService(val id: String, val name: String, val directory: File, val priority: Int, val callback: ConfigServiceCallback) {
 
     /**
      * 相对路径
      * */
-    val path = getDataFolder().toPath().normalize().relativize(directory.toPath().normalize()).toString()
+//    val path = getDataFolder().toPath().normalize().relativize(directory.toPath().normalize()).toString()
 
     /**
      * 文件缓存
@@ -154,7 +153,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     private fun addFileWatcher(file: File) {
         FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
         watched.add(file)
-        console().info(Configs.name) { asLang("common-config-service-load-automatic-enabled", getFileId(file)) }
+        console().info(name) { asLang("common-config-service-load-automatic-enabled", getFileId(file)) }
     }
 
     private fun removeFileWatcher(file: File) {
@@ -162,7 +161,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             return
         }
         FileWatcher.INSTANCE.removeListener(file)
-        console().info(Configs.name) { asLang("common-config-service-load-automatic-disabled", getFileId(file)) }
+        console().info(name) { asLang("common-config-service-load-automatic-disabled", getFileId(file)) }
     }
 
     private fun onFileModified(file: File) {

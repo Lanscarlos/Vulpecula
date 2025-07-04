@@ -24,13 +24,13 @@ import java.io.File
  */
 object ScheduleService {
 
-    internal val module: String get() = asLang("module-schedule-service-name")
+    internal val name: String get() = asLang("module-schedule-service-name")
 
     private val directory: File = File(getDataFolder(), "schedule")
 
     private val registry = mutableMapOf<String, Schedule>()
 
-    private val service: ConfigService = ConfigService(id = "schedule", directory = directory, priority = 8, callback = Callback)
+    private val service: ConfigService = ConfigService("schedule", name, directory, 8, Callback)
 
     @Awake(LifeCycle.LOAD)
     fun onLoad() {
@@ -110,7 +110,7 @@ object ScheduleService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.printLocalizedMessage(sender, module)
+                        is QuestCompileException -> cause.printLocalizedMessage(sender, name)
                     }
                 }
                 else -> {
