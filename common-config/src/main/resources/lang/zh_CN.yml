@@ -3,7 +3,7 @@
 
 common-config-main-load-success: '主配置加载成功 &8({0} ms)'
 common-config-main-load-failure: '主配置加载失败！'
-common-config-service-load-automatic-enabled: '检测到文件 {0} 启用了自动重载功能'
-common-config-service-load-automatic-disabled: '检测到文件 {0} 关闭了自动重载功能'
+common-config-service-load-automatic-enabled: '检测到文件 &a{0}&7 启用了自动重载功能'
+common-config-service-load-automatic-disabled: '检测到文件 &a{0}&7 关闭了自动重载功能'
 common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
 common-config-exception-field-read-failure: '字段 &e{0}&7 {1}'
