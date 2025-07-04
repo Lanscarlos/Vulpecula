@@ -1,6 +1,3 @@
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
 rootProject.name = "Vulpecula"
 
 include("common-applicative")
@@ -19,6 +16,7 @@ include("module-dispatcher")
 include("module-experiment")
 include("module-schedule")
 include("module-script")
+include("module-updater")
 include("module-wireshark")
 
 include("platform-bukkit")
@@ -29,4 +27,3 @@ include("workflow-build")
 include("workflow-metadata")
 include("workflow-resources")
 include("extension-anser")
-include("module-updater")
