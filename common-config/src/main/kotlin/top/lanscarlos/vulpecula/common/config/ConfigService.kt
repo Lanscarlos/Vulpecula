@@ -138,32 +138,6 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
         }
     }
 
-    private fun buildDetailMessage(created: Int, modified: Int, deleted: Int, failed: Int): String {
-        val builder = StringBuilder()
-        if (created > 0) {
-            builder.append(asLang("common-config-service-load-detail-created", created))
-        }
-        if (modified > 0) {
-            if (builder.isNotEmpty()) {
-                builder.append("; ")
-            }
-            builder.append(asLang("common-config-service-load-detail-modified", modified))
-        }
-        if (deleted > 0) {
-            if (builder.isNotEmpty()) {
-                builder.append("; ")
-            }
-            builder.append(asLang("common-config-service-load-detail-deleted", deleted))
-        }
-        if (failed > 0) {
-            if (builder.isNotEmpty()) {
-                builder.append("; ")
-                builder.append(asLang("common-config-service-load-detail-failed", failed))
-            }
-        }
-        return builder.toString()
-    }
-
     private fun timing(time: Long): Double {
         return Coerce.format((System.nanoTime() - time).div(1000000.0))
     }
