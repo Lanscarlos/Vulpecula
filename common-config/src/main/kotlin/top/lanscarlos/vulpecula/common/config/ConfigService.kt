@@ -5,7 +5,6 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
-import top.lanscarlos.vulpecula.common.core.utils.asLang
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
