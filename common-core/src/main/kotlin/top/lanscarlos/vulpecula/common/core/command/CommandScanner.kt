@@ -41,7 +41,7 @@ object CommandScanner : ClassVisitor() {
         component.permissionDefault = annotation.enum("permissionDefault", PermissionDefault.OP)
         component.hidden = annotation.property("hidden", false)
 
-        if (field.isAnnotationPresent(CommandDevelop::class.java)) {
+        if (owner.toClass().isAnnotationPresent(CommandDevelop::class.java)) {
             // 开发者命令
             CommandRegistry.registerDevelopComponent(component)
         } else {
