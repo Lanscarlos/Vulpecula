@@ -162,17 +162,21 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     }
 
     private fun onFileModified(file: File) {
+        // 调试计时
+        val startTime = System.nanoTime()
         // 计算哈希指纹
         val hash = file.digest("SHA-256")
         // 哈希指纹比对
         if (hash == this.hash[file]) {
             return
         }
+        val id = buildFileId(file)
         try {
-            callback.onFileModified(console(), buildFileId(file), file)
+            callback.onFileModified(console(), id, file)
+            callback.onLoadAutomatic(console(), id, file, timing(startTime))
             this.hash[file] = hash
         } catch (e: Exception) {
-            callback.onFileException(console(), buildFileId(file), file, e)
+            callback.onFileException(console(), id, file, e)
         }
     }
 
@@ -185,9 +189,9 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
      * 例如： ./Vulpecula/script/example/default.yml -> example.default
      * */
     private fun buildFileId(file: File): String {
-        val rootPath = directory.toPath().normalize()
-        val targetPath = file.toPath().normalize()
-        val relativePath = rootPath.relativize(targetPath)
+        val rootPath = directory.toURI().normalize()
+        val targetPath = file.toURI().normalize()
+        val relativePath = rootPath.relativize(targetPath).path
         return relativePath.toString().replace(File.separatorChar, '.').substringBeforeLast('.')
     }
 

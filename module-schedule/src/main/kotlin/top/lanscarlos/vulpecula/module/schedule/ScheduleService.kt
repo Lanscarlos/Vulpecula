@@ -123,6 +123,10 @@ object ScheduleService {
             releaseResourceFolder("schedule")
         }
 
+        override fun onLoadAutomatic(sender: ProxyCommandSender, id: String, file: File, time: Double) {
+            sender.info(sync = true) { asLang("module-schedule-service-load-automatic", id, time) }
+        }
+
         override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {
             if (created > 0) {
                 sender.info(sync = true) { asLang("module-schedule-service-load-detail-created", created) }
