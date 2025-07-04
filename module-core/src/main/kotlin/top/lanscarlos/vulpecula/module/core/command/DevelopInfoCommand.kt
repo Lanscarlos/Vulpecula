@@ -4,6 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.pluginVersion
+import top.lanscarlos.vulpecula.common.core.command.CommandDevelop
 
 /**
  * Vulpecula
@@ -14,7 +15,8 @@ import taboolib.common.platform.function.pluginVersion
  */
 object DevelopInfoCommand {
 
-    @CommandBody(["@DEVELOP"])
+    @CommandBody
+    @CommandDevelop
     val version = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
             sender.sendMessage("Vulpecula Version: $pluginVersion")

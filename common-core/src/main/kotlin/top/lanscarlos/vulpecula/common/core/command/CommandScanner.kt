@@ -42,19 +42,13 @@ object CommandScanner : ClassVisitor() {
         component.permissionDefault = annotation.enum("permissionDefault", PermissionDefault.OP)
         component.hidden = annotation.property("hidden", false)
 
-        if (component.aliases.firstOrNull() == "@DEVELOP") {
-            // 注册到开发者命令之下
-            component.aliases = if (component.aliases.size > 1) {
-                component.aliases.sliceArray(1 until component.aliases.size)
-            } else {
-                emptyArray()
-            }
+        if (field.isAnnotationPresent(CommandDevelop::class.java)) {
+            // 开发者命令
             CommandRegistry.registerDevelopComponent(component)
         } else {
+            // 常规命令
             CommandRegistry.registerCommandComponent(component)
         }
-
-        info("Register vulpecula command component: ${component.name}. aliases: ${component.aliases.joinToString(", ")}")
     }
 
     override fun getLifeCycle(): LifeCycle {
