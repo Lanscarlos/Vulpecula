@@ -41,28 +41,17 @@ object ActionCommand {
 
     val registry: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val bacikalCount = BacikalRegistry.getActionParserValues()
-                .filter { it !is ExceptionalActionParser && !it.id.contains('.') }
-                .size
-            val remoteCount = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
-                .flatMap { it.value.values }
-                .filterIsInstance<RemoteActionParser>()
-                .size
-            sender.info {
-                asLang("module-bacikal-command-registry-display-all", bacikalCount + remoteCount)
-            }
             displayBacikalActions(sender, false)
-            displayRemoteActions(sender, false)
         }
 
-        literal("bacikal") {
+        literal("detail") {
             execute<ProxyCommandSender> { sender, _, _ ->
                 displayBacikalActions(sender, true)
             }
         }
         literal("remote") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                displayRemoteActions(sender, true)
+                displayRemoteActions(sender)
             }
         }
         literal("local") {
@@ -147,11 +136,10 @@ object ActionCommand {
         }
     }
 
-    private fun displayBacikalActions(sender: ProxyCommandSender, header: Boolean) {
-        val bacikalParsers = BacikalRegistry.getActionParserValues().filter { it !is ExceptionalActionParser && !it.id.contains('.') }
-        if (header) {
-            sender.info { asLang("module-bacikal-command-registry-display-bacikal", bacikalParsers.size) }
-        }
+    private fun displayBacikalActions(sender: ProxyCommandSender, detail: Boolean) {
+        val bacikalParsers = BacikalRegistry.getActionParserValues()
+            .filter { it !is ExceptionalActionParser && (detail || !it.id.contains('.')) }
+        sender.info { asLang("module-bacikal-command-registry-display-bacikal", bacikalParsers.size) }
         for ((source, parsers) in bacikalParsers.groupBy { it.source }) {
             val color = if (source is BuiltInActionSource) "§3" else "§b"
             sender.info {
@@ -170,17 +158,14 @@ object ActionCommand {
         }
     }
 
-    private fun displayRemoteActions(sender: ProxyCommandSender, header: Boolean) {
+    private fun displayRemoteActions(sender: ProxyCommandSender) {
         val remoteParsers = Kether.scriptRegistry.getProperty<Map<String, Map<String, QuestActionParser>>>("parsers")!!
             .flatMap { it.value.values }
             .filterIsInstance<RemoteActionParser>()
-        if (header) {
-            sender.info {
-                asLang(
-                    "module-bacikal-command-registry-display-remote${if (remoteParsers.isEmpty()) "-empty" else ""}",
-                    remoteParsers.size
-                )
-            }
+        if (remoteParsers.isEmpty()) {
+            sender.info { asLang("module-bacikal-command-registry-display-remote-empty") }
+        } else {
+            sender.info { asLang("module-bacikal-command-registry-display-remote", remoteParsers.size) }
         }
         for ((pluginId, parsers) in remoteParsers.groupBy { it.remote.name }) {
             val plugin = Bukkit.getPluginManager().getPlugin(pluginId) ?: error("Unknown plugin id: $pluginId")
