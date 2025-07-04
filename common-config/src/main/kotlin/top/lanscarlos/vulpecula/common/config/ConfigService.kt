@@ -5,6 +5,8 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
+import taboolib.common5.FileWatcher
+import taboolib.module.configuration.Configuration
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
@@ -36,6 +38,11 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     val hash = HashMap<File, String>()
 
     /**
+     * 被监听变动的文件
+     * */
+    val watched: HashSet<File> = hashSetOf()
+
+    /**
      * 重置缓存
      * */
     fun reset() {
@@ -57,33 +64,55 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 重载开始
             callback.onLoadStarted(sender)
 
-            // 获取所有文件
-            val queue = LinkedList<File>()
-            val loadedFiles = hashSetOf<File>()
-            queue += directory
-            while (queue.isNotEmpty()) {
-                val file = queue.poll()
-                if (file.isFile) {
-                    if (!file.exists() || file.name.first() == '#') {
-                        // 排除不存在或被注释的文件
-                        continue
-                    }
-                    loadedFiles += file
-                    continue
-                }
-                val files = file.listFiles()?.filter { it.name.first() != '#' } ?: continue
-                queue.addAll(files)
-            }
-            val cacheFiles = HashSet(cache)
-
             var created = 0
             var modified = 0
             var deleted = 0
             var failed = 0
+            val cacheFiles = HashSet(cache)
+            cache.clear()
+            for (file in directory.walk()) {
+                if (file.isDirectory) {
+                    continue
+                }
+                if (file.name[0] == '#') {
+                    continue
+                }
 
+                if (file in cacheFiles) {
+                    // 计算哈希指纹
+                    val hash = file.digest("SHA-256")
+                    // 哈希指纹比对
+                    if (hash == this.hash[file]) {
+                        continue
+                    }
+                    try {
+                        callback.onFileModified(sender, buildFileId(file), file)
+                        this.hash[file] = hash
+                        detectAutoReload(file)
+                        modified += 1
+                    } catch (e: Exception) {
+                        failed += 1
+                        callback.onFileException(sender, buildFileId(file), file, e)
+                    } finally {
+                        cacheFiles.remove(file)
+                    }
+                } else {
+                    // 新增的文件
+                    try {
+                        callback.onFileCreated(sender, buildFileId(file), file)
+                        cache += file
+                        hash[file] = file.digest("SHA-256")
+                        detectAutoReload(file)
+                        created += 1
+                    } catch (e: Exception) {
+                        failed += 1
+                        callback.onFileException(sender, buildFileId(file), file, e)
+                    }
+                }
+            }
 
-            // 处理被移除的文件
-            for (file in cacheFiles - loadedFiles) {
+            // 处理剩余被删除的文件
+            for (file in cacheFiles) {
                 try {
                     callback.onFileDeleted(sender, buildFileId(file), file)
                     cache.remove(file)
@@ -92,37 +121,8 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                 } catch (e: Exception) {
                     failed += 1
                     callback.onFileException(sender, buildFileId(file), file, e)
-                }
-            }
-
-            // 处理新增的文件
-            for (file in loadedFiles - cacheFiles) {
-                try {
-                    callback.onFileCreated(sender, buildFileId(file), file)
-                    cache += file
-                    hash[file] = file.digest("SHA-256")
-                    created += 1
-                } catch (e: Exception) {
-                    failed += 1
-                    callback.onFileException(sender, buildFileId(file), file, e)
-                }
-            }
-
-            // 处理变动的文件
-            for (file in loadedFiles intersect cacheFiles) {
-                // 计算哈希指纹
-                val hash = file.digest("SHA-256")
-                // 哈希指纹比对
-                if (hash == this.hash[file]) {
-                    continue
-                }
-                try {
-                    callback.onFileModified(sender, buildFileId(file), file)
-                    this.hash[file] = hash
-                    modified += 1
-                } catch (e: Exception) {
-                    failed += 1
-                    callback.onFileException(sender, buildFileId(file), file, e)
+                } finally {
+                    removeFileWatcher(file)
                 }
             }
 
@@ -134,6 +134,45 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
 
             // 计算耗时, 单位毫秒
             callback.onLoadFailure(sender, timing(startTime), e)
+        }
+    }
+
+    private fun detectAutoReload(file: File) {
+        if (file.extension != "yml" && file.extension != "yaml") {
+            return
+        }
+        val config = Configuration.loadFromFile(file)
+        if (!config.getBoolean("debug.auto-reload", false)) {
+            // 未启用自动重载
+            return
+        }
+        addFileWatcher(file)
+    }
+
+    private fun addFileWatcher(file: File) {
+        FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
+        watched.add(file)
+    }
+
+    private fun removeFileWatcher(file: File) {
+        if (!watched.remove(file)) {
+            return
+        }
+        FileWatcher.INSTANCE.removeListener(file)
+    }
+
+    private fun onFileModified(file: File) {
+        // 计算哈希指纹
+        val hash = file.digest("SHA-256")
+        // 哈希指纹比对
+        if (hash == this.hash[file]) {
+            return
+        }
+        try {
+            callback.onFileModified(console(), buildFileId(file), file)
+            this.hash[file] = hash
+        } catch (e: Exception) {
+            callback.onFileException(console(), buildFileId(file), file, e)
         }
     }
 
