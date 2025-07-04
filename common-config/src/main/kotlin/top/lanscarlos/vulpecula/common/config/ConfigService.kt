@@ -7,6 +7,8 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
 import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.info
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
@@ -86,27 +88,27 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
                         continue
                     }
                     try {
-                        callback.onFileModified(sender, buildFileId(file), file)
+                        callback.onFileModified(sender, getFileId(file), file)
                         this.hash[file] = hash
                         detectAutoReload(file)
                         modified += 1
                     } catch (e: Exception) {
                         failed += 1
-                        callback.onFileException(sender, buildFileId(file), file, e)
+                        callback.onFileException(sender, getFileId(file), file, e)
                     } finally {
                         cacheFiles.remove(file)
                     }
                 } else {
                     // 新增的文件
                     try {
-                        callback.onFileCreated(sender, buildFileId(file), file)
+                        callback.onFileCreated(sender, getFileId(file), file)
                         cache += file
                         hash[file] = file.digest("SHA-256")
                         detectAutoReload(file)
                         created += 1
                     } catch (e: Exception) {
                         failed += 1
-                        callback.onFileException(sender, buildFileId(file), file, e)
+                        callback.onFileException(sender, getFileId(file), file, e)
                     }
                 }
             }
@@ -114,13 +116,13 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 处理剩余被删除的文件
             for (file in cacheFiles) {
                 try {
-                    callback.onFileDeleted(sender, buildFileId(file), file)
+                    callback.onFileDeleted(sender, getFileId(file), file)
                     cache.remove(file)
                     hash.remove(file)
                     deleted += 1
                 } catch (e: Exception) {
                     failed += 1
-                    callback.onFileException(sender, buildFileId(file), file, e)
+                    callback.onFileException(sender, getFileId(file), file, e)
                 } finally {
                     removeFileWatcher(file)
                 }
@@ -152,6 +154,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
     private fun addFileWatcher(file: File) {
         FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
         watched.add(file)
+        console().info(Configs.name) { asLang("common-config-service-load-automatic-enabled", getFileId(file)) }
     }
 
     private fun removeFileWatcher(file: File) {
@@ -159,6 +162,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             return
         }
         FileWatcher.INSTANCE.removeListener(file)
+        console().info(Configs.name) { asLang("common-config-service-load-automatic-disabled", getFileId(file)) }
     }
 
     private fun onFileModified(file: File) {
@@ -170,7 +174,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
         if (hash == this.hash[file]) {
             return
         }
-        val id = buildFileId(file)
+        val id = getFileId(file)
         try {
             callback.onFileModified(console(), id, file)
             callback.onLoadAutomatic(console(), id, file, timing(startTime))
@@ -188,7 +192,7 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
      * 根据文件相对路径获取文件的 Id
      * 例如： ./Vulpecula/script/example/default.yml -> example.default
      * */
-    private fun buildFileId(file: File): String {
+    private fun getFileId(file: File): String {
         val rootPath = directory.toURI().normalize()
         val targetPath = file.toURI().normalize()
         val relativePath = rootPath.relativize(targetPath).path
