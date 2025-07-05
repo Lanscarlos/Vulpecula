@@ -3,9 +3,16 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
+import taboolib.module.chat.colored
+import taboolib.module.chat.uncolored
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
+import top.lanscarlos.vulpecula.module.dispatcher.error
+import top.lanscarlos.vulpecula.module.dispatcher.warning
 import java.lang.reflect.ParameterizedType
 import java.util.LinkedList
 
@@ -110,9 +117,14 @@ object PipelineRegistry : ClassVisitor() {
         }
 
         // 获取事件类型
-        val type = getParameterizedType(clazz)
-        if (type == null) {
-            warning("Property \"${clazz.name}\" must have a generic type.")
+        val type = try {
+            getParameterizedType(clazz)
+        } catch (ex: TypeNotPresentException) {
+            // 事件类不存在
+            console().warning { asLang("module-dispatcher-exception-event-class-not-found", ex.typeName()) }
+            return
+        } catch (_: NullPointerException) {
+            console().warning { "Property \"${clazz.name}\" must have a generic type." }
             return
         }
 
@@ -131,7 +143,7 @@ object PipelineRegistry : ClassVisitor() {
     /**
      * 获取类的泛型
      * */
-    private fun getParameterizedType(clazz: Class<*>): Class<*>? {
+    private fun getParameterizedType(clazz: Class<*>): Class<*> {
         var cache: Class<*> = clazz
         do {
             when (val it = (cache.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
@@ -140,7 +152,7 @@ object PipelineRegistry : ClassVisitor() {
                 else -> cache = cache.superclass
             }
         } while (cache.isAnnotationPresent(AutoRegistered::class.java))
-        return null
+        throw NullPointerException()
     }
 
     override fun getLifeCycle(): LifeCycle = LifeCycle.LOAD
