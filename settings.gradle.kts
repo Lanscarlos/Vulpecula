@@ -4,6 +4,7 @@ include("common-applicative")
 include("common-config")
 include("common-core")
 include("common-diagram")
+include("common-lang")
 
 include("module-action-entity")
 include("module-action-event")
