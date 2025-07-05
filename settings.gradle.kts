@@ -7,6 +7,7 @@ include("common-diagram")
 
 include("module-action-entity")
 include("module-action-event")
+include("module-action-illusion")
 include("module-action-item")
 include("module-action-memory")
 include("module-bacikal")
