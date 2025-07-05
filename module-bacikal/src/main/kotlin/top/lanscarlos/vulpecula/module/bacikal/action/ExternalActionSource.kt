@@ -8,11 +8,9 @@ import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.event.EventBus
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
-import top.lanscarlos.vulpecula.common.core.command.CommandRegistry
 import top.lanscarlos.vulpecula.common.core.command.CommandScanner
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
