@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.getDataFolder
 import taboolib.library.kether.Quest
 import taboolib.module.configuration.Configuration
 import taboolib.module.kether.deepVars
@@ -42,6 +43,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
     val timeout: Long by config.read("timeout").convert(::parseTimeout)
 
     val exceptions: Map<String, Quest> by config.read("exceptions").convert(::parseException)
+
+    val debugOutput: Boolean by config.read("debug.output").boolean(false)
 
     override var quest: Quest = buildQuest()
 
@@ -141,8 +144,11 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
                 .append("}").append('\n')
         }
 
-        // 调试输出
-        File(config.file!!.parent, "#${config.file!!.nameWithoutExtension}.ks").writeText(builder.toString())
+        if (debugOutput) {
+            // 调试输出
+            val path = id.replace('.', File.separatorChar)
+            File(getDataFolder(), "debug/script/$path.ks").writeText(builder.toString())
+        }
 
         return BacikalService.compile(builder.toString(), id, namespace)
     }
