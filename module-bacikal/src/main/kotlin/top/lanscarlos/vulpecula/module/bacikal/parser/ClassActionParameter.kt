@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import org.bukkit.entity.Player
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.ParsedAction
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
@@ -83,6 +84,7 @@ class ClassActionParameter(
         when (type) {
             BacikalFrame::class.java -> return FrameAction
             Player::class.java -> return PlayerAction(isNullable)
+            ProxyPlayer::class.java -> return ProxyPlayerAction(isNullable)
         }
         val action: ParsedAction<*> = when (modifier) {
             Modifier.NONE,
@@ -124,6 +126,16 @@ class ClassActionParameter(
     class PlayerAction(val isNullable: Boolean) : BacikalAction<Player> {
         override fun execute(frame: BacikalFrame): CompletableFuture<Player> {
             val player = frame.senderAsPlayer
+            require(isNullable || player != null) {
+                asLang("module-bacikal-exception-script-player-not-found")
+            }
+            return CompletableFuture.completedFuture(player)
+        }
+    }
+
+    class ProxyPlayerAction(val isNullable: Boolean) : BacikalAction<ProxyPlayer> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<ProxyPlayer> {
+            val player = frame.sender as? ProxyPlayer
             require(isNullable || player != null) {
                 asLang("module-bacikal-exception-script-player-not-found")
             }
