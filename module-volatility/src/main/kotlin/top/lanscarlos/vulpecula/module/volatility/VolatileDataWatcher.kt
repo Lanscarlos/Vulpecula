@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.volatility
 
+import org.bukkit.entity.Entity
 import taboolib.module.nms.nmsProxy
 
 /**
@@ -10,6 +11,14 @@ import taboolib.module.nms.nmsProxy
  * @since 2025/7/5
  */
 interface VolatileDataWatcher {
+
+    fun getByteMetadata(entity: Entity, index: Int): Byte
+
+    fun getIntMetadata(entity: Entity, index: Int): Int
+
+    fun getFloatMetadata(entity: Entity, index: Int): Float
+
+    fun getStringMetadata(entity: Entity, index: Int): Float
 
     fun createByteMetadata(index: Int, value: Byte): Any
 
