@@ -13,6 +13,7 @@ dependencies {
     compileOnly(project(":common-diagram"))
     compileOnly(project(":module-action-entity"))
     compileOnly(project(":module-action-event"))
+    compileOnly(project(":module-action-illusion"))
     compileOnly(project(":module-action-item"))
     compileOnly(project(":module-action-memory"))
     compileOnly(project(":module-bacikal"))
