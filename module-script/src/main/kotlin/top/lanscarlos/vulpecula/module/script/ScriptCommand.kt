@@ -130,7 +130,7 @@ object ScriptCommand {
                 sender.info { asLang("module-script-command-run", id, scriptSender?.name ?: "null", args) }
             }
         } catch (e: Exception) {
-//            sender.error(sync = true) { e.localizedMessage }
+            sender.error(sync = true) { e.localizedMessage }
             null
         }
         task?.onSuccess {
@@ -150,7 +150,7 @@ object ScriptCommand {
                 args = args
             )
         } catch (e: Exception) {
-//            console().error(sync = true) { e.localizedMessage }
+            console().error(sync = true) { e.localizedMessage }
             null
         }
         task?.onFailure { ex ->

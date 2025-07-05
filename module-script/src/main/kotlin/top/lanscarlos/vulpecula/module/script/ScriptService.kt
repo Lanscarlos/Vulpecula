@@ -12,6 +12,7 @@ import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
+import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
@@ -26,8 +27,7 @@ import java.io.File
  */
 object ScriptService {
 
-//    internal val name: String get() = asLang("module-script-service-name")
-    internal val name: String get() = "脚本"
+    internal val name: String get() = asLang("module-script-service-name")
 
     private val directory: File = File(getDataFolder(), "script")
 
@@ -252,8 +252,7 @@ object ScriptService {
                     // 重新构建脚本任务
                     script.rebuild()
                 }
-//                else -> throw InvalidTypeException(script)
-                else -> error("WCNM!")
+                else -> throw InvalidTypeException(script)
             }
         }
 
