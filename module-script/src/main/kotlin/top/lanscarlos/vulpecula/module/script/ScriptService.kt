@@ -5,7 +5,6 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.common.language.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
@@ -13,6 +12,7 @@ import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
+import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
 import java.io.File
