@@ -13,10 +13,10 @@ import top.lanscarlos.vulpecula.common.core.command.CommandDevelop
  * @author Lanscarlos
  * @since 2025/7/4 9:04
  */
-@CommandDevelop
 object DevelopInfoCommand {
 
     @CommandBody
+    @CommandDevelop
     val version = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
             sender.sendMessage("Vulpecula Version: $pluginVersion")
