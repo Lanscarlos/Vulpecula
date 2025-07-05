@@ -17,6 +17,7 @@ include("module-dispatcher")
 include("module-experiment")
 include("module-schedule")
 include("module-script")
+include("module-volatility")
 include("module-wireshark")
 
 include("platform-bukkit")
