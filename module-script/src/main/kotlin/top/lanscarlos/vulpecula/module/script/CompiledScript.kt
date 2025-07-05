@@ -69,7 +69,7 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
                 wrappedArgs[parameter.name] = value ?: continue
                 continue
             }
-            require(arg != null) { asLang("module-script-exception-argument-missing", index, parameter.name) }
+//            require(arg != null) { asLang("module-script-exception-argument-missing", index, parameter.name) }
             wrappedArgs[parameter.name] = parameter.applicative.convert(arg)
         }
 

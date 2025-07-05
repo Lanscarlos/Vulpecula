@@ -8,7 +8,7 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.common.language.asLang
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -101,15 +101,15 @@ object ScriptCommand {
         }
         literal("list") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                val builder = StringBuilder(asLang("module-script-command-task-list-header"))
+//                val builder = StringBuilder(asLang("module-script-command-task-list-header"))
                 for (task in ScriptService.getTaskValues()) {
                     val pid = task.pid
                     val script = task.script.id
                     val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
                     val message = asLang("module-script-command-task-list-item", pid, script, startTime)
-                    builder.append('\n').append(message)
+//                    builder.append('\n').append(message)
                 }
-                sender.info { builder.toString() }
+//                sender.info { builder.toString() }
             }
         }
     }
@@ -130,7 +130,7 @@ object ScriptCommand {
                 sender.info { asLang("module-script-command-run", id, scriptSender?.name ?: "null", args) }
             }
         } catch (e: Exception) {
-            sender.error(sync = true) { e.localizedMessage }
+//            sender.error(sync = true) { e.localizedMessage }
             null
         }
         task?.onSuccess {
@@ -150,7 +150,7 @@ object ScriptCommand {
                 args = args
             )
         } catch (e: Exception) {
-            console().error(sync = true) { e.localizedMessage }
+//            console().error(sync = true) { e.localizedMessage }
             null
         }
         task?.onFailure { ex ->

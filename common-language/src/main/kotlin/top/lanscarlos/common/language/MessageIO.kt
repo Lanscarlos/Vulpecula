@@ -62,3 +62,17 @@ fun ProxyCommandSender.error(
 ) {
     LanguageService.error(this, module, sync, message)
 }
+
+/**
+ * 发送错误信息
+ * @param module 模块名
+ * @param sync 是否同步到控制台
+ * @param message 消息生成器
+ */
+fun ProxyCommandSender.debug(
+    module: String,
+    sync: Boolean = false,
+    message: Supplier<Message>
+) {
+    LanguageService.debug(this, module, sync, message)
+}

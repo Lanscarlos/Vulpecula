@@ -39,6 +39,10 @@ object LanguageService {
         sendLangTo(sender, module, sync, COLOR_ERROR, message)
     }
 
+    fun debug(sender: ProxyCommandSender, module: String, sync: Boolean, message: Supplier<Message>) {
+        sendLangTo(sender, module, sync, COLOR_WARNING, message)
+    }
+
     fun sendLangTo(sender: ProxyCommandSender, module: String, sync: Boolean, color: String, message: Supplier<Message>) {
         val text = COLOR_RESET + asLangText(sender, color, message.get())
         sender.sendLang("common-language-message", color + module, text)
