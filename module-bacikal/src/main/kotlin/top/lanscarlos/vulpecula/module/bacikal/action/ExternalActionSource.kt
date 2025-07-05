@@ -4,12 +4,16 @@ import taboolib.common.LifeCycle
 import taboolib.common.TabooLib
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
+import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.event.EventBus
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
+import top.lanscarlos.vulpecula.common.core.command.CommandRegistry
+import top.lanscarlos.vulpecula.common.core.command.CommandScanner
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import java.io.File
@@ -40,22 +44,12 @@ class ExternalActionSource(val classes: Map<String, ReflexClass>, resources: Map
         config = initActionConfig(resources)
         BacikalRegistry.registerActionSource(this)
         scanAwakeMethod()
+        scanCommandMethod()
         TabooLib.registerLifeCycleTask(LifeCycle.ENABLE, 0, ::scanEventMethod)
     }
 
     fun reload() {
         config.reload()
-    }
-
-    private fun scanEventMethod() {
-        for (owner in classes.values) {
-            for (method in owner.structure.methods) {
-                if (!method.isAnnotationPresent(SubscribeEvent::class.java)) {
-                    continue
-                }
-                eventBus.visit(method, owner)
-            }
-        }
     }
 
     private fun scanAwakeMethod() {
@@ -74,6 +68,28 @@ class ExternalActionSource(val classes: Map<String, ReflexClass>, resources: Map
                         method.invokeStatic()
                     }
                 }
+            }
+        }
+    }
+
+    private fun scanCommandMethod() {
+        for (owner in classes.values) {
+            for (field in owner.structure.fields) {
+                if (!field.isAnnotationPresent(CommandBody::class.java)) {
+                    continue
+                }
+                CommandScanner.visit(field, owner)
+            }
+        }
+    }
+
+    private fun scanEventMethod() {
+        for (owner in classes.values) {
+            for (method in owner.structure.methods) {
+                if (!method.isAnnotationPresent(SubscribeEvent::class.java)) {
+                    continue
+                }
+                eventBus.visit(method, owner)
             }
         }
     }
