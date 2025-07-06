@@ -2,7 +2,13 @@ package top.lanscarlos.vulpecula.module.volatility
 
 import org.bukkit.entity.Entity
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.module.volatility.aliases.CraftEntity12004
+import top.lanscarlos.vulpecula.module.volatility.aliases.CraftEntity12104
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16DataWatcherItem
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16DataWatcherObject
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16DataWatcherRegistry
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMSDataWatcherItem
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMSDataWatcherObject
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMSDataWatcherRegistry
 
 /**
  * Vulpecula
@@ -11,39 +17,34 @@ import top.lanscarlos.vulpecula.module.volatility.aliases.CraftEntity12004
  * @author Lanscarlos
  * @since 2025/7/5
  */
-class DefaultVolatileDataWatcher : VolatileDataWatcher {
+class VolatileDataWatcherImpl : VolatileDataWatcher {
 
     private val isUniversal = MinecraftVersion.isUniversal
     private val minecraftVersion = MinecraftVersion.versionId
 
     override fun getByteMetadata(entity: Entity, index: Int): Byte {
-        val dataWatcher = (entity as CraftEntity12004).handle.entityData
+        val dataWatcher = (entity as CraftEntity12104).handle.entityData
         return dataWatcher.get(NMSDataWatcherObject(index, NMSDataWatcherRegistry.BYTE))
     }
 
     override fun getIntMetadata(entity: Entity, index: Int): Int {
-        val dataWatcher = (entity as CraftEntity12004).handle.entityData
+        val dataWatcher = (entity as CraftEntity12104).handle.entityData
         return dataWatcher.get(NMSDataWatcherObject(index, NMSDataWatcherRegistry.INT))
     }
 
     override fun getFloatMetadata(entity: Entity, index: Int): Float {
-        val dataWatcher = (entity as CraftEntity12004).handle.entityData
+        val dataWatcher = (entity as CraftEntity12104).handle.entityData
         return dataWatcher.get(NMSDataWatcherObject(index, NMSDataWatcherRegistry.FLOAT))
     }
 
     override fun getStringMetadata(entity: Entity, index: Int): Float {
-        val dataWatcher = (entity as CraftEntity12004).handle.entityData
+        val dataWatcher = (entity as CraftEntity12104).handle.entityData
         return dataWatcher.get(NMSDataWatcherObject(index, NMSDataWatcherRegistry.FLOAT))
     }
 
     override fun createByteMetadata(index: Int, value: Byte): Any {
-        return if (isUniversal) {
-            val metadata = NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.BYTE), value)
-            if (minecraftVersion >= 11903) {
-                metadata.value()
-            } else {
-                metadata
-            }
+        return if (minecraftVersion >= 11900) {
+            NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.BYTE), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.a), value)
         }
@@ -99,12 +100,3 @@ class DefaultVolatileDataWatcher : VolatileDataWatcher {
     }
 
 }
-
-typealias NMSDataWatcher = net.minecraft.network.syncher.DataWatcher
-typealias NMSDataWatcherItem<T> = net.minecraft.network.syncher.DataWatcher.Item<T>
-typealias NMSDataWatcherObject<T> = net.minecraft.network.syncher.DataWatcherObject<T>
-typealias NMSDataWatcherRegistry = net.minecraft.network.syncher.DataWatcherRegistry
-
-typealias NMS16DataWatcherItem<T> = net.minecraft.server.v1_16_R1.DataWatcher.Item<T>
-typealias NMS16DataWatcherObject<T> = net.minecraft.server.v1_16_R1.DataWatcherObject<T>
-typealias NMS16DataWatcherRegistry = net.minecraft.server.v1_16_R1.DataWatcherRegistry

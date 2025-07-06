@@ -30,6 +30,6 @@ interface VolatileDataWatcher {
 
     fun deconstruct(source: Pair<Int, Any>): Any
 
-    companion object : VolatileDataWatcher by nmsProxy("${VolatileDataWatcher::class.java.`package`.name}.Default${VolatileDataWatcher::class.java.simpleName}")
+    companion object : VolatileDataWatcher by nmsProxy()
 
 }
