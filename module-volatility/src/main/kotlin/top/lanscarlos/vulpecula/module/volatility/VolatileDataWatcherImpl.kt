@@ -1,14 +1,17 @@
 package top.lanscarlos.vulpecula.module.volatility
 
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Pose
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.module.volatility.aliases.CraftEntity12104
 import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16DataWatcherItem
 import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16DataWatcherObject
 import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16DataWatcherRegistry
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16EntityPose
 import top.lanscarlos.vulpecula.module.volatility.aliases.NMSDataWatcherItem
 import top.lanscarlos.vulpecula.module.volatility.aliases.NMSDataWatcherObject
 import top.lanscarlos.vulpecula.module.volatility.aliases.NMSDataWatcherRegistry
+import top.lanscarlos.vulpecula.module.volatility.aliases.NMSEntityPose
 
 /**
  * Vulpecula
@@ -51,41 +54,34 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
     }
 
     override fun createIntMetadata(index: Int, value: Int): Any {
-        return if (isUniversal) {
-            val metadata = NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.INT), value)
-            if (minecraftVersion >= 11903) {
-                metadata.value()
-            } else {
-                metadata
-            }
+        return if (minecraftVersion >= 11900) {
+            NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.INT), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.b), value)
         }
     }
 
     override fun createFloatMetadata(index: Int, value: Float): Any {
-        return if (isUniversal) {
-            val metadata = NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.FLOAT), value)
-            if (minecraftVersion >= 11903) {
-                metadata.value()
-            } else {
-                metadata
-            }
+        return if (minecraftVersion >= 11900) {
+            NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.FLOAT), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.c), value)
         }
     }
 
     override fun createStringMetadata(index: Int, value: String): Any {
-        return if (isUniversal) {
-            val metadata = NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.STRING), value)
-            if (minecraftVersion >= 11903) {
-                metadata.value()
-            } else {
-                metadata
-            }
+        return if (minecraftVersion >= 11900) {
+            NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.STRING), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.d), value)
+        }
+    }
+
+    override fun createPoseMetadata(index: Int, value: Pose): Any {
+        return if (minecraftVersion >= 11900) {
+            NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.POSE), NMSEntityPose.entries.find { it.name == value.name }!!)
+        } else {
+            NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.s), NMS16EntityPose.entries.find { it.name == value.name }!!)
         }
     }
 
@@ -95,6 +91,7 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
             is Int -> createIntMetadata(source.first, value)
             is Float -> createFloatMetadata(source.first, value)
             is String -> createStringMetadata(source.first, value)
+            is Pose -> createPoseMetadata(source.first, value)
             else -> throw IllegalArgumentException("Unsupported type: ${value::class.java.name}")
         }
     }

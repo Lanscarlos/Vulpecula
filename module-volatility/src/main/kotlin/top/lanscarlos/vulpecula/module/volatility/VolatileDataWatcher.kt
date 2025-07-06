@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.volatility
 
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Pose
 import taboolib.module.nms.nmsProxy
 
 /**
@@ -27,6 +28,8 @@ interface VolatileDataWatcher {
     fun createFloatMetadata(index: Int, value: Float): Any
 
     fun createStringMetadata(index: Int, value: String): Any
+
+    fun createPoseMetadata(index: Int, value: Pose): Any
 
     fun deconstruct(source: Pair<Int, Any>): Any
 

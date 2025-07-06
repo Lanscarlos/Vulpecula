@@ -16,6 +16,9 @@ typealias NMS16DataWatcherItem<T> = net.minecraft.server.v1_16_R1.DataWatcher.It
 typealias NMS16DataWatcherObject<T> = net.minecraft.server.v1_16_R1.DataWatcherObject<T>
 typealias NMS16DataWatcherRegistry = net.minecraft.server.v1_16_R1.DataWatcherRegistry
 
+typealias NMSEntityPose = net.minecraft.world.entity.EntityPose
+typealias NMS16EntityPose = net.minecraft.server.v1_16_R1.EntityPose
+
 typealias CraftEntity12104 = org.bukkit.craftbukkit.v1_21_R3.entity.CraftEntity
 
 typealias NMSPacketPlayOutEntityMetadata = net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata
