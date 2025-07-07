@@ -3,7 +3,9 @@ package top.lanscarlos.vulpecula.module.volatility
 import net.minecraft.server.v1_16_R3.PacketDataSerializer
 import org.bukkit.Location
 import org.bukkit.WorldBorder
+import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.info
 import taboolib.module.nms.DataSerializer
 import taboolib.module.nms.MinecraftVersion
 import taboolib.module.nms.dataSerializerBuilder
@@ -43,7 +45,8 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
     ) {
         if (MinecraftVersion.isUniversal) {
             // 1.17+
-            val worldBorder = NMSWorldBorder()
+            info("1.17+")
+            val worldBorder = (viewer.world as CraftWorld).handle.worldBorder
             worldBorder.size = size
             worldBorder.setCenter(center.x, center.z)
             worldBorder.warningTime = warningTime
@@ -54,6 +57,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
             return
         }
 
+        info("1.16-")
         val packetSetCenter = NMS16PacketPlayOutWorldBorder().a(
             dataSerializerBuilder {
                 writeEnumSet(
