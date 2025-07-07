@@ -26,6 +26,7 @@ subprojects {
             install(Bukkit)
             install(BukkitNMS)
             install(BukkitNMSUtil)
+            install(BukkitNMSDataSerializer)
             install(BukkitUI)
             install(BukkitUtil)
             install(CommandHelper)
