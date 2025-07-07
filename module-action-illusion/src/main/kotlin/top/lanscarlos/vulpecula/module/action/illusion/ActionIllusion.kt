@@ -7,6 +7,7 @@ import org.bukkit.entity.Pose
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
+import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.info
 import taboolib.library.reflex.Reflex.Companion.invokeMethod
@@ -26,8 +27,7 @@ object ActionIllusion {
     @CommandBody
     val illusion = subCommand {
         literal("glow", literal = glow)
-        literal("swimming", literal = swimming)
-        literal("sleeping", literal = sleeping)
+        literal("pose", literal = pose)
     }
 
     private val glow: CommandComponent.() -> Unit = {
@@ -51,48 +51,29 @@ object ActionIllusion {
         }
     }
 
-    private val swimming: CommandComponent.() -> Unit = {
-        execute<Player> { sender, _, _ ->
-            val entity = selectEntity(sender)
-            if (entity == null) {
-                sender.sendMessage("&c请瞄准一个实体!".colored())
-                return@execute
-            }
-            sender.sendMessage("&a成功瞄准 ${entity.type.name}!".colored())
-            VolatileEntityMetadata.setSwimming(sender, entity, !sender.isSwimming)
-            sender.invokeMethod<Void>("setPose", Pose.SWIMMING, true)
-        }
-
+    private val pose: CommandComponent.() -> Unit = {
         dynamic {
+            suggest { Pose.entries.map { it.name }.toList() }
+            execute<Player> { sender, _, type ->
+                val entity = selectEntity(sender)
+                if (entity == null) {
+                    sender.sendMessage("&c请瞄准一个实体!".colored())
+                    return@execute
+                }
+                sender.sendMessage("&a成功瞄准 ${entity.type.name}!".colored())
+                VolatileEntityMetadata.setPose(sender, entity, Pose.valueOf(type.uppercase()))
+            }
+        }.dynamic {
             suggestPlayers()
-            execute<Player> { sender, _, name ->
+            execute<Player> { sender, content, name ->
+                val type = content["type"]
                 val player = Bukkit.getPlayerExact(name)!!
-                VolatileEntityMetadata.setSwimming(sender, player, !player.isSwimming)
+                VolatileEntityMetadata.setPose(sender, player, Pose.valueOf(type.uppercase()))
             }
         }
     }
 
-    private val sleeping: CommandComponent.() -> Unit = {
-        execute<Player> { sender, _, _ ->
-            val entity = selectEntity(sender)
-            if (entity == null) {
-                sender.sendMessage("&c请瞄准一个实体!".colored())
-                return@execute
-            }
-            sender.sendMessage("&a成功瞄准 ${entity.type.name}!".colored())
-            VolatileEntityMetadata.setSleep(sender, entity, !sender.isSleeping)
-        }
-
-        dynamic {
-            suggestPlayers()
-            execute<Player> { sender, _, name ->
-                val player = Bukkit.getPlayerExact(name)!!
-                VolatileEntityMetadata.setSleep(sender, player, !player.isSleeping)
-            }
-        }
-    }
-
-    fun selectEntity(viewer: Player): LivingEntity? {
+    private fun selectEntity(viewer: Player): LivingEntity? {
         val result = viewer.world.rayTraceEntities(viewer.eyeLocation, viewer.eyeLocation.direction, 10.0) {
             it != viewer && it is LivingEntity
         }
