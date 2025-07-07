@@ -39,7 +39,7 @@ object ActionCommand {
         literal("timing", literal = timing)
     }
 
-    val registry: CommandComponent.() -> Unit = {
+    private val registry: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
             displayBacikalActions(sender, false)
         }
@@ -61,7 +61,7 @@ object ActionCommand {
         }
     }
 
-    val reload: CommandComponent.() -> Unit = {
+    private val reload: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
             for (source in BacikalRegistry.getActionSourceValues()) {
                 try {
@@ -86,7 +86,7 @@ object ActionCommand {
         }
     }
 
-    val structure: CommandComponent.() -> Unit = {
+    private val structure: CommandComponent.() -> Unit = {
         dynamic("id") {
             suggest { BacikalRegistry.getActionParserKeys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
@@ -105,7 +105,7 @@ object ActionCommand {
         }
     }
 
-    val timing: CommandComponent.() -> Unit = {
+    private val timing: CommandComponent.() -> Unit = {
         dynamic("option") {
             restrict<ProxyCommandSender> { _, _, input ->
                 input.matches("(\\d+)(?:x(\\d+))?".toRegex())

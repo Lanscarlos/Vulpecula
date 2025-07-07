@@ -25,13 +25,13 @@ import java.io.File
  */
 object DispatcherService {
 
-    internal val module: String get() = asLang("module-dispatcher-service-name")
+    internal val name: String get() = asLang("module-dispatcher-service-name")
 
     private val directory: File = File(getDataFolder(), "dispatcher")
 
     private val registry = mutableMapOf<String, Dispatcher>()
 
-    private val service: ConfigService = ConfigService(id = "dispatcher", directory = directory, priority = 8, callback = Callback)
+    private val service: ConfigService = ConfigService("dispatcher", name, directory, 8, Callback)
 
     @Awake(LifeCycle.LOAD)
     fun onLoad() {
@@ -96,7 +96,7 @@ object DispatcherService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.printLocalizedMessage(sender, module)
+                        is QuestCompileException -> cause.printLocalizedMessage(sender, name)
                     }
                 }
                 else -> {
@@ -107,6 +107,10 @@ object DispatcherService {
 
         override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
             releaseResourceFolder("dispatcher")
+        }
+
+        override fun onLoadAutomatic(sender: ProxyCommandSender, id: String, file: File, time: Double) {
+            sender.info(sync = true) { asLang("module-dispatcher-service-load-automatic", id, time) }
         }
 
         override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {

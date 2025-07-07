@@ -16,25 +16,25 @@ import top.lanscarlos.vulpecula.common.core.utils.*
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-internal fun ProxyCommandSender.info(sync: Boolean = false, message: () -> String) = info(module = ScriptService.module, sync = sync, message = message)
+internal fun ProxyCommandSender.info(sync: Boolean = false, message: () -> String) = info(module = ScriptService.name, sync = sync, message = message)
 
 /**
  * 发送警告消息
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-internal fun ProxyCommandSender.warning(sync: Boolean = false, message: () -> String) = warning(module = ScriptService.module, sync = sync, message = message)
+internal fun ProxyCommandSender.warning(sync: Boolean = false, message: () -> String) = warning(module = ScriptService.name, sync = sync, message = message)
 
 /**
  * 发送错误消息
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-internal fun ProxyCommandSender.error(sync: Boolean = false, message: () -> String) = error(module = ScriptService.module, sync = sync, message = message)
+internal fun ProxyCommandSender.error(sync: Boolean = false, message: () -> String) = error(module = ScriptService.name, sync = sync, message = message)
 
 /**
  * 发送调试消息
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-internal fun ProxyCommandSender.debug(sync: Boolean = false, message: () -> String) = debug(module = ScriptService.module, sync = sync, message = message)
+internal fun ProxyCommandSender.debug(sync: Boolean = false, message: () -> String) = debug(module = ScriptService.name, sync = sync, message = message)

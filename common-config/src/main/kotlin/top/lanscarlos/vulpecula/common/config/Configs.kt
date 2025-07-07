@@ -25,6 +25,8 @@ object Configs {
     lateinit var config: Configuration
         private set
 
+    val name: String get() = asLang("common-core-message-module")
+
     val services = LinkedList<ConfigService>()
 
     @Awake(LifeCycle.ENABLE)
@@ -45,9 +47,9 @@ object Configs {
             config.reload()
             // 计算耗时, 单位毫秒
             val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
-            sender.info(asLang("common-core-message-module"), sync = true) { asLang("common-config-main-load-success", time) }
+            sender.info(name, sync = true) { asLang("common-config-main-load-success", time) }
         } catch (ex: Exception) {
-            sender.error(asLang("common-core-message-module"), sync = true) { asLang("common-config-main-load-failure", ex.localizedMessage) }
+            sender.error(name, sync = true) { asLang("common-config-main-load-failure", ex.localizedMessage) }
         }
 
         // 重载所有服务

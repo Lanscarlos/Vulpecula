@@ -27,7 +27,7 @@ import java.io.File
  */
 object ScriptService {
 
-    internal val module: String get() = asLang("module-script-service-name")
+    internal val name: String get() = asLang("module-script-service-name")
 
     private val directory: File = File(getDataFolder(), "script")
 
@@ -37,7 +37,7 @@ object ScriptService {
 
     private var pid: Long = 0
 
-    private val service: ConfigService = ConfigService(id = "script", directory = directory, priority = 8, callback = Callback)
+    private val service: ConfigService = ConfigService("script", name, directory, 8, Callback)
 
     @Awake(LifeCycle.LOAD)
     fun onLoad() {
@@ -266,16 +266,20 @@ object ScriptService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.printLocalizedMessage(sender, module)
+                        is QuestCompileException -> cause.printLocalizedMessage(sender, name)
                     }
                 }
-                is QuestCompileException -> e.printLocalizedMessage(sender, module)
+                is QuestCompileException -> e.printLocalizedMessage(sender, name)
                 else -> e.printStackTrace()
             }
         }
 
         override fun onLoadInit(sender: ProxyCommandSender, directory: File) {
             releaseResourceFolder("script")
+        }
+
+        override fun onLoadAutomatic(sender: ProxyCommandSender, id: String, file: File, time: Double) {
+            sender.info(sync = true) { asLang("module-script-service-load-automatic", id, time) }
         }
 
         override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {

@@ -204,7 +204,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             // 脚本运行异常时, 暂停任务
             pause()
             console().error { asLang("module-schedule-run-failure", id, pid) }
-            ex.printLocalizedMessage(console(), ScheduleService.module)
+            ex.printLocalizedMessage(console(), ScheduleService.name)
         }
 
         override fun start() {

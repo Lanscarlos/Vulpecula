@@ -3,9 +3,11 @@ package top.lanscarlos.vulpecula.common.config
 import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
 import taboolib.common5.Coerce
+import taboolib.common5.FileWatcher
+import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.core.utils.info
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
@@ -19,12 +21,12 @@ import kotlin.collections.HashSet
  * @author Lanscarlos
  * @since 2025/4/25 11:11
  */
-class ConfigService(val id: String, val directory: File, val priority: Int, val callback: ConfigServiceCallback) {
+class ConfigService(val id: String, val name: String, val directory: File, val priority: Int, val callback: ConfigServiceCallback) {
 
     /**
      * 相对路径
      * */
-    val path = getDataFolder().toPath().normalize().relativize(directory.toPath().normalize()).toString()
+//    val path = getDataFolder().toPath().normalize().relativize(directory.toPath().normalize()).toString()
 
     /**
      * 文件缓存
@@ -35,6 +37,11 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
      * 文件哈希指纹
      * */
     val hash = HashMap<File, String>()
+
+    /**
+     * 被监听变动的文件
+     * */
+    val watched: HashSet<File> = hashSetOf()
 
     /**
      * 重置缓存
@@ -58,72 +65,65 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
             // 重载开始
             callback.onLoadStarted(sender)
 
-            // 获取所有文件
-            val queue = LinkedList<File>()
-            val loadedFiles = hashSetOf<File>()
-            queue += directory
-            while (queue.isNotEmpty()) {
-                val file = queue.poll()
-                if (file.isFile) {
-                    if (!file.exists() || file.name.first() == '#') {
-                        // 排除不存在或被注释的文件
-                        continue
-                    }
-                    loadedFiles += file
-                    continue
-                }
-                val files = file.listFiles()?.filter { it.name.first() != '#' } ?: continue
-                queue.addAll(files)
-            }
-            val cacheFiles = HashSet(cache)
-
             var created = 0
             var modified = 0
             var deleted = 0
             var failed = 0
+            val cacheFiles = HashSet(cache)
+            cache.clear()
+            for (file in directory.walk()) {
+                if (file.isDirectory) {
+                    continue
+                }
+                if (file.name[0] == '#') {
+                    continue
+                }
 
+                if (file in cacheFiles) {
+                    // 计算哈希指纹
+                    val hash = file.digest("SHA-256")
+                    // 哈希指纹比对
+                    if (hash == this.hash[file]) {
+                        continue
+                    }
+                    try {
+                        callback.onFileModified(sender, getFileId(file), file)
+                        this.hash[file] = hash
+                        detectAutoReload(file)
+                        modified += 1
+                    } catch (e: Exception) {
+                        failed += 1
+                        callback.onFileException(sender, getFileId(file), file, e)
+                    } finally {
+                        cacheFiles.remove(file)
+                    }
+                } else {
+                    // 新增的文件
+                    try {
+                        callback.onFileCreated(sender, getFileId(file), file)
+                        cache += file
+                        hash[file] = file.digest("SHA-256")
+                        detectAutoReload(file)
+                        created += 1
+                    } catch (e: Exception) {
+                        failed += 1
+                        callback.onFileException(sender, getFileId(file), file, e)
+                    }
+                }
+            }
 
-            // 处理被移除的文件
-            for (file in cacheFiles - loadedFiles) {
+            // 处理剩余被删除的文件
+            for (file in cacheFiles) {
                 try {
-                    callback.onFileDeleted(sender, buildFileId(file), file)
+                    callback.onFileDeleted(sender, getFileId(file), file)
                     cache.remove(file)
                     hash.remove(file)
                     deleted += 1
                 } catch (e: Exception) {
                     failed += 1
-                    callback.onFileException(sender, buildFileId(file), file, e)
-                }
-            }
-
-            // 处理新增的文件
-            for (file in loadedFiles - cacheFiles) {
-                try {
-                    callback.onFileCreated(sender, buildFileId(file), file)
-                    cache += file
-                    hash[file] = file.digest("SHA-256")
-                    created += 1
-                } catch (e: Exception) {
-                    failed += 1
-                    callback.onFileException(sender, buildFileId(file), file, e)
-                }
-            }
-
-            // 处理变动的文件
-            for (file in loadedFiles intersect cacheFiles) {
-                // 计算哈希指纹
-                val hash = file.digest("SHA-256")
-                // 哈希指纹比对
-                if (hash == this.hash[file]) {
-                    continue
-                }
-                try {
-                    callback.onFileModified(sender, buildFileId(file), file)
-                    this.hash[file] = hash
-                    modified += 1
-                } catch (e: Exception) {
-                    failed += 1
-                    callback.onFileException(sender, buildFileId(file), file, e)
+                    callback.onFileException(sender, getFileId(file), file, e)
+                } finally {
+                    removeFileWatcher(file)
                 }
             }
 
@@ -138,30 +138,49 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
         }
     }
 
-    private fun buildDetailMessage(created: Int, modified: Int, deleted: Int, failed: Int): String {
-        val builder = StringBuilder()
-        if (created > 0) {
-            builder.append(asLang("common-config-service-load-detail-created", created))
+    private fun detectAutoReload(file: File) {
+        if (file.extension != "yml" && file.extension != "yaml") {
+            return
         }
-        if (modified > 0) {
-            if (builder.isNotEmpty()) {
-                builder.append("; ")
-            }
-            builder.append(asLang("common-config-service-load-detail-modified", modified))
+        val config = Configuration.loadFromFile(file)
+        if (!config.getBoolean("debug.auto-reload", false)) {
+            // 未启用自动重载
+            return
         }
-        if (deleted > 0) {
-            if (builder.isNotEmpty()) {
-                builder.append("; ")
-            }
-            builder.append(asLang("common-config-service-load-detail-deleted", deleted))
+        addFileWatcher(file)
+    }
+
+    private fun addFileWatcher(file: File) {
+        FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
+        watched.add(file)
+        console().info(name) { asLang("common-config-service-load-automatic-enabled", getFileId(file)) }
+    }
+
+    private fun removeFileWatcher(file: File) {
+        if (!watched.remove(file)) {
+            return
         }
-        if (failed > 0) {
-            if (builder.isNotEmpty()) {
-                builder.append("; ")
-                builder.append(asLang("common-config-service-load-detail-failed", failed))
-            }
+        FileWatcher.INSTANCE.removeListener(file)
+        console().info(name) { asLang("common-config-service-load-automatic-disabled", getFileId(file)) }
+    }
+
+    private fun onFileModified(file: File) {
+        // 调试计时
+        val startTime = System.nanoTime()
+        // 计算哈希指纹
+        val hash = file.digest("SHA-256")
+        // 哈希指纹比对
+        if (hash == this.hash[file]) {
+            return
         }
-        return builder.toString()
+        val id = getFileId(file)
+        try {
+            callback.onFileModified(console(), id, file)
+            callback.onLoadAutomatic(console(), id, file, timing(startTime))
+            this.hash[file] = hash
+        } catch (e: Exception) {
+            callback.onFileException(console(), id, file, e)
+        }
     }
 
     private fun timing(time: Long): Double {
@@ -172,10 +191,10 @@ class ConfigService(val id: String, val directory: File, val priority: Int, val 
      * 根据文件相对路径获取文件的 Id
      * 例如： ./Vulpecula/script/example/default.yml -> example.default
      * */
-    private fun buildFileId(file: File): String {
-        val rootPath = directory.toPath().normalize()
-        val targetPath = file.toPath().normalize()
-        val relativePath = rootPath.relativize(targetPath)
+    private fun getFileId(file: File): String {
+        val rootPath = directory.toURI().normalize()
+        val targetPath = file.toURI().normalize()
+        val relativePath = rootPath.relativize(targetPath).path
         return relativePath.toString().replace(File.separatorChar, '.').substringBeforeLast('.')
     }
 

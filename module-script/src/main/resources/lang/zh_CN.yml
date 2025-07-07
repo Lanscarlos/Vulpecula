@@ -6,6 +6,7 @@ module-script-service-load-detail-created: '本次加载有 &a{0}&7 个新增的
 module-script-service-load-detail-modified: '本次加载有 &a{0}&7 个脚本被修改'
 module-script-service-load-detail-deleted: '本次加载有 &a{0}&7 个脚本被移除'
 module-script-service-load-detail-failed: '本次加载有 &a{0}&7 个异常的脚本. 请及时处理'
+module-script-service-load-automatic: '脚本 &a{0}&7 自动重载成功 &8({1}ms)'
 module-script-service-load-success: '脚本模块加载成功. 已载入 &a{0}&7 个脚本 &8({1}ms)'
 module-script-service-load-failure: '脚本模块加载失败!'
 module-script-service-file-load-failure: '脚本 &c{0}&7 加载失败! {1}'

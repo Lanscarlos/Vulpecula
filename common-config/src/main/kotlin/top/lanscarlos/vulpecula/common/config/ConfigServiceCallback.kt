@@ -29,6 +29,8 @@ interface ConfigServiceCallback {
 
     fun onLoadStarted(sender: ProxyCommandSender) {}
 
+    fun onLoadAutomatic(sender: ProxyCommandSender, id: String, file: File, time: Double)
+
     /**
      * 加载成功时调用
      *

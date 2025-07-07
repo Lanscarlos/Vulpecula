@@ -7,4 +7,6 @@ package top.lanscarlos.vulpecula.common.core.command
  * @author Lanscarlos
  * @since 2025/7/4 10:13
  */
+@Target(AnnotationTarget.FIELD)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class CommandDevelop

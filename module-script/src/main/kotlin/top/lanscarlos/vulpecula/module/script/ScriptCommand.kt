@@ -101,15 +101,15 @@ object ScriptCommand {
         }
         literal("list") {
             execute<ProxyCommandSender> { sender, _, _ ->
-                val builder = StringBuilder(asLang("module-script-command-task-list-header"))
+//                val builder = StringBuilder(asLang("module-script-command-task-list-header"))
                 for (task in ScriptService.getTaskValues()) {
                     val pid = task.pid
                     val script = task.script.id
                     val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
                     val message = asLang("module-script-command-task-list-item", pid, script, startTime)
-                    builder.append('\n').append(message)
+//                    builder.append('\n').append(message)
                 }
-                sender.info { builder.toString() }
+//                sender.info { builder.toString() }
             }
         }
     }
@@ -138,7 +138,7 @@ object ScriptCommand {
         }
         task?.onFailure { ex ->
             sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-            ex.printLocalizedMessage(sender, ScriptService.module)
+            ex.printLocalizedMessage(sender, ScriptService.name)
         }
     }
 
@@ -155,7 +155,7 @@ object ScriptCommand {
         }
         task?.onFailure { ex ->
             console().error(sync = true) { asLang("module-script-command-run-failure", id) }
-            ex.printLocalizedMessage(sender, ScriptService.module)
+            ex.printLocalizedMessage(sender, ScriptService.name)
         }
     }
 
