@@ -58,7 +58,7 @@ object ActionIllusionWarning {
 @BacikalParser("illusion.warning.set")
 object ActionIllusionWarningSet : ClassActionResolver {
 
-    fun resolve(viewer: Player, level: Int, @Optional(["in"]) duration: Int = 1) {
+    fun resolve(viewer: Player, level: Int, @Optional(["in"]) duration: Int = 10) {
         ActionIllusionWarning.setEffect(viewer, FadeInWarningEffect(viewer,  level, duration))
     }
 

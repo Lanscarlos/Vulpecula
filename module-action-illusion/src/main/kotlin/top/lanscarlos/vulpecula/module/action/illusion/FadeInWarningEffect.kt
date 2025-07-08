@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.illusion
 
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 
@@ -26,6 +27,7 @@ class FadeInWarningEffect(private val viewer: Player, private val target: Int, p
     private lateinit var task: PlatformExecutor.PlatformTask
 
     init {
+        require(duration > 0) { "duration must be greater than 0" }
         val effect = ActionIllusionWarning.getEffect(viewer)
         level = effect?.level ?: 0
         current = level.toLong() shl 32
