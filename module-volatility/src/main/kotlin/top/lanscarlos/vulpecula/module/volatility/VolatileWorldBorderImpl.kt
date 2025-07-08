@@ -5,6 +5,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.entity.Player
+import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.nms.DataSerializer
 import taboolib.module.nms.MinecraftVersion
 import taboolib.module.nms.dataSerializerBuilder
@@ -74,7 +75,9 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
     ): Any {
         if (MinecraftVersion.isUniversal) {
             // 1.17+
-            val worldBorder = (world as CraftWorld).handle.worldBorder
+            val worldBorder = NMSWorldBorder()
+            worldBorder.setProperty("world", (world as CraftWorld).handle)
+            worldBorder.applySettings(world.handle.worldBorder.createSettings())
             if (size != null) {
                 worldBorder.size = size
             }
