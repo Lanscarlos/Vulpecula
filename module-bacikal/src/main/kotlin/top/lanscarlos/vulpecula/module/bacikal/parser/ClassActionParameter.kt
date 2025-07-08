@@ -4,7 +4,9 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.ParsedAction
+import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
+import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
@@ -105,6 +107,7 @@ class ClassActionParameter(
         }
         return when (type) {
             ParsedAction::class.java -> WrappedAction(action)
+            org.bukkit.Location::class.java -> BukkitLocationAction(action, index, name, isNullable)
             Any::class.java -> GenericAction(action, index, name, isNullable)
             else -> ApplicativeAction(action, type, index, name, isNullable)
         }
@@ -152,7 +155,7 @@ class ClassActionParameter(
     class GenericAction(val source: ParsedAction<*>, val index: Int, val name: String, val isNullable: Boolean) : BacikalAction<Any> {
 
         override fun execute(frame: BacikalFrame): CompletableFuture<Any> {
-            return frame.runAction(source).thenApply { it ->
+            return frame.runAction(source).thenApply {
                 if (it == null) {
                     require(isNullable) {
                         asLang("module-bacikal-exception-invalid-null-argument", index, name)
@@ -165,12 +168,26 @@ class ClassActionParameter(
 
     }
 
+    class BukkitLocationAction(val source: ParsedAction<*>, val index: Int, val name: String, val isNullable: Boolean) : BacikalAction<org.bukkit.Location> {
+        override fun execute(frame: BacikalFrame): CompletableFuture<org.bukkit.Location> {
+            return frame.runAction(source).thenApply {
+                if (it == null) {
+                    require(isNullable) {
+                        asLang("module-bacikal-exception-invalid-null-argument", index, name)
+                    }
+                    return@thenApply null
+                }
+                return@thenApply LocationApplicative.convert(it).toBukkitLocation()
+            }
+        }
+    }
+
     class ApplicativeAction<T: Any>(val source: ParsedAction<*>, type: Class<T>, val index: Int, val name: String, val isNullable: Boolean) : BacikalAction<T> {
 
         val applicative = ApplicativeRegistry.getApplicative(type)
 
         override fun execute(frame: BacikalFrame): CompletableFuture<T> {
-            return frame.runAction(source).thenApply { it ->
+            return frame.runAction(source).thenApply {
                 if (it == null) {
                     require(isNullable) {
                         asLang("module-bacikal-exception-invalid-null-argument", index, name)
