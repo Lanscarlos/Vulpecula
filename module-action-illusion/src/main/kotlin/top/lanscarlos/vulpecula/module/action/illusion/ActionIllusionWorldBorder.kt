@@ -19,16 +19,14 @@ object ActionIllusionWorldBorder : ClassActionResolver {
 
     fun resolve(
         viewer: Player,
-        @Additional(["size"]) size: Double = viewer.worldBorder?.size ?: 0.0,
-        @Additional(["centerX", "x"]) centerX: Double = viewer.worldBorder?.center?.x ?: 0.0,
-        @Additional(["centerZ", "z"]) centerZ: Double = viewer.worldBorder?.center?.z ?: 0.0,
-        @Additional(["warningTime"]) warningTime: Int = viewer.worldBorder?.warningTime ?: 0,
-        @Additional(["warningDistance"]) warningDistance: Int = viewer.worldBorder?.warningDistance ?: 0,
-        @Additional(["damageBuffer"]) damageBuffer: Double = viewer.worldBorder?.damageBuffer ?: 0.0,
-        @Additional(["damageAmount"]) damageAmount: Double = viewer.worldBorder?.damageAmount ?: 0.0,
+        @Additional(["size"]) size: Double?,
+        @Additional(["center"]) center: Location,
+        @Additional(["warningTime"]) warningTime: Int?,
+        @Additional(["warningDistance"]) warningDistance: Int?,
+        @Additional(["damageBuffer"]) damageBuffer: Double?,
+        @Additional(["damageAmount"]) damageAmount: Double?,
     ) {
-        val center = Location(null, centerX, 0.0, centerZ)
-        VolatileWorldBorder.sendWorldBorder(viewer, center, size, warningTime, warningDistance, damageBuffer, damageAmount)
+        VolatileWorldBorder.sendWorldBorder(viewer, size, center, warningTime, warningDistance, damageBuffer, damageAmount)
     }
 
 }
