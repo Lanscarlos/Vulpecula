@@ -20,7 +20,7 @@ object ActionIllusionWorldBorder : ClassActionResolver {
     fun resolve(
         viewer: Player,
         @Additional(["size"]) size: Double?,
-        @Additional(["center"]) center: Location,
+        @Additional(["center"]) center: Location?,
         @Additional(["warningTime"]) warningTime: Int?,
         @Additional(["warningDistance"]) warningDistance: Int?,
         @Additional(["damageBuffer"]) damageBuffer: Double?,
