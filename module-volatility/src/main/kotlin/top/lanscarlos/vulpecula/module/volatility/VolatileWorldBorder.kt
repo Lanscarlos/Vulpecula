@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.module.volatility
 
 import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.WorldBorder
 import org.bukkit.entity.Player
 import taboolib.module.nms.nmsProxy
 
