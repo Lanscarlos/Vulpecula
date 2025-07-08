@@ -5,7 +5,6 @@ import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.warning
 import taboolib.library.reflex.ReflexClass
-import java.lang.reflect.ParameterizedType
 
 /**
  * Vulpecula
@@ -69,6 +68,16 @@ object ApplicativeRegistry : ClassVisitor(-4) {
             nameMapping[alias] = applicative
         }
         registry[clazz] = applicative
+        // 处理基本类型映射
+        when (clazz) {
+            Boolean::class.java -> registry[java.lang.Boolean::class.java] = applicative
+            Byte::class.java -> registry[java.lang.Byte::class.java] = applicative
+            Short::class.java -> registry[java.lang.Short::class.java] = applicative
+            Int::class.java -> registry[Integer::class.java] = applicative
+            Long::class.java -> registry[java.lang.Long::class.java] = applicative
+            Float::class.java -> registry[java.lang.Float::class.java] = applicative
+            Double::class.java -> registry[java.lang.Double::class.java] = applicative
+        }
     }
 
     override fun visitStart(owner: ReflexClass) {
