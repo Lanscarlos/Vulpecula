@@ -1,7 +1,9 @@
 package top.lanscarlos.vulpecula.module.action.illusion
 
 import org.bukkit.entity.Player
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.volatility.VolatileWorldBorder
 import java.util.UUID
@@ -16,18 +18,33 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object ActionIllusionWarning {
 
-    private val effect: ConcurrentHashMap<UUID, WarningEffect> = ConcurrentHashMap()
+    private val effects: ConcurrentHashMap<UUID, WarningEffect> = ConcurrentHashMap()
 
-    fun getEffect(player: Player): WarningEffect? {
-        return effect[player.uniqueId]
+    fun getEffect(viewer: Player): WarningEffect? {
+        return effects[viewer.uniqueId]
+    }
+
+    fun setEffect(viewer: Player, effect: WarningEffect) {
+        effects[viewer.uniqueId]?.stop()
+        effects[viewer.uniqueId] = effect
+        effect.apply()
+    }
+
+    fun clearEffect(viewer: Player) {
+        effects.remove(viewer.uniqueId)?.stop()
     }
 
     fun sendWarningEffect(viewer: Player, level: Int) {
         require(level in 0..100) { "level must be between 0 and 100" }
-        val warningDistance = (1024000.0 / (101 - level.toDouble())).toInt()
+        val warningDistance = if (level > 0) {
+            (1024000.0 / (101 - level)).toInt()
+        } else {
+            1024
+        }
+        // 线性分级 0-100
         VolatileWorldBorder.sendWorldBorder(
             viewer,
-            size = 10240.0,
+            size = 20480.0,
             center = viewer.location,
             warningTime = null,
             warningDistance = warningDistance,
@@ -41,8 +58,26 @@ object ActionIllusionWarning {
 @BacikalParser("illusion.warning.set")
 object ActionIllusionWarningSet : ClassActionResolver {
 
-    fun resolve(viewer: Player, level: Int) {
-        ActionIllusionWarning.sendWarningEffect(viewer, level)
+    fun resolve(viewer: Player, level: Int, @Optional(["in"]) duration: Int = 1) {
+        ActionIllusionWarning.setEffect(viewer, FadeInWarningEffect(viewer,  level, duration))
+    }
+
+}
+
+@BacikalParser("illusion.warning.breathing")
+object ActionIllusionWarningBreathing : ClassActionResolver {
+
+    fun resolve(viewer: Player, @Additional(["speed"]) speed: Int = 5) {
+        ActionIllusionWarning.setEffect(viewer, BreathingWarningEffect(viewer, speed.toDouble()))
+    }
+
+}
+
+@BacikalParser("illusion.warning.clear")
+object ActionIllusionWarningClear : ClassActionResolver {
+
+    fun resolve(viewer: Player) {
+        ActionIllusionWarning.clearEffect(viewer)
     }
 
 }
