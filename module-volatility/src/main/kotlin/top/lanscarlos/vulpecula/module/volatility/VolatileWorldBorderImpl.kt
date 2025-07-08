@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.volatility
 
 import net.minecraft.server.v1_16_R3.PacketDataSerializer
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.WorldBorder
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.entity.Player
@@ -22,43 +23,149 @@ import java.util.EnumSet
  */
 class VolatileWorldBorderImpl : VolatileWorldBorder {
 
-    override fun sendWorldBorder(viewer: Player, worldBorder: WorldBorder) {
-        sendWorldBorder(
-            viewer,
-            worldBorder.center,
-            worldBorder.size,
-            worldBorder.warningTime,
-            worldBorder.warningDistance,
-            worldBorder.damageBuffer,
-            worldBorder.damageAmount
-        )
-    }
-
     override fun sendWorldBorder(
         viewer: Player,
-        center: Location,
-        size: Double,
-        warningTime: Int,
-        warningDistance: Int,
-        damageBuffer: Double,
-        damageAmount: Double
+        size: Double?,
+        center: Location?,
+        warningTime: Int?,
+        warningDistance: Int?,
+        damageBuffer: Double?,
+        damageAmount: Double?
     ) {
+        val packet = createWorldBorderPacket(viewer.world, size, center, warningTime, warningDistance, damageBuffer, damageAmount)
         if (MinecraftVersion.isUniversal) {
             // 1.17+
-            info("1.17+")
-            val worldBorder = (viewer.world as CraftWorld).handle.worldBorder
-            worldBorder.size = size
-            worldBorder.setCenter(center.x, center.z)
-            worldBorder.warningTime = warningTime
-            worldBorder.warningBlocks = warningDistance
-            worldBorder.damagePerBlock = damageAmount
-            worldBorder.damageSafeZone = damageBuffer
-            viewer.sendPacket(NMSClientboundInitializeBorderPacket(worldBorder))
-            return
+            viewer.sendPacket(packet)
+        } else {
+            // 1.16-
+            val packets = (packet as List<*>).filterNotNull()
+            viewer.sendBundlePacket(packets)
         }
+    }
 
-        info("1.16-")
-        val packetSetCenter = NMS16PacketPlayOutWorldBorder().a(
+    override fun sendDynamicWorldBorder(
+        viewer: Player,
+        oldSize: Double,
+        newSize: Double,
+        speed: Long,
+        center: Location?,
+        warningTime: Int?,
+        warningDistance: Int?,
+        damageBuffer: Double?,
+        damageAmount: Double?
+    ) {
+        val packet = createDynamicWorldBorderPacket(viewer.world, oldSize, newSize, speed, center, warningTime, warningDistance, damageBuffer, damageAmount)
+        if (MinecraftVersion.isUniversal) {
+            // 1.17+
+            viewer.sendPacket(packet)
+        } else {
+            // 1.16-
+            val packets = (packet as List<*>).filterNotNull()
+            viewer.sendBundlePacket(packets)
+        }
+    }
+
+    override fun createWorldBorderPacket(
+        world: World,
+        size: Double?,
+        center: Location?,
+        warningTime: Int?,
+        warningDistance: Int?,
+        damageBuffer: Double?,
+        damageAmount: Double?
+    ): Any {
+        if (MinecraftVersion.isUniversal) {
+            // 1.17+
+            val worldBorder = (world as CraftWorld).handle.worldBorder
+            if (size != null) {
+                worldBorder.size = size
+            }
+            if (center != null) {
+                worldBorder.setCenter(center.x, center.z)
+            }
+            if (warningTime != null) {
+                worldBorder.warningTime = warningTime
+            }
+            if (warningDistance != null) {
+                worldBorder.warningBlocks = warningDistance
+            }
+            if (damageBuffer != null) {
+                worldBorder.damageSafeZone = damageBuffer
+            }
+            if (damageAmount != null) {
+                worldBorder.damagePerBlock = damageAmount
+            }
+            return NMSClientboundInitializeBorderPacket(worldBorder)
+        } else {
+            // 1.16-
+            val packets = mutableListOf<Any>()
+            if (center != null) {
+                packets += createNMS16SetCenterPacket(center)
+            }
+            if (size != null) {
+                packets += createNMS16SetSizePacket(size)
+            }
+            if (warningTime != null) {
+                packets += createNMS16SetWarningTimePacket(warningTime)
+            }
+            if (warningDistance != null) {
+                packets += createNMS16SetWarningBlocksPacket(warningDistance)
+            }
+            return packets
+        }
+    }
+
+    override fun createDynamicWorldBorderPacket(
+        world: World,
+        oldSize: Double,
+        newSize: Double,
+        speed: Long,
+        center: Location?,
+        warningTime: Int?,
+        warningDistance: Int?,
+        damageBuffer: Double?,
+        damageAmount: Double?
+    ): Any {
+        if (MinecraftVersion.isUniversal) {
+            // 1.17+
+            val worldBorder = (world as CraftWorld).handle.worldBorder
+            worldBorder.lerpSizeBetween(oldSize, newSize, speed)
+            if (center != null) {
+                worldBorder.setCenter(center.x, center.z)
+            }
+            if (warningTime != null) {
+                worldBorder.warningTime = warningTime
+            }
+            if (warningDistance != null) {
+                worldBorder.warningBlocks = warningDistance
+            }
+            if (damageBuffer != null) {
+                worldBorder.damageSafeZone = damageBuffer
+            }
+            if (damageAmount != null) {
+                worldBorder.damagePerBlock = damageAmount
+            }
+            return NMSClientboundInitializeBorderPacket(worldBorder)
+        } else {
+            // 1.16-
+            val packets = mutableListOf(
+                createNMS16SetLerpSizePacket(oldSize, newSize, speed)
+            )
+            if (center != null) {
+                packets += createNMS16SetCenterPacket(center)
+            }
+            if (warningTime != null) {
+                packets += createNMS16SetWarningTimePacket(warningTime)
+            }
+            if (warningDistance != null) {
+                packets += createNMS16SetWarningBlocksPacket(warningDistance)
+            }
+            return packets
+        }
+    }
+
+    private fun createNMS16SetCenterPacket(center: Location): Any {
+        return NMS16PacketPlayOutWorldBorder().a(
             dataSerializerBuilder {
                 writeEnumSet(
                     EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_CENTER),
@@ -68,7 +175,10 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 writeDouble(center.z)
             }.build() as PacketDataSerializer
         )
-        val packetSetSize = NMS16PacketPlayOutWorldBorder().a(
+    }
+
+    private fun createNMS16SetSizePacket(size: Double): Any {
+        return NMS16PacketPlayOutWorldBorder().a(
             dataSerializerBuilder {
                 writeEnumSet(
                     EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_SIZE),
@@ -77,61 +187,10 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 writeDouble(size)
             }.build() as PacketDataSerializer
         )
-        val packetSetWarningTime = NMS16PacketPlayOutWorldBorder().a(
-            dataSerializerBuilder {
-                writeEnumSet(
-                    EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_WARNING_TIME),
-                    NMS16PacketPlayOutWorldBorderAction::class.java
-                )
-                writeVarInt(warningTime)
-            }.build() as PacketDataSerializer
-        )
-        val packetSetWarningBlocks = NMS16PacketPlayOutWorldBorder().a(
-            dataSerializerBuilder {
-                writeEnumSet(
-                    EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_WARNING_BLOCKS),
-                    NMS16PacketPlayOutWorldBorderAction::class.java
-                )
-                writeVarInt(warningDistance)
-            }.build() as PacketDataSerializer
-        )
-        viewer.sendBundlePacket(packetSetCenter, packetSetSize, packetSetWarningTime, packetSetWarningBlocks)
     }
 
-    override fun sendDynamicWorldBorder(
-        viewer: Player,
-        center: Location,
-        oldSize: Double,
-        newSize: Double,
-        speed: Long,
-        warningTime: Int,
-        warningDistance: Int,
-        damageBuffer: Double,
-        damageAmount: Double
-    ) {
-        if (MinecraftVersion.isUniversal) {
-            // 1.17+
-            val worldBorder = NMSWorldBorder()
-            worldBorder.lerpSizeBetween(oldSize, newSize, speed)
-            worldBorder.setCenter(center.x, center.z)
-            worldBorder.warningTime = warningTime
-            worldBorder.warningBlocks = warningDistance
-            worldBorder.damagePerBlock = damageAmount
-            worldBorder.damageSafeZone = damageBuffer
-            viewer.sendPacket(NMSClientboundInitializeBorderPacket(worldBorder))
-            return
-        }
-        val packetSetCenter = NMS16PacketPlayOutWorldBorder().a(
-            dataSerializerBuilder {
-                writeEnumSet(
-                    EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_CENTER),
-                    NMS16PacketPlayOutWorldBorderAction::class.java
-                )
-                writeDouble(center.x)
-                writeDouble(center.z)
-            }.build() as PacketDataSerializer
-        )
-        val packetSetSize = NMS16PacketPlayOutWorldBorder().a(
+    private fun createNMS16SetLerpSizePacket(oldSize: Double, newSize: Double, speed: Long): Any {
+        return NMS16PacketPlayOutWorldBorder().a(
             dataSerializerBuilder {
                 writeEnumSet(
                     EnumSet.of(NMS16PacketPlayOutWorldBorderAction.LERP_SIZE),
@@ -142,7 +201,10 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 writeVarLong(speed)
             }.build() as PacketDataSerializer
         )
-        val packetSetWarningTime = NMS16PacketPlayOutWorldBorder().a(
+    }
+
+    private fun createNMS16SetWarningTimePacket(warningTime: Int): Any {
+        return NMS16PacketPlayOutWorldBorder().a(
             dataSerializerBuilder {
                 writeEnumSet(
                     EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_WARNING_TIME),
@@ -151,7 +213,10 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 writeVarInt(warningTime)
             }.build() as PacketDataSerializer
         )
-        val packetSetWarningBlocks = NMS16PacketPlayOutWorldBorder().a(
+    }
+
+    private fun createNMS16SetWarningBlocksPacket(warningDistance: Int): Any {
+        return NMS16PacketPlayOutWorldBorder().a(
             dataSerializerBuilder {
                 writeEnumSet(
                     EnumSet.of(NMS16PacketPlayOutWorldBorderAction.SET_WARNING_BLOCKS),
@@ -160,7 +225,6 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 writeVarInt(warningDistance)
             }.build() as PacketDataSerializer
         )
-        viewer.sendBundlePacket(packetSetCenter, packetSetSize, packetSetWarningTime, packetSetWarningBlocks)
     }
 
     private fun DataSerializer.writeVarLong(value: Long) {
