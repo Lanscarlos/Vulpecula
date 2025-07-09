@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.library.reflex.Reflex.Companion.unsafeInstance
 import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.sendBundlePacket
 import taboolib.module.nms.sendPacket
 import java.util.LinkedList
 
@@ -22,6 +23,10 @@ class VolatileBlockImpl : VolatileBlock {
         viewer.sendPacket(createBlockChange(location, data))
     }
 
+    override fun sendBlockChanges(viewer: Player, data: List<Pair<Location, BlockData>>) {
+        viewer.sendBundlePacket(createMultiBlockChange(data))
+    }
+
     override fun createBlockChange(location: Location, data: BlockData): Any {
         return if (MinecraftVersion.isUniversal) {
             NMSPacketPlayOutBlockChange(
@@ -36,7 +41,7 @@ class VolatileBlockImpl : VolatileBlock {
         }
     }
 
-    override fun createMultiBlockChange(data: List<Pair<Location, BlockData>>): Any {
+    override fun createMultiBlockChange(data: List<Pair<Location, BlockData>>): List<Any> {
         require(data.isNotEmpty()) { "Block data list is empty" }
         if (MinecraftVersion.isUniversal) {
             val chunks = mutableMapOf<NMSSectionPosition, LinkedList<Pair<Short, NMS21BlockData>>>()

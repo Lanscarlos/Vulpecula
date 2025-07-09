@@ -16,9 +16,11 @@ interface VolatileBlock {
 
     fun sendBlockChange(viewer: Player, location: Location, data: BlockData)
 
+    fun sendBlockChanges(viewer: Player, data: List<Pair<Location, BlockData>>)
+
     fun createBlockChange(location: Location, data: BlockData): Any
 
-    fun createMultiBlockChange(data: List<Pair<Location, BlockData>>): Any
+    fun createMultiBlockChange(data: List<Pair<Location, BlockData>>): List<Any>
 
     companion object : VolatileBlock by nmsProxy()
 
