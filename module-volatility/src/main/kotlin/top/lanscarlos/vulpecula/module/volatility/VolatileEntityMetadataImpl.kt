@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.module.volatility
 
-import net.minecraft.network.syncher.DataWatcher
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
@@ -51,7 +50,7 @@ class VolatileEntityMetadataImpl : VolatileEntityMetadata {
                 NMSPacketPlayOutEntityMetadata(
                     entityId,
                     metadata.map {
-                        (VolatileDataWatcher.deconstruct(it) as DataWatcher.Item<*>).value()
+                        (VolatileDataWatcher.deconstruct(it) as NMSDataWatcherItem<*>).value()
                     }
                 )
             }
@@ -82,9 +81,10 @@ class VolatileEntityMetadataImpl : VolatileEntityMetadata {
 
 }
 
-typealias Craft21Entity = org.bukkit.craftbukkit.v1_21_R3.entity.CraftEntity
 typealias NMSEntityPose = net.minecraft.world.entity.EntityPose
 typealias NMSPacketPlayOutEntityMetadata = net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata
+
+typealias Craft21Entity = org.bukkit.craftbukkit.v1_21_R3.entity.CraftEntity
 
 typealias NMS16EntityPose = net.minecraft.server.v1_16_R1.EntityPose
 typealias NMS16PacketPlayOutEntityMetadata = net.minecraft.server.v1_16_R1.PacketPlayOutEntityMetadata

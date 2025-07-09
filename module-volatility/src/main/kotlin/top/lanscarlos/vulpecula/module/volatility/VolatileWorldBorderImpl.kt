@@ -1,9 +1,7 @@
 package top.lanscarlos.vulpecula.module.volatility
 
-import net.minecraft.server.v1_16_R3.PacketDataSerializer
 import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.entity.Player
 import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.module.nms.DataSerializer
@@ -76,7 +74,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
         if (MinecraftVersion.isUniversal) {
             // 1.17+
             val worldBorder = NMSWorldBorder()
-            worldBorder.setProperty("world", (world as CraftWorld).handle)
+            worldBorder.setProperty("world", (world as Craft21World).handle)
             worldBorder.applySettings(world.handle.worldBorder.createSettings())
             if (size != null) {
                 worldBorder.size = size
@@ -96,7 +94,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
             if (damageAmount != null) {
                 worldBorder.damagePerBlock = damageAmount
             }
-            return NMSClientboundInitializeBorderPacket(worldBorder)
+            return NMSPacketPlayOutWorldBorder(worldBorder)
         } else {
             // 1.16-
             val packets = mutableListOf<Any>()
@@ -129,7 +127,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
     ): Any {
         if (MinecraftVersion.isUniversal) {
             // 1.17+
-            val worldBorder = (world as CraftWorld).handle.worldBorder
+            val worldBorder = (world as Craft21World).handle.worldBorder
             worldBorder.lerpSizeBetween(oldSize, newSize, speed)
             if (center != null) {
                 worldBorder.setCenter(center.x, center.z)
@@ -146,7 +144,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
             if (damageAmount != null) {
                 worldBorder.damagePerBlock = damageAmount
             }
-            return NMSClientboundInitializeBorderPacket(worldBorder)
+            return NMSPacketPlayOutWorldBorder(worldBorder)
         } else {
             // 1.16-
             val packets = mutableListOf(
@@ -174,7 +172,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 )
                 writeDouble(center.x)
                 writeDouble(center.z)
-            }.build() as PacketDataSerializer
+            }.build() as NMS16PacketDataSerializer
         )
     }
 
@@ -186,7 +184,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                     NMS16PacketPlayOutWorldBorderAction::class.java
                 )
                 writeDouble(size)
-            }.build() as PacketDataSerializer
+            }.build() as NMS16PacketDataSerializer
         )
     }
 
@@ -200,7 +198,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                 writeDouble(oldSize)
                 writeDouble(newSize)
                 writeVarLong(speed)
-            }.build() as PacketDataSerializer
+            }.build() as NMS16PacketDataSerializer
         )
     }
 
@@ -212,7 +210,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                     NMS16PacketPlayOutWorldBorderAction::class.java
                 )
                 writeVarInt(warningTime)
-            }.build() as PacketDataSerializer
+            }.build() as NMS16PacketDataSerializer
         )
     }
 
@@ -224,7 +222,7 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
                     NMS16PacketPlayOutWorldBorderAction::class.java
                 )
                 writeVarInt(warningDistance)
-            }.build() as PacketDataSerializer
+            }.build() as NMS16PacketDataSerializer
         )
     }
 
@@ -240,7 +238,10 @@ class VolatileWorldBorderImpl : VolatileWorldBorder {
 }
 
 typealias NMSWorldBorder = net.minecraft.world.level.border.WorldBorder
-typealias NMSClientboundInitializeBorderPacket = net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
+typealias NMSPacketPlayOutWorldBorder = net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 
+typealias Craft21World = org.bukkit.craftbukkit.v1_21_R3.CraftWorld
+
+typealias NMS16PacketDataSerializer = net.minecraft.server.v1_16_R3.PacketDataSerializer
 typealias NMS16PacketPlayOutWorldBorder = net.minecraft.server.v1_16_R3.PacketPlayOutWorldBorder
 typealias NMS16PacketPlayOutWorldBorderAction = net.minecraft.server.v1_16_R3.PacketPlayOutWorldBorder.EnumWorldBorderAction

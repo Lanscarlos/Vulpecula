@@ -13,9 +13,6 @@ import taboolib.module.nms.MinecraftVersion
  */
 class VolatileDataWatcherImpl : VolatileDataWatcher {
 
-    private val isUniversal = MinecraftVersion.isUniversal
-    private val minecraftVersion = MinecraftVersion.versionId
-
     override fun getByteMetadata(entity: Entity, index: Int): Byte {
         val dataWatcher = (entity as Craft21Entity).handle.entityData
         return dataWatcher.get(NMSDataWatcherObject(index, NMSDataWatcherRegistry.BYTE))
@@ -37,7 +34,7 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
     }
 
     override fun createByteMetadata(index: Int, value: Byte): Any {
-        return if (minecraftVersion >= 11900) {
+        return if (MinecraftVersion.versionId >= 11900) {
             NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.BYTE), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.a), value)
@@ -45,7 +42,7 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
     }
 
     override fun createIntMetadata(index: Int, value: Int): Any {
-        return if (minecraftVersion >= 11900) {
+        return if (MinecraftVersion.versionId >= 11900) {
             NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.INT), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.b), value)
@@ -53,7 +50,7 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
     }
 
     override fun createFloatMetadata(index: Int, value: Float): Any {
-        return if (minecraftVersion >= 11900) {
+        return if (MinecraftVersion.versionId >= 11900) {
             NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.FLOAT), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.c), value)
@@ -61,7 +58,7 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
     }
 
     override fun createStringMetadata(index: Int, value: String): Any {
-        return if (minecraftVersion >= 11900) {
+        return if (MinecraftVersion.versionId >= 11900) {
             NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.STRING), value)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.d), value)
@@ -69,7 +66,7 @@ class VolatileDataWatcherImpl : VolatileDataWatcher {
     }
 
     override fun createPoseMetadata(index: Int, value: Pose): Any {
-        return if (minecraftVersion >= 11900) {
+        return if (MinecraftVersion.versionId >= 11900) {
             NMSDataWatcherItem(NMSDataWatcherObject(index, NMSDataWatcherRegistry.POSE), NMSEntityPose.entries.find { it.name == value.name }!!)
         } else {
             NMS16DataWatcherItem(NMS16DataWatcherObject(index, NMS16DataWatcherRegistry.s), NMS16EntityPose.entries.find { it.name == value.name }!!)
