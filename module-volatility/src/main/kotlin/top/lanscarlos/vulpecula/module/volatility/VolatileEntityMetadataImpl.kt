@@ -8,8 +8,6 @@ import taboolib.library.reflex.Reflex.Companion.setProperty
 import taboolib.library.reflex.Reflex.Companion.unsafeInstance
 import taboolib.module.nms.MinecraftVersion
 import taboolib.module.nms.sendPacket
-import top.lanscarlos.vulpecula.module.volatility.aliases.NMS16PacketPlayOutEntityMetadata
-import top.lanscarlos.vulpecula.module.volatility.aliases.NMSPacketPlayOutEntityMetadata
 
 /**
  * Vulpecula
@@ -83,3 +81,10 @@ class VolatileEntityMetadataImpl : VolatileEntityMetadata {
     }
 
 }
+
+typealias Craft21Entity = org.bukkit.craftbukkit.v1_21_R3.entity.CraftEntity
+typealias NMSEntityPose = net.minecraft.world.entity.EntityPose
+typealias NMSPacketPlayOutEntityMetadata = net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata
+
+typealias NMS16EntityPose = net.minecraft.server.v1_16_R1.EntityPose
+typealias NMS16PacketPlayOutEntityMetadata = net.minecraft.server.v1_16_R1.PacketPlayOutEntityMetadata
