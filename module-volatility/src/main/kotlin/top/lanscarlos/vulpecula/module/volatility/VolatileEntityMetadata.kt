@@ -14,11 +14,15 @@ import taboolib.module.nms.nmsProxy
  */
 interface VolatileEntityMetadata {
 
-    fun updateHealth(viewer: Player, entity: Entity, health: Float)
+    fun setGlowing(viewer: Player, entity: Entity, value: Boolean) {
+        setFlag(viewer, entity, EntityMetadataFlag.GLOWING, value)
+    }
 
-    fun setGlowing(viewer: Player, entity: Entity, value: Boolean)
+    fun setFlag(viewer: Player, entity: Entity, flag: EntityMetadataFlag, value: Boolean)
 
     fun setPose(viewer: Player, entity: Entity, pose: Pose)
+
+    fun updateHealth(viewer: Player, entity: Entity, health: Float)
 
     companion object : VolatileEntityMetadata by nmsProxy()
 
