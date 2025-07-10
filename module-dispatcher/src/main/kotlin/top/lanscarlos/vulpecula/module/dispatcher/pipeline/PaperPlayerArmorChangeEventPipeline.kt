@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
-import org.bukkit.inventory.EquipmentSlot
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
 
