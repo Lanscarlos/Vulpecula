@@ -23,6 +23,6 @@ dependencies {
 tasks {
     jar {
         archiveBaseName.set(project.name.substringAfter('-'))
-        destinationDirectory.set(file("${rootDir}/build/libs/action"))
+        destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs/action"))
     }
 }
