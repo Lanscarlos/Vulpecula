@@ -1,0 +1,5 @@
+
+
+player-armor-change-event:
+  enable: false
+  period: 5

@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
+import org.bukkit.inventory.EquipmentSlot
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
 
@@ -12,7 +13,7 @@ import top.lanscarlos.vulpecula.module.dispatcher.Context
  * @since 2025/7/5
  */
 @AutoRegistered
-class PlayerArmorChangeEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<PlayerArmorChangeEvent>(clazz, config) {
+class PaperPlayerArmorChangeEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<PlayerArmorChangeEvent>(clazz, config) {
 
     override fun initVariables(context: Context) {
         val event = getEvent(context)
