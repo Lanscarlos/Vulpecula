@@ -1,6 +1,7 @@
 import io.izzel.taboolib.gradle.AfyBroker
 import io.izzel.taboolib.gradle.BungeeCord
 import io.izzel.taboolib.gradle.Porticus
+import io.izzel.taboolib.gradle.Velocity
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 version = "1.0.0"
@@ -11,6 +12,7 @@ taboolib {
         install(AfyBroker)
         install(BungeeCord)
         install(Porticus)
+        install(Velocity)
     }
     description {
         name(project.name.substringAfter('-').uppercaseFirstChar())
