@@ -1,6 +1,7 @@
 
 taboolib {
     subproject = false
+    relocate("top.lanscarlos.module.", "top.lanscarlos.vulpecula.module.")
     relocate("kotlinx.metadata.", "kotlinx.metadata060.")
     relocate("com.ucasoft.kcron.", "com.ucasoft.kcron0230.")
     relocate("io.foldright.cffu.", "io.foldright.cffu113.")
@@ -16,6 +17,7 @@ dependencies {
     compileOnly(project(":module-action-illusion"))
     compileOnly(project(":module-action-item"))
     compileOnly(project(":module-action-memory"))
+    compileOnly(project(":module-anser"))
     compileOnly(project(":module-bacikal"))
     compileOnly(project(":module-command"))
     compileOnly(project(":module-core"))
