@@ -24,6 +24,8 @@ interface VolatileEntityMetadata {
 
     fun updateHealth(viewer: Player, entity: Entity, health: Float)
 
+    fun mount(viewer: Player, entity: Entity)
+
     companion object : VolatileEntityMetadata by nmsProxy()
 
 }

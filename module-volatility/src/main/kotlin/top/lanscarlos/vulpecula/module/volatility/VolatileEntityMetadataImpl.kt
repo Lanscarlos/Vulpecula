@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.volatility
 
+import net.minecraft.network.protocol.game.PacketPlayOutMount
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
@@ -38,6 +39,15 @@ class VolatileEntityMetadataImpl : VolatileEntityMetadata {
 
     override fun updateHealth(viewer: Player, entity: Entity, health: Float) {
         viewer.sendPacket(createPacketPlayOutEntityMetadata(entity.entityId, INDEX_HEALTH to health))
+    }
+
+    override fun mount(viewer: Player, entity: Entity) {
+        val packet = Class.forName("net.minecraft.network.protocol.game.ClientboundSetPassengersPacket")
+            .unsafeInstance()
+        packet.setProperty("vehicle", (entity as Craft21Entity).handle.id)
+        packet.setProperty("passengers", intArrayOf((viewer as Craft21Entity).handle.id))
+//        viewer.sendPacket(PacketPlayOutMount((entity as Craft21Entity).handle))
+        viewer.sendPacket(packet)
     }
 
     /**
