@@ -47,4 +47,10 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
         }
     }
 
+    override fun postprocess(context: Context) {
+        for (pipeline in pipelines) {
+            pipeline.postprocess(context)
+        }
+    }
+
 }
