@@ -20,9 +20,4 @@ class PlayerEventPipeline(clazz: Class<*>, config: ConfigurationSection) : Abstr
         context.setPlayer(getEvent(context).player)
     }
 
-    override fun initVariables(context: Context) {
-        val event = getEvent(context)
-        context.setVariable("player", event.player)
-    }
-
 }

@@ -49,6 +49,11 @@ data class Context(val event: Event) {
             return
         }
         this.player = player
+        if (player != null) {
+            setVariable("player", player)
+        } else {
+            removeVariable("player")
+        }
     }
 
     fun sender(): ProxyCommandSender {
