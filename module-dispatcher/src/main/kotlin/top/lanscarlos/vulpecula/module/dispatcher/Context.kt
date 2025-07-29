@@ -5,6 +5,7 @@ import org.bukkit.event.Event
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.applicative.Applicative
 
 /**
  * Vulpecula
@@ -40,6 +41,9 @@ data class Context(val event: Event) {
         isCancelled = true
     }
 
+    /**
+     * @param force 是否强制替换玩家变量
+     * */
     fun setPlayer(player: Player?, force: Boolean = false) {
         if (!force && isPlayerInitialized) {
             return
@@ -53,6 +57,14 @@ data class Context(val event: Event) {
 
     fun variables(): Map<String, Any> {
         return variables
+    }
+
+    fun getVariable(key: String): Any? {
+        return variables[key]
+    }
+
+    fun <T> getVariable(key: String, applicative: Applicative<T>): T? {
+        return getVariable(key)?.let(applicative::convert)
     }
 
     fun setVariable(key: String, value: Any?) {

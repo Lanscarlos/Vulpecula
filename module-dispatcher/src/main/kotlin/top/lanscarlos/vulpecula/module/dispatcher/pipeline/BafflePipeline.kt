@@ -47,7 +47,7 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
         // TODO 阻断处理流的传播
     }
 
-    override fun postprocess(context: Context) {
+    override fun afterFilter(context: Context) {
         // 更新阻断器数据
         baffle?.next()
     }

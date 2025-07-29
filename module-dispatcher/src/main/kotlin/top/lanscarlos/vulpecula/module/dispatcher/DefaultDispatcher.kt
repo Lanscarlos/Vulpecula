@@ -42,7 +42,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override val executable: Script by config.read("execute").convert(::parseScript)
 
-    val pipeline: Pipeline<*> by config.read("rule").convert(::parsePipeline)
+    val pipeline: Pipeline by config.read("rule").convert(::parsePipeline)
 
     init {
         enable()
@@ -98,7 +98,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
                 when (val status = task.variables()["@EVENT_STATUS"]) {
                     null -> {
                         // 更新阻断
-                        pipeline.postprocess(context)
+                        pipeline.afterFilter(context)
                     }
                     "CANCELED" -> {
                         info("取消事件.")
@@ -115,7 +115,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
             }
         } else {
             // 更新阻断
-            pipeline.postprocess(context)
+            pipeline.afterFilter(context)
         }
 
         flow.add(executable)
@@ -144,7 +144,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         console().error { ex.getDetailMessage() }
     }
 
-    private fun parsePipeline(value: Any?): Pipeline<*> {
+    private fun parsePipeline(value: Any?): Pipeline {
         val name = config.getString("listen-event")!!
         val config = if (value != null) {
             value as ConfigurationSection

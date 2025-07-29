@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
  * @author Lanscarlos
  * @since 2025/6/12 11:56
  */
-abstract class AbstractPipeline<T: Event>(val clazz: Class<*>, val config: ConfigurationSection) : Pipeline<T> {
+abstract class AbstractPipeline<T: Event>(val clazz: Class<*>, val config: ConfigurationSection) : Pipeline {
 
     override val priority: Int = 8
 
@@ -26,6 +26,8 @@ abstract class AbstractPipeline<T: Event>(val clazz: Class<*>, val config: Confi
     override fun initVariables(context: Context) = Unit
 
     override fun filter(context: Context) = Unit
+
+    override fun afterFilter(context: Context) = Unit
 
     override fun postprocess(context: Context) = Unit
 

@@ -1,7 +1,5 @@
 package top.lanscarlos.vulpecula.module.dispatcher
 
-import org.bukkit.event.Event
-
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.dispatcher
@@ -9,7 +7,7 @@ import org.bukkit.event.Event
  * @author Lanscarlos
  * @since 2025/6/12 8:57
  */
-interface Pipeline<T: Event> {
+interface Pipeline {
 
     val priority: Int
 
@@ -29,7 +27,12 @@ interface Pipeline<T: Event> {
     fun filter(context: Context)
 
     /**
-     * 后置处理
+     * 过滤后置处理
+     * */
+    fun afterFilter(context: Context)
+
+    /**
+     * 后置处理, 当脚本运行结束时被调用
      * */
     fun postprocess(context: Context)
 
