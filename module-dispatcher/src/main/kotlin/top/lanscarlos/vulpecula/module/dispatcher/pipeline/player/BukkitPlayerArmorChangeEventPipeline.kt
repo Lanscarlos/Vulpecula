@@ -1,12 +1,14 @@
-package top.lanscarlos.vulpecula.module.dispatcher.pipeline
+package top.lanscarlos.vulpecula.module.dispatcher.pipeline.player
 
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
 import top.lanscarlos.vulpecula.module.dispatcher.event.PlayerArmorChangeEvent
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.module.dispatcher.pipeline
+ * top.lanscarlos.vulpecula.module.dispatcher.pipeline.player
  *
  * @author Lanscarlos
  * @since 2025/7/10 11:46

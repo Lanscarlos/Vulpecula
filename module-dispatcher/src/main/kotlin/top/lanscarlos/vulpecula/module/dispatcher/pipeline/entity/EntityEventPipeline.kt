@@ -1,13 +1,15 @@
-package top.lanscarlos.vulpecula.module.dispatcher.pipeline
+package top.lanscarlos.vulpecula.module.dispatcher.pipeline.entity
 
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityEvent
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.module.dispatcher.pipeline
+ * top.lanscarlos.vulpecula.module.dispatcher.pipeline.entity
  *
  * @author Lanscarlos
  * @since 2025/6/14 9:24
