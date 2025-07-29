@@ -59,12 +59,20 @@ data class Context(val event: Event) {
         return variables
     }
 
-    fun getVariable(key: String): Any? {
+    fun getVariableOrNull(key: String): Any? {
         return variables[key]
     }
 
-    fun <T> getVariable(key: String, applicative: Applicative<T>): T? {
-        return getVariable(key)?.let(applicative::convert)
+    fun <T> getVariableOrNull(key: String, applicative: Applicative<T>): T? {
+        return getVariableOrNull(key)?.let(applicative::convert)
+    }
+
+    fun getVariable(key: String): Any {
+        return variables[key]!!
+    }
+
+    fun <T> getVariable(key: String, applicative: Applicative<T>): T {
+        return applicative.convert(getVariable(key))
     }
 
     fun setVariable(key: String, value: Any?) {
