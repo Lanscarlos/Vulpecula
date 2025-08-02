@@ -11,5 +11,5 @@ import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
  * @author Lanscarlos
  * @since 2025/7/29
  */
-@AutoRegistered
+@AutoRegistered("PlayerDamageByEntityEvent", "PlayerDamageEvent")
 class PlayerDamageByEntityEventPipeline(clazz: Class<*>, config: ConfigurationSection) : VirtualPlayerEventPipeline<EntityDamageByEntityEvent>(clazz, config)
