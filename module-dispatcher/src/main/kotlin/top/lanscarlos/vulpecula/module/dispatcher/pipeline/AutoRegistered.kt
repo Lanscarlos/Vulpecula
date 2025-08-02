@@ -9,4 +9,4 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class AutoRegistered(val value: String = "")
+annotation class AutoRegistered(val value: String = "", val extends: String = "")

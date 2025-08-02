@@ -21,7 +21,7 @@ import java.util.LinkedList
 @Awake(LifeCycle.LOAD)
 object PipelineRegistry : ClassVisitor() {
 
-    data class Registration(val name: String, val event: Class<*>, val pipeline: Class<*>)
+    data class Registration(val name: String, val extends: String, val event: Class<*>, val pipeline: Class<*>)
 
     private val registry: HashMap<String, Registration> = linkedMapOf()
 
@@ -39,13 +39,30 @@ object PipelineRegistry : ClassVisitor() {
             registrations.add(registration)
         }
 
-        // 按继承关系远近进行排序, 继承关系越近则排序越靠前
+        // 按继承关系远近进行排序, 继承关系越远则排序越靠前, 越先处理事件
         registrations.sortedWith { a, b ->
             when {
-                a.event == event -> -1 // [a, b]
-                b.event == event -> 1 // [b, a]
-                a.event.isAssignableFrom(b.event) -> 1 // [b, a]
-                else -> -1 // [a, b]
+                a.event == b.event -> {
+                    // 两者相同, 可能为虚拟事件, 比对 name 和 extends 字段
+                    when {
+                        a.name[0] == '@' && b.name[0] != '@' -> {
+                            // a 为虚拟事件, 继承自 b
+                            1 // [b, a]
+                        }
+                        a.name[0] != '@' && b.name[0] == '@' -> {
+                            // b 为虚拟事件, 继承自 a
+                            -1 // [a, b]
+                        }
+                        a.extends.isBlank() && b.extends.isBlank() -> 0
+                        a.extends == b.name ->  1 // [b, a]
+                        b.extends == a.name ->  -1 // [a, b]
+                        else -> 0
+                    }
+                }
+                a.event == event -> 1 // [b, a]
+                b.event == event -> -1 // [a, b]
+                a.event.isAssignableFrom(b.event) -> -1 // [a, b]
+                else -> 0
             }
         }
 
@@ -132,7 +149,7 @@ object PipelineRegistry : ClassVisitor() {
             type.name
         }
 
-        registry[name] = Registration(name, type, clazz)
+        registry[name] = Registration(name, annotation.extends, type, clazz)
     }
 
     /**
