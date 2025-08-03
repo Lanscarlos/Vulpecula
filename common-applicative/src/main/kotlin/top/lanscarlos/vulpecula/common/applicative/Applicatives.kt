@@ -37,8 +37,8 @@ object Applicatives {
      *
      * @param key 属性名, 递归获取属性使用 . 分隔
      * @param strict 严格模式, 递归过程遇到中间属性为空或不存在时抛出异常
-     * @throws IllegalStateException 如果属性不存在或者严格模式下遇到中间属性为空或不存在
      * @param reflect 是否使用反射检查预设之外的属性
+     * @throws IllegalStateException 如果属性不存在或者严格模式下遇到中间属性为空或不存在
      * */
     fun <T: Any> readProperty(instance: T, key: String, strict: Boolean, reflect: Boolean): Any? {
         val applicative = ApplicativeRegistry.getApplicative(instance.javaClass)
