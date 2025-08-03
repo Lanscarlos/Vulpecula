@@ -4,7 +4,7 @@ import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.action.bindActionConfig
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -26,7 +26,7 @@ object ActionMemory {
 
 }
 
-@BacikalParser("memory.switch")
+@Parser("memory.switch")
 object ActionMemorySwitch : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, storage: String) {
@@ -35,7 +35,7 @@ object ActionMemorySwitch : ClassActionResolver {
 
 }
 
-@BacikalParser("memory.get")
+@Parser("memory.get")
 object ActionMemoryGet : ClassActionResolver {
 
     fun resolve(
@@ -49,7 +49,7 @@ object ActionMemoryGet : ClassActionResolver {
 
 }
 
-@BacikalParser("memory.set")
+@Parser("memory.set")
 object ActionMemorySet : ClassActionResolver {
 
     fun resolve(
@@ -67,7 +67,7 @@ object ActionMemorySet : ClassActionResolver {
 
 }
 
-@BacikalParser("memory.remove")
+@Parser("memory.remove")
 object ActionMemoryRemove : ClassActionResolver {
 
     fun resolve(

@@ -4,7 +4,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/30
  */
-@BacikalParser("item.color.get")
+@Parser("item.color.get")
 object ActionItemColorGet : ClassActionResolver {
 
     fun resolve(
@@ -39,7 +39,7 @@ object ActionItemColorGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.color.set")
+@Parser("item.color.set")
 object ActionItemColorSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, color: java.awt.Color?) {
@@ -56,7 +56,7 @@ object ActionItemColorSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.color.mix")
+@Parser("item.color.mix")
 object ActionItemColorMix : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, color: java.awt.Color) {

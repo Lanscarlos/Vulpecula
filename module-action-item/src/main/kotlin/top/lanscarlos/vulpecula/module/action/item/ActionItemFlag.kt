@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemFlag
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -13,7 +13,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.flag.size")
+@Parser("item.flag.size")
 object ActionItemFlagSize : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -23,7 +23,7 @@ object ActionItemFlagSize : ClassActionResolver {
 
 }
 
-@BacikalParser("item.flag.has")
+@Parser("item.flag.has")
 object ActionItemFlagHas : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, flag: String): Boolean {
@@ -34,7 +34,7 @@ object ActionItemFlagHas : ClassActionResolver {
 
 }
 
-@BacikalParser("item.flag.add")
+@Parser("item.flag.add")
 object ActionItemFlagAdd : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, flag: String) {
@@ -47,7 +47,7 @@ object ActionItemFlagAdd : ClassActionResolver {
 
 }
 
-@BacikalParser("item.flag.remove")
+@Parser("item.flag.remove")
 object ActionItemFlagRemove : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, flag: String) {

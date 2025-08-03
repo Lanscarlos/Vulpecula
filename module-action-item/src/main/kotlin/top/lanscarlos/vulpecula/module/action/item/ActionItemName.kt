@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.action.item
 
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -11,7 +11,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.name.get")
+@Parser("item.name.get")
 object ActionItemNameGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): String? {
@@ -21,7 +21,7 @@ object ActionItemNameGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.name.set")
+@Parser("item.name.set")
 object ActionItemNameSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, name: String?) {

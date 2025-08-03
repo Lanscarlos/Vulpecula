@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.action.entity
 
 import taboolib.common.util.Location
 import taboolib.platform.util.toBukkitLocation
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -14,7 +14,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/7/3
  */
-@BacikalParser("entity.teleport")
+@Parser("entity.teleport")
 object ActionEntityTeleport : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, @Expected(["to"]) location: Location) {

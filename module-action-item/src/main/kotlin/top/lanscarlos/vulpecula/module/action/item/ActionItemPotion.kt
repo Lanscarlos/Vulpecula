@@ -8,7 +8,7 @@ import taboolib.library.xseries.XPotion
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -19,7 +19,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/7/2
  */
-@BacikalParser("item.potion.size")
+@Parser("item.potion.size")
 object ActionItemPotionSize : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -33,7 +33,7 @@ object ActionItemPotionSize : ClassActionResolver {
 
 }
 
-@BacikalParser("item.potion.has")
+@Parser("item.potion.has")
 object ActionItemPotionHas : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, type: String): Boolean {
@@ -45,7 +45,7 @@ object ActionItemPotionHas : ClassActionResolver {
 
 }
 
-@BacikalParser("item.potion.set", aliases = ["add"])
+@Parser("item.potion.set", aliases = ["add"])
 object ActionItemPotionSet : ClassActionResolver {
 
     fun resolve(
@@ -75,7 +75,7 @@ object ActionItemPotionSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.potion.remove")
+@Parser("item.potion.remove")
 object ActionItemPotionRemove : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, type: String): Boolean {
@@ -92,7 +92,7 @@ object ActionItemPotionRemove : ClassActionResolver {
 
 }
 
-@BacikalParser("item.potion.clear")
+@Parser("item.potion.clear")
 object ActionItemPotionClear : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Boolean {

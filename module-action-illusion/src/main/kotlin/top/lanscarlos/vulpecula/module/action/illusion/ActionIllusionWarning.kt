@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.action.illusion
 
 import org.bukkit.entity.Player
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.volatility.VolatileWorldBorder
@@ -55,7 +55,7 @@ object ActionIllusionWarning {
 
 }
 
-@BacikalParser("illusion.warning.set")
+@Parser("illusion.warning.set")
 object ActionIllusionWarningSet : ClassActionResolver {
 
     fun resolve(viewer: Player, level: Int, @Optional(["in"]) duration: Int = 20) {
@@ -64,7 +64,7 @@ object ActionIllusionWarningSet : ClassActionResolver {
 
 }
 
-@BacikalParser("illusion.warning.breathing")
+@Parser("illusion.warning.breathing")
 object ActionIllusionWarningBreathing : ClassActionResolver {
 
     fun resolve(viewer: Player, @Additional(["speed"]) speed: Int = 5) {
@@ -73,7 +73,7 @@ object ActionIllusionWarningBreathing : ClassActionResolver {
 
 }
 
-@BacikalParser("illusion.warning.clear")
+@Parser("illusion.warning.clear")
 object ActionIllusionWarningClear : ClassActionResolver {
 
     fun resolve(viewer: Player) {

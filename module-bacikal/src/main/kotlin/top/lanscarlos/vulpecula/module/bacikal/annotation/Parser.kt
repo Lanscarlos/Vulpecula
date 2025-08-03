@@ -9,7 +9,7 @@ package top.lanscarlos.vulpecula.module.bacikal.annotation
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class BacikalParser(
+annotation class Parser(
     val id: String,
     val name: String = "",
     val aliases: Array<String> = [],

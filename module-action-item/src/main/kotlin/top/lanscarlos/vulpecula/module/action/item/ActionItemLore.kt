@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import java.util.LinkedList
@@ -14,7 +14,7 @@ import java.util.LinkedList
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.lore.size")
+@Parser("item.lore.size")
 class ActionItemLoreSize : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -24,7 +24,7 @@ class ActionItemLoreSize : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.get")
+@Parser("item.lore.get")
 class ActionItemLoreGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: String): Any? {
@@ -39,7 +39,7 @@ class ActionItemLoreGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.insert")
+@Parser("item.lore.insert")
 class ActionItemLoreInsert : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: Int, content: String) {
@@ -58,7 +58,7 @@ class ActionItemLoreInsert : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.add")
+@Parser("item.lore.add")
 class ActionItemLoreAdd : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, content: String) {
@@ -72,7 +72,7 @@ class ActionItemLoreAdd : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.set")
+@Parser("item.lore.set")
 class ActionItemLoreSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: String, content: String) {
@@ -97,7 +97,7 @@ class ActionItemLoreSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.remove")
+@Parser("item.lore.remove")
 class ActionItemLoreRemove : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, line: String, content: String) {
@@ -120,7 +120,7 @@ class ActionItemLoreRemove : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.override")
+@Parser("item.lore.override")
 class ActionItemLoreOverride : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, lore: List<String>) {
@@ -132,7 +132,7 @@ class ActionItemLoreOverride : ClassActionResolver {
 
 }
 
-@BacikalParser("item.lore.clear")
+@Parser("item.lore.clear")
 class ActionItemLoreClear : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {

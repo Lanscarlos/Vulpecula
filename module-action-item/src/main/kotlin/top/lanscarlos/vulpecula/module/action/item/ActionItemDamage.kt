@@ -4,7 +4,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/30 10:53
  */
-@BacikalParser("item.damage.maximum", aliases = ["max"])
+@Parser("item.damage.maximum", aliases = ["max"])
 object ActionItemDamageMaximum : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -25,7 +25,7 @@ object ActionItemDamageMaximum : ClassActionResolver {
 
 }
 
-@BacikalParser("item.damage.get")
+@Parser("item.damage.get")
 object ActionItemDamageGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -35,7 +35,7 @@ object ActionItemDamageGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.damage.set")
+@Parser("item.damage.set")
 object ActionItemDamageSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, damage: Int) {
@@ -45,7 +45,7 @@ object ActionItemDamageSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.damage.increase", aliases = ["inc", "add"])
+@Parser("item.damage.increase", aliases = ["inc", "add"])
 object ActionItemDamageIncrease : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, damage: Int) {
@@ -55,7 +55,7 @@ object ActionItemDamageIncrease : ClassActionResolver {
 
 }
 
-@BacikalParser("item.damage.decrease", aliases = ["dec"])
+@Parser("item.damage.decrease", aliases = ["dec"])
 object ActionItemDamageDecrease : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, damage: Int) {

@@ -6,7 +6,7 @@ import org.bukkit.inventory.EntityEquipment
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -17,7 +17,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("entity.equipment.get")
+@Parser("entity.equipment.get")
 object ActionEntityEquipmentGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, slot: String): ItemStack {
@@ -29,7 +29,7 @@ object ActionEntityEquipmentGet : ClassActionResolver {
 
 }
 
-@BacikalParser("entity.equipment.set")
+@Parser("entity.equipment.set")
 object ActionEntityEquipmentSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, slot: String, item: ItemStack) {

@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.action.entity
 import org.bukkit.entity.Damageable
 import org.bukkit.entity.Entity
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/7/3
  */
-@BacikalParser("entity.damage")
+@Parser("entity.damage")
 object ActionEntityDamage : ClassActionResolver {
 
     fun resolve(

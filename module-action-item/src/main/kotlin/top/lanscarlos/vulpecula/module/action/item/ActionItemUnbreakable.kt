@@ -1,10 +1,9 @@
 package top.lanscarlos.vulpecula.module.action.item
 
-import taboolib.common.platform.function.warning
 import taboolib.library.reflex.Reflex.Companion.invokeMethod
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -15,7 +14,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.unbreakable.state")
+@Parser("item.unbreakable.state")
 object ActionItemUnbreakableState : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Boolean {
@@ -35,7 +34,7 @@ object ActionItemUnbreakableState : ClassActionResolver {
 
 }
 
-@BacikalParser("item.unbreakable.enable")
+@Parser("item.unbreakable.enable")
 object ActionItemUnbreakableEnable : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {
@@ -56,7 +55,7 @@ object ActionItemUnbreakableEnable : ClassActionResolver {
 
 }
 
-@BacikalParser("item.unbreakable.disable")
+@Parser("item.unbreakable.disable")
 object ActionItemUnbreakableDisable : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {

@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.action.event
 
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -11,7 +11,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/18
  */
-@BacikalParser("event.ignore")
+@Parser("event.ignore")
 object ActionEventIgnore : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {

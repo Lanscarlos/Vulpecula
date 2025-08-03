@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.action.item
 import taboolib.module.nms.getItemTag
 import taboolib.module.nms.setItemTag
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/7/2
  */
-@BacikalParser("item.tag.has")
+@Parser("item.tag.has")
 object ActionItemTagHas : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, key: String): Boolean {
@@ -25,7 +25,7 @@ object ActionItemTagHas : ClassActionResolver {
 
 }
 
-@BacikalParser("item.tag.get")
+@Parser("item.tag.get")
 object ActionItemTagGet : ClassActionResolver {
 
     fun resolve(
@@ -51,7 +51,7 @@ object ActionItemTagGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.tag.set")
+@Parser("item.tag.set")
 object ActionItemTagSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, key: String, value: Any) {
@@ -65,7 +65,7 @@ object ActionItemTagSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.tag.remove")
+@Parser("item.tag.remove")
 object ActionItemTagRemove : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, key: String) {

@@ -4,7 +4,7 @@ import org.bukkit.enchantments.Enchantment
 import taboolib.library.xseries.XEnchantment
 import taboolib.module.nms.MinecraftVersion
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import kotlin.jvm.optionals.getOrNull
@@ -16,7 +16,7 @@ import kotlin.jvm.optionals.getOrNull
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.enchantment.size")
+@Parser("item.enchantment.size")
 object ActionItemEnchantmentSize : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -26,7 +26,7 @@ object ActionItemEnchantmentSize : ClassActionResolver {
 
 }
 
-@BacikalParser("item.enchantment.has")
+@Parser("item.enchantment.has")
 object ActionItemEnchantmentHas : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, enchantment: String): Boolean {
@@ -37,7 +37,7 @@ object ActionItemEnchantmentHas : ClassActionResolver {
 
 }
 
-@BacikalParser("item.enchantment.get")
+@Parser("item.enchantment.get")
 object ActionItemEnchantmentGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, enchantment: String): Int {
@@ -48,7 +48,7 @@ object ActionItemEnchantmentGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.enchantment.set", aliases = ["add"])
+@Parser("item.enchantment.set", aliases = ["add"])
 object ActionItemEnchantmentSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, enchantment: String, level: Int): Boolean {
@@ -65,7 +65,7 @@ object ActionItemEnchantmentSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.enchantment.remove")
+@Parser("item.enchantment.remove")
 object ActionItemEnchantmentRemove : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, enchantment: String): Boolean {
@@ -79,7 +79,7 @@ object ActionItemEnchantmentRemove : ClassActionResolver {
 
 }
 
-@BacikalParser("item.enchantment.clear")
+@Parser("item.enchantment.clear")
 object ActionItemEnchantmentClear : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {

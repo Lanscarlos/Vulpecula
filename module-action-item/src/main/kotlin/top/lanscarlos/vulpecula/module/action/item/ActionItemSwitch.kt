@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.switch")
+@Parser("item.switch")
 object ActionItemSwitch : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, item: ItemStack) {

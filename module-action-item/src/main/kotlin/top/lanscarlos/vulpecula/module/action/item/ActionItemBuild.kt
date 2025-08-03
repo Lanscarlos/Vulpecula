@@ -5,7 +5,7 @@ import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import kotlin.collections.plusAssign
@@ -18,7 +18,7 @@ import kotlin.jvm.optionals.getOrNull
  * @author Lanscarlos
  * @since 2025/6/28
  */
-@BacikalParser("item.build")
+@Parser("item.build")
 object ActionItemBuild : ClassActionResolver {
 
     fun resolve(

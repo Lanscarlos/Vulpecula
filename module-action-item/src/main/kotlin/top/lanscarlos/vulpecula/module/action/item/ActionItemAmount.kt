@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
  * @author Lanscarlos
  * @since 2025/6/29
  */
-@BacikalParser("item.amount.maximum", aliases = ["max"])
+@Parser("item.amount.maximum", aliases = ["max"])
 object ActionItemAmountMaximum : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -22,7 +22,7 @@ object ActionItemAmountMaximum : ClassActionResolver {
 
 }
 
-@BacikalParser("item.amount.get")
+@Parser("item.amount.get")
 object ActionItemAmountGet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame): Int {
@@ -32,7 +32,7 @@ object ActionItemAmountGet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.amount.set")
+@Parser("item.amount.set")
 object ActionItemAmountSet : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, amount: Int) {
@@ -45,7 +45,7 @@ object ActionItemAmountSet : ClassActionResolver {
 
 }
 
-@BacikalParser("item.amount.increase", aliases = ["inc", "add"])
+@Parser("item.amount.increase", aliases = ["inc", "add"])
 object ActionItemAmountIncrease : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, amount: Int) {
@@ -55,7 +55,7 @@ object ActionItemAmountIncrease : ClassActionResolver {
 
 }
 
-@BacikalParser("item.amount.decrease", aliases = ["dec"])
+@Parser("item.amount.decrease", aliases = ["dec"])
 object ActionItemAmountDecrease : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, amount: Int) {

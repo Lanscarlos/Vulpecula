@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.action.illusion
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
-import top.lanscarlos.vulpecula.module.bacikal.annotation.BacikalParser
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.volatility.VolatileWorldBorder
 
@@ -14,7 +14,7 @@ import top.lanscarlos.vulpecula.module.volatility.VolatileWorldBorder
  * @author Lanscarlos
  * @since 2025/7/7
  */
-@BacikalParser("illusion.worldborder")
+@Parser("illusion.worldborder")
 object ActionIllusionWorldBorder : ClassActionResolver {
 
     fun resolve(
