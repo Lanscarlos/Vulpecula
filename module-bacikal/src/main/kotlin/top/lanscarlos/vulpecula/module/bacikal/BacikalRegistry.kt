@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal
 
 import taboolib.common.LifeCycle
 import taboolib.common.TabooLib
+import taboolib.common.io.taboolibPath
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.info
@@ -12,10 +13,13 @@ import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
+import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
+import top.lanscarlos.vulpecula.module.bacikal.property.BacikalProperty
+import top.lanscarlos.vulpecula.module.bacikal.property.BacikalPropertyResolver
 import java.util.LinkedList
 
 /**
@@ -31,6 +35,8 @@ object BacikalRegistry {
 
     private val sources: HashMap<String, ExternalActionSource> = hashMapOf()
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
+    private val properties: HashMap<Class<*>, BacikalProperty<*>> = hashMapOf()
+    private val propertyResolvers: HashMap<Class<*>, BacikalPropertyResolver<*>> = hashMapOf()
     private val exceptionalParsers: LinkedList<ExceptionalActionParser> = LinkedList()
     private val sourceByClass: HashMap<Class<*>, ExternalActionSource> = hashMapOf()
 
@@ -40,18 +46,31 @@ object BacikalRegistry {
             for (parser in parsers.values) {
                 registerAction(parser)
             }
+            for (resolver in properties.keys) {
+                registerPropertyResolver(resolver, true)
+            }
             Vulpecula.addMetricsChart(DrilldownPie("actionExtension", ::metricsActionExtension))
             Vulpecula.addMetricsChart(DrilldownPie("extensionAuthor", ::metricsExtensionAuthor))
         }
     }
 
-    fun getActionParser(id: String): BacikalActionParser {
-        return getActionParserOrNull(id) ?: error("Parser $id not found.")
+    fun getActionSource(name: String): ExternalActionSource {
+        return getActionSourceOrNull(name) ?: error("Source $name not found.")
     }
 
-    fun getActionParserOrNull(id: String): BacikalActionParser? {
-        return parsers[id]
+    fun getActionSourceOrNull(name: String): ExternalActionSource? {
+        return sources[name]
     }
+
+    fun getActionSourceKeys(): Set<String> = sources.keys
+
+    fun getActionSourceValues(): Collection<ExternalActionSource> = sources.values
+
+    fun getActionSourceEntries(): Set<Map.Entry<String, ExternalActionSource>> = sources.entries
+
+    fun getActionParser(id: String): BacikalActionParser = getActionParserOrNull(id) ?: error("Parser $id not found.")
+
+    fun getActionParserOrNull(id: String): BacikalActionParser? = parsers[id]
 
     /**
      * 获取所有已注册的语句解析器 ID
@@ -68,19 +87,9 @@ object BacikalRegistry {
      * */
     fun getActionParserEntries(): Set<Map.Entry<String, BacikalActionParser>> = parsers.entries
 
-    fun getActionSource(name: String): ExternalActionSource {
-        return getActionSourceOrNull(name) ?: error("Source $name not found.")
-    }
+    fun getPropertyValues(): Collection<BacikalProperty<*>> = properties.values
 
-    fun getActionSourceOrNull(name: String): ExternalActionSource? {
-        return sources[name]
-    }
-
-    fun getActionSourceKeys(): Set<String> = sources.keys
-
-    fun getActionSourceValues(): Collection<ExternalActionSource> = sources.values
-
-    fun getActionSourceEntries(): Set<Map.Entry<String, ExternalActionSource>> = sources.entries
+    fun getPropertyEntries(): Set<Map.Entry<Class<*>, BacikalProperty<*>>> =  properties.entries
 
     /**
      * 注册异常的语句
@@ -144,6 +153,52 @@ object BacikalRegistry {
                 registerAction(parser)
             }
             else -> {}
+        }
+    }
+
+    fun registerProperty(typeClass: Class<*>, property: BacikalProperty<*>, source: ActionSource) {
+        properties[typeClass] = property
+        when (TabooLib.getCurrentLifeCycle()) {
+            LifeCycle.ENABLE,
+            LifeCycle.ACTIVE -> {
+                if (propertyResolvers.contains(typeClass)) {
+                    return
+                }
+                // 立刻注册
+                registerPropertyResolver(typeClass, true)
+            }
+            else -> {}
+        }
+    }
+
+    /**
+     * 注册属性
+     * */
+    fun registerPropertyResolver(clazz: Class<*>, shared: Boolean) {
+        if (propertyResolvers.containsKey(clazz)) {
+            return
+        }
+        val id = "vulpecula.${clazz.name}.operator"
+        val resolver = BacikalPropertyResolver(id, clazz)
+        propertyResolvers[clazz] = resolver
+
+        // 本地注册
+        Kether.registeredScriptProperty.computeIfAbsent(clazz) { HashMap() }[id] = resolver
+
+        if (shared) {
+            val remoteName = resolver.bind.name.let {
+                if (it.startsWith(taboolibPath)) "@${it.substring(taboolibPath.length)}" else it
+            }
+            // 远程注册
+            for (connection in getOpenContainers()) {
+                if (connection.name == pluginId) {
+                    continue
+                }
+                connection.call(
+                    StandardChannel.REMOTE_ADD_PROPERTY,
+                    arrayOf(pluginId, remoteName, resolver)
+                )
+            }
         }
     }
 
