@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.module.bacikal.property
+package top.lanscarlos.vulpecula.module.property.${module}
 
 import ${import}
 import top.lanscarlos.vulpecula.common.applicative.*

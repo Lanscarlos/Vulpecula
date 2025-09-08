@@ -1,5 +1,6 @@
 package top.lanscarlos.vulpecula.module.bacikal.develop
 
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
@@ -31,17 +32,19 @@ object PropertyClassGenerator {
 
     @Awake(LifeCycle.ACTIVE)
     fun onActive() {
-        info("尝试生成 Player 属性")
+        info("尝试生成 Entity 包下所有属性")
         try {
-            generate(Player::class.java)
-            info("尝试生成 Player 属性完成...")
+            for (clazz in PackageScanner.getClassesInPackage(Entity::class.java.`package`.name)) {
+                generate(clazz, "entity")
+            }
+            info("Entity 属性包生成完毕...")
         } catch (e: Exception) {
             e.printStackTrace()
-            warning("尝试生成 Player 属性失败...")
+            warning("Entity 属性包生成失败...")
         }
     }
 
-    fun generate(target: Class<*>) {
+    fun generate(target: Class<*>, module: String) {
         val reflexClass = ReflexClass.of(target, AnalyseMode.ASM_ONLY)
 
         // 读取所有标准 bean 方法名称
@@ -66,6 +69,7 @@ object PropertyClassGenerator {
         val setter = generateWriteMethod(setters)
         val template = this.javaClass.classLoader.getResource("template/property.kt")!!.readText()
             .replace(
+                "\${module}" to module,
                 "\${import}" to target.name,
                 "\${time}" to SimpleDateFormat("yyyy/MM/dd").format(Date()),
                 "\${name}" to "${target.simpleName}Property",
@@ -73,7 +77,11 @@ object PropertyClassGenerator {
                 "\${getters}" to getter,
                 "\${setters}" to setter,
             )
-        File(getDataFolder(), "${target.simpleName}Property.kt").writeText(template)
+        val output = File(getDataFolder(), "develop/${target.simpleName}Property.kt")
+        if (output.parentFile.exists().not()) {
+            output.parentFile.mkdirs()
+        }
+        output.writeText(template)
     }
 
     fun generateReadMethod(getters: List<Getter>): String {

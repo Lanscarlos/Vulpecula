@@ -7,6 +7,8 @@ import taboolib.common.inject.ClassVisitorHandler.getClasses
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.info
 import java.io.File
+import java.util.jar.JarFile
+import java.util.stream.Collectors
 
 /**
  * Vulpecula
@@ -17,7 +19,7 @@ import java.io.File
  */
 object PackageScanner {
 
-    @Awake(LifeCycle.ACTIVE)
+//    @Awake(LifeCycle.ACTIVE)
     fun onActive() {
         try {
             val packageName = Entity::class.java.`package`.name
@@ -37,22 +39,20 @@ object PackageScanner {
     fun getClassesInPackage(packageName: String): List<Class<*>> {
         val classLoader = Bukkit::class.java.classLoader
         val path = packageName.replace('.', '/')
-        info("path >> $path")
         val url = classLoader.getResource(path)!!
-        info("url >> ${url.file}")
-        val directory = File(url.path)
-        return directory.walk()
-            .onEach { info("scan >> ${it.absolutePath}") }
-            .filter { it.isFile && it.name.endsWith(".class") }
-            .map { classFile ->
-                val className = "$packageName." +
-                        classFile.relativeTo(directory)
-                            .toString()
-                            .removeSuffix(".class")
-                            .replace(File.separatorChar, '.')
-                Class.forName(className)
+        val jarPath = url.path.substring(5, url.path.indexOf("!"))
+        val jarFile = JarFile(jarPath)
+        val classes = jarFile.stream()
+            .filter {
+                it.name.startsWith(path) && it.name.endsWith(".class") && !it.name.contains("$")
             }
-            .toList()
+            .map { entry ->
+                entry.name.replace('/', '.').replace(".class", "")
+            }
+            .map(Class<*>::forName)
+            .collect(Collectors.toList())
+
+        return classes
     }
 
 }
