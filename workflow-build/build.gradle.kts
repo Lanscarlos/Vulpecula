@@ -5,7 +5,7 @@ taboolib {
 for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.startsWith("plugin-") }) {
     project.tasks.register("cleanResources") {
         delete(project.layout.buildDirectory.dir("resources"))
-        val workspace = file(project.layout.buildDirectory.dir("resources/main/action")).also(File::mkdirs)
+        file(project.layout.buildDirectory.dir("resources/main/action")).also(File::mkdirs)
     }
     project.tasks.jar {
         archiveClassifier.set("")
