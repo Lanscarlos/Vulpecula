@@ -53,7 +53,17 @@ object ApplicativeRegistry : ClassVisitor(-4) {
      * */
     @Suppress("UNCHECKED_CAST")
     fun <T> getApplicativeOrNull(clazz: Class<T>): Applicative<T>? {
-        return registry[clazz] as? Applicative<T>
+        val cache = registry[clazz] as? Applicative<T>
+        if (cache != null) {
+            return cache
+        }
+        if (clazz.enumConstants != null) {
+            // 枚举类
+            val applicative = EnumApplicative(clazz)
+            registry[clazz] = applicative
+            return applicative
+        }
+        return null
     }
 
     /**
