@@ -1,15 +1,15 @@
 package top.lanscarlos.vulpecula.module.property.entity
 
 import org.bukkit.entity.Player
-import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.module.bacikal.property.BacikalProperty
+import top.lanscarlos.vulpecula.common.applicative.*
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.bacikal.property
  *
  * @author Lanscarlos
- * @since 2025/09/07
+ * @since 2025/09/09
  */
 object PlayerProperty : BacikalProperty<Player> {
 
@@ -27,8 +27,6 @@ object PlayerProperty : BacikalProperty<Player> {
                 "address" -> instance.address
                 "bedSpawnLocation" -> instance.bedSpawnLocation
                 "respawnLocation" -> instance.respawnLocation
-                "enderPearls" -> instance.enderPearls
-                "currentInput" -> instance.currentInput
                 "previousGameMode" -> instance.previousGameMode
                 "playerTime" -> instance.playerTime
                 "playerTimeOffset" -> instance.playerTimeOffset
@@ -65,9 +63,12 @@ object PlayerProperty : BacikalProperty<Player> {
                 "playerListOrder" -> instance.playerListOrder = value.let(IntApplicative::convert)
                 "playerListHeader" -> instance.playerListHeader = value.let(StringApplicative::convert)
                 "playerListFooter" -> instance.playerListFooter = value.let(StringApplicative::convert)
+                "compassTarget" -> instance.compassTarget = value.let(BukkitLocationApplicative::convert)
                 "sneaking" -> instance.isSneaking = value.let(BooleanApplicative::convert)
                 "sprinting" -> instance.isSprinting = value.let(BooleanApplicative::convert)
                 "sleepingIgnored" -> instance.isSleepingIgnored = value.let(BooleanApplicative::convert)
+                "bedSpawnLocation" -> instance.bedSpawnLocation = value.let(BukkitLocationApplicative::convert)
+                "respawnLocation" -> instance.respawnLocation = value.let(BukkitLocationApplicative::convert)
                 "expCooldown" -> instance.expCooldown = value.let(IntApplicative::convert)
                 "exp" -> instance.exp = value.let(FloatApplicative::convert)
                 "level" -> instance.level = value.let(IntApplicative::convert)
@@ -81,6 +82,7 @@ object PlayerProperty : BacikalProperty<Player> {
                 "healthScaled" -> instance.isHealthScaled = value.let(BooleanApplicative::convert)
                 "healthScale" -> instance.healthScale = value.let(DoubleApplicative::convert)
                 "spectatorTarget" -> instance.spectatorTarget = value.let(EntityApplicative::convert)
+                else -> throw NoSuchMethodError()
             }
         } catch (ex: NoSuchMethodError) {
             ex.printStackTrace()
