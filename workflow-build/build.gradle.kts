@@ -17,6 +17,7 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
             dependsOn(":${dependency.name}:generateMetadata")
         }
         dependsOn("embedActions")
+        dependsOn("embedProperties")
         dependsOn("mergeResources")
 
         // 打包资源文件
@@ -28,6 +29,10 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
         for (dependency in dependencies) {
             if (dependency.name.startsWith("module-action-")) {
                 // 排除拓展语句
+                continue
+            }
+            if (dependency.name.startsWith("module-property-")) {
+                // 排除拓展属性
                 continue
             }
             from(dependency.sourceSets["main"].output) {

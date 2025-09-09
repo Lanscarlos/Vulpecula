@@ -22,6 +22,7 @@ dependencies {
     compileOnly(project(":module-command"))
     compileOnly(project(":module-core"))
     compileOnly(project(":module-dispatcher"))
+    compileOnly(project(":module-property-entity"))
     compileOnly(project(":module-schedule"))
     compileOnly(project(":module-script"))
     compileOnly(project(":module-volatility"))
