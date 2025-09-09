@@ -37,7 +37,34 @@ object BacikalScanner : ClassVisitor(5) {
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
+        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanPropertyExtension)
         registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanActionExtension)
+    }
+
+    /**
+     * 扫描拓展属性包
+     * */
+    private fun scanPropertyExtension() {
+        val folder = File(getDataFolder(), "property")
+        if (!folder.exists()) {
+            releaseResourceFolder("property")
+        }
+        for (file in folder.listFiles() ?: emptyArray<File>()) {
+            if (!file.exists() || !file.isFile || !file.canRead() || file.extension != "jar") {
+                continue
+            }
+
+            // 载入包体
+            ClassAppender.addPath(file.toPath(), false, false)
+
+            val classes = file.toURI().toURL().getClasses()
+            val source = ExternalActionSource(classes, file.toURI().toURL().getResources())
+
+            // 遍历 class 对象
+            for (owner in classes.values) {
+                visitClass(owner, source)
+            }
+        }
     }
 
     /**
