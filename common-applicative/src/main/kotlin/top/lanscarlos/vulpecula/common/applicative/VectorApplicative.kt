@@ -47,34 +47,12 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
         }
     }
 
-    override fun readProperty(instance: Vector, key: String): Any {
-        return when (key) {
-            "x" -> instance.x
-            "y" -> instance.y
-            "z" -> instance.z
-            "blockX" -> instance.blockX
-            "blockY" -> instance.blockY
-            "blockZ" -> instance.blockZ
-            "length" -> instance.length()
-            "lengthSquared" -> instance.lengthSquared()
-            "normalize" -> instance.normalize()
-            "isNormalized" -> instance.isNormalized
-            "zero" -> instance.zero()
-            "clone" -> instance.clone()
-            else -> errorGetPropertyNotSupported(instance, key)
-        }
-    }
-
-    override fun writeProperty(instance: Vector, key: String, value: Any?) {
-        when (key) {
-            "x" -> instance.x = value.applicativeDouble()
-            "y" -> instance.y = value.applicativeDouble()
-            "z" -> instance.z = value.applicativeDouble()
-            else -> errorBySetPropertyNotSupported(instance, key)
-        }
-    }
 }
 
 object BukkitVectorApplicative : AbstractApplicative<org.bukkit.util.Vector>(org.bukkit.util.Vector::class.java) {
+
+    override fun convertOrThrow(instance: Any): org.bukkit.util.Vector {
+        return VectorApplicative.convertOrThrow(instance).let { org.bukkit.util.Vector(it.x, it.y, it.z) }
+    }
 
 }
