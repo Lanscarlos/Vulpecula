@@ -13,7 +13,3 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
-
-gradle.buildFinished {
-    buildDir.deleteRecursively()
-}
