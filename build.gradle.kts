@@ -59,10 +59,7 @@ subprojects {
     }
 
     repositories {
-        maven("https://libraries.minecraft.net")
-        maven("https://repo1.maven.org/maven2")
         maven("https://maven.aliyun.com/repository/central")
-        maven("https://repo.codemc.io/repository/nms/")
         mavenLocal()
         mavenCentral()
     }
