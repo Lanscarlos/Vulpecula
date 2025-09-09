@@ -1,6 +1,9 @@
 package top.lanscarlos.vulpecula.module.bacikal.develop
 
+import org.bukkit.entity.Damageable
 import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
@@ -32,22 +35,25 @@ object PropertyClassGenerator {
 
     @Awake(LifeCycle.ACTIVE)
     fun onActive() {
-        info("尝试生成 Entity 包下所有属性")
+        File(getDataFolder(), "develop").deleteRecursively()
+        info("尝试生成属性包")
         try {
-            for (clazz in PackageScanner.getClassesInPackage(Entity::class.java.`package`.name)) {
-                generate(clazz, "entity")
-            }
+            val packageName = Entity::class.java.`package`.name
+            generate(Entity::class.java, packageName, "entity")
+            generate(LivingEntity::class.java, packageName, "entity")
+            generate(Player::class.java, packageName, "entity")
+            generate(Damageable::class.java, packageName, "entity")
             for (info in warnings) {
                 warning(info)
             }
-            info("Entity 属性包生成完毕...")
+            info("属性包生成完毕...")
         } catch (e: Exception) {
             e.printStackTrace()
-            warning("Entity 属性包生成失败...")
+            warning("属性包生成失败...")
         }
     }
 
-    fun generate(target: Class<*>, module: String) {
+    fun generate(target: Class<*>, packageName: String, module: String) {
         val reflexClass = ReflexClass.of(target, AnalyseMode.ASM_ONLY)
 
         // 读取所有标准 bean 方法名称
@@ -86,7 +92,8 @@ object PropertyClassGenerator {
                 "\${getters}" to getter,
                 "\${setters}" to setter,
             )
-        val output = File(getDataFolder(), "develop/${target.simpleName}Property.kt")
+        val name = target.name.substringAfter("$packageName.").replace('.', '/')
+        val output = File(getDataFolder(), "develop/${name}Property.kt")
         if (output.parentFile.exists().not()) {
             output.parentFile.mkdirs()
         }

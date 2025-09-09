@@ -114,7 +114,7 @@ object BacikalScanner : ClassVisitor(5) {
         if (!owner.hasInterface(BacikalProperty::class.java)) {
             error("Cannot register class ${owner.name} without BacikalProperty interface.")
         }
-        val javaClass = owner.toClass() as Class<Any>
+        val javaClass = owner.toClass()
 //        val annotation = javaClass.getAnnotation(Property::class.java)
         val bind = when (val it = (javaClass.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
             is Class<*> -> it
