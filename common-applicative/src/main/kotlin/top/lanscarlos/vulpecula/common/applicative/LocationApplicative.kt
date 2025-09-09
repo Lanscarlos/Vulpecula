@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.util.Vector
+import taboolib.platform.util.toBukkitLocation
 import taboolib.platform.util.toProxyLocation
 import top.lanscarlos.vulpecula.common.applicative.exception.ValueConversionException
 import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
@@ -83,37 +84,6 @@ object LocationApplicative : AbstractApplicative<Location>(Location::class.java)
         }
     }
 
-    override fun readProperty(instance: Location, key: String): Any? {
-        return when (key) {
-            "x" -> instance.x
-            "y" -> instance.y
-            "z" -> instance.z
-            "yaw" -> instance.yaw
-            "pitch" -> instance.pitch
-            "world" -> instance.world
-            "blockX" -> instance.blockX
-            "blockY" -> instance.blockY
-            "blockZ" -> instance.blockZ
-            "length" -> instance.length()
-            "lengthSquared" -> instance.lengthSquared()
-            "direction" -> instance.direction
-            "zero" -> instance.zero()
-            "clone" -> instance.clone()
-            else -> errorGetPropertyNotSupported(instance, key)
-        }
-    }
-
-    override fun writeProperty(instance: Location, key: String, value: Any?) {
-        when (key) {
-            "x" -> instance.x = value.applicativeDouble()
-            "y" -> instance.y = value.applicativeDouble()
-            "z" -> instance.z = value.applicativeDouble()
-            "yaw" -> instance.yaw = value.applicativeFloat()
-            "pitch" -> instance.pitch = value.applicativeFloat()
-            "direction" -> instance.direction = value.applicativeVector()
-            else -> errorBySetPropertyNotSupported(instance, key)
-        }
-    }
 
     private fun parseRelative(source: String): Double {
         return if (source[0] == '~') {
@@ -122,4 +92,12 @@ object LocationApplicative : AbstractApplicative<Location>(Location::class.java)
             source.toDoubleOrNull() ?: 0.0
         }
     }
+}
+
+object BukkitLocationApplicative : AbstractApplicative<org.bukkit.Location>(org.bukkit.Location::class.java) {
+
+    override fun convertOrThrow(instance: Any): org.bukkit.Location {
+        return LocationApplicative.convertOrThrow(instance).toBukkitLocation()
+    }
+
 }

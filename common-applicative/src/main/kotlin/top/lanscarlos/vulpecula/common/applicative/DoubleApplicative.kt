@@ -21,26 +21,4 @@ object DoubleApplicative : AbstractApplicative<Double>(Double::class.java) {
         }
     }
 
-    override fun readProperty(instance: Double, key: String): Any {
-        return when (key) {
-            "inc" -> instance + 1
-            "dec" -> instance - 1
-            "negate" -> -instance
-            "pow" -> instance * instance
-            "sqrt" -> kotlin.math.sqrt(instance)
-            "abs" -> if (instance < 0) -instance else instance
-            "toByte" -> instance.toInt().toByte()
-            "toShort" -> instance.toInt().toShort()
-            "toInt" -> instance.toInt()
-            "toLong" -> instance.toLong()
-            "toFloat" -> instance.toFloat()
-            "toDouble" -> instance
-            "toString" -> instance.toString()
-            else -> errorGetPropertyNotSupported(instance, key)
-        }
-    }
-
-    override fun writeProperty(instance: Double, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
 }

@@ -20,12 +20,4 @@ class EnumApplicative<T>(clazz: Class<T>) : AbstractApplicative<T>(clazz) {
         return enumMapping[instance.uppercase()] ?: error("Invalid enum value: $instance")
     }
 
-    override fun readProperty(instance: T, key: String): Any {
-        errorGetPropertyNotSupported(instance, key)
-    }
-
-    override fun writeProperty(instance: T, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
-
 }

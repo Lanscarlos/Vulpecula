@@ -21,26 +21,4 @@ object IntApplicative : AbstractApplicative<Int>(Int::class.java) {
         }
     }
 
-    override fun readProperty(instance: Int, key: String): Any {
-        return when (key) {
-            "inc" -> instance + 1
-            "dec" -> instance - 1
-            "negate" -> -instance
-            "pow" -> instance * instance
-            "sqrt" -> kotlin.math.sqrt(instance.toDouble())
-            "abs" -> if (instance < 0) -instance else instance
-            "toByte" -> instance.toByte()
-            "toShort" -> instance.toShort()
-            "toInt" -> instance
-            "toLong" -> instance.toLong()
-            "toFloat" -> instance.toFloat()
-            "toDouble" -> instance.toDouble()
-            "toString" -> instance.toString()
-            else -> errorGetPropertyNotSupported(instance, key)
-        }
-    }
-
-    override fun writeProperty(instance: Int, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
 }

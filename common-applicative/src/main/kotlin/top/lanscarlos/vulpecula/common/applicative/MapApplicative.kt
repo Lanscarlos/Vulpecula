@@ -20,19 +20,4 @@ object MapApplicative : AbstractApplicative<Map<*, *>>(Map::class.java) {
         }
     }
 
-    override fun readProperty(instance: Map<*, *>, key: String): Any? {
-        return when (key) {
-            "size" -> instance.size
-            "isEmpty", "empty" -> instance.isEmpty()
-            "isNotEmpty", "notEmpty" -> instance.isNotEmpty()
-            "keys" -> instance.keys
-            "values" -> instance.values
-            "entries" -> instance.entries
-            else -> instance[key]
-        }
-    }
-
-    override fun writeProperty(instance: Map<*, *>, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
 }

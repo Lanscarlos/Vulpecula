@@ -26,11 +26,4 @@ object EntityApplicative : AbstractApplicative<Entity>(Entity::class.java) {
         }
     }
 
-    override fun readProperty(instance: Entity, key: String): Any? {
-        errorGetPropertyNotSupported(instance, key)
-    }
-
-    override fun writeProperty(instance: Entity, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
 }

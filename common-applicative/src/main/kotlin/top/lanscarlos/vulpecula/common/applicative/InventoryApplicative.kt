@@ -27,11 +27,4 @@ object InventoryApplicative : AbstractApplicative<Inventory>(Inventory::class.ja
         }
     }
 
-    override fun readProperty(instance: Inventory, key: String): Any? {
-        errorGetPropertyNotSupported(instance, key)
-    }
-
-    override fun writeProperty(instance: Inventory, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
 }

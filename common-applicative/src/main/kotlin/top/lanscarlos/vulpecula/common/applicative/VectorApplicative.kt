@@ -74,3 +74,7 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
         }
     }
 }
+
+object BukkitVectorApplicative : AbstractApplicative<org.bukkit.util.Vector>(org.bukkit.util.Vector::class.java) {
+
+}

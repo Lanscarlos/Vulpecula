@@ -74,18 +74,4 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
         }
     }
 
-    override fun readProperty(instance: Color, key: String): Any {
-        return when (key) {
-            "red" -> instance.red
-            "green" -> instance.green
-            "blue" -> instance.blue
-            "alpha" -> instance.alpha
-            "rgb" -> instance.rgb
-            else -> errorGetPropertyNotSupported(instance, key)
-        }
-    }
-
-    override fun writeProperty(instance: Color, key: String, value: Any?) {
-        errorBySetPropertyNotSupported(instance, key)
-    }
 }
