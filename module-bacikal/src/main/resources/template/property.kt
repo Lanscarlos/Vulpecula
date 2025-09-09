@@ -30,6 +30,7 @@ object ${name} : BacikalProperty<${target}> {
         try {
             when(key) {
                 ${setters}
+                else -> throw NoSuchMethodError()
             }
         } catch (ex: NoSuchMethodError) {
             ex.printStackTrace()

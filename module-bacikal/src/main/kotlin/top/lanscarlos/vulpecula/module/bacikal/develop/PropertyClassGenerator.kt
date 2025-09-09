@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.bacikal.develop
 
 import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
@@ -11,11 +10,10 @@ import taboolib.common5.util.replace
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
-import top.lanscarlos.vulpecula.common.applicative.Applicatives
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
+import java.util.HashSet
 
 /**
  * Vulpecula
@@ -30,12 +28,17 @@ object PropertyClassGenerator {
 
     data class Setter(val name: String, val parameterType: Class<*>, val isNullable: Boolean)
 
+    val warnings = HashSet<String>()
+
     @Awake(LifeCycle.ACTIVE)
     fun onActive() {
         info("尝试生成 Entity 包下所有属性")
         try {
             for (clazz in PackageScanner.getClassesInPackage(Entity::class.java.`package`.name)) {
                 generate(clazz, "entity")
+            }
+            for (info in warnings) {
+                warning(info)
             }
             info("Entity 属性包生成完毕...")
         } catch (e: Exception) {
@@ -65,6 +68,12 @@ object PropertyClassGenerator {
             }
         }
 
+        if (getters.isEmpty() && setters.isEmpty()) {
+            // 无可用属性
+            warning("类 ${target.name} 无可用字段属性")
+            return
+        }
+
         val getter = generateReadMethod(getters)
         val setter = generateWriteMethod(setters)
         val template = this.javaClass.classLoader.getResource("template/property.kt")!!.readText()
@@ -88,7 +97,7 @@ object PropertyClassGenerator {
         val builder = StringBuilder()
         for ((i, getter) in getters.withIndex()) {
             val name = getter.name.substring(3).replaceFirstChar { if (it.isUpperCase()) it.lowercaseChar() else it }
-            if (i > 0) {
+            if (builder.isNotBlank()) {
                 builder.append("                ") // 缩进
             }
             builder.append('"').append(name).append('"')
@@ -108,10 +117,11 @@ object PropertyClassGenerator {
             val applicative = try {
                 ApplicativeRegistry.getApplicative(setter.parameterType)
             } catch (e: Exception) {
-                warning(e.localizedMessage)
+                warnings.add(e.localizedMessage)
+//                warning(e.localizedMessage)
                 continue
             }
-            if (i > 0) {
+            if (builder.isNotBlank()) {
                 builder.append("                ") // 缩进
             }
             builder.append('"').append(name).append('"')
