@@ -33,7 +33,7 @@ object PropertyClassGenerator {
 
     val warnings = HashSet<String>()
 
-    @Awake(LifeCycle.ACTIVE)
+//    @Awake(LifeCycle.ACTIVE)
     fun onActive() {
         File(getDataFolder(), "develop").deleteRecursively()
         info("尝试生成属性包")
