@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.action.illusion
 
 import org.bukkit.entity.Player
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 

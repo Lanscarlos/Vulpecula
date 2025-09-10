@@ -12,7 +12,6 @@ import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import top.lanscarlos.vulpecula.common.core.command.CommandScanner
-import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import java.io.File
 import java.io.FileOutputStream

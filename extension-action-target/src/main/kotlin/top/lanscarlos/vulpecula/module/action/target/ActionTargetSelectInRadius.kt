@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.module.action.target
 
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import taboolib.common.util.Vector
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser

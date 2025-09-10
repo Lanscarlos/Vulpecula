@@ -8,12 +8,9 @@ import taboolib.common.io.getResources
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
-import taboolib.module.kether.KetherProperty
-import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
@@ -23,7 +20,6 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.property.BacikalProperty
-import top.lanscarlos.vulpecula.module.bacikal.property.BacikalPropertyResolver
 import java.io.File
 import java.lang.reflect.ParameterizedType
 
