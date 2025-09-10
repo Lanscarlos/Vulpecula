@@ -23,7 +23,7 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
         }
 
         doLast {
-            val workspace = file(project.layout.buildDirectory.dir("resources/main/action")).also(File::mkdirs)
+            val workspace = file(project.layout.buildDirectory.dir("resources/main/extension")).also(File::mkdirs)
             for (dependency in dependencies) {
                 val archive = file(dependency.tasks.getByName<Jar>("jar").archiveFile)
                 archive.copyTo(File(workspace, archive.name))
