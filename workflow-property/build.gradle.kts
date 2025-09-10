@@ -3,7 +3,7 @@ taboolib {
     subproject = true
 }
 
-for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.startsWith("module-property-") }) {
+for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.startsWith("extension-property-") }) {
     project.tasks.jar {
         archiveClassifier.set("")
     }

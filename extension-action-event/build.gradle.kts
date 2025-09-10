@@ -6,7 +6,7 @@ taboolib {
 
     description {
         name(project.name.substringAfter('-'))
-        desc("Please put this action jar in directory `./plugins/Vulpecula/action/` of your server.")
+        desc("Please put this action jar in directory `./plugins/Vulpecula/extension/` of your server.")
         dependencies {
             this.dependencies.clear()
             name("DISABLE")
@@ -15,7 +15,6 @@ taboolib {
 }
 
 dependencies {
-    compileOnly(project(":common-core"))
     compileOnly(project(":module-bacikal"))
     compileOnly("ink.ptms.core:v12004:12004:mapped")
 }
@@ -23,6 +22,6 @@ dependencies {
 tasks {
     jar {
         archiveBaseName.set(project.name.substringAfter('-'))
-        destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs/action"))
+        destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs/extension"))
     }
 }

@@ -19,7 +19,11 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
             for (dependency in dependencies) {
                 for (file in files(dependency.sourceSets["main"].resources)) {
                     val name = file.absolutePath.substringAfter("resources\\")
-                    if (dependency.name.startsWith("module-action-") && name == "config.yml") {
+                    if (dependency.name.startsWith("extension-action-") && name == "config.yml") {
+                        // 排除 Action 中的 config.yml
+                        continue
+                    }
+                    if (dependency.name.startsWith("extension-property-") && name == "config.yml") {
                         // 排除 Action 中的 config.yml
                         continue
                     }

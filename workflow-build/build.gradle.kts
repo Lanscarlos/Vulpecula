@@ -14,7 +14,7 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
             .filterIsInstance<ProjectDependency>()
             .map { it.dependencyProject }
         for (dependency in dependencies) {
-            if (dependency.name.startsWith("module-action-")) {
+            if (dependency.name.startsWith("extension-action-")) {
                 dependsOn(":${dependency.name}:generateMetadata")
             }
         }
@@ -29,11 +29,11 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
 
         // 打包子项目源码
         for (dependency in dependencies) {
-            if (dependency.name.startsWith("module-action-")) {
+            if (dependency.name.startsWith("extension-action-")) {
                 // 排除拓展语句
                 continue
             }
-            if (dependency.name.startsWith("module-property-")) {
+            if (dependency.name.startsWith("extension-property-")) {
                 // 排除拓展属性
                 continue
             }

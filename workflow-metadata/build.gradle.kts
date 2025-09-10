@@ -13,7 +13,7 @@ val projects = rootProject.subprojects
     .flatMap { project ->
         project.configurations["compileOnly"].dependencies
             .filterIsInstance<ProjectDependency>()
-            .filter { it.name.startsWith("module-action-") }
+            .filter { it.name.startsWith("extension-action-") }
             .map { it.dependencyProject }
     }
 for (project in projects) {
