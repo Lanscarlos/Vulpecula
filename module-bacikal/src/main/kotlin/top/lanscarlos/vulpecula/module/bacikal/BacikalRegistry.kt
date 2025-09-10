@@ -48,9 +48,8 @@ object BacikalRegistry {
             for (parser in parsers.values) {
                 registerAction(parser)
             }
-            for (clazz in properties.keys) {
-                val source = sourceByClass[clazz] ?: BuiltInActionSource
-                warning("Class ${clazz.name} source not found.")
+            for ((clazz, property) in properties) {
+                val source = sourceByClass[property.javaClass] ?: BuiltInActionSource
                 registerPropertyResolver(clazz, source, true)
             }
             Vulpecula.addMetricsChart(DrilldownPie("actionExtension", ::metricsActionExtension))
