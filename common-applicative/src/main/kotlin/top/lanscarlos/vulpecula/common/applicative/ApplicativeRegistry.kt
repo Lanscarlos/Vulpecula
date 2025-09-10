@@ -96,6 +96,10 @@ object ApplicativeRegistry : ClassVisitor(-4) {
             // 排除 taboolib 库
             return
         }
+        if (clazz == EnumApplicative::class.java) {
+            // 排除枚举类
+            return
+        }
         if (clazz == AbstractApplicative::class.java || !AbstractApplicative::class.java.isAssignableFrom(clazz)) {
             // 必须继承 AbstractApplicative
             return
