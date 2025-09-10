@@ -184,12 +184,11 @@ object BacikalRegistry {
         if (propertyResolvers.containsKey(clazz)) {
             return
         }
-        val id = "vulpecula.${clazz.simpleName}.operator"
-        val resolver = BacikalPropertyResolver(id, clazz, source)
+        val resolver = BacikalPropertyResolver(clazz.simpleName, clazz, source)
         propertyResolvers[clazz] = resolver
 
         // 本地注册
-        Kether.registeredScriptProperty.computeIfAbsent(clazz) { HashMap() }[id] = resolver
+        Kether.registeredScriptProperty.computeIfAbsent(clazz) { HashMap() }[resolver.id] = resolver
 
         if (shared) {
             val remoteName = resolver.bind.name.let {

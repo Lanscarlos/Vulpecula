@@ -8,9 +8,11 @@ import taboolib.common.io.getResources
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
+import taboolib.module.kether.KetherProperty
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
@@ -37,8 +39,8 @@ object BacikalScanner : ClassVisitor(5) {
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
-        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanPropertyExtension)
         registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanActionExtension)
+        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanPropertyExtension)
     }
 
     /**
@@ -138,16 +140,16 @@ object BacikalScanner : ClassVisitor(5) {
     }
 
     private fun registerBacikalProperty(owner: ReflexClass, source: ActionSource) {
+        info("interface reflex >> ${owner.hasInterface(BacikalProperty::class.java)} by ${owner.name}")
+        info("interface java >> ${BacikalProperty::class.java.isAssignableFrom(owner.toClass())} by ${owner.name}")
         if (!owner.hasInterface(BacikalProperty::class.java)) {
+            info("woc interface reflex >> ${owner.hasInterface(BacikalProperty::class.java)} by ${owner.name}")
+            info("woc interface java >> ${BacikalProperty::class.java.isAssignableFrom(owner.toClass())} by ${owner.name}")
             error("Cannot register class ${owner.name} without BacikalProperty interface.")
         }
         val javaClass = owner.toClass()
-//        val annotation = javaClass.getAnnotation(Property::class.java)
-        val bind = when (val it = (javaClass.genericSuperclass as? ParameterizedType)?.actualTypeArguments?.getOrNull(0)) {
-            is Class<*> -> it
-            is ParameterizedType -> it.rawType as Class<*>
-            else -> error("Cannot register class ${owner.name} without ClassProperty interface.")
-        }
+        val annotation = javaClass.getAnnotation(Property::class.java)
+        val bind = annotation.bind.java
         val property = owner.getInstance() as BacikalProperty<*>
         BacikalRegistry.registerProperty(bind, property, source)
     }

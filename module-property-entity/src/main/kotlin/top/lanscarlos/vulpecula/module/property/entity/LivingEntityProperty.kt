@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.module.bacikal.annotation.Property
  * @author Lanscarlos
  * @since 2025/09/09
  */
-@Property
+@Property(bind = LivingEntity::class)
 object LivingEntityProperty : BacikalProperty<LivingEntity> {
 
     @Suppress("DEPRECATION")

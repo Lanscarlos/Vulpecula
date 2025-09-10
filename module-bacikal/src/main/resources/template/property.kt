@@ -11,6 +11,7 @@ import top.lanscarlos.vulpecula.common.applicative.*
  * @author Lanscarlos
  * @since ${time}
  */
+@Property(bind = ${target}::class)
 object ${name} : BacikalProperty<${target}> {
 
     @Suppress("DEPRECATION")
