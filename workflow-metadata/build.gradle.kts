@@ -13,6 +13,7 @@ val projects = rootProject.subprojects
     .flatMap { project ->
         project.configurations["compileOnly"].dependencies
             .filterIsInstance<ProjectDependency>()
+            .filter { it.name.startsWith("module-action-") }
             .map { it.dependencyProject }
     }
 for (project in projects) {
@@ -33,7 +34,7 @@ for (project in projects) {
                 val data = mutableListOf<String>()
                 reader.accept(object : ClassVisitor(Opcodes.ASM9) {
                     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor? {
-                        if (descriptor == "Ltop/lanscarlos/vulpecula/module/bacikal/annotation/BacikalParser;") {
+                        if (descriptor == "Ltop/lanscarlos/vulpecula/module/bacikal/annotation/Parser;") {
                             hasParserAnnotation = true
                             return null
                         }

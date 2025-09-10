@@ -14,7 +14,9 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
             .filterIsInstance<ProjectDependency>()
             .map { it.dependencyProject }
         for (dependency in dependencies) {
-            dependsOn(":${dependency.name}:generateMetadata")
+            if (dependency.name.startsWith("module-action-")) {
+                dependsOn(":${dependency.name}:generateMetadata")
+            }
         }
         dependsOn("embedActions")
         dependsOn("embedProperties")

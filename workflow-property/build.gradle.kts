@@ -6,8 +6,6 @@ taboolib {
 for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.startsWith("module-property-") }) {
     project.tasks.jar {
         archiveClassifier.set("")
-
-        dependsOn("generateMetadata")
     }
 }
 
