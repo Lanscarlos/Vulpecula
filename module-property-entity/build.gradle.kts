@@ -1,6 +1,15 @@
 
 taboolib {
-    subproject = true
+    subproject = false
+
+    description {
+        name(project.name.substringAfter('-'))
+        desc("Please put this action jar in directory `./plugins/Vulpecula/property/` of your server.")
+        dependencies {
+            this.dependencies.clear()
+            name("DISABLE")
+        }
+    }
 }
 
 dependencies {
