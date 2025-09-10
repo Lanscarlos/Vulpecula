@@ -140,11 +140,7 @@ object BacikalScanner : ClassVisitor(5) {
     }
 
     private fun registerBacikalProperty(owner: ReflexClass, source: ActionSource) {
-        info("interface reflex >> ${owner.hasInterface(BacikalProperty::class.java)} by ${owner.name}")
-        info("interface java >> ${BacikalProperty::class.java.isAssignableFrom(owner.toClass())} by ${owner.name}")
         if (!owner.hasInterface(BacikalProperty::class.java)) {
-            info("woc interface reflex >> ${owner.hasInterface(BacikalProperty::class.java)} by ${owner.name}")
-            info("woc interface java >> ${BacikalProperty::class.java.isAssignableFrom(owner.toClass())} by ${owner.name}")
             error("Cannot register class ${owner.name} without BacikalProperty interface.")
         }
         val javaClass = owner.toClass()
