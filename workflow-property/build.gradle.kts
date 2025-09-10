@@ -14,7 +14,7 @@ for (project in rootProject.subprojects.filter { it.depth == 1 && it.name.starts
         dependsOn("cleanResources")
         val dependencies = project.configurations["compileOnly"].dependencies
             .filterIsInstance<ProjectDependency>()
-            .filter { it.name.startsWith("module-property-") }
+            .filter { it.name.startsWith("extension-property-") }
             .map { it.dependencyProject }
         for (dependency in dependencies) {
             dependsOn(":${dependency.name}:jar")
