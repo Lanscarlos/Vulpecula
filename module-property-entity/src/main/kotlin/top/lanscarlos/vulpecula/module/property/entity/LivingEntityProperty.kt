@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.property.entity
 import org.bukkit.entity.LivingEntity
 import top.lanscarlos.vulpecula.module.bacikal.property.BacikalProperty
 import top.lanscarlos.vulpecula.common.applicative.*
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Property
 
 /**
  * Vulpecula
@@ -11,6 +12,7 @@ import top.lanscarlos.vulpecula.common.applicative.*
  * @author Lanscarlos
  * @since 2025/09/09
  */
+@Property
 object LivingEntityProperty : BacikalProperty<LivingEntity> {
 
     @Suppress("DEPRECATION")

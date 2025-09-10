@@ -111,7 +111,7 @@ class ExternalActionSource(val classes: Map<String, ReflexClass>, resources: Map
 
     private fun initActionRegistry(resources: Map<String, ByteArray>): Configuration {
         val inputStream = resources.entries.find { it.key == "plugin.yml" }?.value?.inputStream()
-            ?: error(asLang("Registry not found."))
+            ?: error("Registry not found.")
         return Configuration.loadFromInputStream(inputStream, Type.YAML)
     }
 

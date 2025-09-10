@@ -8,12 +8,14 @@ import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.registerLifeCycleTask
+import taboolib.common.platform.function.warning
 import taboolib.library.kether.QuestActionParser
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
 import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
+import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
 import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
@@ -46,8 +48,10 @@ object BacikalRegistry {
             for (parser in parsers.values) {
                 registerAction(parser)
             }
-            for (resolver in properties.keys) {
-                registerPropertyResolver(resolver, true)
+            for (clazz in properties.keys) {
+                val source = sourceByClass[clazz] ?: BuiltInActionSource
+                warning("Class ${clazz.name} source not found.")
+                registerPropertyResolver(clazz, source, true)
             }
             Vulpecula.addMetricsChart(DrilldownPie("actionExtension", ::metricsActionExtension))
             Vulpecula.addMetricsChart(DrilldownPie("extensionAuthor", ::metricsExtensionAuthor))
@@ -90,6 +94,8 @@ object BacikalRegistry {
     fun getPropertyValues(): Collection<BacikalProperty<*>> = properties.values
 
     fun getPropertyEntries(): Set<Map.Entry<Class<*>, BacikalProperty<*>>> =  properties.entries
+
+    fun getPropertyResolverValues(): Collection<BacikalPropertyResolver<*>> = propertyResolvers.values
 
     /**
      * 注册异常的语句
@@ -165,7 +171,7 @@ object BacikalRegistry {
                     return
                 }
                 // 立刻注册
-                registerPropertyResolver(typeClass, true)
+                registerPropertyResolver(typeClass, source, true)
             }
             else -> {}
         }
@@ -174,12 +180,12 @@ object BacikalRegistry {
     /**
      * 注册属性
      * */
-    fun registerPropertyResolver(clazz: Class<*>, shared: Boolean) {
+    fun registerPropertyResolver(clazz: Class<*>, source: ActionSource, shared: Boolean) {
         if (propertyResolvers.containsKey(clazz)) {
             return
         }
-        val id = "vulpecula.${clazz.name}.operator"
-        val resolver = BacikalPropertyResolver(id, clazz)
+        val id = "vulpecula.${clazz.simpleName}.operator"
+        val resolver = BacikalPropertyResolver(id, clazz, source)
         propertyResolvers[clazz] = resolver
 
         // 本地注册
