@@ -35,43 +35,16 @@ object BacikalScanner : ClassVisitor(5) {
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
-        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanActionExtension)
-        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanPropertyExtension)
+        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanExtension)
     }
 
     /**
-     * 扫描拓展属性包
+     * 扫描拓展包
      * */
-    private fun scanPropertyExtension() {
-        val folder = File(getDataFolder(), "property")
+    private fun scanExtension() {
+        val folder = File(getDataFolder(), "extension")
         if (!folder.exists()) {
-            releaseResourceFolder("property")
-        }
-        for (file in folder.listFiles() ?: emptyArray<File>()) {
-            if (!file.exists() || !file.isFile || !file.canRead() || file.extension != "jar") {
-                continue
-            }
-
-            // 载入包体
-            ClassAppender.addPath(file.toPath(), false, false)
-
-            val classes = file.toURI().toURL().getClasses()
-            val source = ExternalActionSource(classes, file.toURI().toURL().getResources())
-
-            // 遍历 class 对象
-            for (owner in classes.values) {
-                visitClass(owner, source)
-            }
-        }
-    }
-
-    /**
-     * 扫描拓展语句包
-     * */
-    private fun scanActionExtension() {
-        val folder = File(getDataFolder(), "action")
-        if (!folder.exists()) {
-            releaseResourceFolder("action")
+            releaseResourceFolder("extension")
         }
         for (file in folder.listFiles() ?: emptyArray<File>()) {
             if (!file.exists() || !file.isFile || !file.canRead() || file.extension != "jar") {
