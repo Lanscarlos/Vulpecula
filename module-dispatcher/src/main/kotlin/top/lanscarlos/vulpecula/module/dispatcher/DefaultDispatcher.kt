@@ -95,7 +95,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         if (preprocessing != null) {
             flow.add(preprocessing!!)
             flow.postprocess { task ->
-                when (val status = task.variables()["@EVENT_STATUS"]) {
+                when (val status = task.variables()["@VULPECULA_CONTEXT_EVENT_STATUS"]) {
                     null -> {
                         // 更新阻断
                         pipeline.afterFilter(context)

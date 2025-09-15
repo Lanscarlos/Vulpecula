@@ -17,8 +17,8 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 object ActionEventCancel : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {
-        frame.setVariable("@EVENT_STATUS", "CANCELED")
-        val event = frame.getVariable<Event>("@EVENT")
+        frame.setVariable("@VULPECULA_CONTEXT_EVENT_STATUS", "CANCELED")
+        val event = frame.getVariable<Event>("@VULPECULA_CONTEXT_EVENT")
         if (event is Cancellable) {
             event.isCancelled = true
         }

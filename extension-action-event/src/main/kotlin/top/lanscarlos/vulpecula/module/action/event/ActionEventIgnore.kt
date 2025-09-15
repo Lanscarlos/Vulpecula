@@ -15,7 +15,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 object ActionEventIgnore : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame) {
-        frame.setVariable("@EVENT_STATUS", "IGNORED")
+        frame.setVariable("@VULPECULA_CONTEXT_EVENT_STATUS", "IGNORED")
     }
 
 }

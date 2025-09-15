@@ -25,7 +25,7 @@ data class Context(val event: Event) {
 
     private var isPlayerInitialized: Boolean = false
 
-    private val variables: HashMap<String, Any> = hashMapOf()
+    private val variables: HashMap<String, Any> = hashMapOf("@VULPECULA_CONTEXT_EVENT" to event)
 
     /**
      * 过滤事件
