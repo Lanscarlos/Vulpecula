@@ -16,7 +16,7 @@ import java.util.LinkedList
  */
 object ActionTarget {
 
-    private const val CONTEXT = "@TARGET"
+    private const val CONTEXT = "@VULPECULA_CONTEXT_TARGET"
 
     fun getContext(frame: BacikalFrame): LinkedList<Any> {
         val target = frame.getVariable<LinkedList<Any>>(CONTEXT)

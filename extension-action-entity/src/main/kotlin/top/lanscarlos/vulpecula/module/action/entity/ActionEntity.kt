@@ -13,7 +13,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
  */
 object ActionEntity {
 
-    private const val CONTEXT = "@ENTITY"
+    private const val CONTEXT = "@VULPECULA_CONTEXT_ENTITY"
 
     fun getContext(frame: BacikalFrame): Entity {
         val value = frame.getVariable<Entity>(CONTEXT)

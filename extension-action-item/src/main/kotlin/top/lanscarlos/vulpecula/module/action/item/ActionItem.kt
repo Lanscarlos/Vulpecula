@@ -14,7 +14,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
  */
 object ActionItem {
 
-    private const val CONTEXT = "@ITEM"
+    private const val CONTEXT = "@VULPECULA_CONTEXT_ITEM"
 
     fun getContext(frame: BacikalFrame): ItemStack {
         val item = frame.getVariable<ItemStack>(CONTEXT)

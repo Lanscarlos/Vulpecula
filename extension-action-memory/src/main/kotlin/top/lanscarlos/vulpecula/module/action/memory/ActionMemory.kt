@@ -18,7 +18,7 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 
 object ActionMemory {
 
-    internal const val CONTEXT = "@MEMORY"
+    internal const val CONTEXT = "@VULPECULA_CONTEXT_MEMORY"
 
     internal val defaultOwner: String by bindActionConfig("default-owner").string("@")
 
