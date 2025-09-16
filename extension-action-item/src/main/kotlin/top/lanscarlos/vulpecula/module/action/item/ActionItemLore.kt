@@ -58,7 +58,7 @@ class ActionItemLoreInsert : ClassActionResolver {
 
 }
 
-@Parser("item.lore.add")
+@Parser("item.lore.append", aliases = ["add"])
 class ActionItemLoreAdd : ClassActionResolver {
 
     fun resolve(frame: BacikalFrame, content: String) {
@@ -97,10 +97,10 @@ class ActionItemLoreSet : ClassActionResolver {
 
 }
 
-@Parser("item.lore.remove")
+@Parser("item.lore.remove", aliases = ["delete"])
 class ActionItemLoreRemove : ClassActionResolver {
 
-    fun resolve(frame: BacikalFrame, line: String, content: String) {
+    fun resolve(frame: BacikalFrame, line: String) {
         val item = ActionItem.getContext(frame)
         val itemMeta = item.itemMeta!!
         val lore = LinkedList(itemMeta.lore ?: mutableListOf<String>())
