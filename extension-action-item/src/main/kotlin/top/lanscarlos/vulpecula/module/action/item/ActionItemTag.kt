@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.action.item
 import taboolib.module.nms.getItemTag
 import taboolib.module.nms.setItemTag
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -54,7 +55,11 @@ object ActionItemTagGet : ClassActionResolver {
 @Parser("item.tag.set")
 object ActionItemTagSet : ClassActionResolver {
 
-    fun resolve(frame: BacikalFrame, key: String, value: Any) {
+    fun resolve(
+        frame: BacikalFrame,
+        key: String,
+        @Expected(["to"]) value: Any
+    ) {
         val item = ActionItem.getContext(frame)
         val tag = item.getItemTag()
         tag.putDeep(key, value)
