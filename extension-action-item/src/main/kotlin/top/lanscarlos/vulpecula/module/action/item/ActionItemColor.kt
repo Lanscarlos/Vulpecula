@@ -20,8 +20,7 @@ object ActionItemColorGet : ClassActionResolver {
 
     fun resolve(
         frame: BacikalFrame,
-        @Additional(["alpha"]) alpha: Boolean = false,
-        @Additional(["hex"]) hex: Boolean = false
+        @Additional(["alpha"]) alpha: Boolean = false
     ): Any? {
         val item = ActionItem.getContext(frame)
         val color =  when (val itemMeta = item.itemMeta) {
@@ -31,7 +30,6 @@ object ActionItemColorGet : ClassActionResolver {
         }
         return when {
             color == null -> null
-            !hex -> color
             !alpha -> "#${color.red.toString(16)}${color.green.toString(16)}${color.blue.toString(16)}"
             else -> "#${color.alpha.toString(16)}${color.red.toString(16)}${color.green.toString(16)}${color.blue.toString(16)}"
         }
