@@ -57,6 +57,8 @@ object ActionItemPotionSet : ClassActionResolver {
         @Additional(["particles", "particle", "p"]) particles: Boolean = true,
         @Additional(["icon", "i"]) icon: Boolean = true
     ): Boolean {
+        require(duration > 0) { "duration must be greater than 0" }
+        require(level > 0) { "level must be greater than 0" }
         val item = ActionItem.getContext(frame)
         val itemMeta = getPotionMeta(item)
         val potionEffectType = getPotionEffectType(type)
