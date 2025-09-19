@@ -196,8 +196,8 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         fun variables(): Map<String, Any> {
             return mapOf<String, Any>(
                 "pid" to pid,
-                "elapsedTime" to (System.currentTimeMillis() - activationTime) / 50L, // 已运行时间, 单位 Tick
-                "counter" to counter
+                "elapsedTime" to (System.currentTimeMillis() - activationTime) / 1000L, // 已运行时间, 单位秒
+                "runCount" to counter
             )
         }
 
