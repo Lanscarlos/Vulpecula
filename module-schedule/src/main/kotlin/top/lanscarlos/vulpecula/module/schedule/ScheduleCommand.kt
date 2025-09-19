@@ -54,35 +54,17 @@ object ScheduleCommand {
                     sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
                 }
             }
-        }.dynamic("sender") {
-            suggestPlayers(listOf("@NULL", "@SELF", "@CONSOLE"))
-            execute<ProxyCommandSender> { sender, context, value ->
-                val id = context["id"]
-                try {
-                    val pid = context["pid"]
-                    val runtimeSender = value.toSender(sender)
-                    ScheduleService.get(id).start(
-                        pid = pid,
-                        sender = runtimeSender
-                    )
-                    sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", "[]") }
-                } catch (e: Exception) {
-                    sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
-                }
-            }
         }.dynamic("args") {
             execute<ProxyCommandSender> { sender, context, value ->
                 val id = context["id"]
                 try {
                     val pid = context["pid"]
-                    val runtimeSender = context["sender"].toSender(sender)
                     val args = value.split(' ')
                     ScheduleService.get(id).start(
                         pid = pid,
-                        sender = runtimeSender,
                         args = args
                     )
-                    sender.info { asLang("module-schedule-command-start-success", id, pid, runtimeSender?.name ?: "null", args) }
+                    sender.info { asLang("module-schedule-command-start-success", id, pid, args) }
                 } catch (e: Exception) {
                     sender.error { asLang("module-schedule-command-run-failure", id, e.localizedMessage) }
                 }

@@ -10,7 +10,7 @@ module-schedule-service-load-automatic: '日程 &a{0}&7 自动重载成功 &8({1
 module-schedule-service-load-success: '日程模块加载成功. 已载入 &a{0}&7 个日程 &8({1}ms)'
 module-schedule-service-load-failure: '日程模块加载失败!'
 module-schedule-service-file-load-failure: '日程 &c{0}&7 加载失败! {1}'
-module-schedule-command-start-success: '启动日程 &a{0}&7. PID &a{1}&7, 执行者 &a{2}&7, 参数 &a{3}&7'
+module-schedule-command-start-success: '启动日程 &a{0}&7. PID &a{1}&7, 参数 &a{3}&7'
 module-schedule-command-start-failure: '启动日程 &a{0}&7 失败. {1}'
 module-schedule-command-pause-all-success: '成功暂停日程 &a{0}&7 下的所有任务.'
 module-schedule-command-pause-all-failure: '暂停日程 &a{0}&7 下的所有任务失败. {1}'

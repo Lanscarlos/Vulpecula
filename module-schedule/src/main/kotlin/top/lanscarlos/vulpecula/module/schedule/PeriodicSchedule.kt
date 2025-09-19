@@ -31,7 +31,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
 
     override val tasks: HashMap<String, Task> = HashMap()
 
-    override fun create(pid: String, sender: ProxyCommandSender?, args: List<String>): ScheduleTask {
+    override fun create(pid: String, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) {
             val runningPid = tasks.values.firstOrNull { it.state.isRunning }
             asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
@@ -39,7 +39,7 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
         require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
             asLang("module-schedule-exception-conflict-task", id, pid)
         }
-        val task = Task(pid, sender, args)
+        val task = Task(pid, null, args)
         tasks[task.pid] = task
         return task
     }

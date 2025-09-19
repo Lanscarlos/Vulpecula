@@ -26,7 +26,6 @@ interface Schedule {
      * */
     fun create(
         pid: String = "~",
-        sender: ProxyCommandSender? = null,
         args: List<String> = emptyList()
     ): ScheduleTask
 
@@ -39,10 +38,9 @@ interface Schedule {
      * */
     fun start(
         pid: String = "~",
-        sender: ProxyCommandSender? = null,
         args: List<String> = emptyList()
     ): ScheduleTask {
-        return create(pid, sender, args).also(ScheduleTask::start)
+        return create(pid, args).also(ScheduleTask::start)
     }
 
     /**
