@@ -25,6 +25,7 @@ dependencies {
     compileOnly(project(":module-dispatcher"))
     compileOnly(project(":module-schedule"))
     compileOnly(project(":module-script"))
+    compileOnly(project(":module-updater"))
     compileOnly(project(":module-volatility"))
     compileOnly(project(":platform-bukkit"))
 }
