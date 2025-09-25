@@ -30,7 +30,7 @@ object ActionTargetSelectWorld : ClassActionResolver {
         } else {
             world.entities
         }
-        ActionTarget.setContext(frame, LinkedList<Any>(entities))
+        ActionTarget.setContext(frame, entities)
     }
 
 }

@@ -38,7 +38,7 @@ object ActionTargetSelectInBox : ClassActionResolver {
             // 排除自身
             includeSelf || it != sender
         }
-        ActionTarget.setContext(frame, LinkedList<Any>(entities))
+        ActionTarget.setContext(frame, entities)
     }
 
 }

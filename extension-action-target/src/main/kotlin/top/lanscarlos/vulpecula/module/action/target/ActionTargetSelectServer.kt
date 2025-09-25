@@ -20,7 +20,7 @@ object ActionTargetSelectServer : ClassActionResolver {
         frame: BacikalFrame
     ) {
         val players = Bukkit.getOnlinePlayers()
-        ActionTarget.setContext(frame, LinkedList<Any>(players))
+        ActionTarget.setContext(frame, players)
     }
 
 }

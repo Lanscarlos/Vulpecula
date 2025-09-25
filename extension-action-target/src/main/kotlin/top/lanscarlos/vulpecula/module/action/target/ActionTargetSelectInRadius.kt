@@ -39,7 +39,7 @@ object ActionTargetSelectInRadius : ClassActionResolver {
             // 确保距离在半径球体内
             sender.location.distanceSquared(it.location) <= radiusSquared
         }
-        ActionTarget.setContext(frame, LinkedList<Any>(entities))
+        ActionTarget.setContext(frame, entities)
     }
 
 }

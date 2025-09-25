@@ -24,8 +24,8 @@ object ActionTarget {
         return target
     }
 
-    fun setContext(frame: BacikalFrame, target: LinkedList<Any>) {
-        frame.setVariable(CONTEXT, target)
+    fun setContext(frame: BacikalFrame, targets: Collection<Any>) {
+        frame.setVariable(CONTEXT, LinkedList(targets))
     }
 
     fun setContext(frame: BacikalFrame, target: Player) {
