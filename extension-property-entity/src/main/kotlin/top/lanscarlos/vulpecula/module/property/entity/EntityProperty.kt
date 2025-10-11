@@ -7,7 +7,7 @@ import top.lanscarlos.vulpecula.module.bacikal.annotation.Property
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.module.bacikal.property
+ * top.lanscarlos.vulpecula.module.bacikal.property.entity
  *
  * @author Lanscarlos
  * @since 2025/09/09
