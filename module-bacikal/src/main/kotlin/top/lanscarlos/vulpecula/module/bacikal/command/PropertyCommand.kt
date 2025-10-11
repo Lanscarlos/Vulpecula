@@ -6,8 +6,8 @@ import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
-import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
 import top.lanscarlos.vulpecula.module.bacikal.error
+import top.lanscarlos.vulpecula.module.bacikal.extension.NativeExtension
 import top.lanscarlos.vulpecula.module.bacikal.info
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -42,8 +42,8 @@ object PropertyCommand {
     private fun displayBacikalProperties(sender: ProxyCommandSender, detail: Boolean) {
         val bacikalResolvers = BacikalRegistry.getPropertyResolverValues()
         sender.info { asLang("module-bacikal-command-registry-display-bacikal-property", bacikalResolvers.size) }
-        for ((source, parsers) in bacikalResolvers.groupBy { it.source }) {
-            val color = if (source is BuiltInActionSource) "§3" else "§b"
+        for ((source, parsers) in bacikalResolvers.groupBy { it.extension }) {
+            val color = if (source is NativeExtension) "§3" else "§b"
             sender.info {
                 asLang(
                     "module-bacikal-command-registry-display-item",

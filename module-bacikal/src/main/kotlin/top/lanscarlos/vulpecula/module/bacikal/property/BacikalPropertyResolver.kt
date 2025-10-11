@@ -4,8 +4,8 @@ import taboolib.common.OpenResult
 import taboolib.module.kether.ScriptProperty
 import taboolib.module.kether.action.ActionProperty
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.exception.NoSuchPropertyException
+import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
 import kotlin.collections.set
 
 /**
@@ -18,7 +18,7 @@ import kotlin.collections.set
 class BacikalPropertyResolver<T: Any>(
     id: String,
     val bind: Class<T>,
-    val source: ActionSource
+    val extension: Extension
 ) : ScriptProperty<T>("vulpecula.$id.operator") {
 
     /**

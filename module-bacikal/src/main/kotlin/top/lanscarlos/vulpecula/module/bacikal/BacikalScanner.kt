@@ -1,21 +1,14 @@
 package top.lanscarlos.vulpecula.module.bacikal
 
-import taboolib.common.ClassAppender
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
-import taboolib.common.io.getClasses
-import taboolib.common.io.getResources
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.registerLifeCycleTask
-import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
-import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Property
+import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
+import top.lanscarlos.vulpecula.module.bacikal.extension.NativeExtension
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
@@ -33,64 +26,33 @@ import java.lang.reflect.ParameterizedType
 @Awake(LifeCycle.LOAD)
 object BacikalScanner : ClassVisitor(5) {
 
-    @Awake(LifeCycle.INIT)
-    fun onInit() {
-        registerLifeCycleTask(LifeCycle.LOAD, 6, runnable = ::scanExtension)
-    }
-
-    /**
-     * 扫描拓展包
-     * */
-    private fun scanExtension() {
-        val folder = File(getDataFolder(), "extension")
-        if (!folder.exists()) {
-            releaseResourceFolder("extension")
-        }
-        for (file in folder.listFiles() ?: emptyArray<File>()) {
-            if (!file.exists() || !file.isFile || !file.canRead() || file.extension != "jar") {
-                continue
-            }
-
-            // 载入包体
-            ClassAppender.addPath(file.toPath(), false, false)
-
-            val classes = file.toURI().toURL().getClasses()
-            val source = ExternalActionSource(classes, file.toURI().toURL().getResources())
-
-            // 遍历 class 对象
-            for (owner in classes.values) {
-                visitClass(owner, source)
-            }
-        }
-    }
-
     /**
      * 扫描类式语句解析器或属性
      * */
     override fun visitStart(owner: ReflexClass) {
-        visitClass(owner, BuiltInActionSource)
+        visitClass(owner, NativeExtension)
     }
 
-    private fun visitClass(owner: ReflexClass, source: ActionSource) {
+    internal fun visitClass(owner: ReflexClass, extension: Extension) {
         when {
             owner.hasAnnotation(Parser::class.java) -> {
                 // 语句
                 val parser = try {
-                    buildClassActionParser(owner, source)
+                    buildClassActionParser(owner, extension)
                 } catch (ex: Exception) {
                     console().error { ex.localizedMessage }
-                    ExceptionalActionParser(ex, source)
+                    ExceptionalActionParser(ex, extension)
                 }
                 BacikalRegistry.registerActionParser(parser)
             }
             owner.hasAnnotation(Property::class.java) -> {
                 // 属性
-                registerBacikalProperty(owner, source)
+                registerBacikalProperty(owner, extension)
             }
         }
     }
 
-    private fun buildClassActionParser(owner: ReflexClass, source: ActionSource): ClassActionParser {
+    private fun buildClassActionParser(owner: ReflexClass, extension: Extension): ClassActionParser {
         if (!owner.hasInterface(ClassActionResolver::class.java)) {
             error("Cannot register class ${owner.name} without ClassActionResolver interface.")
         }
@@ -103,12 +65,12 @@ object BacikalScanner : ClassVisitor(5) {
             annotation.namespace,
             annotation.description,
             clazz,
-            source
+            extension
         )
         return parser
     }
 
-    private fun registerBacikalProperty(owner: ReflexClass, source: ActionSource) {
+    private fun registerBacikalProperty(owner: ReflexClass, extension: Extension) {
         if (!owner.hasInterface(BacikalProperty::class.java)) {
             error("Cannot register class ${owner.name} without BacikalProperty interface.")
         }
@@ -116,7 +78,7 @@ object BacikalScanner : ClassVisitor(5) {
         val annotation = javaClass.getAnnotation(Property::class.java)
         val bind = annotation.bind.java
         val property = owner.getInstance() as BacikalProperty<*>
-        BacikalRegistry.registerProperty(bind, property, source)
+        BacikalRegistry.registerProperty(bind, property, extension)
     }
 
     /**

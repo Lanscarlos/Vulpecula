@@ -8,15 +8,14 @@ import taboolib.common.platform.function.getOpenContainers
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.registerLifeCycleTask
-import taboolib.common.platform.function.warning
 import taboolib.library.kether.QuestActionParser
 import taboolib.module.kether.Kether
 import taboolib.module.kether.StandardChannel
 import taboolib.module.metrics.charts.DrilldownPie
 import top.lanscarlos.vulpecula.Vulpecula
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
-import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
-import top.lanscarlos.vulpecula.module.bacikal.action.ExternalActionSource
+import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
+import top.lanscarlos.vulpecula.module.bacikal.extension.ExternalExtension
+import top.lanscarlos.vulpecula.module.bacikal.extension.NativeExtension
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ComplexActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
@@ -35,12 +34,12 @@ import java.util.LinkedList
  */
 object BacikalRegistry {
 
-    private val sources: HashMap<String, ExternalActionSource> = hashMapOf()
+    private val extensions: HashMap<String, ExternalExtension> = hashMapOf()
     private val parsers: HashMap<String, BacikalActionParser> = hashMapOf()
     private val properties: HashMap<Class<*>, BacikalProperty<*>> = hashMapOf()
     private val propertyResolvers: HashMap<Class<*>, BacikalPropertyResolver<*>> = hashMapOf()
     private val exceptionalParsers: LinkedList<ExceptionalActionParser> = LinkedList()
-    private val sourceByClass: HashMap<Class<*>, ExternalActionSource> = hashMapOf()
+    private val extensionByClass: HashMap<Class<*>, ExternalExtension> = hashMapOf()
 
     @Awake(LifeCycle.INIT)
     fun onInit() {
@@ -49,27 +48,27 @@ object BacikalRegistry {
                 registerAction(parser)
             }
             for ((clazz, property) in properties) {
-                val source = sourceByClass[property.javaClass] ?: BuiltInActionSource
-                registerPropertyResolver(clazz, source, true)
+                val extension = extensionByClass[property.javaClass] ?: NativeExtension
+                registerPropertyResolver(clazz, extension, true)
             }
             Vulpecula.addMetricsChart(DrilldownPie("actionExtension", ::metricsActionExtension))
             Vulpecula.addMetricsChart(DrilldownPie("extensionAuthor", ::metricsExtensionAuthor))
         }
     }
 
-    fun getActionSource(name: String): ExternalActionSource {
-        return getActionSourceOrNull(name) ?: error("Source $name not found.")
+    fun getExtension(name: String): ExternalExtension {
+        return getExtensionOrNull(name) ?: error("Extension $name not found.")
     }
 
-    fun getActionSourceOrNull(name: String): ExternalActionSource? {
-        return sources[name]
+    fun getExtensionOrNull(name: String): ExternalExtension? {
+        return extensions[name]
     }
 
-    fun getActionSourceKeys(): Set<String> = sources.keys
+    fun getExtensionKeys(): Set<String> = extensions.keys
 
-    fun getActionSourceValues(): Collection<ExternalActionSource> = sources.values
+    fun getExtensionValues(): Collection<ExternalExtension> = extensions.values
 
-    fun getActionSourceEntries(): Set<Map.Entry<String, ExternalActionSource>> = sources.entries
+    fun getExtensionEntries(): Set<Map.Entry<String, ExternalExtension>> = extensions.entries
 
     fun getActionParser(id: String): BacikalActionParser = getActionParserOrNull(id) ?: error("Parser $id not found.")
 
@@ -101,19 +100,19 @@ object BacikalRegistry {
      * */
     internal fun getExceptionalParsers(): List<ExceptionalActionParser> = exceptionalParsers
 
-    fun getActionSourceByClass(clazz: Class<*>): ExternalActionSource {
-        return sourceByClass[clazz] ?: error("No Source registered for class: ${clazz.name}")
+    fun getExtensionByClass(clazz: Class<*>): ExternalExtension {
+        return extensionByClass[clazz] ?: error("No Extension registered for class: ${clazz.name}")
     }
 
     /**
      * 注册语句来源
      *
-     * @param source 语句来源
+     * @param extension 语句来源
      * */
-    fun registerActionSource(source: ExternalActionSource) {
-        sources[source.name] = source
-        for (clazz in source.classes.values) {
-            sourceByClass[clazz.toClass()] = source
+    fun registerExtension(extension: ExternalExtension) {
+        extensions[extension.name] = extension
+        for (clazz in extension.classes.values) {
+            extensionByClass[clazz.toClass()] = extension
         }
     }
 
@@ -139,7 +138,7 @@ object BacikalRegistry {
                 val id = array.subList(0, index + 1).joinToString(".")
                 val name = array[index]
                 val complex = parsers.computeIfAbsent(id) {
-                    ComplexActionParser(id, name, emptyArray(), "vulpecula", "Description", parser.source)
+                    ComplexActionParser(id, name, emptyArray(), "vulpecula", "Description", parser.extension)
                         .also(newParents::add)
                 }
                 parent?.addActionParser(complex) // 第一次遍历时无父节点
@@ -161,7 +160,7 @@ object BacikalRegistry {
         }
     }
 
-    fun registerProperty(typeClass: Class<*>, property: BacikalProperty<*>, source: ActionSource) {
+    fun registerProperty(typeClass: Class<*>, property: BacikalProperty<*>, extension: Extension) {
         properties[typeClass] = property
         when (TabooLib.getCurrentLifeCycle()) {
             LifeCycle.ENABLE,
@@ -170,7 +169,7 @@ object BacikalRegistry {
                     return
                 }
                 // 立刻注册
-                registerPropertyResolver(typeClass, source, true)
+                registerPropertyResolver(typeClass, extension, true)
             }
             else -> {}
         }
@@ -179,11 +178,11 @@ object BacikalRegistry {
     /**
      * 注册属性
      * */
-    fun registerPropertyResolver(clazz: Class<*>, source: ActionSource, shared: Boolean) {
+    fun registerPropertyResolver(clazz: Class<*>, extension: Extension, shared: Boolean) {
         if (propertyResolvers.containsKey(clazz)) {
             return
         }
-        val resolver = BacikalPropertyResolver(clazz.simpleName, clazz, source)
+        val resolver = BacikalPropertyResolver(clazz.simpleName, clazz, extension)
         propertyResolvers[clazz] = resolver
 
         // 本地注册
@@ -253,7 +252,7 @@ object BacikalRegistry {
 
     private fun metricsActionExtension(): Map<String, Map<String, Int>> {
         val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
-        val sources = parsers.values.map { it.source }.distinct()
+        val sources = parsers.values.map { it.extension }.distinct()
         for (source in sources) {
             val innerMap = outerMap.computeIfAbsent(source.name) { hashMapOf() }
             innerMap.compute(source.version) { _, value ->
@@ -266,7 +265,7 @@ object BacikalRegistry {
 
     private fun metricsExtensionAuthor(): Map<String, Map<String, Int>> {
         val outerMap: HashMap<String, HashMap<String, Int>> = hashMapOf()
-        val sources = parsers.values.map { it.source }.distinct()
+        val sources = parsers.values.map { it.extension }.distinct()
         for (source in sources) {
             for (author in source.authors) {
                 val innerMap = outerMap.computeIfAbsent(author) { hashMapOf() }

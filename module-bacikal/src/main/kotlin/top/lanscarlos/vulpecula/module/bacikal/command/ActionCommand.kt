@@ -15,8 +15,8 @@ import taboolib.module.kether.RemoteActionParser
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
-import top.lanscarlos.vulpecula.module.bacikal.action.BuiltInActionSource
 import top.lanscarlos.vulpecula.module.bacikal.error
+import top.lanscarlos.vulpecula.module.bacikal.extension.NativeExtension
 import top.lanscarlos.vulpecula.module.bacikal.info
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
@@ -63,7 +63,7 @@ object ActionCommand {
 
     private val reload: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            for (source in BacikalRegistry.getActionSourceValues()) {
+            for (source in BacikalRegistry.getExtensionValues()) {
                 try {
                     source.reload()
                     sender.info { asLang("module-bacikal-command-reload-success", source.name) }
@@ -74,10 +74,10 @@ object ActionCommand {
         }
 
         dynamic("source") {
-            suggest { BacikalRegistry.getActionSourceKeys().toList() }
+            suggest { BacikalRegistry.getExtensionKeys().toList() }
             execute<ProxyCommandSender> { sender, _, name ->
                 try {
-                    BacikalRegistry.getActionSource(name).reload()
+                    BacikalRegistry.getExtension(name).reload()
                     sender.info { asLang("module-bacikal-command-reload-success", name) }
                 } catch (e: Exception) {
                     sender.error { asLang("module-bacikal-command-reload-failure", name, e.localizedMessage) }
@@ -140,8 +140,8 @@ object ActionCommand {
         val bacikalParsers = BacikalRegistry.getActionParserValues()
             .filter { it !is ExceptionalActionParser && (detail || !it.id.contains('.')) }
         sender.info { asLang("module-bacikal-command-registry-display-bacikal-action", bacikalParsers.size) }
-        for ((source, parsers) in bacikalParsers.groupBy { it.source }) {
-            val color = if (source is BuiltInActionSource) "§3" else "§b"
+        for ((source, parsers) in bacikalParsers.groupBy { it.extension }) {
+            val color = if (source is NativeExtension) "§3" else "§b"
             sender.info {
                 asLang(
                     "module-bacikal-command-registry-display-item",

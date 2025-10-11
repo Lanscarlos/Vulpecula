@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.library.kether.QuestActionParser
 import taboolib.module.chat.ComponentText
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
+import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
 
 /**
  * Vulpecula
@@ -23,7 +23,7 @@ interface BacikalActionParser : QuestActionParser {
 
     val description: String
 
-    val source: ActionSource
+    val extension: Extension
 
     /**
      * 构建可视化结构用于展示结构

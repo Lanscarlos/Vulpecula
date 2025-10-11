@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.module.updater
+package top.lanscarlos.vulpecula.module.bacikal.extension
 
 import taboolib.module.configuration.Configuration
 import java.io.File
@@ -6,10 +6,10 @@ import java.util.jar.JarFile
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.module.updater
+ * top.lanscarlos.vulpecula.module.bacikal.extension
  *
  * @author Lanscarlos
- * @since 2025/9/24
+ * @since 2025/10/11
  */
 class Artifact(val file: File) : Comparable<Artifact> {
 
@@ -24,6 +24,11 @@ class Artifact(val file: File) : Comparable<Artifact> {
     val patchVersion: Int
 
     init {
+        require(file.extension == "jar") { "${file.path} is not a jar" }
+        require(file.exists()) { "${file.path} does not exist" }
+        require(file.isFile) { "${file.path} is not a file" }
+        require(file.canRead()) { "${file.path} can not be read" }
+
         JarFile(file).use { jarFile ->
             val jarEntry = jarFile.getJarEntry("plugin.yml") ?: error("空的 plugin.yml")
             val inputStream = jarFile.getInputStream(jarEntry)
@@ -39,12 +44,12 @@ class Artifact(val file: File) : Comparable<Artifact> {
 
     override fun compareTo(other: Artifact): Int {
         if (majorVersion != other.majorVersion) {
-            return majorVersion - other.majorVersion
+            return majorVersion.compareTo(other.majorVersion)
         }
         if (minorVersion != other.minorVersion) {
-            return minorVersion - other.minorVersion
+            return minorVersion.compareTo(other.minorVersion)
         }
-        return patchVersion - other.patchVersion
+        return patchVersion.compareTo(other.patchVersion)
     }
 
 }

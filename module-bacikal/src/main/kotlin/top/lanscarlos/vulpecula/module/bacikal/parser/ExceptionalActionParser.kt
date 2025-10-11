@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 import taboolib.library.kether.QuestAction
 import taboolib.library.kether.QuestReader
 import taboolib.module.chat.ComponentText
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
+import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
 
 /**
  * Vulpecula
@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
  * @author Lanscarlos
  * @since 2025/6/29
  */
-class ExceptionalActionParser(val exception: Exception, override val source: ActionSource) : BacikalActionParser {
+class ExceptionalActionParser(val exception: Exception, override val extension: Extension) : BacikalActionParser {
 
     override val id: String get() = throw exception
 

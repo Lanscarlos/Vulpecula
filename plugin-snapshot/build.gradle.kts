@@ -17,6 +17,7 @@ dependencies {
     compileOnly(project(":extension-action-illusion"))
     compileOnly(project(":extension-action-item"))
     compileOnly(project(":extension-action-memory"))
+    compileOnly(project(":extension-action-target"))
     compileOnly(project(":extension-property-entity"))
     compileOnly(project(":module-anser"))
     compileOnly(project(":module-bacikal"))
@@ -25,7 +26,6 @@ dependencies {
     compileOnly(project(":module-dispatcher"))
     compileOnly(project(":module-schedule"))
     compileOnly(project(":module-script"))
-    compileOnly(project(":module-updater"))
     compileOnly(project(":module-volatility"))
     compileOnly(project(":platform-bukkit"))
 }

@@ -5,8 +5,8 @@ import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
 import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.module.bacikal.action.ActionSource
 import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionRegisterException
+import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
 import java.util.LinkedList
 import java.util.concurrent.CompletableFuture
 
@@ -26,7 +26,7 @@ class ClassActionParser(
     namespace: String,
     description: String,
     javaClass: Class<*>,
-    override val source: ActionSource
+    override val extension: Extension
 ) : AbstractActionParser(id, name, aliases, namespace, description) {
 
     private val constructor: ClassActionConstructor

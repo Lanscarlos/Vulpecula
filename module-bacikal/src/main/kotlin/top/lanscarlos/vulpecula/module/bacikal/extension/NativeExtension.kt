@@ -1,16 +1,16 @@
-package top.lanscarlos.vulpecula.module.bacikal.action
+package top.lanscarlos.vulpecula.module.bacikal.extension
 
 import taboolib.common.platform.function.pluginId
 import taboolib.common.platform.function.pluginVersion
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.module.bacikal.action
+ * top.lanscarlos.vulpecula.module.bacikal.extension
  *
  * @author Lanscarlos
- * @since 2025/6/18 17:23
+ * @since 2025/10/11
  */
-object BuiltInActionSource : ActionSource {
+object NativeExtension : Extension {
 
     override val name: String by lazy { pluginId }
 
