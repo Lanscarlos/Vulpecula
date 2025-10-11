@@ -22,7 +22,6 @@ include("module-dispatcher")
 include("module-experiment")
 include("module-schedule")
 include("module-script")
-include("module-updater")
 include("module-volatility")
 include("module-wireshark")
 
