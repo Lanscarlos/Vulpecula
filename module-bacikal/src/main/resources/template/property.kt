@@ -6,7 +6,7 @@ import top.lanscarlos.vulpecula.common.applicative.*
 
 /**
  * Vulpecula
- * top.lanscarlos.vulpecula.module.bacikal.property
+ * top.lanscarlos.vulpecula.module.bacikal.property.${module}
  *
  * @author Lanscarlos
  * @since ${time}
