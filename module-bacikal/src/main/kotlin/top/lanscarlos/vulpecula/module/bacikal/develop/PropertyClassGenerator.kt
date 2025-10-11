@@ -1,9 +1,14 @@
 package top.lanscarlos.vulpecula.module.bacikal.develop
 
-import org.bukkit.entity.Damageable
-import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
+import org.bukkit.Color
+import org.bukkit.Location
+import org.bukkit.OfflinePlayer
+import org.bukkit.World
+import org.bukkit.block.Block
+import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
@@ -31,16 +36,25 @@ object PropertyClassGenerator {
 
     val warnings = HashSet<String>()
 
-//    @Awake(LifeCycle.ACTIVE)
+    @Awake(LifeCycle.ACTIVE)
     fun onActive() {
         File(getDataFolder(), "develop").deleteRecursively()
         info("尝试生成属性包")
         try {
-            val packageName = Entity::class.java.`package`.name
-            generate(Entity::class.java, packageName, "entity")
-            generate(LivingEntity::class.java, packageName, "entity")
-            generate(Player::class.java, packageName, "entity")
-            generate(Damageable::class.java, packageName, "entity")
+            val classes = listOf(
+                Block::class.java,
+                Location::class.java,
+                Color::class.java,
+                ItemStack::class.java,
+                OfflinePlayer::class.java,
+                World::class.java,
+                Vector::class.java,
+                Vector::class.java,
+            )
+            for (clazz in classes) {
+                generate(clazz, clazz.`package`.name, "common")
+            }
+
             for (info in warnings) {
                 warning(info)
             }

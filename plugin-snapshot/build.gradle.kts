@@ -18,6 +18,7 @@ dependencies {
     compileOnly(project(":extension-action-item"))
     compileOnly(project(":extension-action-memory"))
     compileOnly(project(":extension-action-target"))
+    compileOnly(project(":extension-property-common"))
     compileOnly(project(":extension-property-entity"))
     compileOnly(project(":module-anser"))
     compileOnly(project(":module-bacikal"))
