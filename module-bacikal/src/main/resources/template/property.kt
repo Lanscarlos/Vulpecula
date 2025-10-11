@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.property.${module}
 import ${import}
 import top.lanscarlos.vulpecula.module.bacikal.property.BacikalProperty
 import top.lanscarlos.vulpecula.common.applicative.*
+import top.lanscarlos.vulpecula.module.bacikal.annotation.Property
 
 /**
  * Vulpecula
