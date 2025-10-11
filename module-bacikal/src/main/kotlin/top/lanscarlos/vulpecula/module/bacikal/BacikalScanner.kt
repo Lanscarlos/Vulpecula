@@ -13,7 +13,6 @@ import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionParser
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
 import top.lanscarlos.vulpecula.module.bacikal.parser.ExceptionalActionParser
 import top.lanscarlos.vulpecula.module.bacikal.property.BacikalProperty
-import java.io.File
 import java.lang.reflect.ParameterizedType
 
 /**
