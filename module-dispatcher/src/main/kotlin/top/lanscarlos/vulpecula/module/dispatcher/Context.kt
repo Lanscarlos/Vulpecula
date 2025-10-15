@@ -49,6 +49,7 @@ data class Context(val event: Event) {
             return
         }
         this.player = player
+        isPlayerInitialized = true
         if (player != null) {
             setVariable("player", player)
         } else {
