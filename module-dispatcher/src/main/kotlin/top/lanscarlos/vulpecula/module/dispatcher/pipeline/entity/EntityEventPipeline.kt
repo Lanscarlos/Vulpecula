@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline.entity
 
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityEvent
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.module.dispatcher.Context
