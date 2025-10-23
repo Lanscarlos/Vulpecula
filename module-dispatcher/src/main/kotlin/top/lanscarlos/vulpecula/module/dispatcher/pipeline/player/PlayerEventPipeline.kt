@@ -16,8 +16,8 @@ import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 @AutoRegistered
 class PlayerEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<PlayerEvent>(clazz, config) {
 
-    override fun initPlayer(context: Context) {
-        context.setPlayer(getEvent(context).player)
+    override fun initPrincipal(context: Context) {
+        context.setPrincipal(getEvent(context).player)
     }
 
 }

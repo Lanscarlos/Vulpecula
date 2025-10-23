@@ -17,8 +17,8 @@ import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 @AutoRegistered
 class EntityEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<EntityEvent>(clazz, config) {
 
-    override fun initPlayer(context: Context) {
-        context.setPlayer(getEvent(context).entity as? Player)
+    override fun initPrincipal(context: Context) {
+        context.setPrincipal(getEvent(context).entity)
     }
 
     override fun initVariables(context: Context) {

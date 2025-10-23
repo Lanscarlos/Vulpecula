@@ -14,7 +14,7 @@ interface Pipeline {
     /**
      * 初始化玩家对象
      * */
-    fun initPlayer(context: Context)
+    fun initPrincipal(context: Context)
 
     /**
      * 初始化变量

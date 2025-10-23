@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
+import org.bukkit.block.Block
+import org.bukkit.entity.Entity
 import org.bukkit.event.Event
 import taboolib.common5.Baffle
 import taboolib.common5.Baffle.BaffleCounter
@@ -33,9 +35,12 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
 
     val cancel: Boolean by config.read("baffle-cancel").boolean(false)
 
+    val global: Boolean by config.read("baffle-global").boolean(false)
+
     override fun filter(context: Context) {
         val baffle = this.baffle ?: return
-        if (baffle.hasNext("*", false)) {
+        val id = if (global) "*" else context.principalId
+        if (baffle.hasNext(id, false)) {
             // 冷却通过
             return
         }

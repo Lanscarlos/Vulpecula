@@ -23,9 +23,9 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
             it.priority
         }
 
-    override fun initPlayer(context: Context) {
+    override fun initPrincipal(context: Context) {
         for (pipeline in pipelines) {
-            pipeline.initPlayer(context)
+            pipeline.initPrincipal(context)
         }
     }
 

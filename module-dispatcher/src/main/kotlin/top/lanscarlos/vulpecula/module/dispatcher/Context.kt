@@ -1,5 +1,7 @@
 package top.lanscarlos.vulpecula.module.dispatcher
 
+import org.bukkit.block.Block
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import taboolib.common.platform.ProxyCommandSender
@@ -16,14 +18,29 @@ import top.lanscarlos.vulpecula.common.applicative.Applicative
  */
 data class Context(val event: Event) {
 
+    /**
+     * 事件主体
+     * */
+    var principal: Any? = Unit
+        private set
+
+    /**
+     * 事件主体唯一标识
+     * */
+    var principalId: String = "NULL"
+        private set
+
     var isCancelled: Boolean = false
+        private set
 
     var isFiltered: Boolean = false
+        private set
 
     var player: Player? = null
         private set
 
-    private var isPlayerInitialized: Boolean = false
+    var isPrincipalInitialized: Boolean = false
+        private set
 
     private val variables: HashMap<String, Any> = hashMapOf("@VULPECULA_CONTEXT_EVENT" to event)
 
@@ -42,14 +59,28 @@ data class Context(val event: Event) {
     }
 
     /**
-     * @param force 是否强制替换玩家变量
+     * 获取事件主体
+     *
+     * @param replace 是否替换已存在的事件主体
      * */
-    fun setPlayer(player: Player?, force: Boolean = false) {
-        if (!force && isPlayerInitialized) {
+    fun setPrincipal(principal: Any?, replace: Boolean = false) {
+        if (!replace && isPrincipalInitialized) {
             return
         }
-        this.player = player
-        isPlayerInitialized = true
+        this.principal = principal
+        isPrincipalInitialized = true
+
+        // 处理标识
+        principalId = when (principal) {
+            is Unit -> "NULL"
+            is Player -> "PLAYER@${principal.uniqueId}"
+            is Entity -> "ENTITY@${principal.uniqueId}"
+            is Block -> "BLOCK@${principal.world.name},${principal.x},${principal.y},${principal.z}"
+            else -> error("Unsupported type: ${principal?.javaClass?.canonicalName ?: "NULL"}")
+        }
+
+        // 处理玩家对象
+        player = principal as? Player
         if (player != null) {
             setVariable("player", player)
         } else {

@@ -69,7 +69,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override fun accept(event: Event) {
         val context = Context(event)
-        pipeline.initPlayer(context)
+        pipeline.initPrincipal(context)
         pipeline.filter(context)
 
         // 判断处理状态

@@ -29,9 +29,14 @@ class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : Abst
 
     val playerField: ClassField? by config.read("player-field").string("~").convert(::parsePlayerField)
 
-    override fun initPlayer(context: Context) {
+    override fun initPrincipal(context: Context) {
+        if (context.isPrincipalInitialized) {
+            // 已初始化玩家对象
+            return
+        }
         // 解析玩家对象
-        context.setPlayer(playerField?.get(context.event) as? Player)
+        val player = playerField?.get(context.event) as? Player ?: return
+        context.setPrincipal(player)
     }
 
     override fun filter(context: Context) {
