@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.event.Event
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.module.dispatcher.Context
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
 
 /**
@@ -17,18 +16,18 @@ abstract class AbstractPipeline<T: Event>(val clazz: Class<*>, val config: Confi
     override val priority: Int = 8
 
     @Suppress("UNCHECKED_CAST")
-    fun getEvent(context: Context): T {
+    fun getEvent(context: PipelineContext): T {
         return context.event as T
     }
 
-    override fun initPrincipal(context: Context) = Unit
+    override fun initPrincipal(context: PipelineContext) = Unit
 
-    override fun initVariables(context: Context) = Unit
+    override fun initVariables(context: PipelineContext) = Unit
 
-    override fun filter(context: Context) = Unit
+    override fun filter(context: PipelineContext) = Unit
 
-    override fun afterFilter(context: Context) = Unit
+    override fun afterFilter(context: PipelineContext) = Unit
 
-    override fun postprocess(context: Context) = Unit
+    override fun postprocess(context: PipelineContext) = Unit
 
 }

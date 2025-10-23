@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline.entity
 
 import org.bukkit.event.entity.EntityEvent
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.module.dispatcher.Context
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 
@@ -16,11 +16,11 @@ import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 @AutoRegistered
 class EntityEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<EntityEvent>(clazz, config) {
 
-    override fun initPrincipal(context: Context) {
+    override fun initPrincipal(context: PipelineContext) {
         context.setPrincipal(getEvent(context).entity)
     }
 
-    override fun initVariables(context: Context) {
+    override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
         context.setVariable("entity", event.entity)
     }

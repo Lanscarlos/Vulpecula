@@ -1,4 +1,4 @@
-package top.lanscarlos.vulpecula.module.dispatcher
+package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.common.applicative.Applicative
  * @author Lanscarlos
  * @since 2025/6/4 11:30
  */
-data class Context(val event: Event) {
+data class PipelineContext(val event: Event) {
 
     /**
      * 事件主体

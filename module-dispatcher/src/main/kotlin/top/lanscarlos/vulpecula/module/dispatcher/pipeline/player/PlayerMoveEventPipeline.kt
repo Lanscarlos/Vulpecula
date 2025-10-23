@@ -5,7 +5,7 @@ import org.bukkit.event.player.PlayerMoveEvent
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.module.dispatcher.Context
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 
@@ -29,7 +29,7 @@ class PlayerMoveEventPipeline(clazz: Class<*>, config: ConfigurationSection) : A
      * */
     val captureSubtleMovement: Boolean by config.read("capture-subtle-movement").boolean(false)
 
-    override fun filter(context: Context) {
+    override fun filter(context: PipelineContext) {
         if (context.event::class.java != PlayerMoveEvent::class.java) {
             // 可能为 PlayerMoveEvent 的子类, 不做处理, 放行
             return

@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.module.dispatcher.Context
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
 
 /**
@@ -23,31 +22,31 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
             it.priority
         }
 
-    override fun initPrincipal(context: Context) {
+    override fun initPrincipal(context: PipelineContext) {
         for (pipeline in pipelines) {
             pipeline.initPrincipal(context)
         }
     }
 
-    override fun initVariables(context: Context) {
+    override fun initVariables(context: PipelineContext) {
         for (pipeline in pipelines) {
             pipeline.initVariables(context)
         }
     }
 
-    override fun filter(context: Context) {
+    override fun filter(context: PipelineContext) {
         for (pipeline in pipelines) {
             pipeline.filter(context)
         }
     }
 
-    override fun afterFilter(context: Context) {
+    override fun afterFilter(context: PipelineContext) {
         for (pipeline in pipelines) {
             pipeline.afterFilter(context)
         }
     }
 
-    override fun postprocess(context: Context) {
+    override fun postprocess(context: PipelineContext) {
         for (pipeline in pipelines) {
             pipeline.postprocess(context)
         }

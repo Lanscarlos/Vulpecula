@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline.player
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.module.dispatcher.Context
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 
@@ -16,7 +16,7 @@ import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AutoRegistered
 @AutoRegistered
 class PaperPlayerArmorChangeEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<PlayerArmorChangeEvent>(clazz, config) {
 
-    override fun initVariables(context: Context) {
+    override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
         context.setVariable("slot", event.slotType.name)
         context.setVariable("oldItem", event.oldItem)

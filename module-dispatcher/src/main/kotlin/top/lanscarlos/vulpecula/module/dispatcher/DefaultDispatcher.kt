@@ -15,6 +15,7 @@ import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ListPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineRegistry
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptFlow
@@ -68,7 +69,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     }
 
     override fun accept(event: Event) {
-        val context = Context(event)
+        val context = PipelineContext(event)
         pipeline.initPrincipal(context)
         pipeline.filter(context)
 
