@@ -37,9 +37,9 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     override val weight: Int by config.read("weight").int(8)
 
-    override val preprocessing: Script? by config.read("pre-processing").convert(::parseScriptOrNull)
+    override val preprocessing: Script? by config.read("before-execute").convert(::parseScriptOrNull)
 
-    override val postprocessing: Script? by config.read("post-processing").convert(::parseScriptOrNull)
+    override val postprocessing: Script? by config.read("after-execute").convert(::parseScriptOrNull)
 
     override val executable: Script by config.read("execute").convert(::parseScript)
 

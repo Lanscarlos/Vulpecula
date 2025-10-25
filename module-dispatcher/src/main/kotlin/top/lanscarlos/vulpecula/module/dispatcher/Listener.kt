@@ -27,7 +27,7 @@ class Listener(val clazz: ReflexClass) {
 
         val dispatchers = this.dispatchers.computeIfAbsent(priority) { LinkedList() }
         dispatchers += dispatcher
-        dispatchers.sortByDescending { it.weight } // 按权重排序
+        dispatchers.sortByDescending { it.weight } // 按权重排序, 权重越高, 越先处理
 
         listeners.computeIfAbsent(priority) {
             registerBukkitListener(clazz.toClass(), priority, false) { event ->
