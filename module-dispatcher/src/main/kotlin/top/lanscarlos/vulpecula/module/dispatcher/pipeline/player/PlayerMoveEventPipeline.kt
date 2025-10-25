@@ -63,6 +63,14 @@ class PlayerMoveEventPipeline(clazz: Class<*>, config: ConfigurationSection) : A
         }
     }
 
+    override fun initVariables(context: PipelineContext) {
+        val event = getEvent(context)
+        context.setVariable("event.from", event.from)
+        context.setVariable("event.to", event.to)
+
+        context.setVariable("isCrossWorld", event.from.world?.name != event.to?.world?.name) // 是否跨世界
+    }
+
     private fun checkCrossBlock(from: Location, to: Location): Boolean {
         return from.blockX != to.blockX || from.blockY != to.blockY || from.blockZ != to.blockZ
     }
