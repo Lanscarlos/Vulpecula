@@ -18,7 +18,7 @@ class EntityDamageByEntityEventPipeline(clazz: Class<*>, config: ConfigurationSe
 
     override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
-        context.setVariable("damager", event.damager)
+        context.setVariable("event.damager", event.damager)
     }
 
 }

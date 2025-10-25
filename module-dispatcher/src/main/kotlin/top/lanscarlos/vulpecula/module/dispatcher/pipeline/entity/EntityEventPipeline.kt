@@ -22,7 +22,7 @@ class EntityEventPipeline(clazz: Class<*>, config: ConfigurationSection) : Abstr
 
     override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
-        context.setVariable("entity", event.entity)
+        context.setVariable("event.entity", event.entity)
     }
 
 }

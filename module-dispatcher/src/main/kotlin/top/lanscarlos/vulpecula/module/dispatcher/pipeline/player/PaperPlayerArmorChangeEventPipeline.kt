@@ -18,9 +18,9 @@ class PaperPlayerArmorChangeEventPipeline(clazz: Class<*>, config: Configuration
 
     override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
-        context.setVariable("slot", event.slotType.name)
-        context.setVariable("oldItem", event.oldItem)
-        context.setVariable("newItem", event.newItem)
+        context.setVariable("event.slot", event.slotType.name)
+        context.setVariable("event.oldItem", event.oldItem)
+        context.setVariable("event.newItem", event.newItem)
     }
 
 }

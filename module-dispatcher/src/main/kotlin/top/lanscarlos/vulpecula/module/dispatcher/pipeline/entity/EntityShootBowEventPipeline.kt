@@ -18,9 +18,9 @@ class EntityShootBowEventPipeline(clazz: Class<*>, config: ConfigurationSection)
 
     override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
-        context.setVariable("projectile", event.projectile)
-        context.setVariable("bow", event.bow)
-        context.setVariable("force", event.force)
+        context.setVariable("event.projectile", event.projectile)
+        context.setVariable("event.bow", event.bow)
+        context.setVariable("event.force", event.force)
     }
 
 }

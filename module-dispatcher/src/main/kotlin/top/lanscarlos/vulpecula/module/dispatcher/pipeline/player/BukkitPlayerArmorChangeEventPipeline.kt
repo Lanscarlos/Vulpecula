@@ -18,9 +18,9 @@ class BukkitPlayerArmorChangeEventPipeline(clazz: Class<*>, config: Configuratio
 
     override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
-        context.setVariable("slot", event.slot.name)
-        context.setVariable("oldItem", event.oldItem)
-        context.setVariable("newItem", event.newItem)
+        context.setVariable("event.slot", event.slot.name)
+        context.setVariable("event.oldItem", event.oldItem)
+        context.setVariable("event.newItem", event.newItem)
     }
 
 }
