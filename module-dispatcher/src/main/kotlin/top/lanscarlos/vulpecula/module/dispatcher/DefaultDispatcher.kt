@@ -128,8 +128,13 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         flow.onFailure(::onScriptFailure)
 
         // 执行脚本流
-        flow.execute().exceptionally {
-            onFailure(it.cause as Exception)
+        flow.execute().handle { result, ex ->
+            if (ex != null) {
+                onFailure(ex.cause as Exception)
+            } else {
+                context.result = result
+                pipeline.postprocess(context)
+            }
         }
     }
 

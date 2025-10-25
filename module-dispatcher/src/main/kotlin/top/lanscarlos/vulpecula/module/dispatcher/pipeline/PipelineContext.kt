@@ -39,6 +39,8 @@ data class PipelineContext(val event: Event) {
     var player: Player? = null
         private set
 
+    var result: Any? = null
+
     var isPrincipalInitialized: Boolean = false
         private set
 
