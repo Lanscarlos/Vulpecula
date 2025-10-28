@@ -3,6 +3,7 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline.player
 import org.bukkit.Location
 import org.bukkit.event.player.PlayerMoveEvent
 import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.applicative.BukkitLocationApplicative
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
@@ -69,6 +70,11 @@ class PlayerMoveEventPipeline(clazz: Class<*>, config: ConfigurationSection) : A
         context.setVariable("event.to", event.to)
 
         context.setVariable("isCrossWorld", event.from.world?.name != event.to?.world?.name) // 是否跨世界
+    }
+
+    override fun postprocess(context: PipelineContext) {
+        val event = getEvent(context)
+        event.setTo(context.getVariable("event.to", BukkitLocationApplicative))
     }
 
     private fun checkCrossBlock(from: Location, to: Location): Boolean {
