@@ -2,7 +2,9 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline.player
 
 import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 
 /**
  * Vulpecula
@@ -12,4 +14,15 @@ import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
  * @since 2025/10/25
  */
 class PlayerQuitEventPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<PlayerQuitEvent>(clazz, config) {
+
+    override fun initVariables(context: PipelineContext) {
+        val event = getEvent(context)
+        context.setVariable("event.joinMessage", event.quitMessage)
+    }
+
+    override fun postprocess(context: PipelineContext) {
+        val event = getEvent(context)
+        event.quitMessage = context.getVariable("event.quitMessage", StringApplicative)
+    }
+
 }

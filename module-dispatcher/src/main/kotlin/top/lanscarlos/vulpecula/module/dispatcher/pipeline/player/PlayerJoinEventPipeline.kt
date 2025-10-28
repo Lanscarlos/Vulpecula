@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline.player
 
 import org.bukkit.event.player.PlayerJoinEvent
 import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.AbstractPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 
@@ -17,6 +18,11 @@ class PlayerJoinEventPipeline(clazz: Class<*>, config: ConfigurationSection) : A
     override fun initVariables(context: PipelineContext) {
         val event = getEvent(context)
         context.setVariable("event.joinMessage", event.joinMessage)
+    }
+
+    override fun postprocess(context: PipelineContext) {
+        val event = getEvent(context)
+        event.joinMessage = context.getVariable("event.joinMessage", StringApplicative)
     }
 
 }
