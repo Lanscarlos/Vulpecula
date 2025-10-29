@@ -14,7 +14,6 @@ import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import java.io.File
 import java.util.concurrent.CompletableFuture
-import kotlin.toString
 
 /**
  * Vulpecula
