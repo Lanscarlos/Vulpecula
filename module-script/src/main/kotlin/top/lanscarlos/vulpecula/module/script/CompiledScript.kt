@@ -25,7 +25,7 @@ import kotlin.toString
  */
 class CompiledScript(override val id: String, val config: Configuration) : AbstractScript() {
 
-    data class Parameter(val name: String, val applicative: Applicative<Any>, val optional: Boolean, val default: Any?)
+    data class Parameter(val name: String, val applicative: Applicative<out Any>, val optional: Boolean, val default: Any?)
 
     val namespace: List<String> by config.read("namespace").stringList(emptyList())
 
@@ -70,8 +70,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
         for ((index, parameter) in parameters.withIndex()) {
             val arg = args.getOrNull(index)
             if (parameter.optional) {
-                val value = arg?.let(parameter.applicative::convertOrNull)
-                    ?: parameter.default?.let(parameter.applicative::convertOrNull) // 采用缺省值
+                val value = arg?.let(parameter.applicative::convert)
+                    ?: parameter.default?.let(parameter.applicative::convert) // 采用缺省值
                 wrappedArgs[parameter.name] = value ?: continue
                 continue
             }
@@ -162,8 +162,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
         val cache = mutableListOf<Parameter>()
         var optional = false
         for (map in source) {
-            val name = map["name"].toString()
-            val applicative: Applicative<Any> = map["type"].toString().lowercase().let(ApplicativeRegistry::getApplicative)
+            val name = map["name"]?.toString() ?: error("Parameter name is null")
+            val applicative: Applicative<out Any> = map["type"]?.toString()?.lowercase()?.let(ApplicativeRegistry::getApplicative) ?: StringApplicative
             optional = optional || map["optional"].applicativeBoolean(false)
             val default = map["default"]
             cache += Parameter(name, applicative, optional, default)
