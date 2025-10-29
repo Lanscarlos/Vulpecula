@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.common.core.utils.asLang
 import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
 import java.io.File
 import java.util.concurrent.CompletableFuture
+import kotlin.toString
 
 /**
  * Vulpecula
@@ -43,6 +44,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
     val timeout: Long by config.read("timeout").convert(::parseTimeout)
 
     val exceptions: Map<String, Quest> by config.read("exceptions").convert(::parseException)
+
+    val returnConversion: Applicative<*>? by config.read("return-conversion").convert(::parseReturnConversion)
 
     val debugOutput: Boolean by config.read("debug.output").boolean(false)
 
@@ -98,6 +101,8 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
             // 执行异常处理
             val exContext = BacikalService.executeLater(quest, timeout, sender, args.plus(context.rootFrame().deepVars()))
             exContext.runActions()
+        }.thenApply {
+            returnConversion?.convert(it) ?: it
         }
 
         return DefaultScriptTask(pid, this, context, future, startTime).also(ScriptService::trackTask)
@@ -227,6 +232,13 @@ class CompiledScript(override val id: String, val config: Configuration) : Abstr
             else -> throw InvalidTypeException(value)
         }
         return map.mapValues { (key, value) -> BacikalService.compile(value, "$id-exception-$key", namespace) }
+    }
+
+    private fun parseReturnConversion(value: Any?): Applicative<*>? {
+        if (value == null) {
+            return null
+        }
+        return ApplicativeRegistry.getApplicative<Any>(value.toString().lowercase())
     }
 
     private fun StringBuilder.appendIndent(value: String, indent: Int): StringBuilder {
