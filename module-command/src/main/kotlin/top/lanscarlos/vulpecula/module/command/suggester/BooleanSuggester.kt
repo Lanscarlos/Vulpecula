@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.command.suggester
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
+import top.lanscarlos.vulpecula.module.command.Suggester
 
 /**
  * Vulpecula
