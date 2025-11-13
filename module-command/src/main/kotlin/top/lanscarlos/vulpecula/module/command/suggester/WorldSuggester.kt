@@ -1,21 +1,21 @@
-package top.lanscarlos.vulpecula.module.command
+package top.lanscarlos.vulpecula.module.command.suggester
 
 import org.bukkit.Bukkit
-import org.bukkit.OfflinePlayer
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
+import top.lanscarlos.vulpecula.module.command.Suggester
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.command
  *
  * @author Lanscarlos
- * @since 2025/4/29 14:18
+ * @since 2025/4/29 14:01
  */
-object OfflinePlayerSuggester : Suggester {
+object WorldSuggester : Suggester {
 
     override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
-        return Bukkit.getOfflinePlayers().mapNotNull { it.name }
+        return Bukkit.getWorlds().map { it.name }
     }
 
 }

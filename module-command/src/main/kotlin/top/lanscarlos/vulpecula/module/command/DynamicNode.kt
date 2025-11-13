@@ -6,6 +6,13 @@ import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.module.command.restrictor.DoubleRestrictor
+import top.lanscarlos.vulpecula.module.command.restrictor.IntRestrictor
+import top.lanscarlos.vulpecula.module.command.suggester.BooleanSuggester
+import top.lanscarlos.vulpecula.module.command.suggester.ListSuggester
+import top.lanscarlos.vulpecula.module.command.suggester.OfflinePlayerSuggester
+import top.lanscarlos.vulpecula.module.command.suggester.PlayerSuggester
+import top.lanscarlos.vulpecula.module.command.suggester.WorldSuggester
 
 /**
  * Vulpecula

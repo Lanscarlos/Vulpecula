@@ -1,21 +1,21 @@
-package top.lanscarlos.vulpecula.module.command
+package top.lanscarlos.vulpecula.module.command.suggester
 
+import org.bukkit.Bukkit
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
+import top.lanscarlos.vulpecula.module.command.Suggester
 
 /**
  * Vulpecula
  * top.lanscarlos.vulpecula.module.command
  *
  * @author Lanscarlos
- * @since 2025/5/6 11:47
+ * @since 2025/4/29 13:26
  */
-class ListSuggester(list: List<*>) : Suggester {
-
-    val list = list.map { it.toString() }
+object PlayerSuggester : Suggester {
 
     override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
-        return list
+        return Bukkit.getOnlinePlayers().map { it.name }
     }
 
 }
