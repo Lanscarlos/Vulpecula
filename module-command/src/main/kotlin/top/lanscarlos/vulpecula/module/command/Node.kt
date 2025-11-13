@@ -63,7 +63,7 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
         val args = mutableMapOf<String, Any>("args" to rawArgs)
         var index = 0
         for ((i, rawArg) in rawArgs.withIndex()) {
-            val node = chain[i] as? DynamicNode ?: continue
+            val node = chain[i] as? ParameterNode ?: continue
             args["arg$index"] = rawArg
             args[node.name] = rawArg
             index++

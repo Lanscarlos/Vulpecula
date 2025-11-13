@@ -18,13 +18,13 @@ import java.util.*
  * @author Lanscarlos
  * @since 2025/4/29 13:23
  */
-class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : Node(id, parent, section) {
+open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : Node(id, parent, section) {
 
     val aliases: List<String> = section["aliases"].applicativeStringList(emptyList())
 
     val hidden: Boolean = section["hidden"].applicativeBoolean(false)
 
-    val parameters: List<DynamicNode> = parseParameters(section.getMapList("parameters"))
+    val parameters: List<ParameterNode> = parseParameters(section.getMapList("parameters"))
 
     override fun build(): CommandComponent {
         val component = CommandComponentLiteral(
@@ -55,14 +55,14 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
         super.execute(sender, context, argument)
     }
 
-    private fun parseParameters(value: List<Map<*, *>>): List<DynamicNode> {
+    private fun parseParameters(value: List<Map<*, *>>): List<ParameterNode> {
         if (value.isEmpty()) {
             return emptyList()
         }
         require(executor != null) {
             asLang("module-command-exception-executor-not-found", id)
         }
-        val list = LinkedList<DynamicNode>()
+        val list = LinkedList<ParameterNode>()
         var parent: Node = this
         for (section in value) {
             val id = section["name"]!!.toString()
@@ -72,19 +72,6 @@ class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : No
             parent = node
         }
         return list
-    }
-
-    inner class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : DynamicNode(id, parent, section) {
-
-        override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
-            if (children.isNotEmpty() && !children.single().optional) {
-                warning("ParameterNode 缺失必要参数: ${children.single().name}")
-                sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
-                return
-            }
-            super.execute(sender, context, argument)
-        }
-
     }
 
 }

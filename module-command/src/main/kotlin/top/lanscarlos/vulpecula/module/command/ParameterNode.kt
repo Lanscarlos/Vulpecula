@@ -1,8 +1,10 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
+import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.core.utils.asLang
@@ -21,7 +23,7 @@ import top.lanscarlos.vulpecula.module.command.suggester.WorldSuggester
  * @author Lanscarlos
  * @since 2025/4/29 13:19
  */
-open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, parent, section) {
+class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, parent, section) {
 
     constructor(id: String, parent: Node?, section: ConfigurationSection) : this(id, parent, section.toMap())
 
@@ -66,6 +68,15 @@ open class DynamicNode(id: String, parent: Node?, section: Map<*, *>) : Node(id,
         }
 
         return component
+    }
+
+    override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
+        if (children.isNotEmpty() && !children.single().optional) {
+            warning("ParameterNode 缺失必要参数: ${children.single().name}")
+            sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
+            return
+        }
+        super.execute(sender, context, argument)
     }
 
     private fun parseSuggester(suggestion: Any): Suggester {

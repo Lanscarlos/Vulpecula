@@ -124,11 +124,7 @@ class CustomCommand(val id: String, val config: Configuration) {
             require(parent != null) {
                 asLang("module-command-exception-parent-not-found", id)
             }
-            val node = when {
-                "literal" in section || "aliases" in section -> LiteralNode(id, parent, section)
-                "dynamic" in section || "suggest" in section || "optional" in section -> DynamicNode(id, parent, section)
-                else -> LiteralNode(id, parent, section)
-            }
+            val node = LiteralNode(id, parent, section)
             parent.children += node
             nodes[id] = node
             visited += id
