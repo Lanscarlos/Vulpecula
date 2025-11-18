@@ -79,25 +79,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     continue
                 }
 
-                if (file in cacheFiles) {
-                    // 计算哈希指纹
-                    val hash = file.digest("SHA-256")
-                    // 哈希指纹比对
-                    if (hash == this.hash[file]) {
-                        continue
-                    }
-                    try {
-                        callback.onFileModified(sender, getFileId(file), file)
-                        this.hash[file] = hash
-                        detectAutoReload(file)
-                        modified += 1
-                    } catch (e: Exception) {
-                        failed += 1
-                        callback.onFileException(sender, getFileId(file), file, e)
-                    } finally {
-                        cacheFiles.remove(file)
-                    }
-                } else {
+                if (file !in cacheFiles) {
                     // 新增的文件
                     try {
                         callback.onFileCreated(sender, getFileId(file), file)
@@ -109,6 +91,28 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                         failed += 1
                         callback.onFileException(sender, getFileId(file), file, e)
                     }
+                    continue
+                }
+
+                // 计算哈希指纹并进行比对
+                val hash = file.digest("SHA-256")
+                if (hash == this.hash[file]) {
+                    // 文件无修改
+                    cacheFiles.remove(file)
+                    continue
+                }
+
+                // 文件修改
+                try {
+                    callback.onFileModified(sender, getFileId(file), file)
+                    this.hash[file] = hash
+                    detectAutoReload(file)
+                    modified += 1
+                } catch (e: Exception) {
+                    failed += 1
+                    callback.onFileException(sender, getFileId(file), file, e)
+                } finally {
+                    cacheFiles.remove(file)
                 }
             }
 
