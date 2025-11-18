@@ -99,12 +99,14 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                 if (hash == this.hash[file]) {
                     // 文件无修改
                     cacheFiles.remove(file)
+                    cache += file
                     continue
                 }
 
                 // 文件修改
                 try {
                     callback.onFileModified(sender, getFileId(file), file)
+                    cache += file
                     this.hash[file] = hash
                     detectAutoReload(file)
                     modified += 1
@@ -120,7 +122,6 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             for (file in cacheFiles) {
                 try {
                     callback.onFileDeleted(sender, getFileId(file), file)
-                    cache.remove(file)
                     hash.remove(file)
                     deleted += 1
                 } catch (e: Exception) {
