@@ -112,18 +112,18 @@ class ExternalExtension(artifact: Artifact) : Extension {
         }
         file.parentFile.mkdirs()
 
-        // 获取输入流
+        // 获取配置文件输入流
         val inputStream = jarFile.getJarEntry("config.yml")?.let(jarFile::getInputStream)
             ?: return Configuration.empty()
 
-        // 输出文件
+        // 导出配置
         inputStream.use {
             FileOutputStream(file).use { outputStream ->
                 inputStream.copyTo(outputStream)
             }
         }
 
-        return Configuration.loadFromInputStream(inputStream)
+        return Configuration.loadFromFile(file)
     }
 
     companion object {
