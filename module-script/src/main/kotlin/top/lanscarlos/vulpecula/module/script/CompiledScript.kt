@@ -22,9 +22,11 @@ import java.util.concurrent.CompletableFuture
  * @author Lanscarlos
  * @since 2025-03-20 15:11
  */
-class CompiledScript(override val id: String, val config: Configuration) : AbstractScript() {
+class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
 
     data class Parameter(val name: String, val applicative: Applicative<out Any>, val optional: Boolean, val default: Any?)
+
+    override val id: String by config.read("name").stringOrNull().default(id)
 
     val namespace: List<String> by config.read("namespace").stringList(emptyList())
 
