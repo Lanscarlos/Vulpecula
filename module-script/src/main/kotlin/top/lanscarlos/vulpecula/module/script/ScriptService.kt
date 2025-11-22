@@ -237,7 +237,7 @@ object ScriptService {
                 "yml", "yaml" -> CompiledScript(id, Configuration.loadFromFile(file))
                 else -> throw UnsupportedFileExtensionException(file.extension)
             }
-            scripts[id] = script
+            scripts[script.id] = script
         }
 
         override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
