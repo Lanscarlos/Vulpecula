@@ -62,9 +62,9 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         }
 
         if (playerRequired) {
-            component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
-        } else {
             component.execute(bind = ProxyPlayer::class.java, function = ::execute)
+        } else {
+            component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
         }
 
         // 处理子节点

@@ -38,9 +38,9 @@ open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection)
 
         // 执行器
         if (playerRequired) {
-            component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
-        } else {
             component.execute(bind = ProxyPlayer::class.java, function = ::execute)
+        } else {
+            component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
         }
 
         // 处理子节点
