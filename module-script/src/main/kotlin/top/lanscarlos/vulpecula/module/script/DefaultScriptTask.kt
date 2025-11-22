@@ -33,7 +33,10 @@ class DefaultScriptTask(
     }
 
     override fun onSuccess(func: Consumer<Any?>): ScriptTask {
-        future = future.thenApply { func.accept(it) }
+        future = future.thenApply {
+            func.accept(it)
+            it
+        }
         return this
     }
 
