@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
@@ -60,7 +61,11 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
             }
         }
 
-        component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
+        if (playerRequired) {
+            component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
+        } else {
+            component.execute(bind = ProxyPlayer::class.java, function = ::execute)
+        }
 
         // 处理子节点
         for (child in children) {
@@ -70,13 +75,27 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         return component
     }
 
-    override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
-        if (children.isNotEmpty() && !children.single().optional) {
-            warning("ParameterNode 缺失必要参数: ${children.single().name}")
-            sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
+    override fun execute(sender: ProxyPlayer, context: CommandContext<ProxyPlayer>, argument: String) {
+        if (!beforeExecute(sender)) {
             return
         }
         super.execute(sender, context, argument)
+    }
+
+    override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
+        if (!beforeExecute(sender)) {
+            return
+        }
+        super.execute(sender, context, argument)
+    }
+
+    private fun beforeExecute(sender: ProxyCommandSender): Boolean {
+        if (children.isEmpty() || children.single().optional) {
+            return true
+        }
+        warning("ParameterNode 缺失必要参数: ${children.single().name}")
+        sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
+        return false
     }
 
     private fun parseSuggester(suggestion: Any): Suggester {
@@ -91,7 +110,7 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         }
         if (suggestion[0] != '@' || suggestion.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(suggestion, ::transformArgs)
+            return ScriptExecutor(suggestion, true, ::transformArgs)
         }
         return when (suggestion.substring(1).lowercase()) {
             "bool", "boolean" -> BooleanSuggester
@@ -111,7 +130,7 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         }
         if (restriction[0] != '@' || restriction.lowercase().startsWith("@script:")) {
             // 启用脚本约束
-            return ScriptExecutor(restriction, ::transformArgs)
+            return ScriptExecutor(restriction, true, ::transformArgs)
         }
         return when (restriction.substring(1).lowercase()) {
             "int" -> IntRestrictor

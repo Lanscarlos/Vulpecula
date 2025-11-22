@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentLiteral
@@ -36,7 +37,11 @@ open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection)
         )
 
         // 执行器
-        component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
+        if (playerRequired) {
+            component.execute(bind = ProxyCommandSender::class.java, function = ::execute)
+        } else {
+            component.execute(bind = ProxyPlayer::class.java, function = ::execute)
+        }
 
         // 处理子节点
         for (child in children) {
@@ -44,6 +49,15 @@ open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection)
         }
 
         return component
+    }
+
+    override fun execute(sender: ProxyPlayer, context: CommandContext<ProxyPlayer>, argument: String) {
+        if (parameters.isNotEmpty() && !parameters.first().optional) {
+            warning("LiteralNode 缺失必要参数: ${parameters.first().name}")
+            sender.error(sync = true) { asLang("module-command-exception-missing-argument", parameters.first().name) }
+            return
+        }
+        super.execute(sender, context, argument)
     }
 
     override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {

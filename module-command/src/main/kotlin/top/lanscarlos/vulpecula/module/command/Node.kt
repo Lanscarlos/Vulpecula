@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.function.warning
@@ -29,6 +30,8 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
 
     val playerRequired = section["require-player"].applicativeBoolean(false)
 
+    val disableSuccessMessage = section["disable-success-message"].applicativeBoolean(false)
+
     val children = LinkedList<Node>()
 
     /**
@@ -50,6 +53,14 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
     }
 
     abstract fun build(): CommandComponent
+
+    open fun execute(sender: ProxyPlayer, context: CommandContext<ProxyPlayer>, argument: String) {
+        if (executor == null) {
+            warning("此处无执行器.")
+            return
+        }
+        executor.execute(sender, context)
+    }
 
     open fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
         if (executor == null) {
@@ -80,7 +91,7 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
             // 字符串内容为空
             asLang("module-command-exception-invalid-content", id, "execute", "BLANK#空白")
         }
-        return ScriptExecutor(value, ::transformArgs)
+        return ScriptExecutor(value, disableSuccessMessage, ::transformArgs)
     }
 
     private fun parseNodeChain(): List<Node> {

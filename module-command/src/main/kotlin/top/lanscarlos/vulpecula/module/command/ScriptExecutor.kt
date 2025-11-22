@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.core.utils.asLang
@@ -21,6 +22,7 @@ import java.util.function.Function
  */
 class ScriptExecutor(
     execution: Any,
+    val disableSuccessMessage: Boolean,
     private val transformArgs: Function<List<String>, Map<String, Any>>
 ) : Suggester, Restrictor {
 
@@ -68,7 +70,7 @@ class ScriptExecutor(
         return boolean
     }
 
-    fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>) {
+    fun execute(sender: ProxyCommandSender, context: CommandContext<*>) {
         val rawArgs = getRawArgs(context)
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
@@ -125,11 +127,14 @@ class ScriptExecutor(
     }
 
     private fun onSuccess(sender: ProxyCommandSender, command: String, value: Any?) {
-        sender.info { asLang("module-command-execute-success", command, value.toString()) }
+        if (disableSuccessMessage) {
+            return
+        }
+        sender.info { asLang("module-command-execute-success", command.trim(), value.toString()) }
     }
 
     private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: QuestRuntimeException): Any? {
-        sender.error(sync = true) { asLang("module-command-$action-failure", command) }
+        sender.error(sync = true) { asLang("module-command-$action-failure", command.trim()) }
         sender.error(sync = true) { exception.getActionMessage() }
         sender.error(sync = true) { exception.getReasonMessage() }
         sender.error(sync = true) { exception.getDetailMessage() }
