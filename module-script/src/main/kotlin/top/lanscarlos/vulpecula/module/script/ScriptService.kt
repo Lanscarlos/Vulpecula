@@ -49,7 +49,7 @@ object ScriptService {
      * 获取脚本
      *
      * @param id 脚本 ID
-     * @throws IllegalStateException 脚本不存在
+     * @throws ScriptNotFoundException 脚本不存在
      * @return 脚本
      * */
     fun get(id: String): Script = getOrNull(id) ?: throw ScriptNotFoundException(id)
@@ -143,7 +143,7 @@ object ScriptService {
      * @param variables 脚本变量
      * @param onSuccess 成功回调
      * @param onFailure 异常回调
-     * @throws IllegalStateException 脚本不存在
+     * @throws ScriptNotFoundException 脚本不存在
      * @return 运行结果
      * */
     fun run(
