@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.action.entity
 
 import org.bukkit.entity.Damageable
 import org.bukkit.entity.Entity
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame

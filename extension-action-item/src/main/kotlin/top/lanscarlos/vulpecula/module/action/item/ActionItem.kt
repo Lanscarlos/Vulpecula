@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
 import taboolib.platform.util.isNotAir
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
 /**

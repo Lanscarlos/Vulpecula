@@ -9,7 +9,7 @@ import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.applicative.applicativeStringList
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import java.util.*
 
 /**

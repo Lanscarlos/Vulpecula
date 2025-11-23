@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.bacikal
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.module.kether.ScriptContext
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestCompiler
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor

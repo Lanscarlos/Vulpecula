@@ -7,7 +7,7 @@ import taboolib.library.kether.ParsedAction
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional

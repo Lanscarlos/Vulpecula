@@ -10,7 +10,7 @@ import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
-import top.lanscarlos.vulpecula.common.core.utils.TimeUtil
+import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import java.util.concurrent.TimeUnit
 
 /**

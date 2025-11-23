@@ -1,8 +1,8 @@
 package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.ProxyCommandSender
-import top.lanscarlos.vulpecula.common.core.exception.InvalidArgumentFormatException
-import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
+import top.lanscarlos.vulpecula.common.exception.InvalidArgumentFormatException
+import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.module.schedule.selector.*
 
 /**

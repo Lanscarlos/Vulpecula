@@ -4,8 +4,6 @@ taboolib {
 }
 
 dependencies {
-    compileOnly(project(":common-applicative"))
-    compileOnly(project(":common-config"))
     compileOnly(project(":common-core"))
     compileOnly(project(":module-bacikal"))
     compileOnly(project(":module-script"))

@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ListPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext

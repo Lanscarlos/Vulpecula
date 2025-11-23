@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.module.script.exception
 
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.script.Script
 
 /**

@@ -8,7 +8,7 @@ module-command-service-load-detail-deleted: '本次加载有 &a{0}&7 个命令�
 module-command-service-load-detail-failed: '本次加载有 &a{0}&7 个异常的命令. 请及时处理'
 module-command-service-load-automatic: '命令 &a{0}&7 自动重载成功 &8({1}ms)'
 module-command-service-load-success: '命令模块加载成功. 已载入 &a{0}&7 个命令 &8({1} ms)'
-module-command-service-load-failure: '命令模块加载失败!'
+module-command-service-load-failure: '命令模块加载失败! {0}'
 module-command-service-file-load-failure: '命令 &c{0}&7 加载失败! {1}'
 
 module-command-restrict-failure: '命令 &c{0}&7 约束异常.'
@@ -30,3 +30,4 @@ module-command-exception-executor-not-found: '节点 &e{0}&7 未定义 execute �
 module-command-exception-strategy-conflict: '节点 &e{0}&7 策略冲突. 不允许同时设置 suggest 和 restrict.'
 module-command-exception-invalid-content: '节点 &e{0}&7 字段 &e{1}&7 内容不符合规则. 异常值 &e{2}&7.'
 module-command-exception-missing-argument: '缺少必要的参数 &e{0}&7.'
+module-command-missing-argument: '缺少必要的参数 &e{0}&7.'

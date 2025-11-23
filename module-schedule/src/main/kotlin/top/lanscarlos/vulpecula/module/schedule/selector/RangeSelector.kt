@@ -6,7 +6,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.schedule.SenderSelector
 import kotlin.math.pow
 

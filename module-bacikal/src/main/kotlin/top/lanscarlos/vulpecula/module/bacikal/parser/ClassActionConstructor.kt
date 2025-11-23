@@ -2,7 +2,7 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import java.lang.reflect.Constructor
 
 /**

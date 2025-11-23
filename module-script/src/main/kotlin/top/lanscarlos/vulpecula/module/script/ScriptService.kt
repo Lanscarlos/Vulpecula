@@ -12,8 +12,9 @@ import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
-import top.lanscarlos.vulpecula.common.core.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
+import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
 import java.io.File
@@ -260,8 +261,8 @@ object ScriptService {
             scripts.remove(id)
         }
 
-        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
-            sender.error(sync = true) { asLang("module-script-service-file-load-failure", id, e.localizedMessage) }
+        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
+            Lang.EXCEPTION_SCRIPT_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {

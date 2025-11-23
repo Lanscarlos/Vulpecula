@@ -1,7 +1,10 @@
 package top.lanscarlos.vulpecula.module.bacikal
 
 import taboolib.common.platform.ProxyCommandSender
-import top.lanscarlos.vulpecula.common.core.utils.*
+import top.lanscarlos.vulpecula.common.utils.debug
+import top.lanscarlos.vulpecula.common.utils.error
+import top.lanscarlos.vulpecula.common.utils.info
+import top.lanscarlos.vulpecula.common.utils.warning
 
 /**
  * Vulpecula

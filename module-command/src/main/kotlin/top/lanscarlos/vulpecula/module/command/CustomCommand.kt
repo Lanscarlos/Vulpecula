@@ -1,5 +1,11 @@
 package top.lanscarlos.vulpecula.module.command
 
+import top.lanscarlos.vulpecula.common.config.boolean
+import top.lanscarlos.vulpecula.common.config.convert
+import top.lanscarlos.vulpecula.common.config.read
+import top.lanscarlos.vulpecula.common.config.string
+import top.lanscarlos.vulpecula.common.config.stringList
+import top.lanscarlos.vulpecula.common.config.stringOrNull
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
 import taboolib.common.platform.command.component.CommandBase
@@ -7,8 +13,7 @@ import taboolib.common.platform.function.registerCommand
 import taboolib.common.platform.function.unregisterCommand
 import taboolib.common.platform.function.warning
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.config.*
+import top.lanscarlos.vulpecula.common.utils.asLang
 import java.util.HashSet
 import java.util.LinkedList
 

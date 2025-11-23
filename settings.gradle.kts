@@ -1,7 +1,5 @@
 rootProject.name = "Vulpecula"
 
-include("common-applicative")
-include("common-config")
 include("common-core")
 include("common-diagram")
 

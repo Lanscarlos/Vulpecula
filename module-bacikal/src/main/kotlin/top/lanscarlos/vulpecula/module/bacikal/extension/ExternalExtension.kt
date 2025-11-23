@@ -13,7 +13,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.library.reflex.ReflexClass
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
-import top.lanscarlos.vulpecula.common.core.command.CommandScanner
+import top.lanscarlos.vulpecula.common.command.CommandScanner
 import java.io.File
 import java.io.FileOutputStream
 import java.util.jar.JarFile

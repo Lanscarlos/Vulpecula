@@ -12,7 +12,8 @@ import taboolib.library.kether.QuestActionParser
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.kether.Kether
 import taboolib.module.kether.RemoteActionParser
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.TimeUtil
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.error
@@ -115,15 +116,15 @@ object ActionCommand {
                 val option = "(\\d+)(?:x(\\d+))?".toRegex().matchEntire(context["option"])!!.groupValues
                 val repeat = option[1].toInt()
                 val group = option[2].ifBlank { "1" }.toInt()
-                var time = top.lanscarlos.vulpecula.common.core.utils.timing()
+                var time = TimeUtil.startTiming()
                 val quest = BacikalService.compile(content, "timing", emptyList())
-                val compileTime = top.lanscarlos.vulpecula.common.core.utils.timing(time)
-                time = top.lanscarlos.vulpecula.common.core.utils.timing()
+                val compileTime = TimeUtil.stopTiming(time)
+                time = TimeUtil.startTiming()
                 val completeTimes = List(group) {
                     repeat(repeat) {
                         BacikalQuestExecutor.execute(quest, "main", -1L, sender, emptyMap()).join()
                     }
-                    top.lanscarlos.vulpecula.common.core.utils.timing(time)
+                    TimeUtil.stopTiming(time)
                 }
                 val averageCompleteTime = completeTimes.average()
 

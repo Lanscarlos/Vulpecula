@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.memory
 
 import org.bukkit.entity.Entity
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 
 /**
  * Vulpecula

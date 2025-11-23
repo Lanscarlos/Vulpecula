@@ -1,5 +1,6 @@
 
 # 通用
+prefix: '&8[&cVul&6pecula&8]'
 
 common-core-message-module: '消息'
 common-core-message-info: '&8[&3Vul&bpecula&8] &a{0} &8|&7 {1}'

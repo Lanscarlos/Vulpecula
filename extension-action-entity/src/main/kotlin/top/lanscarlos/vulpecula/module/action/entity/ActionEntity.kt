@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.entity
 
 import org.bukkit.entity.Entity
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
 /**

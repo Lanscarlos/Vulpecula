@@ -4,7 +4,7 @@ import taboolib.library.kether.*
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionRegisterException
 import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
 import java.util.LinkedList

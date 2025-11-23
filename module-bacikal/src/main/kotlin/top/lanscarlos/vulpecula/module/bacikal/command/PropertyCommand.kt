@@ -4,7 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalRegistry
 import top.lanscarlos.vulpecula.module.bacikal.error
 import top.lanscarlos.vulpecula.module.bacikal.extension.NativeExtension

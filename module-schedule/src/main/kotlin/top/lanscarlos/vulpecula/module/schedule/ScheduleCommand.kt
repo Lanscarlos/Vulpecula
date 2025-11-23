@@ -6,11 +6,10 @@ import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
-import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.chat.Components
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 
 /**
  * Vulpecula

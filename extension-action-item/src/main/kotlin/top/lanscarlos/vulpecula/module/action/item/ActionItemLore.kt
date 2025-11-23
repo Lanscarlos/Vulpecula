@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver

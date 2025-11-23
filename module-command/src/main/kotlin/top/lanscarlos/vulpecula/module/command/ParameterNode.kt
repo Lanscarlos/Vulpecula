@@ -8,7 +8,8 @@ import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.command.restrictor.DoubleRestrictor
 import top.lanscarlos.vulpecula.module.command.restrictor.IntRestrictor
 import top.lanscarlos.vulpecula.module.command.suggester.BooleanSuggester
@@ -95,6 +96,7 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         }
         warning("ParameterNode 缺失必要参数: ${children.single().name}")
         sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
+        Lang.MODULE_COMMAND_MISSING_ARGUMENT.error(sender, children.single().name)
         return false
     }
 

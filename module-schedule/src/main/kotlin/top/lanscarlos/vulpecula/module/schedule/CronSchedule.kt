@@ -17,7 +17,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.schedule.exception.InvalidCronException
 import java.util.*
 

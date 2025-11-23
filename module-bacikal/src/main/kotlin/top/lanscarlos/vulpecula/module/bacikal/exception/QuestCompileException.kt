@@ -5,8 +5,8 @@ import taboolib.library.kether.ParsedAction
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionLiteral
-import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.core.utils.error
+import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.error
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
 
 /**

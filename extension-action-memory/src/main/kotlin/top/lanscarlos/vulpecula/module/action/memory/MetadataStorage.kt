@@ -3,7 +3,7 @@ package top.lanscarlos.vulpecula.module.action.memory
 import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.metadata.Metadatable
 import taboolib.platform.BukkitPlugin
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 
 /**
  * Vulpecula

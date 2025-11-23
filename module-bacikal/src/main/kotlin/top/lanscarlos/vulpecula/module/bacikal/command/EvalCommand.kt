@@ -4,7 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.module.kether.printKetherErrorMessage
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.error
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException

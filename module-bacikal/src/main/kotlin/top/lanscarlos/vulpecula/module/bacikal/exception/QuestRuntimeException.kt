@@ -4,8 +4,8 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.chat.colored
-import top.lanscarlos.vulpecula.common.core.utils.asLang
-import top.lanscarlos.vulpecula.common.core.utils.error
+import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.error
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
 
 /**

@@ -11,7 +11,8 @@ import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
-import top.lanscarlos.vulpecula.common.core.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import java.io.File
 
@@ -50,7 +51,7 @@ object CommandService {
      * 重载服务
      * */
     fun reload(sender: ProxyCommandSender) {
-        service.load(sender)
+        service.load(sender.withConsole())
     }
 
     private object Callback : ConfigServiceCallback {
@@ -71,7 +72,7 @@ object CommandService {
             registry.remove(id)?.unregister()
         }
 
-        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception) {
+        override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
             sender.error(sync = true) { asLang("module-command-service-load-failure", id, e.localizedMessage) }
             when (e) {
                 is ConfigFieldNotFoundException -> {}
