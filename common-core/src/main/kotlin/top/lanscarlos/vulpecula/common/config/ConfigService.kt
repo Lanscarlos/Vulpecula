@@ -6,7 +6,9 @@ import taboolib.common.platform.function.console
 import taboolib.common5.Coerce
 import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
+import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.common.utils.info
 import java.io.File
@@ -56,8 +58,8 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
      * 加载配置
      * */
     fun load(sender: ProxyCommandSender = console()) {
-        // 调试计时
-        val startTime = System.nanoTime()
+        // 创建统计数据
+        val statistics = ConfigStatistics(TimeUtil.startTiming())
         try {
             if (!directory.exists()) {
                 callback.onLoadInit(sender, directory)
@@ -66,10 +68,6 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             // 重载开始
             callback.onLoadStarted(sender)
 
-            var created = 0
-            var modified = 0
-            var deleted = 0
-            var failed = 0
             val cacheFiles = HashSet(cache)
             cache.clear()
             for (file in directory.walk()) {
@@ -80,6 +78,8 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     continue
                 }
 
+                statistics.scannedFiles += file
+
                 if (file !in cacheFiles) {
                     // 新增的文件
                     try {
@@ -87,9 +87,9 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                         cache += file
                         hash[file] = file.digest("SHA-256")
                         detectAutoReload(file)
-                        created += 1
+                        statistics.createdFiles += file
                     } catch (e: Throwable) {
-                        failed += 1
+                        statistics.failedFiles += file
                         callback.onFileException(sender, getFileId(file), file, e)
                     }
                     continue
@@ -101,6 +101,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     // 文件无修改
                     cacheFiles.remove(file)
                     cache += file
+                    statistics.unmodifiedFiles += file
                     continue
                 }
 
@@ -110,9 +111,9 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     cache += file
                     this.hash[file] = hash
                     detectAutoReload(file)
-                    modified += 1
+                    statistics.modifiedFiles += file
                 } catch (e: Throwable) {
-                    failed += 1
+                    statistics.failedFiles += file
                     callback.onFileException(sender, getFileId(file), file, e)
                 } finally {
                     cacheFiles.remove(file)
@@ -124,9 +125,9 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                 try {
                     callback.onFileDeleted(sender, getFileId(file), file)
                     hash.remove(file)
-                    deleted += 1
+                    statistics.deletedFiles += file
                 } catch (e: Throwable) {
-                    failed += 1
+                    statistics.failedFiles += file
                     callback.onFileException(sender, getFileId(file), file, e)
                 } finally {
                     removeFileWatcher(file)
@@ -134,16 +135,45 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             }
 
             // 重载完成
-            callback.onLoadSuccess(sender, created, modified, deleted, failed, timing(startTime))
+            callback.onLoadSuccess(sender, statistics)
+            onDisplayStatistics(sender, statistics)
         } catch (e: Throwable) {
             // 加载失败, 重置缓存
             reset()
 
             // 计算耗时, 单位毫秒
-            callback.onLoadFailure(sender, timing(startTime), e)
+            callback.onLoadFailure(sender, e)
 
             Lang.EXCEPTION_CONFIG_SERVICE_LOAD_FAILURE.error(sender, name, e.localizedMessage)
             e.printStackTrace()
+        }
+    }
+
+    private fun onDisplayStatistics(sender: ProxyCommandSender, statistics: ConfigStatistics) {
+        if (statistics.scannedFiles.isNotEmpty()) {
+            statistics.displayDetails += Lang.COMMON_CONFIG_LOAD_STATISTICS_SCANNED.asText(sender, statistics.scannedFiles.size)
+        }
+        if (statistics.unmodifiedFiles.isNotEmpty()) {
+            statistics.displayDetails += Lang.COMMON_CONFIG_LOAD_STATISTICS_UNMODIFIED.asText(sender, statistics.unmodifiedFiles.size)
+        }
+        if (statistics.createdFiles.isNotEmpty()) {
+            statistics.displayDetails += Lang.COMMON_CONFIG_LOAD_STATISTICS_CREATED.asText(sender, statistics.createdFiles.size)
+        }
+        if (statistics.modifiedFiles.isNotEmpty()) {
+            statistics.displayDetails += Lang.COMMON_CONFIG_LOAD_STATISTICS_MODIFIED.asText(sender, statistics.modifiedFiles.size)
+        }
+        if (statistics.deletedFiles.isNotEmpty()) {
+            statistics.displayDetails += Lang.COMMON_CONFIG_LOAD_STATISTICS_DELETED.asText(sender, statistics.deletedFiles.size)
+        }
+        if (statistics.failedFiles.isNotEmpty()) {
+            statistics.displayDetails += Lang.COMMON_CONFIG_LOAD_STATISTICS_FAILED.asText(sender, statistics.failedFiles.size)
+        }
+        for ((index, content) in statistics.displayDetails.withIndex()) {
+            if (index < statistics.displayDetails.size - 1) {
+                Lang.COMMON_CONFIG_LOAD_STATISTICS_BRANCH.info(sender, content)
+            } else {
+                Lang.COMMON_CONFIG_LOAD_STATISTICS_BRANCH_END.info(sender, content)
+            }
         }
     }
 

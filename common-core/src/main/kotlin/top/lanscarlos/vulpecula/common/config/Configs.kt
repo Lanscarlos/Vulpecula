@@ -7,6 +7,8 @@ import taboolib.common.platform.function.console
 import taboolib.common5.Coerce
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.common.utils.error
 import top.lanscarlos.vulpecula.common.utils.info
@@ -43,13 +45,12 @@ object Configs {
         // 加载主配置
         try {
             // 调试计时
-            val startTime = System.nanoTime()
+            val startTime = TimeUtil.startTiming()
             config.reload()
             // 计算耗时, 单位毫秒
-            val time = Coerce.format((System.nanoTime() - startTime).div(1000000.0))
-            sender.info(name, sync = true) { asLang("common-config-main-load-success", time) }
+            Lang.COMMON_CONFIG_MAIN_LOAD_SUCCESS.info(sender, TimeUtil.stopTiming(startTime))
         } catch (ex: Exception) {
-            sender.error(name, sync = true) { asLang("common-config-main-load-failure", ex.localizedMessage) }
+            Lang.COMMON_CONFIG_MAIN_LOAD_FAILURE.error(sender, ex.localizedMessage)
         }
 
         // 重载所有服务

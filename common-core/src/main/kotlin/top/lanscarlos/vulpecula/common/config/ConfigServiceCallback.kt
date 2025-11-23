@@ -34,14 +34,10 @@ interface ConfigServiceCallback {
     /**
      * 加载成功时调用
      *
-     * @param created 新增文件数
-     * @param modified 修改的文件数
-     * @param deleted 移除的文件数
-     * @param failed 异常的文件数
-     * @param time 耗时, 单位毫秒
+     * @param statistics 统计数据
      * */
-    fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double)
+    fun onLoadSuccess(sender: ProxyCommandSender, statistics: ConfigStatistics)
 
-    fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {}
+    fun onLoadFailure(sender: ProxyCommandSender, e: Throwable) {}
 
 }

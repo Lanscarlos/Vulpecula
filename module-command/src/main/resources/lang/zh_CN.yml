@@ -31,3 +31,5 @@ module-command-exception-strategy-conflict: '节点 &e{0}&7 策略冲突. 不允
 module-command-exception-invalid-content: '节点 &e{0}&7 字段 &e{1}&7 内容不符合规则. 异常值 &e{2}&7.'
 module-command-exception-missing-argument: '缺少必要的参数 &e{0}&7.'
 module-command-missing-argument: '缺少必要的参数 &e{0}&7.'
+
+module-command-load-success: '&7命令模块加载完毕. 共 &a{0}&7 个自定义命令. &8({1}ms)'

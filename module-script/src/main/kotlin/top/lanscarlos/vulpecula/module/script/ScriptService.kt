@@ -5,10 +5,12 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
+import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
+import top.lanscarlos.vulpecula.common.config.ConfigStatistics
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
@@ -283,20 +285,13 @@ object ScriptService {
             sender.info(sync = true) { asLang("module-script-service-load-automatic", id, time) }
         }
 
-        override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {
-            if (created > 0) {
-                sender.info(sync = true) { asLang("module-script-service-load-detail-created", created) }
-            }
-            if (modified > 0) {
-                sender.info(sync = true) { asLang("module-script-service-load-detail-modified", modified) }
-            }
-            if (deleted > 0) {
-                sender.info(sync = true) { asLang("module-script-service-load-detail-deleted", deleted) }
-            }
-            if (failed > 0) {
-                sender.warning(sync = true) { asLang("module-script-service-load-detail-failed", failed) }
-            }
-            sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
+        override fun onLoadSuccess(sender: ProxyCommandSender, statistics: ConfigStatistics) {
+            Lang.MODULE_SCRIPT_LOAD_SUCCESS.info(sender, scripts.size, statistics.consumeTime)
+        }
+
+        override fun onLoadFailure(sender: ProxyCommandSender, e: Throwable) {
+            // 加载器异常时需要清空已载入的对象
+            scripts.clear()
         }
 
     }

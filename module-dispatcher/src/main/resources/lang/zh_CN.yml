@@ -11,3 +11,5 @@ module-dispatcher-service-load-success: '调度模块加载成功. 已载入 &a{
 module-dispatcher-service-load-failure: '调度器模块加载失败!'
 module-dispatcher-service-file-load-failure: '调度器 &c{0}&7 加载失败! {1}'
 module-dispatcher-exception-event-class-not-found: '事件类 &e{0}&7 不存在.'
+
+module-dispatcher-load-success: '&7调度模块加载完毕. 共 &a{0}&7 个调度器. &8({1}ms)'

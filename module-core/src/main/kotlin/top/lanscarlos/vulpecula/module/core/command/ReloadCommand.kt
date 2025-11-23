@@ -5,6 +5,7 @@ import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
 import top.lanscarlos.vulpecula.common.config.Configs
+import top.lanscarlos.vulpecula.common.utils.withConsole
 
 /**
  * Vulpecula
@@ -18,13 +19,13 @@ object ReloadCommand {
     @CommandBody
     val reload = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            Configs.load(sender)
+            Configs.load(sender.withConsole())
         }
 
         dynamic("service") {
             suggest { Configs.services.map { it.id } }
             execute<ProxyCommandSender> { sender, _, serviceId ->
-                Configs.services.first { it.id == serviceId }.load(sender)
+                Configs.services.first { it.id == serviceId }.load(sender.withConsole())
             }
         }
     }

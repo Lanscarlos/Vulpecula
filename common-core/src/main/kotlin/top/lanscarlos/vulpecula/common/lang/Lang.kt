@@ -1,15 +1,10 @@
 package top.lanscarlos.vulpecula.common.lang
 
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.module.lang.Level
 import taboolib.module.lang.asLangText
 import taboolib.module.lang.sendError
 import taboolib.module.lang.sendInfo
 import taboolib.module.lang.sendWarn
-import top.lanscarlos.vulpecula.common.config.bindConfig
-import top.lanscarlos.vulpecula.common.config.default
-import top.lanscarlos.vulpecula.common.config.string
-import top.lanscarlos.vulpecula.common.config.stringOrNull
 
 /**
  * Vulpecula
@@ -20,10 +15,27 @@ import top.lanscarlos.vulpecula.common.config.stringOrNull
  */
 enum class Lang {
 
-    MODULE_COMMAND_MISSING_ARGUMENT,
+    COMMON_CONFIG_LOAD_STATISTICS_SCANNED, // 无变动
+    COMMON_CONFIG_LOAD_STATISTICS_UNMODIFIED, // 无变动
+    COMMON_CONFIG_LOAD_STATISTICS_CREATED, // 创建
+    COMMON_CONFIG_LOAD_STATISTICS_MODIFIED, // 修改
+    COMMON_CONFIG_LOAD_STATISTICS_DELETED, // 删除
+    COMMON_CONFIG_LOAD_STATISTICS_FAILED, // 异常
+    COMMON_CONFIG_LOAD_STATISTICS_BRANCH, // 分支
+    COMMON_CONFIG_LOAD_STATISTICS_BRANCH_END, // 分支结束
+
+    COMMON_CONFIG_MAIN_LOAD_SUCCESS, // 主配置载入成功
+    COMMON_CONFIG_MAIN_LOAD_FAILURE, // 主配置载入成功
+    MODULE_COMMAND_LOAD_SUCCESS, // 载入成功
+    MODULE_DISPATCHER_LOAD_SUCCESS, // 载入成功
+    MODULE_SCHEDULE_LOAD_SUCCESS, // 载入成功
+    MODULE_SCRIPT_LOAD_SUCCESS, // 载入成功
 
     // 配置相关
     EXCEPTION_CONFIG_SERVICE_LOAD_FAILURE, // 配置服务加载异常
+
+    // 命令相关
+    EXCEPTION_COMMAND_MISSING_ARGUMENT, // 缺少参数
 
     // 任务相关
     EXCEPTION_QUEST_COMPILE_FAILURE, // 编译异常

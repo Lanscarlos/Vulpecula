@@ -24,7 +24,7 @@ module-script-exception-task-not-found: '脚本任务 &c{0}&7 不存在.'
 module-script-exception-argument-missing: '位置 &c{0}&7 缺失所需的参数 &c{1}&7.'
 module-script-exception-script-execute-failure: '脚本 &c{0}&7 运行异常. {1}'
 
-module-script-load-success: '&7脚本加载成功. 共 &a{0}&7 个脚本'
+module-script-load-success: '&7脚本模块加载完毕. 共 &a{0}&7 个脚本. &8({1}ms)'
 
 exception-script-load-failure: '&7脚本 &c{0}&7 加载失败. {1}'
 exception-script-not-found: '&7脚本 &c{0}&7 不存在.'

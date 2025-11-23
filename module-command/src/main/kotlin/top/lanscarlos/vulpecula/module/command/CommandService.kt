@@ -8,9 +8,11 @@ import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
+import top.lanscarlos.vulpecula.common.config.ConfigStatistics
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
@@ -51,7 +53,7 @@ object CommandService {
      * 重载服务
      * */
     fun reload(sender: ProxyCommandSender) {
-        service.load(sender.withConsole())
+        service.load(sender)
     }
 
     private object Callback : ConfigServiceCallback {
@@ -94,22 +96,9 @@ object CommandService {
             sender.info(sync = true) { asLang("module-command-service-load-automatic", id, time) }
         }
 
-        override fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double) {
-            if (created > 0) {
-                sender.info(sync = true) { asLang("module-command-service-load-detail-created", created) }
-            }
-            if (modified > 0) {
-                sender.info(sync = true) { asLang("module-command-service-load-detail-modified", modified) }
-            }
-            if (deleted > 0) {
-                sender.info(sync = true) { asLang("module-command-service-load-detail-deleted", deleted) }
-            }
-            if (failed > 0) {
-                sender.warning(sync = true) { asLang("module-command-service-load-detail-failed", failed) }
-            }
-            sender.info(sync = true) { asLang("module-command-service-load-success", registry.size, time) }
+        override fun onLoadSuccess(sender: ProxyCommandSender, statistics: ConfigStatistics) {
+            Lang.MODULE_COMMAND_LOAD_SUCCESS.info(sender, registry.size, statistics.consumeTime)
         }
-
 
     }
 

@@ -10,6 +10,7 @@ import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
 import taboolib.module.chat.Components
 import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.withConsole
 
 /**
  * Vulpecula
@@ -161,7 +162,7 @@ object ScheduleCommand {
 
     private val reload: CommandComponent.() -> Unit = {
         execute<ProxyCommandSender> { sender, _, _ ->
-            ScheduleService.reload(sender)
+            ScheduleService.reload(sender.withConsole())
         }
     }
 
