@@ -132,6 +132,11 @@ object ScheduleService {
             Lang.MODULE_SCHEDULE_LOAD_SUCCESS.info(sender, registry.size, statistics.consumeTime)
         }
 
+        override fun onLoadFailure(sender: ProxyCommandSender, e: Throwable) {
+            // 加载器异常时需要清空已载入的对象
+            registry.clear()
+        }
+
     }
 
 }
