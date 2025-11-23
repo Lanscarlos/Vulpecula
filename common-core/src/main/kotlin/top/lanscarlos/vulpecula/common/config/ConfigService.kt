@@ -6,6 +6,7 @@ import taboolib.common.platform.function.console
 import taboolib.common5.Coerce
 import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.common.utils.info
 import java.io.File
@@ -140,6 +141,9 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
 
             // 计算耗时, 单位毫秒
             callback.onLoadFailure(sender, timing(startTime), e)
+
+            Lang.EXCEPTION_CONFIG_SERVICE_LOAD_FAILURE.error(sender, name, e.localizedMessage)
+            e.printStackTrace()
         }
     }
 

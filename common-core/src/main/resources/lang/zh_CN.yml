@@ -15,6 +15,8 @@ common-config-service-load-automatic-disabled: '检测到文件 &a{0}&7 关闭�
 common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
 common-config-exception-field-read-failure: '字段 &e{0}&7 {1}'
 
+exception-config-service-load-failure: '{0}模块配置加载异常. {1}'
+
 
 # 通用
 prefix: '&8[&cVul&6pecula&8]'

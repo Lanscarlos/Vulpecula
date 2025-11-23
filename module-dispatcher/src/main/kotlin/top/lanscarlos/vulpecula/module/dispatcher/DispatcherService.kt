@@ -128,10 +128,5 @@ object DispatcherService {
             sender.info(sync = true) { asLang("module-dispatcher-service-load-success", registry.size, time) }
         }
 
-        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
-            e.printStackTrace()
-            sender.error(sync = true) { asLang("module-dispatcher-service-load-failure", e.localizedMessage) }
-        }
-
     }
 }

@@ -299,10 +299,6 @@ object ScriptService {
             sender.info(sync = true) { asLang("module-script-service-load-success", scripts.size, time) }
         }
 
-        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
-            e.printStackTrace()
-            sender.error(sync = true) { asLang("module-script-service-load-failure", e.localizedMessage) }
-        }
     }
 
 }

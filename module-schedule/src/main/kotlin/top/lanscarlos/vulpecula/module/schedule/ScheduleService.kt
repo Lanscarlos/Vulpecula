@@ -142,11 +142,6 @@ object ScheduleService {
             sender.info(sync = true) { asLang("module-schedule-service-load-success", registry.size, time) }
         }
 
-        override fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {
-            e.printStackTrace()
-            sender.error(sync = true) { asLang("module-schedule-service-load-failure", e.localizedMessage) }
-        }
-
     }
 
 }

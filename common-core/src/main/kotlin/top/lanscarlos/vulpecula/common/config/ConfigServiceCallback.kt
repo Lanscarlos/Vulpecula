@@ -42,6 +42,6 @@ interface ConfigServiceCallback {
      * */
     fun onLoadSuccess(sender: ProxyCommandSender, created: Int, modified: Int, deleted: Int, failed: Int, time: Double)
 
-    fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable)
+    fun onLoadFailure(sender: ProxyCommandSender, time: Double, e: Throwable) {}
 
 }
