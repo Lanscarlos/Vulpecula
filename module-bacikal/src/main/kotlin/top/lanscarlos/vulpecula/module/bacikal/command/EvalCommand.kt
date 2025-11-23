@@ -39,13 +39,13 @@ object EvalCommand {
                 .handle { result, e ->
                     if (e != null) {
                         val ex = e.cause as QuestRuntimeException
-                        ex.printLocalizedMessage(sender, module)
+                        ex.notice(sender)
                     } else {
                         sender.info { asLang("module-bacikal-command-eval-success", result ?: "null") }
                     }
                 }
         } catch (ex: QuestCompileException) {
-            ex.printLocalizedMessage(sender, module)
+            ex.notice(sender)
         } catch (ex: Throwable) {
             ex.printKetherErrorMessage(true)
             sender.error { asLang("module-bacikal-command-eval-failure", ex.localizedMessage) }

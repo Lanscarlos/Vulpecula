@@ -145,9 +145,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
     private fun onScriptFailure(ex: QuestRuntimeException) {
         // 脚本运行异常时, 暂停任务
         console().error { asLang("module-dispatcher-run-failure", id) }
-        console().error { ex.getActionMessage() }
-        console().error { ex.getReasonMessage() }
-        console().error { ex.getDetailMessage() }
+        ex.notice(console())
     }
 
     private fun parsePipeline(value: Any?): Pipeline {

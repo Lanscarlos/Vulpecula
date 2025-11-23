@@ -36,3 +36,9 @@ module-bacikal-exception-unknown-additional-parameter: '未知的附加参数 &e
 module-bacikal-exception-invalid-null-argument: '传入的参数 &e{1}&7 值为空'
 module-bacikal-exception-script-player-not-found: '当前脚本上下文中无玩家对象'
 module-bacikal-exception-no-such-exception: '当前对象中 {1} 属性不存在. {0}'
+
+exception-quest-compile-failure: '脚本编译异常'
+exception-quest-reason: '&7异常原因: {0}'
+exception-quest-location-header: '&7异常位置:'
+exception-quest-location-body: '&7 {0} &8|&7 {1}'
+exception-quest-location-footer: ' '

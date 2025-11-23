@@ -40,7 +40,7 @@ abstract class AbstractLocalizedException : RuntimeException() {
     /**
      * 将异常信息通知指定接收者
      */
-    fun notice(receiver: ProxyCommandSender) {
+    open fun notice(receiver: ProxyCommandSender) {
         receiver.sendErrorMessage(getLocalizedMessage(receiver))
     }
 

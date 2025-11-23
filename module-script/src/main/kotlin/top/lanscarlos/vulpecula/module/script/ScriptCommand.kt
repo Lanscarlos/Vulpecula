@@ -138,7 +138,7 @@ object ScriptCommand {
         }
         task?.onFailure { ex ->
             sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
-            ex.printLocalizedMessage(sender, ScriptService.name)
+            ex.notice(sender)
         }
     }
 
@@ -155,7 +155,7 @@ object ScriptCommand {
         }
         task?.onFailure { ex ->
             console().error(sync = true) { asLang("module-script-command-run-failure", id) }
-            ex.printLocalizedMessage(sender, ScriptService.name)
+            ex.notice(sender)
         }
     }
 

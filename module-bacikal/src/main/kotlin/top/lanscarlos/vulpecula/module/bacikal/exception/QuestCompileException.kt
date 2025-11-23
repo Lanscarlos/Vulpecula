@@ -5,9 +5,10 @@ import taboolib.library.kether.ParsedAction
 import taboolib.module.chat.colored
 import taboolib.module.kether.Kether
 import taboolib.module.kether.action.ActionLiteral
-import top.lanscarlos.vulpecula.common.utils.asLang
-import top.lanscarlos.vulpecula.common.utils.error
+import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -17,47 +18,38 @@ import top.lanscarlos.vulpecula.common.applicative.IntApplicative
  * @since 2025-05-03 13:18
  */
 class QuestCompileException(
-    cause: Throwable,
+    override val cause: Throwable,
     private val parsedContent: String,
     private val unparseContent: String,
     private val actions: List<ParsedAction<*>>
-) : BacikalException(cause) {
+) : AbstractLocalizedException() {
+
+    override val lang: Lang = Lang.EXCEPTION_QUEST_COMPILE_FAILURE
+
+    override val arguments: Array<Any> = arrayOf()
 
     private val colorParsed: String = "&a".colored()
     private val colorWarning: String = "&e".colored()
     private val colorError: String = "&c".colored()
     private val padding: Int = 2
 
-    override val message: String = asLang("module-bacikal-exception-compile-failure")
-
-    fun printLocalizedMessage(sender: ProxyCommandSender, module: String) {
-        sender.error(module, sync = true) { getErrorReasonMessage() }
-        sender.error(module, sync = true) { getErrorDetailMessage() }
-    }
-
-    /**
-     * 获取报错原因信息
-     * */
-    fun getErrorReasonMessage(): String {
-        val reason = cause.localizedMessage
-        if (reason.isBlank()) {
-            cause.printStackTrace()
-        }
-        return asLang("module-bacikal-exception-reason", reason)
+    override fun notice(receiver: ProxyCommandSender) {
+        Lang.EXCEPTION_QUEST_REASON.error(receiver, cause.localizedMessage)
+        receiver.sendErrorMessage(getErrorDetailMessage(receiver))
     }
 
     /**
      * 获取报错详情信息
      * */
-    fun getErrorDetailMessage(): String {
+    fun getErrorDetailMessage(receiver: ProxyCommandSender): String {
         return when {
             checkLiteralMisspelled() -> {
                 // Literal 拼写异常
-                buildLiteralMisspelledErrorMessage(parsedContent + unparseContent, actions)
+                buildLiteralMisspelledErrorMessage(receiver, parsedContent + unparseContent, actions)
             }
             else -> {
                 // 其他异常
-                buildCommonErrorMessage(parsedContent, unparseContent)
+                buildCommonErrorMessage(receiver, parsedContent, unparseContent)
             }
         }
     }
@@ -79,7 +71,7 @@ class QuestCompileException(
         return false
     }
 
-    private fun buildLiteralMisspelledErrorMessage(source: String, actions: List<ParsedAction<*>>): String {
+    private fun buildLiteralMisspelledErrorMessage(receiver: ProxyCommandSender, source: String, actions: List<ParsedAction<*>>): String {
         val misspelledAction = actions.first {
             val action = it.action
             action is ActionLiteral<*> && action.isMisspelled
@@ -91,16 +83,16 @@ class QuestCompileException(
 
         val errorRange = errorStartIndex..errorEndIndex
         val lines = highlight(source, errorRange).split('\n')
-        return buildErrorDetailMessage(lines, startLine..endLine)
+        return buildErrorDetailMessage(receiver, lines, startLine..endLine)
     }
 
-    private fun buildCommonErrorMessage(parsedContent: String, unparseContent: String): String {
+    private fun buildCommonErrorMessage(receiver: ProxyCommandSender, parsedContent: String, unparseContent: String): String {
         val errorStartIndex = parsedContent.lastIndexOf('\n') + 1
         val errorEndIndex = parsedContent.length
         val errorRange = errorStartIndex..errorEndIndex
         val line = parsedContent.count { it == '\n' }
         val lines = highlight(parsedContent + unparseContent, errorRange).split('\n')
-        return buildErrorDetailMessage(lines, line..line)
+        return buildErrorDetailMessage(receiver, lines, line..line)
     }
 
     private fun highlight(source: String, errorRange: IntRange): String {
@@ -129,20 +121,20 @@ class QuestCompileException(
         return builder.toString()
     }
 
-    private fun buildErrorDetailMessage(lines: List<String>, range: IntRange): String {
+    private fun buildErrorDetailMessage(receiver: ProxyCommandSender, lines: List<String>, range: IntRange): String {
         val startLine = range.first - padding
         val endLine = range.last + padding + 1
-        return buildErrorDetailMessage(lines, startLine.coerceAtLeast(0), endLine.coerceAtMost(lines.size))
+        return buildErrorDetailMessage(receiver, lines, startLine.coerceAtLeast(0), endLine.coerceAtMost(lines.size))
     }
 
-    private fun buildErrorDetailMessage(lines: List<String>, startLine: Int, endLine: Int): String {
-        val builder = StringBuilder(asLang("module-bacikal-exception-detail-header"))
+    private fun buildErrorDetailMessage(receiver: ProxyCommandSender, lines: List<String>, startLine: Int, endLine: Int): String {
+        val builder = StringBuilder(Lang.EXCEPTION_QUEST_LOCATION_HEADER.asText(receiver))
         for (index in startLine until endLine) {
             val line = lines.getOrNull(index) ?: break
-            val content = asLang("module-bacikal-exception-detail-item", (index + 1).formatIndex(), line)
+            val content = Lang.EXCEPTION_QUEST_LOCATION_BODY.asText(receiver, (index + 1).formatIndex(), line)
             builder.append('\n').append(content)
         }
-        val footer = asLang("module-bacikal-exception-detail-footer")
+        val footer = Lang.EXCEPTION_QUEST_LOCATION_FOOTER.asText(receiver)
         if (footer.isNotBlank()) {
             builder.append('\n').append(footer)
         }

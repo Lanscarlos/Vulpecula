@@ -5,6 +5,7 @@ import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.common.applicative.*
 import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
@@ -146,9 +147,7 @@ class ScriptExecutor(
 
     private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: QuestRuntimeException): Any? {
         sender.error(sync = true) { asLang("module-command-$action-failure", command.trim()) }
-        sender.error(sync = true) { exception.getActionMessage() }
-        sender.error(sync = true) { exception.getReasonMessage() }
-        sender.error(sync = true) { exception.getDetailMessage() }
+        exception.notice(sender.withConsole())
         return null
     }
 

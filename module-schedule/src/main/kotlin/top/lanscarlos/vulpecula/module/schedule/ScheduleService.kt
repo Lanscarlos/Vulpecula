@@ -110,12 +110,11 @@ object ScheduleService {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.printLocalizedMessage(sender, name)
+                        is QuestCompileException -> cause.notice(sender)
                     }
                 }
-                else -> {
-                    e.printStackTrace()
-                }
+                is QuestCompileException -> e.notice(sender)
+                else -> e.printStackTrace()
             }
         }
 
