@@ -40,6 +40,8 @@ object ScriptService {
 
     private var pid: Long = 0
 
+    private val rawMapping: HashMap<String, Script> = hashMapOf() // 用于映射原始文件 ID 与脚本的关系
+
     private val service: ConfigService = ConfigService("script", name, directory, 8, Callback)
 
     @Awake(LifeCycle.LOAD)
@@ -240,11 +242,12 @@ object ScriptService {
                 "yml", "yaml" -> CompiledScript(id, Configuration.loadFromFile(file))
                 else -> throw UnsupportedFileExtensionException(file.extension)
             }
+            rawMapping[id] = script
             scripts[script.id] = script
         }
 
         override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
-            when (val script = scripts[id]!!) {
+            when (val script = rawMapping[id]!!) {
                 is NativeScript -> {
                     // 直接重新创建
                     onFileCreated(sender, id, file)
@@ -260,6 +263,7 @@ object ScriptService {
         }
 
         override fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File) {
+            rawMapping.remove(id)
             scripts.remove(id)
         }
 
@@ -291,6 +295,7 @@ object ScriptService {
 
         override fun onLoadFailure(sender: ProxyCommandSender, e: Throwable) {
             // 加载器异常时需要清空已载入的对象
+            rawMapping.clear()
             scripts.clear()
         }
 
