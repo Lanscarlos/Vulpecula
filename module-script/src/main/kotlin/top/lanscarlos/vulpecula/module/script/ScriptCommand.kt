@@ -122,13 +122,12 @@ object ScriptCommand {
 
     private fun runScript(sender: ProxyCommandSender, id: String, scriptSender: ProxyCommandSender?, args: List<String>) {
         val task = try {
+            sender.info { asLang("module-script-command-run", id, scriptSender?.name ?: "null", args) }
             ScriptService.run(
                 id = id,
                 sender = scriptSender,
                 args = args
-            ).also {
-                sender.info { asLang("module-script-command-run", id, scriptSender?.name ?: "null", args) }
-            }
+            )
         } catch (e: Exception) {
             sender.error(sync = true) { e.localizedMessage }
             null
