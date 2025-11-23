@@ -1,6 +1,5 @@
 package top.lanscarlos.vulpecula.common.config
 
-import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import java.io.File
 import java.util.LinkedList

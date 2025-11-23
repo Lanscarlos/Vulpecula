@@ -5,7 +5,6 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.*
 import taboolib.module.configuration.Configuration
-import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.Configs

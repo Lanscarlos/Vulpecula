@@ -6,7 +6,6 @@ import taboolib.common.platform.function.console
 import taboolib.common5.Coerce
 import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
-import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import top.lanscarlos.vulpecula.common.utils.asLang

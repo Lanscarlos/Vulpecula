@@ -14,7 +14,6 @@ import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundExcep
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.asLang
-import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import java.io.File
 
