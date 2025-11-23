@@ -87,7 +87,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                         hash[file] = file.digest("SHA-256")
                         detectAutoReload(file)
                         created += 1
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         failed += 1
                         callback.onFileException(sender, getFileId(file), file, e)
                     }
@@ -110,7 +110,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     this.hash[file] = hash
                     detectAutoReload(file)
                     modified += 1
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     failed += 1
                     callback.onFileException(sender, getFileId(file), file, e)
                 } finally {
@@ -124,7 +124,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     callback.onFileDeleted(sender, getFileId(file), file)
                     hash.remove(file)
                     deleted += 1
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     failed += 1
                     callback.onFileException(sender, getFileId(file), file, e)
                 } finally {

@@ -20,7 +20,7 @@ interface ConfigServiceCallback {
 
     fun onFileDeleted(sender: ProxyCommandSender, id: String, file: File)
 
-    fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Exception)
+    fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable)
 
     /**
      * 当路径不存在时调用
