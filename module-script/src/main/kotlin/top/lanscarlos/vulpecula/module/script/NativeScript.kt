@@ -22,6 +22,12 @@ class NativeScript(override val id: String, source: String) : AbstractScript() {
 
     override val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
+    init {
+        require(source.isNotBlank()) {
+            "Source is not blank"
+        }
+    }
+
     override fun execute(
         sender: ProxyCommandSender?,
         args: List<Any?>,

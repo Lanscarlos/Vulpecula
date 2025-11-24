@@ -128,17 +128,6 @@ object ScriptService {
     }
 
     /**
-     * 编译指定内容为脚本, 本次编译不会被记录
-     *
-     * @param source 源码
-     * @param id 脚本 ID
-     * @return 脚本
-     * */
-    fun compile(source: String, id: String): Script {
-        return NativeScript(id, source)
-    }
-
-    /**
      * 运行指定脚本
      *
      * @param id 脚本 ID
