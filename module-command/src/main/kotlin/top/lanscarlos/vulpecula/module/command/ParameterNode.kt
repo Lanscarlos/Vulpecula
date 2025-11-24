@@ -96,7 +96,7 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         }
         warning("ParameterNode 缺失必要参数: ${children.single().name}")
         sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
-        Lang.EXCEPTION_COMMAND_MISSING_ARGUMENT.error(sender, children.single().name)
+        Lang.MODULE_COMMAND_MISSING_ARGUMENT.error(sender, children.single().name)
         return false
     }
 
