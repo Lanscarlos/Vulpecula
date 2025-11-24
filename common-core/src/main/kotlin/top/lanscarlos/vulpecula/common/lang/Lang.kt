@@ -31,6 +31,9 @@ enum class Lang {
     MODULE_SCHEDULE_LOAD_SUCCESS, // 载入成功
     MODULE_SCRIPT_LOAD_SUCCESS, // 载入成功
 
+    EXCEPTION_CONVERT_NULL_VALUE, // 空值强转
+    EXCEPTION_CONVERT_UNSUPPORTED_TYPE, // 不支持的类型转换
+
     // 配置相关
     EXCEPTION_CONFIG_SERVICE_LOAD_FAILURE, // 配置服务加载异常
 
@@ -48,7 +51,8 @@ enum class Lang {
 
     // 脚本相关
     EXCEPTION_SCRIPT_LOAD_FAILURE,
-    EXCEPTION_SCRIPT_NOT_FOUND;
+    EXCEPTION_SCRIPT_NOT_FOUND,
+    EXCEPTION_SCRIPT_NOT_COMPLETED;
 
     val path: String = name.lowercase().replace('_', '-')
 
