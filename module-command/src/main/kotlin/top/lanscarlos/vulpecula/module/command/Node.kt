@@ -84,11 +84,11 @@ abstract class Node(val id: String, val parent: Node?, section: Map<*, *>) {
     }
 
     private fun parseExecution(value: Any): ScriptExecutor {
-        require(value is String || value is Script) {
+        require(value is String) {
             // 类型不匹配
             asLang("module-command-exception-invalid-content", id, "execute", value.javaClass.name)
         }
-        require(value !is String || value.isNotBlank()) {
+        require(value.isNotBlank()) {
             // 字符串内容为空
             asLang("module-command-exception-invalid-content", id, "execute", "BLANK#空白")
         }

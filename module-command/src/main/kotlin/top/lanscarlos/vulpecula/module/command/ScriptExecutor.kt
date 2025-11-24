@@ -2,17 +2,16 @@ package top.lanscarlos.vulpecula.module.command
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandContext
-import taboolib.common.platform.function.info
 import top.lanscarlos.vulpecula.common.applicative.*
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.common.utils.onlyConsole
 import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
-import top.lanscarlos.vulpecula.module.script.ScriptTask
-import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
-import java.util.concurrent.CompletableFuture
-import java.util.function.Consumer
+import top.lanscarlos.vulpecula.module.script.exception.ScriptNotCompletedException
 import java.util.function.Function
 
 /**
@@ -31,83 +30,99 @@ class ScriptExecutor(
     val script: Script = ScriptService.compile(execution)
 
     override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
+        val rawArgs: List<String> = getRawArgs(context) // 原始参数
+        val args: Map<String, Any> = transformArgs.apply(rawArgs)
+        val command: String = getCommand(context, rawArgs)
         try {
-            val rawArgs = getRawArgs(context)
-            val args = transformArgs(rawArgs)
-            val command = getCommand(context, rawArgs)
-            val future = ScriptService.run(script, sender, emptyList(), args)
-                    .onFailure { onFailure("suggest", sender, command, it) }
-                    .future
-
-            if (!future.isDone) {
-                sender.error(sync = true) { asLang("module-command-suggest-failure", command) }
-                sender.error(sync = true) { asLang("module-command-suggest-failure-timeout") }
-                return emptyList()
-            }
-            val result = future.getNow(null)
-            info("我擦 result: $result")
-            val list = ListApplicative.convertOrNull(result)
-            if (list == null) {
-                sender.error(sync = true) { asLang("module-command-suggest-failure", command) }
-                sender.error(sync = true) { asLang("module-command-suggest-failure-conversion", result.toString()) }
-                return emptyList()
-            }
-            info("我擦 list: $list")
-            return list.map(Any?::toString)
-        } catch (e: ScriptNotFoundException) {
-            sender.error { "script ${e.id} not found" }
-            e.notice(sender)
-            return emptyList()
+            return ScriptService.run(script, sender, rawArgs, args)
+                .onFailure { it } // 执行异常时直接返回异常对象
+                .get(ListApplicative)
+                .map(StringApplicative::convert)
         } catch (e: Exception) {
-            info("错误类型：${e.javaClass.name}")
-            return emptyList()
+            when (e) {
+                is TypeConversionException -> {
+                    val source = e.source
+                    if (source !is QuestRuntimeException) {
+                        // 转换类型异常
+                        Lang.MODULE_COMMAND_SUGGEST_FAILURE_CONVERSION.error(sender.withConsole(), command)
+                        return emptyList()
+                    }
+
+                    // 脚本运行异常
+                    Lang.MODULE_COMMAND_SUGGEST_FAILURE.error(sender.withConsole(), command)
+                    source.notice(sender.onlyConsole())
+                }
+                is ScriptNotCompletedException -> Lang.MODULE_COMMAND_SUGGEST_FAILURE_TIMEOUT.error(sender.withConsole(), command)
+                is AbstractLocalizedException -> e.notice(sender.withConsole())
+                else -> {
+                    Lang.MODULE_COMMAND_SUGGEST_FAILURE.error(sender.withConsole(), command)
+                    e.printStackTrace()
+                }
+            }
         }
+        return emptyList()
     }
 
     override fun restrict(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String): Boolean {
-        val rawArgs = getRawArgs(context)
-        val args = transformArgs(rawArgs)
-        val command = getCommand(context, rawArgs)
-        val future = execute(script, sender, args, onSuccess = {}, onFailure = { onFailure("restrict", sender, command, it) })
+        val rawArgs: List<String> = getRawArgs(context) // 原始参数
+        val args: Map<String, Any> = transformArgs.apply(rawArgs)
+        val command: String = getCommand(context, rawArgs)
+        try {
+            return ScriptService.run(script, sender, rawArgs, args)
+                .onFailure { it } // 执行异常时直接返回异常对象
+                .get(BooleanApplicative)
+        } catch (e: Exception) {
+            when (e) {
+                is TypeConversionException -> {
+                    val source = e.source
+                    if (source !is QuestRuntimeException) {
+                        // 转换类型异常
+                        Lang.MODULE_COMMAND_RESTRICT_FAILURE_CONVERSION.error(sender.withConsole(), command)
+                        return false
+                    }
 
-        if (!future.isDone) {
-            sender.error(sync = true) { asLang("module-command-restrict-failure", command) }
-            sender.error(sync = true) { asLang("module-command-restrict-failure-timeout") }
-            return false
+                    // 脚本运行异常
+                    Lang.MODULE_COMMAND_RESTRICT_FAILURE.error(sender.withConsole(), command)
+                    source.notice(sender.onlyConsole())
+                }
+                is ScriptNotCompletedException -> Lang.MODULE_COMMAND_RESTRICT_FAILURE_TIMEOUT.error(sender.withConsole(), command)
+                is AbstractLocalizedException -> e.notice(sender.withConsole())
+                else -> {
+                    Lang.MODULE_COMMAND_RESTRICT_FAILURE.error(sender.withConsole(), command)
+                    e.printStackTrace()
+                }
+            }
         }
-        val result = future.getNow(null)
-        val boolean = BooleanApplicative.convertOrNull(result)
-        if (boolean == null) {
-            sender.error(sync = true) { asLang("module-command-restrict-failure", command) }
-            sender.error(sync = true) { asLang("module-command-restrict-failure-conversion", result.toString()) }
-            return false
-        }
-        return boolean
+        return false
     }
 
     fun execute(sender: ProxyCommandSender, context: CommandContext<*>) {
-        val rawArgs = getRawArgs(context)
-        val args = transformArgs(rawArgs)
-        val command = getCommand(context, rawArgs)
+        val rawArgs: List<String> = getRawArgs(context) // 原始参数
+        val args: Map<String, Any> = transformArgs.apply(rawArgs)
+        val command: String = getCommand(context, rawArgs)
         try {
-            execute("execute", sender, context)
-        } catch (ex: Exception) {
-            if (ex !is ScriptNotFoundException) {
-                ex.printStackTrace()
+            ScriptService.run(script, sender, rawArgs, args)
+                .onSuccess {
+                    if (disableSuccessMessage) {
+                        return@onSuccess
+                    }
+                    Lang.MODULE_COMMAND_EXECUTE_SUCCESS.info(sender.withConsole(), command)
+                }
+                .onFailure {
+                    Lang.MODULE_COMMAND_EXECUTE_FAILURE.error(sender.withConsole(), command)
+                    it.notice(sender.onlyConsole())
+                }
+        } catch (e: Exception) {
+            when (e) {
+                is AbstractLocalizedException -> {
+                    e.notice(sender.withConsole())
+                }
+                else -> {
+                    Lang.MODULE_COMMAND_EXECUTE_FAILURE.error(sender.withConsole(), command)
+                    e.printStackTrace()
+                }
             }
-            sender.error(sync = true) { asLang("module-command-execute-failure", command) }
-            sender.error(sync = true) { ex.localizedMessage }
         }
-    }
-
-    private fun execute(action: String, sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): ScriptTask {
-        val rawArgs = getRawArgs(context) // 原始参数
-        val args = transformArgs.apply(rawArgs)
-        val command = "/${context.name} ${rawArgs.joinToString(" ")}"
-        return ScriptService.run(script, sender, rawArgs, args)
-            .onFailure {
-                onFailure(action, sender, command, it)
-            }
     }
 
     fun getRawArgs(context: CommandContext<*>): List<String> {
@@ -121,23 +136,6 @@ class ScriptExecutor(
 
     fun getCommand(context: CommandContext<*>, rawArgs: List<String>): String {
         return "/${context.name} ${rawArgs.joinToString(" ")}"
-    }
-
-    fun transformArgs(rawArgs: List<String>): Map<String, Any> {
-        return transformArgs.apply(rawArgs)
-    }
-
-    private fun onSuccess(sender: ProxyCommandSender, command: String, value: Any?) {
-        if (disableSuccessMessage) {
-            return
-        }
-        sender.info { asLang("module-command-execute-success", command.trim(), value.toString()) }
-    }
-
-    private fun onFailure(action: String, sender: ProxyCommandSender, command: String, exception: QuestRuntimeException): Any? {
-        sender.error(sync = true) { asLang("module-command-$action-failure", command.trim()) }
-        exception.notice(sender.withConsole())
-        return null
     }
 
 }
