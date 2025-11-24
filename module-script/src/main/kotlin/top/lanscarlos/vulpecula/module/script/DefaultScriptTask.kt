@@ -1,7 +1,9 @@
 package top.lanscarlos.vulpecula.module.script
 
 import taboolib.module.kether.ScriptContext
+import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
+import top.lanscarlos.vulpecula.module.script.exception.ScriptNotCompletedException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
@@ -50,6 +52,21 @@ class DefaultScriptTask(
 
     override fun getNow(): Any? {
         return future.getNow(null)
+    }
+
+    override fun get(): Any? {
+        require(isDone) {
+            throw ScriptNotCompletedException(script)
+        }
+        return future.getNow(null)
+    }
+
+    override fun <T> get(applicative: Applicative<T>): T {
+        return applicative.convert(get())
+    }
+
+    override fun <T> getOrNull(applicative: Applicative<T>): T? {
+        return applicative.convertOrNull(get())
     }
 
 }

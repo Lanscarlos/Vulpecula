@@ -1,6 +1,8 @@
 package top.lanscarlos.vulpecula.module.script
 
+import top.lanscarlos.vulpecula.common.applicative.Applicative
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
+import top.lanscarlos.vulpecula.module.script.exception.ScriptNotCompletedException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import java.util.function.Function
@@ -37,6 +39,30 @@ interface ScriptTask {
 
     fun onFailure(func: Function<QuestRuntimeException, Any?>): ScriptTask
 
+    /**
+     * 立刻获取结果, 若脚本未完成则返回 null
+     */
     fun getNow(): Any?
+
+    /**
+     * 获取结果
+     *
+     * @throws ScriptNotCompletedException 脚本未完成
+     */
+    fun get(): Any?
+
+    /**
+     * 获取结果
+     *
+     * @throws ScriptNotCompletedException 脚本未完成
+     */
+    fun <T> get(applicative: Applicative<T>): T
+
+    /**
+     * 获取结果
+     *
+     * @throws ScriptNotCompletedException 脚本未完成
+     */
+    fun <T> getOrNull(applicative: Applicative<T>): T?
 
 }
