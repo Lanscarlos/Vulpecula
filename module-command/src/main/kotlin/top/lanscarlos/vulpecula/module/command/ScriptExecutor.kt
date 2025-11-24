@@ -9,6 +9,7 @@ import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
+import top.lanscarlos.vulpecula.module.script.ScriptTask
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -22,19 +23,21 @@ import java.util.function.Function
  * @since 2025/4/30 10:19
  */
 class ScriptExecutor(
-    execution: Any,
+    execution: String,
     val disableSuccessMessage: Boolean,
     private val transformArgs: Function<List<String>, Map<String, Any>>
 ) : Suggester, Restrictor {
 
-    val script: Any = parseScript(execution)
+    val script: Script = ScriptService.compile(execution)
 
     override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
         try {
             val rawArgs = getRawArgs(context)
             val args = transformArgs(rawArgs)
             val command = getCommand(context, rawArgs)
-            val future = execute(script, sender, args, onSuccess = {}, onFailure = { onFailure("suggest", sender, command, it) })
+            val future = ScriptService.run(script, sender, emptyList(), args)
+                    .onFailure { onFailure("suggest", sender, command, it) }
+                    .future
 
             if (!future.isDone) {
                 sender.error(sync = true) { asLang("module-command-suggest-failure", command) }
@@ -87,7 +90,7 @@ class ScriptExecutor(
         val args = transformArgs(rawArgs)
         val command = getCommand(context, rawArgs)
         try {
-            execute(script, sender, args, onSuccess = { onSuccess(sender, command, it) }, onFailure = { onFailure("execute", sender, command, it) })
+            execute("execute", sender, context)
         } catch (ex: Exception) {
             if (ex !is ScriptNotFoundException) {
                 ex.printStackTrace()
@@ -95,6 +98,16 @@ class ScriptExecutor(
             sender.error(sync = true) { asLang("module-command-execute-failure", command) }
             sender.error(sync = true) { ex.localizedMessage }
         }
+    }
+
+    private fun execute(action: String, sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): ScriptTask {
+        val rawArgs = getRawArgs(context) // 原始参数
+        val args = transformArgs.apply(rawArgs)
+        val command = "/${context.name} ${rawArgs.joinToString(" ")}"
+        return ScriptService.run(script, sender, rawArgs, args)
+            .onFailure {
+                onFailure(action, sender, command, it)
+            }
     }
 
     fun getRawArgs(context: CommandContext<*>): List<String> {
@@ -114,30 +127,6 @@ class ScriptExecutor(
         return transformArgs.apply(rawArgs)
     }
 
-    private fun execute(
-        script: Any,
-        sender: ProxyCommandSender,
-        args: Map<String, Any>,
-        onSuccess: Consumer<Any?>,
-        onFailure: Function<QuestRuntimeException, Any?>
-    ): CompletableFuture<Any?> {
-        return when (script) {
-            is String -> {
-                ScriptService.run(script, sender, emptyList(), args)
-                    .onSuccess(onSuccess)
-                    .onFailure(onFailure)
-                    .future
-            }
-            is Script -> {
-                ScriptService.run(script, sender, emptyList(), args)
-                    .onSuccess(onSuccess)
-                    .onFailure(onFailure)
-                    .future
-            }
-            else -> error("Unsupported script type: ${script.javaClass.name}")
-        }
-    }
-
     private fun onSuccess(sender: ProxyCommandSender, command: String, value: Any?) {
         if (disableSuccessMessage) {
             return
@@ -149,21 +138,6 @@ class ScriptExecutor(
         sender.error(sync = true) { asLang("module-command-$action-failure", command.trim()) }
         exception.notice(sender.withConsole())
         return null
-    }
-
-    private fun parseScript(source: Any): Any {
-        if (source is Script) {
-            return source
-        }
-        require(source is String)
-        require(source.isNotBlank())
-        return if (source.lowercase().startsWith("@script:")) {
-            // 调用脚本
-            source.substringAfter(':')
-        } else {
-            // 编译脚本
-            ScriptService.compile(source, "script-executor")
-        }
     }
 
 }
