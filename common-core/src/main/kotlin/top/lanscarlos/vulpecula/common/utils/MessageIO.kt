@@ -25,6 +25,16 @@ fun ProxyCommandSender.withConsole(): ProxyCommandSender {
     return MessageSyncCommandSender(this)
 }
 
+/**
+ * 将当前对象转换为仅控制台
+ * */
+fun ProxyCommandSender.onlyConsole(): ProxyCommandSender {
+    if (this !is ProxyPlayer) {
+        return this
+    }
+    return console()
+}
+
 private class MessageSyncCommandSender(val player: ProxyPlayer) : ProxyCommandSender by player {
 
     override fun sendMessage(message: String) {
