@@ -17,7 +17,7 @@ object LongApplicative : AbstractApplicative<Long>(Long::class.java) {
             is Long -> instance
             is Number -> instance.toLong()
             is String -> instance.toLongOrNull() ?: throw ValueConversionException(instance, Long::class.java)
-            else -> throw TypeConversionException(instance::class.java, Long::class.java)
+            else -> throw TypeConversionException(instance, Long::class.java)
         }
     }
 

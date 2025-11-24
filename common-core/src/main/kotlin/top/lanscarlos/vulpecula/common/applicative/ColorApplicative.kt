@@ -70,7 +70,7 @@ object ColorApplicative : AbstractApplicative<Color>(Color::class.java) {
                     }
                 }
             }
-            else -> throw TypeConversionException(instance::class.java, Color::class.java)
+            else -> throw TypeConversionException(instance, Color::class.java)
         }
     }
 

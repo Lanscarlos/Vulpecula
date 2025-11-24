@@ -20,7 +20,7 @@ object BooleanApplicative : AbstractApplicative<Boolean>(Boolean::class.java) {
             "true", "True", "TRUE" -> true
             "false", "False", "FALSE" -> false
             is String -> throw ValueConversionException(instance, Boolean::class.java)
-            else -> throw TypeConversionException(instance::class.java, Boolean::class.java)
+            else -> throw TypeConversionException(instance, Boolean::class.java)
         }
     }
 

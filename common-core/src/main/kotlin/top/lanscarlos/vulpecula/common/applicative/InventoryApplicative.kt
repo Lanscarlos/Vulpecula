@@ -23,7 +23,7 @@ object InventoryApplicative : AbstractApplicative<Inventory>(Inventory::class.ja
             is HumanEntity -> instance.inventory
             is ProxyPlayer -> instance.cast<Player>().inventory
             is String -> Bukkit.getPlayerExact(instance)?.inventory ?: throw ValueConversionException(instance, Inventory::class.java)
-            else -> throw TypeConversionException(instance::class.java, Inventory::class.java)
+            else -> throw TypeConversionException(instance, Inventory::class.java)
         }
     }
 

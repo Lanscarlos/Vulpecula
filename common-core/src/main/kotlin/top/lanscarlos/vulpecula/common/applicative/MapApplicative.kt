@@ -17,7 +17,7 @@ object MapApplicative : AbstractApplicative<Map<*, *>>(Map::class.java) {
             is Map<*, *> -> instance
             is ConfigurationSection -> instance.getValues(false)
             is org.bukkit.configuration.ConfigurationSection -> instance.getValues(false)
-            else -> throw TypeConversionException(instance::class.java, Map::class.java)
+            else -> throw TypeConversionException(instance, Map::class.java)
         }
     }
 

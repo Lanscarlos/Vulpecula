@@ -17,7 +17,7 @@ object IntApplicative : AbstractApplicative<Int>(Int::class.java) {
             is Int -> instance
             is Number -> instance.toInt()
             is String -> instance.toIntOrNull() ?: throw ValueConversionException(instance, Int::class.java)
-            else -> throw TypeConversionException(instance::class.java, Int::class.java)
+            else -> throw TypeConversionException(instance, Int::class.java)
         }
     }
 

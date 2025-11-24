@@ -17,7 +17,7 @@ object DoubleApplicative : AbstractApplicative<Double>(Double::class.java) {
             is Double -> instance
             is Number -> instance.toDouble()
             is String -> instance.toDoubleOrNull() ?: throw ValueConversionException(instance, Double::class.java)
-            else -> throw TypeConversionException(instance::class.java, Double::class.java)
+            else -> throw TypeConversionException(instance, Double::class.java)
         }
     }
 

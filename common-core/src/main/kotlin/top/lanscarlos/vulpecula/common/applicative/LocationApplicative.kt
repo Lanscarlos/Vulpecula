@@ -34,7 +34,7 @@ object LocationApplicative : AbstractApplicative<Location>(Location::class.java)
             is Vector -> Location(null, instance.x, instance.y, instance.z)
             is org.bukkit.util.Vector -> Location(null, instance.x, instance.y, instance.z)
             is String -> convert(instance)
-            else -> throw TypeConversionException(instance::class.java, String::class.java)
+            else -> throw TypeConversionException(instance, String::class.java)
         }
     }
 

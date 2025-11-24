@@ -17,7 +17,7 @@ object FloatApplicative : AbstractApplicative<Float>(Float::class.java) {
             is Float -> instance
             is Number -> instance.toFloat()
             is String -> instance.toFloatOrNull() ?: throw ValueConversionException(instance, Float::class.java)
-            else -> throw TypeConversionException(instance::class.java, Float::class.java)
+            else -> throw TypeConversionException(instance, Float::class.java)
         }
     }
 

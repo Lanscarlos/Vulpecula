@@ -43,7 +43,7 @@ object VectorApplicative : AbstractApplicative<Vector>(Vector::class.java) {
                     else -> throw ValueConversionException(instance, Vector::class.java)
                 }
             }
-            else -> throw TypeConversionException(instance::class.java, Vector::class.java)
+            else -> throw TypeConversionException(instance, Vector::class.java)
         }
     }
 

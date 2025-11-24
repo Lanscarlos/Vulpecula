@@ -22,7 +22,7 @@ object EntityApplicative : AbstractApplicative<Entity>(Entity::class.java) {
             is OfflinePlayer -> instance.player!!
             is ProxyPlayer -> instance.cast()
             is String -> Bukkit.getPlayerExact(instance) ?: throw ValueConversionException(instance, Entity::class.java)
-            else -> throw TypeConversionException(instance::class.java, Entity::class.java)
+            else -> throw TypeConversionException(instance, Entity::class.java)
         }
     }
 

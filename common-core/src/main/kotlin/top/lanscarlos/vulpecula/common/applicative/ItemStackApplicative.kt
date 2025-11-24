@@ -34,7 +34,7 @@ object ItemStackApplicative : AbstractApplicative<ItemStack>(ItemStack::class.ja
                 }
                 buildItem(material)
             }
-            else -> throw TypeConversionException(instance::class.java, ItemStack::class.java)
+            else -> throw TypeConversionException(instance, ItemStack::class.java)
         }
     }
 
