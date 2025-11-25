@@ -35,7 +35,7 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
 
     data class Parameter(val name: String, val applicative: Applicative<out Any>, val optional: Boolean, val default: Any?)
 
-    override val id: String by config.read("name").stringOrNull().default(id)
+    override val id: String by config.read("name").string(id)
 
     val namespace: List<String> by config.read("namespace").stringList(emptyList())
 
