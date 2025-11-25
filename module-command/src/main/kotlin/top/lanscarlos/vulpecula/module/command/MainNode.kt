@@ -12,7 +12,7 @@ import taboolib.library.configuration.ConfigurationSection
  * @author Lanscarlos
  * @since 2025/4/29 17:03
  */
-class MainNode(section: ConfigurationSection) : LiteralNode("main", null, section) {
+class MainNode(config: ConfigurationSection) : LiteralNode("main", null, config) {
 
     override fun build(): CommandBase {
         val component = CommandBase()

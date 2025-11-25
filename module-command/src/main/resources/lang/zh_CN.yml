@@ -17,7 +17,7 @@ module-command-exception-missing-argument: '缺少必要的参数 &e{0}&7.'
 module-command-display-name: '命令'
 
 module-command-load-success: '&7命令模块加载完毕. 共 &a{0}&7 个自定义命令. &8({1}ms)'
-module-command-load-failure: '&7命令 &c{0}&7 加载失败! {1}'
+module-command-load-failure: '&7命令 &c{0}&7 加载失败. {1}'
 module-command-load-automatic: '&7命令 &a{0}&7 自动重载成功 &8({1}ms)'
 
 module-command-execute-success: '命令 &a{0}&7 执行成功.'

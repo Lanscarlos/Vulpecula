@@ -51,10 +51,11 @@ enum class Lang {
 
     EXCEPTION_CONVERT_NULL_VALUE, // 空值强转
     EXCEPTION_CONVERT_UNSUPPORTED_TYPE, // 不支持的类型转换
+    EXCEPTION_BLANK_STRING, // 空白字符串
+    EXCEPTION_UNSUPPORTED_VALUE, // 不支持的值
 
     // 配置相关
     EXCEPTION_CONFIG_SERVICE_LOAD_FAILURE, // 配置服务加载异常
-
 
     // 任务相关
     EXCEPTION_QUEST_COMPILE_FAILURE, // 编译异常
