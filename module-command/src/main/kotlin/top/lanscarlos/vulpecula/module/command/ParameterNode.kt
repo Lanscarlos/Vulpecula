@@ -5,11 +5,13 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
-import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
+import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
+import top.lanscarlos.vulpecula.common.config.boolean
+import top.lanscarlos.vulpecula.common.config.convert
+import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.lang.Lang
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.module.command.exception.StrategyConflictException
 import top.lanscarlos.vulpecula.module.command.restrictor.DoubleRestrictor
 import top.lanscarlos.vulpecula.module.command.restrictor.IntRestrictor
 import top.lanscarlos.vulpecula.module.command.suggester.BooleanSuggester
@@ -17,6 +19,7 @@ import top.lanscarlos.vulpecula.module.command.suggester.ListSuggester
 import top.lanscarlos.vulpecula.module.command.suggester.OfflinePlayerSuggester
 import top.lanscarlos.vulpecula.module.command.suggester.PlayerSuggester
 import top.lanscarlos.vulpecula.module.command.suggester.WorldSuggester
+import top.lanscarlos.vulpecula.module.script.Script
 
 /**
  * Vulpecula
@@ -25,25 +28,22 @@ import top.lanscarlos.vulpecula.module.command.suggester.WorldSuggester
  * @author Lanscarlos
  * @since 2025/4/29 13:19
  */
-class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, parent, section) {
+class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, script: Script) : Node(id, parent, config) {
 
-    constructor(id: String, parent: Node?, section: ConfigurationSection) : this(id, parent, section.toMap())
+    val uncheck: Boolean by config.read("uncheck").boolean(false)
 
-    val uncheck: Boolean
+    val suggester: Suggester? by config.read("suggest").convert(::parseSuggester)
 
-    val suggester: Suggester?
+    val restrictor: Restrictor? by config.read("restrictor").convert(::parseRestrictor)
 
-    val restrictor: Restrictor?
+    override val executor: ScriptExecutor = ScriptExecutor(script, disableSuccessMessage, ::transformArgs)
 
     init {
         // 验证配置结构
-        require("suggest" !in section || "restrict" !in section) {
+        require(suggester == null || restrictor == null) {
             // 策略冲突
-            asLang("module-command-exception-strategy-conflict", id)
+            throw StrategyConflictException(id)
         }
-        uncheck = section["uncheck"].applicativeBoolean(false)
-        suggester = section["suggest"]?.let(::parseSuggester)
-        restrictor = section["restrict"]?.let(::parseRestrictor)
     }
 
     override fun build(): CommandComponent {
@@ -55,10 +55,10 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         )
         when {
             suggester != null -> {
-                component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = suggester::suggest)
+                component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = suggester!!::suggest)
             }
             restrictor != null -> {
-                component.restrict(bind = ProxyCommandSender::class.java, function = restrictor::restrict)
+                component.restrict(bind = ProxyCommandSender::class.java, function = restrictor!!::restrict)
             }
         }
 
@@ -94,17 +94,19 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         if (children.isEmpty() || children.single().optional) {
             return true
         }
-        warning("ParameterNode 缺失必要参数: ${children.single().name}")
-        sender.error(sync = true) { asLang("module-command-exception-missing-argument", children.single().name) }
         Lang.MODULE_COMMAND_MISSING_ARGUMENT.error(sender, children.single().name)
         return false
     }
 
-    private fun parseSuggester(suggestion: Any): Suggester {
+    private fun parseSuggester(suggestion: Any?): Suggester? {
+        if (suggestion == null) {
+            return null
+        }
         if (suggestion is List<*>) {
             return ListSuggester(suggestion)
         }
         require(suggestion is String) {
+            throw TypeConversionException(suggestion, String::class.java)
             asLang("module-command-exception-invalid-content", id, "suggest", suggestion.javaClass.name)
         }
         require(suggestion.isNotBlank()) {
@@ -123,7 +125,10 @@ class ParameterNode(id: String, parent: Node?, section: Map<*, *>) : Node(id, pa
         }
     }
 
-    private fun parseRestrictor(restriction: Any): Restrictor {
+    private fun parseRestrictor(restriction: Any?): Restrictor? {
+        if (restriction == null) {
+            return null
+        }
         require(restriction is String) {
             asLang("module-command-exception-invalid-content", id, "restrict", restriction.javaClass.name)
         }

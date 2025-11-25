@@ -229,7 +229,7 @@ fun <T> LiveData<T>.stringList(defaultValue: List<String>): LiveData<List<String
         if (it == null) {
             return@LiveDataTransformer defaultValue
         }
-        ListApplicative.convert(it)?.map(StringApplicative::convert) ?: defaultValue
+        ListApplicative.convert(it).map(StringApplicative::convert)
     }
 }
 

@@ -5,11 +5,17 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentLiteral
-import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
-import top.lanscarlos.vulpecula.common.applicative.applicativeStringList
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.config.boolean
+import top.lanscarlos.vulpecula.common.config.convert
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
+import top.lanscarlos.vulpecula.common.config.mapList
+import top.lanscarlos.vulpecula.common.config.read
+import top.lanscarlos.vulpecula.common.config.stringList
+import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.common.utils.withConsole
+import top.lanscarlos.vulpecula.module.command.exception.ExecutorNotFoundException
 import java.util.*
 
 /**
@@ -19,13 +25,13 @@ import java.util.*
  * @author Lanscarlos
  * @since 2025/4/29 13:23
  */
-open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection) : Node(id, parent, section) {
+open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) : Node(id, parent, config) {
 
-    val aliases: List<String> = section["aliases"].applicativeStringList(emptyList())
+    val aliases: List<String> by config.read("aliases").stringList(emptyList())
 
-    val hidden: Boolean = section["hidden"].applicativeBoolean(false)
+    val hidden: Boolean by config.read("hidden").boolean(false)
 
-    val parameters: List<ParameterNode> = parseParameters(section.getMapList("parameters"))
+    val parameters: List<ParameterNode> by config.read("parameters").mapList().convert(::parseParameters)
 
     override fun build(): CommandComponent {
         val component = CommandComponentLiteral(
@@ -53,8 +59,7 @@ open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection)
 
     override fun execute(sender: ProxyPlayer, context: CommandContext<ProxyPlayer>, argument: String) {
         if (parameters.isNotEmpty() && !parameters.first().optional) {
-            warning("LiteralNode 缺失必要参数: ${parameters.first().name}")
-            sender.error(sync = true) { asLang("module-command-exception-missing-argument", parameters.first().name) }
+            Lang.MODULE_COMMAND_MISSING_ARGUMENT.error(sender.withConsole(), parameters.first().name)
             return
         }
         super.execute(sender, context, argument)
@@ -62,8 +67,7 @@ open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection)
 
     override fun execute(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>, argument: String) {
         if (parameters.isNotEmpty() && !parameters.first().optional) {
-            warning("LiteralNode 缺失必要参数: ${parameters.first().name}")
-            sender.error(sync = true) { asLang("module-command-exception-missing-argument", parameters.first().name) }
+            Lang.MODULE_COMMAND_MISSING_ARGUMENT.error(sender.withConsole(), parameters.first().name)
             return
         }
         super.execute(sender, context, argument)
@@ -73,14 +77,13 @@ open class LiteralNode(id: String, parent: Node?, section: ConfigurationSection)
         if (value.isEmpty()) {
             return emptyList()
         }
-        require(executor != null) {
-            asLang("module-command-exception-executor-not-found", id)
-        }
+        val executor = executor ?: throw ExecutorNotFoundException(id)
         val list = LinkedList<ParameterNode>()
         var parent: Node = this
         for (section in value) {
-            val id = section["name"]!!.toString()
-            val node = ParameterNode(id, parent, section.plus("execute" to executor.script))
+            val id = section["name"]?.toString() ?: throw ConfigFieldNotFoundException("components.${this.id}.name")
+            val config = Configuration.fromMap(mapOf("section" to section)).getConfigurationSection("section")!!
+            val node = ParameterNode(id, parent, config, executor.script)
             list += node
             parent.children += node
             parent = node

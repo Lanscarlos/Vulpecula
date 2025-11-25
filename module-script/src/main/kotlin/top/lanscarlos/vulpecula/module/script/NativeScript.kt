@@ -4,6 +4,7 @@ import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
+import top.lanscarlos.vulpecula.module.script.exception.ScriptBlankException
 import java.io.File
 import java.nio.charset.StandardCharsets
 
@@ -23,8 +24,8 @@ class NativeScript(override val id: String, source: String) : AbstractScript() {
     override val quest: Quest = BacikalService.compile(source, id, listOf("vulpecula"))
 
     init {
-        require(source.isNotBlank()) {
-            "Source is not blank"
+        if (source.isBlank()) {
+            throw ScriptBlankException()
         }
     }
 

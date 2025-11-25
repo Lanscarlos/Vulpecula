@@ -16,6 +16,7 @@ import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtension
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.module.script.exception.ScriptBlankException
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
 import java.io.File
@@ -117,6 +118,9 @@ object ScriptService {
      * @return 脚本
      * */
     fun compile(source: String): Script {
+        if (source.isBlank()) {
+            throw ScriptBlankException()
+        }
         return if (source.getOrNull(6) == '@' && source.lowercase().startsWith("script@")) {
             // 调用脚本
             val id = source.substring(7)

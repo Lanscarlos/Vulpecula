@@ -13,7 +13,7 @@ common-config-main-load-failure: '&7主配置加载失败. {0}'
 common-config-service-load-automatic-enabled: '检测到文件 &a{0}&7 启用了自动重载功能'
 common-config-service-load-automatic-disabled: '检测到文件 &a{0}&7 关闭了自动重载功能'
 common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
-common-config-exception-field-read-failure: '字段 &e{0}&7 {1}'
+common-config-exception-field-read-failure: '字段 &e{0}&7 解析异常. {1}'
 
 common-config-load-statistics-scanned: '&7扫描到 &a{0}&7 个文件'
 common-config-load-statistics-unmodified: '&7未变动文件 &a{0}&7 个'

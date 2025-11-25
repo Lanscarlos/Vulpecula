@@ -22,12 +22,20 @@ import java.util.function.Function
  * @since 2025/4/30 10:19
  */
 class ScriptExecutor(
-    execution: String,
+    val script: Script,
     val disableSuccessMessage: Boolean,
     private val transformArgs: Function<List<String>, Map<String, Any>>
 ) : Suggester, Restrictor {
 
-    val script: Script = ScriptService.compile(execution)
+    constructor(
+        execution: String,
+        disableSuccessMessage: Boolean,
+        transformArgs: Function<List<String>, Map<String, Any>>
+    ) : this(
+        ScriptService.compile(execution),
+        disableSuccessMessage,
+        transformArgs
+    )
 
     override fun suggest(sender: ProxyCommandSender, context: CommandContext<ProxyCommandSender>): List<String> {
         val rawArgs: List<String> = getRawArgs(context) // 原始参数
