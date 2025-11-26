@@ -22,7 +22,7 @@ abstract class AbstractLocalizedException : RuntimeException() {
     /**
      * 参数
      */
-    abstract val arguments: Array<Any>
+    open val arguments: Array<Any> = emptyArray()
 
     /**
      * 默认以控制台视角获取信息

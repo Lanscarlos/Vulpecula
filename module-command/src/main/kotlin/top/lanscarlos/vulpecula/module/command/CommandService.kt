@@ -5,6 +5,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
@@ -74,16 +75,33 @@ object CommandService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
             when (e) {
-                is ConfigFieldNotFoundException -> {}
+                is ConfigFieldNotFoundException -> {
+                    info("ConfigFieldNotFoundException")
+                    Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
+                }
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.notice(sender)
+                        is QuestCompileException -> {
+                            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
+                            cause.notice(sender)
+                        }
+                        is LiteralNode.ParameterNameNotFoundException -> {
+                            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, cause.localizedMessage ?: "")
+                        }
+                        else -> {
+                            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
+                        }
                     }
                 }
-                is QuestCompileException -> e.notice(sender)
-                else -> e.printStackTrace()
+                is QuestCompileException -> {
+                    Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
+                    e.notice(sender)
+                }
+                else -> {
+                    Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
+                    e.printStackTrace()
+                }
             }
         }
 

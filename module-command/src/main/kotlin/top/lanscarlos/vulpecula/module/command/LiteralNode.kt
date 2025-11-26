@@ -13,6 +13,8 @@ import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundExcep
 import top.lanscarlos.vulpecula.common.config.mapList
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.stringList
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.withConsole
 import top.lanscarlos.vulpecula.module.command.exception.ExecutorNotFoundException
@@ -80,8 +82,9 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
         val executor = executor ?: throw ExecutorNotFoundException(id)
         val list = LinkedList<ParameterNode>()
         var parent: Node = this
-        for (section in value) {
-            val id = section["name"]?.toString() ?: throw ConfigFieldNotFoundException("components.${this.id}.name")
+        for ((index, section) in value.withIndex()) {
+//            val id = section["name"]?.toString() ?: throw ConfigFieldNotFoundException("components.${this.id}.name")
+            val id = section["name"]?.toString() ?: throw ParameterNameNotFoundException(this.id, index)
             val config = Configuration.fromMap(mapOf("section" to section)).getConfigurationSection("section")!!
             val node = ParameterNode(id, parent, config, executor.script)
             list += node
@@ -90,5 +93,8 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
         }
         return list
     }
+
+    class ParameterNameNotFoundException(val nodeId: String, val index: Int) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_NAME_UNDEFINED, nodeId, index + 1)
 
 }

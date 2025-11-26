@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.common.config.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -11,8 +12,10 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/5/29 9:36
  */
-class ConfigFieldReadException(val field: String, override val cause: Throwable) : RuntimeException() {
+class ConfigFieldReadException(val field: String, override val cause: Throwable) : AbstractLocalizedException() {
 
-    override val message: String = asLang("common-config-exception-field-read-failure", field, cause.localizedMessage)
+    override val lang: Lang = Lang.EXCEPTION_UNSUPPORTED_VALUE
+
+    override val arguments: Array<Any> by lazy { arrayOf(field, cause.localizedMessage) }
 
 }

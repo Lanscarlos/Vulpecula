@@ -6,7 +6,6 @@ import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentDynamic
 import taboolib.library.configuration.ConfigurationSection
-import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
@@ -37,7 +36,7 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
 
     val suggester: Suggester? by config.read("suggest").convert(::parseSuggester)
 
-    val restrictor: Restrictor? by config.read("restrictor").convert(::parseRestrictor)
+    val restrictor: Restrictor? by config.read("restrict").convert(::parseRestrictor)
 
     override val executor: ScriptExecutor = ScriptExecutor(script, disableSuccessMessage, ::transformArgs)
 
