@@ -32,6 +32,7 @@ module-command-suggest-failure-conversion: '无法将脚本运行结果 &e{0}&7 
 module-command-missing-argument: '缺少必要的参数 &e{0}&7.'
 module-command-invalid-field: '节点 &e{0}&7 字段 &e{1}&7 内容不符合规则. 异常值 &e{2}&7.'
 module-command-executor-not-found: '节点 &e{0}&7 未定义 execute 执行内容.'
-module-command-strategy-conflict: '节点 &e{0}&7 策略冲突. 不允许同时设置 suggest 和 restrict.'
 
-module-command-parameter-name-undefined: '节点 &e{0}&7 第 &e{1}&7 个参数的&e name &7未定义'
+module-command-parameter-name-undefined: '节点 &e{0}&7 第 &e{1}&7 个参数的字段&e name &7未定义'
+module-command-parameter-illegal-strategy: '无法解析节点 &e{0}&7 的参数 &e{1}&7 中 &e{2}&7 的值 &e{3}&7.'
+module-command-parameter-strategy-conflict: '节点 &e{0}&7 的参数 &e{1}&7 策略冲突. 不允许同时设置 suggest 和 restrict.'

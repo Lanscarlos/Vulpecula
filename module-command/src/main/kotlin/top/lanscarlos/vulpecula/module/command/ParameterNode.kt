@@ -9,11 +9,12 @@ import taboolib.library.configuration.ConfigurationSection
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
 import top.lanscarlos.vulpecula.common.exception.BlankStringException
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.exception.UnsupportedValueException
 import top.lanscarlos.vulpecula.common.lang.Lang
-import top.lanscarlos.vulpecula.module.command.exception.StrategyConflictException
 import top.lanscarlos.vulpecula.module.command.restrictor.DoubleRestrictor
 import top.lanscarlos.vulpecula.module.command.restrictor.IntRestrictor
 import top.lanscarlos.vulpecula.module.command.suggester.BooleanSuggester
@@ -44,7 +45,7 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
         // 验证配置结构
         require(suggester == null || restrictor == null) {
             // 策略冲突
-            throw StrategyConflictException(id)
+            throw StrategyConflictException()
         }
     }
 
@@ -59,6 +60,7 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
             suggester != null -> {
                 component.suggestion(bind = ProxyCommandSender::class.java, uncheck = uncheck, function = suggester!!::suggest)
             }
+
             restrictor != null -> {
                 component.restrict(bind = ProxyCommandSender::class.java, function = restrictor!!::restrict)
             }
@@ -108,10 +110,10 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
             return ListSuggester(suggestion)
         }
         require(suggestion is String) {
-            throw InvalidTypeException(suggestion)
+            throw IllegalStrategyException("suggest", suggestion.javaClass.name)
         }
         require(suggestion.isNotBlank()) {
-            throw BlankStringException()
+            throw IllegalStrategyException("suggest", "null")
         }
         if (suggestion[0] != '@' || suggestion.lowercase().startsWith("@script:")) {
             // 启用脚本约束
@@ -122,7 +124,7 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
             "offline" -> OfflinePlayerSuggester
             "player" -> PlayerSuggester
             "world" -> WorldSuggester
-            else -> throw UnsupportedValueException(suggestion)
+            else -> throw IllegalStrategyException("suggest", suggestion)
         }
     }
 
@@ -131,10 +133,10 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
             return null
         }
         require(restriction is String) {
-            throw InvalidTypeException(restriction)
+            throw IllegalStrategyException("restrict", restriction.javaClass.name)
         }
         require(restriction.isNotBlank()) {
-            throw BlankStringException()
+            throw IllegalStrategyException("restrict", "null")
         }
         if (restriction[0] != '@' || restriction.lowercase().startsWith("@script:")) {
             // 启用脚本约束
@@ -143,8 +145,14 @@ class ParameterNode(id: String, parent: Node?, config: ConfigurationSection, scr
         return when (restriction.substring(1).lowercase()) {
             "int" -> IntRestrictor
             "double" -> DoubleRestrictor
-            else -> throw UnsupportedValueException(restriction)
+            else -> throw IllegalStrategyException("restrict", restriction)
         }
     }
+
+    inner class IllegalStrategyException(field: String, value: String) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_ILLEGAL_STRATEGY, arrayOf("?", id, field, value))
+
+    inner class StrategyConflictException :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_STRATEGY_CONFLICT, arrayOf("?", id))
 
 }

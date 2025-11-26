@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.common.config.ConfigStatistics
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import java.io.File
@@ -75,33 +76,23 @@ object CommandService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            when (e) {
-                is ConfigFieldNotFoundException -> {
-                    info("ConfigFieldNotFoundException")
-                    Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
-                }
+            val cause = when (e) {
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> {
-                            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
-                            cause.notice(sender)
-                        }
-                        is LiteralNode.ParameterNameNotFoundException -> {
-                            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, cause.localizedMessage ?: "")
-                        }
-                        else -> {
-                            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
-                        }
+//                        is QuestCompileException,
+//                        is LiteralNode.ExecutorNotFoundException,
+//                        is LiteralNode.ParameterNameNotFoundException,
+//                        is LiteralNode.StrategyConflictException -> cause
+                        is AbstractLocalizedException -> cause
+                        else -> e
                     }
                 }
-                is QuestCompileException -> {
-                    Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
-                    e.notice(sender)
-                }
-                else -> {
-                    Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
-                    e.printStackTrace()
-                }
+                else -> e
+            }
+            val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage ?: ""
+            Lang.MODULE_COMMAND_LOAD_FAILURE.error(sender, id, message)
+            if (cause is QuestCompileException) {
+                cause.notice(sender)
             }
         }
 

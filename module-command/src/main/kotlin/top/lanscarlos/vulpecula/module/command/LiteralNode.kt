@@ -5,11 +5,13 @@ import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.component.CommandComponentLiteral
+import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.mapList
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.stringList
@@ -17,7 +19,6 @@ import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
 import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.withConsole
-import top.lanscarlos.vulpecula.module.command.exception.ExecutorNotFoundException
 import java.util.*
 
 /**
@@ -83,10 +84,20 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
         val list = LinkedList<ParameterNode>()
         var parent: Node = this
         for ((index, section) in value.withIndex()) {
-//            val id = section["name"]?.toString() ?: throw ConfigFieldNotFoundException("components.${this.id}.name")
             val id = section["name"]?.toString() ?: throw ParameterNameNotFoundException(this.id, index)
             val config = Configuration.fromMap(mapOf("section" to section)).getConfigurationSection("section")!!
-            val node = ParameterNode(id, parent, config, executor.script)
+            val node = try {
+                ParameterNode(id, parent, config, executor.script)
+            } catch (e: ParameterNode.StrategyConflictException) {
+                throw e.also { it.arguments[0] = this.id }
+            } catch (e: ConfigFieldReadException) {
+                when (val cause = e.cause) {
+                    is ParameterNode.IllegalStrategyException -> {
+                        throw cause.also { it.arguments[0] = this.id }
+                    }
+                    else -> throw e
+                }
+            }
             list += node
             parent.children += node
             parent = node
@@ -94,7 +105,10 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
         return list
     }
 
-    class ParameterNameNotFoundException(val nodeId: String, val index: Int) :
-        DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_NAME_UNDEFINED, nodeId, index + 1)
+    class ExecutorNotFoundException(nodeId: String) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_EXECUTOR_NOT_FOUND, arrayOf(nodeId))
+
+    class ParameterNameNotFoundException(nodeId: String, index: Int) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_NAME_UNDEFINED, arrayOf(nodeId, index + 1))
 
 }
