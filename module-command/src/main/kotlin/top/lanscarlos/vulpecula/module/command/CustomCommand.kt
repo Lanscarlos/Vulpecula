@@ -14,10 +14,10 @@ import taboolib.common.platform.function.unregisterCommand
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import java.awt.Component
 import java.util.HashSet
 import java.util.LinkedList
@@ -119,8 +119,7 @@ class CustomCommand(val id: String, val config: Configuration) {
         for (key in components.getKeys(false)) {
             val parent = components.getString("$key.parent")
             require(!parent.isNullOrBlank()) {
-                throw NodeUndefinedException(key)
-                asLang("module-command-exception-field-not-found", key, "parent")
+                throw ConfigFieldNotFoundException("$key.parent")
             }
             relation.computeIfAbsent(parent) { HashSet() } += key
         }
@@ -140,12 +139,13 @@ class CustomCommand(val id: String, val config: Configuration) {
             val id = stack.pop()
             if (!visited.add(id)) {
                 // 重复处理节点
-                error(asLang("module-command-exception-key-conflict", id))
+                throw DuplicateNodeException(id)
             }
             val section = components.getConfigurationSection(id)!!
-            val parent = nodes[section.getString("parent")!!]
+            val parentId = section.getString("parent")!!
+            val parent = nodes[parentId]
             require(parent != null) {
-                asLang("module-command-exception-parent-not-found", id)
+                throw ParentNodeUndefinedException(id, parentId)
             }
             val node = LiteralNode(id, parent, section)
             parent.children += node
@@ -163,11 +163,16 @@ class CustomCommand(val id: String, val config: Configuration) {
             return PermissionDefault.OP
         }
         return PermissionDefault.entries.find { it.name.equals(value, true) }
-            ?: error(asLang("module-command-exception-invalid-permission-default", id, value))
+            ?: throw IllegalPermissionException(id, value)
     }
 
-    inner class IllegalPermissionException(value: String) : DefaultLocalizedException()
+    class DuplicateNodeException(nodeId: String) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_DUPLICATE_NODE, arrayOf(nodeId))
 
-    inner class NodeUndefinedException(nodeId: String) : DefaultLocalizedException()
+    class ParentNodeUndefinedException(nodeId: String, parentId: String) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_PARENT_NOT_FOUND, arrayOf(nodeId, parentId))
+
+    class IllegalPermissionException(id: String, value: String) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_ILLEGAL_PERMISSION, arrayOf(id, value))
 
 }
