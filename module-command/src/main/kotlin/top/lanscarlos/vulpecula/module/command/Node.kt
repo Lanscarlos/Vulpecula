@@ -6,17 +6,11 @@ import taboolib.common.platform.command.CommandContext
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
-import taboolib.module.configuration.Configuration
-import top.lanscarlos.vulpecula.common.applicative.applicativeBoolean
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
-import top.lanscarlos.vulpecula.common.config.default
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.config.stringOrNull
-import top.lanscarlos.vulpecula.common.utils.asLang
-import top.lanscarlos.vulpecula.module.script.Script
-import top.lanscarlos.vulpecula.module.script.exception.ScriptBlankException
 import java.util.LinkedList
 
 /**

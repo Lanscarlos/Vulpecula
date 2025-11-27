@@ -14,6 +14,8 @@ import taboolib.common.platform.function.unregisterCommand
 import taboolib.common.platform.function.warning
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.utils.asLang
 import java.awt.Component
@@ -117,6 +119,7 @@ class CustomCommand(val id: String, val config: Configuration) {
         for (key in components.getKeys(false)) {
             val parent = components.getString("$key.parent")
             require(!parent.isNullOrBlank()) {
+                throw NodeUndefinedException(key)
                 asLang("module-command-exception-field-not-found", key, "parent")
             }
             relation.computeIfAbsent(parent) { HashSet() } += key
@@ -155,55 +158,6 @@ class CustomCommand(val id: String, val config: Configuration) {
         return mainNode.build()
     }
 
-    fun buildNode(): MainNode {
-        // 创建主节点
-        val main = MainNode(config.getConfigurationSection("main") ?: Configuration.empty())
-        val components = config.getConfigurationSection("components") ?: return main
-
-        // 整合父子关系
-        val relation = HashMap<String, HashSet<String>>()
-        for (key in components.getKeys(false)) {
-            val parent = components.getString("$key.parent")
-            require(!parent.isNullOrBlank()) {
-                asLang("module-command-exception-field-not-found", key, "parent")
-            }
-            relation.computeIfAbsent(parent) { HashSet() } += key
-        }
-
-        // 深度搜索遍历创建节点
-        val nodes = HashMap<String, Node>()
-        val stack = LinkedList<String>()
-        val visited = mutableSetOf<String>()
-
-        nodes[main.id] = main
-        stack += relation["main"] ?: emptyList()
-        if (stack.isEmpty()) {
-            warning("Node \"${main.id}\" has no children.")
-            return main
-        }
-        while (stack.isNotEmpty()) {
-            val id = stack.pop()
-            if (!visited.add(id)) {
-                // 重复处理节点
-                error(asLang("module-command-exception-key-conflict", id))
-            }
-            val section = components.getConfigurationSection(id)!!
-            val parent = nodes[section.getString("parent")!!]
-            require(parent != null) {
-                asLang("module-command-exception-parent-not-found", id)
-            }
-            val node = LiteralNode(id, parent, section)
-            parent.children += node
-            nodes[id] = node
-            visited += id
-
-            // 载入子节点
-            stack += relation[id] ?: continue
-        }
-
-        return main
-    }
-
     private fun parsePermissionDefault(value: String?): PermissionDefault {
         if (value == null) {
             return PermissionDefault.OP
@@ -211,5 +165,9 @@ class CustomCommand(val id: String, val config: Configuration) {
         return PermissionDefault.entries.find { it.name.equals(value, true) }
             ?: error(asLang("module-command-exception-invalid-permission-default", id, value))
     }
+
+    inner class IllegalPermissionException(value: String) : DefaultLocalizedException()
+
+    inner class NodeUndefinedException(nodeId: String) : DefaultLocalizedException()
 
 }

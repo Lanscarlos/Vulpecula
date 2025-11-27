@@ -81,7 +81,7 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
         val list = LinkedList<ParameterNode>()
         var parent: Node = this
         for ((index, section) in value.withIndex()) {
-            val id = section["name"]?.toString() ?: throw ParameterNameNotFoundException(this.id, index)
+            val id = section["name"]?.toString() ?: throw ParameterNameUndefinedException(this.id, index)
             val config = Configuration.fromMap(mapOf("section" to section)).getConfigurationSection("section")!!
             val node = try {
                 ParameterNode(id, parent, config, executor.script)
@@ -105,7 +105,7 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
     class ExecutorNotFoundException(nodeId: String) :
         DefaultLocalizedException(Lang.MODULE_COMMAND_EXECUTOR_NOT_FOUND, arrayOf(nodeId))
 
-    class ParameterNameNotFoundException(nodeId: String, index: Int) :
+    class ParameterNameUndefinedException(nodeId: String, index: Int) :
         DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_NAME_UNDEFINED, arrayOf(nodeId, index + 1))
 
 }
