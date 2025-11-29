@@ -13,6 +13,8 @@ import top.lanscarlos.vulpecula.common.config.ConfigStatistics
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.script.exception.ScriptBlankException
@@ -234,6 +236,9 @@ object ScriptService {
                 else -> throw UnsupportedFileExtensionException(file.extension)
             }
             rawMapping[id] = script
+            require(!scripts.containsKey(script.id)) {
+                throw ScriptConflictException(script.id, file)
+            }
             scripts[script.id] = script
         }
 
@@ -244,8 +249,14 @@ object ScriptService {
                     onFileCreated(sender, id, file)
                 }
                 is CompiledScript -> {
+                    scripts.remove(script.id)
                     // 刷新配置
                     script.config.loadFromFile(file)
+                    // 刷新 id
+                    require(!scripts.containsKey(script.id)) {
+                        throw ScriptConflictException(script.id, file)
+                    }
+                    scripts[script.id] = script
                     // 重新构建脚本任务
                     script.rebuild()
                 }
@@ -259,16 +270,19 @@ object ScriptService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            Lang.MODULE_SCRIPT_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
-            when (e) {
-                is ConfigFieldNotFoundException -> {}
+            val cause = when (e) {
                 is ConfigFieldReadException -> {
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.notice(sender)
+                        is AbstractLocalizedException -> cause
+                        else -> e
                     }
                 }
-                is QuestCompileException -> e.notice(sender)
-                else -> e.printStackTrace()
+                else -> e
+            }
+            val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage ?: ""
+            Lang.MODULE_SCRIPT_LOAD_FAILURE.error(sender, id, message)
+            if (cause is QuestCompileException) {
+                cause.notice(sender)
             }
         }
 
@@ -291,5 +305,11 @@ object ScriptService {
         }
 
     }
+
+    class ScriptConflictException(scriptId: String, file: File) :
+        DefaultLocalizedException(
+            Lang.MODULE_SCRIPT_CONFLICT,
+            arrayOf(scriptId, directory.toPath().relativize(file.toPath()))
+        )
 
 }
