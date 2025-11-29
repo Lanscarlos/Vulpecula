@@ -18,7 +18,6 @@ import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundExcep
 import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.Lang
-import java.awt.Component
 import java.util.HashSet
 import java.util.LinkedList
 
@@ -39,7 +38,7 @@ class CustomCommand(val id: String, val config: Configuration) {
 
     val usage: String by config.read("usage").string("")
 
-    val permission: String by config.read("permission").string("")
+    val permission: String by config.read("permission").string("vulpecula.command.${id}.use")
 
     val permissionMessage: String by config.read("permission-message").string("")
 

@@ -28,7 +28,7 @@ abstract class Node(val id: String, val parent: Node?, config: ConfigurationSect
 
     val optional by config.read("optional").boolean(false)
 
-    val playerRequired by config.read("player_required").boolean(false)
+    val playerRequired by config.read("player-required").boolean(false)
 
     val disableSuccessMessage by config.read("disable-success-message").boolean(false)
 
