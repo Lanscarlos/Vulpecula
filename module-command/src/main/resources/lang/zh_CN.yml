@@ -40,3 +40,4 @@ module-command-illegal-permission: '节点 &e{0}&7 的默认权限 &e{1}&7 解�
 module-command-parameter-name-undefined: '节点 &e{0}&7 第 &e{1}&7 个参数的字段&e name &7未定义'
 module-command-parameter-illegal-strategy: '无法解析节点 &e{0}&7 的参数 &e{1}&7 中 &e{2}&7 的值 &e{3}&7.'
 module-command-parameter-strategy-conflict: '节点 &e{0}&7 的参数 &e{1}&7 策略冲突. 不允许同时设置 suggest 和 restrict.'
+module-command-illegal-binding: '节点 &e{0}&7 已设置参数. 不允许再被节点 &e{1}&7 挂载'

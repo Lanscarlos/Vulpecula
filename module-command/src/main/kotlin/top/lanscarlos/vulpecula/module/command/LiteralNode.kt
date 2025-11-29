@@ -34,6 +34,15 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
     val parameters: List<ParameterNode> by config.read("parameters").mapList().convert(::parseParameters)
 
     override fun build(): CommandComponent {
+        if (parameters.isNotEmpty()) {
+            // 参数不为空，子命令节点不允许存在 LiteralNode
+            for (child in children) {
+                require(child !is LiteralNode) {
+                    throw IllegalBindingException(id, child.id)
+                }
+            }
+        }
+
         val component = CommandComponentLiteral(
             aliases = arrayOf(name, *aliases.toTypedArray()),
             hidden = hidden,
@@ -107,5 +116,8 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
 
     class ParameterNameUndefinedException(nodeId: String, index: Int) :
         DefaultLocalizedException(Lang.MODULE_COMMAND_PARAMETER_NAME_UNDEFINED, arrayOf(nodeId, index + 1))
+
+    class IllegalBindingException(id: String, childId: String) :
+        DefaultLocalizedException(Lang.MODULE_COMMAND_ILLEGAL_BINDING, arrayOf(id, childId))
 
 }
