@@ -121,9 +121,9 @@ object ScriptService {
         if (source.isBlank()) {
             throw ScriptBlankException()
         }
-        return if (source.getOrNull(6) == '@' && source.lowercase().startsWith("script@")) {
+        return if (source.getOrNull(0) == '@' && source.lowercase().startsWith("@script:")) {
             // 调用脚本
-            val id = source.substring(7)
+            val id = source.substring(8)
             get(id) // 检测 ID 是否存在
             ProxyScript(id)
         } else {
