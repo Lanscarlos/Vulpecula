@@ -24,7 +24,25 @@ module-script-exception-task-not-found: '脚本任务 &c{0}&7 不存在.'
 module-script-exception-argument-missing: '位置 &c{0}&7 缺失所需的参数 &c{1}&7.'
 module-script-exception-script-execute-failure: '脚本 &c{0}&7 运行异常. {1}'
 
-module-script-load-success: '&7脚本模块加载完毕. 共 &a{0}&7 个脚本. &8({1}ms)'
-
 exception-script-load-failure: '&7脚本 &c{0}&7 加载失败. {1}'
 exception-script-not-found: '&7脚本 &c{0}&7 不存在.'
+
+
+# 改动后
+module-script-display-name: '脚本'
+module-script-load-success: '&7脚本模块加载完毕. 共 &a{0}&7 个脚本. &8({1}ms)'
+module-script-load-failure: '&7脚本 &c{0}&7 加载失败. {1}'
+module-script-load-automatic: '&7脚本 &a{0}&7 自动重载成功 &8({1}ms)'
+
+module-script-run-info: '&7正在运行脚本 &a{0}&7. 执行者 &a{1}&7, 参数 &a{2}&7'
+module-script-run-success: '&7脚本 &a{0}&7 运行成功. 运行结果: &a{1}&7'
+module-script-run-failure: '&7脚本 &c{0}&7 运行异常. {1}'
+module-script-stop: '&7终止脚本 &a{0}&7.'
+module-script-stop-task: '&7终止脚本任务 &a{0}&7.'
+module-script-task-empty: '&7当前没有正在运行的脚本任务.'
+module-script-task-info: '&7当前正在运行的脚本任务:'
+module-script-task-body: '&7脚本 {0} 存在 {1} 个正在运行的任务'
+module-script-task-branch: '&8  ├─ &7{0} | {1}'
+module-script-task-branch-end: '&8  └─ &7{0} | {1}'
+
+module-script-missing-argument: '脚本 &e{0}&7 执行失败. 第 &c{1}&7 参数 &c{2}&7 未传值.'

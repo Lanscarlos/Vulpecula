@@ -1,5 +1,0 @@
-
-# Script 模块
-script-debugger:
-  # 是否显示文件加载详情
-  show-load-details: false

@@ -1,19 +1,6 @@
 
 # 命令模块
 
-module-command-service-name: '命令'
-module-command-service-load-automatic: '命令 &a{0}&7 自动重载成功 &8({1}ms)'
-module-command-service-load-success: '命令模块加载成功. 已载入 &a{0}&7 个命令 &8({1} ms)'
-module-command-service-load-failure: '命令模块加载失败! {0}'
-module-command-service-file-load-failure: '命令 &c{0}&7 加载失败! {1}'
-
-module-command-exception-field-not-found: '节点 &e{0}&7 缺少必要的字段 &e{1}&7.'
-module-command-exception-invalid-permission-default: '命令 &e{0}&7 的字段 permission-default 值异常: &e{1}&7.'
-module-command-exception-parent-not-found: '节点 &e{0}&7 缺少父节点.'
-module-command-exception-key-conflict: '节点 &e{0}&7 冲突.'
-module-command-exception-invalid-content: '节点 &e{0}&7 字段 &e{1}&7 内容不符合规则. 异常值 &e{2}&7.'
-module-command-exception-missing-argument: '缺少必要的参数 &e{0}&7.'
-
 module-command-display-name: '命令'
 
 module-command-load-success: '&7命令模块加载完毕. 共 &a{0}&7 个自定义命令. &8({1}ms)'

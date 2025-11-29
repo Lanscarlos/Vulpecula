@@ -15,7 +15,6 @@ import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.config.exception.UnsupportedFileExtensionException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.Lang
-import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.script.exception.ScriptBlankException
 import top.lanscarlos.vulpecula.module.script.exception.ScriptNotFoundException
 import top.lanscarlos.vulpecula.module.script.exception.TaskNotFoundException
@@ -30,7 +29,7 @@ import java.io.File
  */
 object ScriptService {
 
-    internal val name: String get() = asLang("module-script-service-name")
+    internal val name: String get() = Lang.MODULE_SCRIPT_DISPLAY_NAME.asText(console())
 
     private val directory: File = File(getDataFolder(), "script")
 
@@ -278,7 +277,7 @@ object ScriptService {
         }
 
         override fun onLoadAutomatic(sender: ProxyCommandSender, id: String, file: File, time: Double) {
-            sender.info(sync = true) { asLang("module-script-service-load-automatic", id, time) }
+            Lang.MODULE_SCRIPT_LOAD_AUTOMATIC.info(sender, id, time)
         }
 
         override fun onLoadSuccess(sender: ProxyCommandSender, statistics: ConfigStatistics) {

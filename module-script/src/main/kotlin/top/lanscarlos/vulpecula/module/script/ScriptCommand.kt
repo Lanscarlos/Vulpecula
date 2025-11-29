@@ -8,9 +8,10 @@ import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.onlinePlayers
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 /**
  * Vulpecula
@@ -84,7 +85,7 @@ object ScriptCommand {
             suggest { ScriptService.keys().toList() }
             execute<ProxyCommandSender> { sender, _, id ->
                 ScriptService.stop(id)
-                sender.info { asLang("module-script-command-stop", id) }
+                Lang.MODULE_SCRIPT_STOP.info(sender, id)
             }
         }
     }
@@ -95,21 +96,30 @@ object ScriptCommand {
                 suggest { ScriptService.getTaskKeys().map { it.toString() } }
                 execute<ProxyCommandSender> { sender, _, pid ->
                     ScriptService.stop(pid.toLong())
-                    sender.info { asLang("module-script-command-task-stop", pid) }
+                    Lang.MODULE_SCRIPT_STOP_TASK.info(sender, pid)
                 }
             }
         }
         literal("list") {
             execute<ProxyCommandSender> { sender, _, _ ->
-//                val builder = StringBuilder(asLang("module-script-command-task-list-header"))
-                for (task in ScriptService.getTaskValues()) {
-                    val pid = task.pid
-                    val script = task.script.id
-                    val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
-                    val message = asLang("module-script-command-task-list-item", pid, script, startTime)
-//                    builder.append('\n').append(message)
+                val scriptTasks = ScriptService.getTaskValues()
+                if (scriptTasks.isEmpty()) {
+                    Lang.MODULE_SCRIPT_TASK_EMPTY.info(sender)
+                    return@execute
                 }
-//                sender.info { builder.toString() }
+                Lang.MODULE_SCRIPT_TASK_INFO.info(sender)
+                for ((scriptId, tasks) in scriptTasks.groupBy { it.script.id }) {
+                    Lang.MODULE_SCRIPT_TASK_BODY.info(sender, scriptId, tasks.size)
+                    for ((index, task) in tasks.withIndex()) {
+                        val pid = String.format("%6d", task.pid)
+                        val startTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Date(task.startTime))
+                        if (index < tasks.size - 1) {
+                            Lang.MODULE_SCRIPT_TASK_BRANCH.info(sender, pid, startTime)
+                        } else {
+                            Lang.MODULE_SCRIPT_TASK_BRANCH_END.info(sender, pid, startTime)
+                        }
+                    }
+                }
             }
         }
     }
@@ -122,21 +132,22 @@ object ScriptCommand {
 
     private fun runScript(sender: ProxyCommandSender, id: String, scriptSender: ProxyCommandSender?, args: List<String>) {
         val task = try {
-            sender.info { asLang("module-script-command-run", id, scriptSender?.name ?: "null", args) }
+            Lang.MODULE_SCRIPT_RUN_INFO.info(sender, id, scriptSender?.name ?: "null", args)
             ScriptService.run(
                 id = id,
                 sender = scriptSender,
                 args = args
             )
         } catch (e: Exception) {
-            sender.error(sync = true) { e.localizedMessage }
+            val message = (e as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: e.localizedMessage
+            Lang.MODULE_SCRIPT_RUN_FAILURE.error(sender, id, message)
             null
         }
         task?.onSuccess {
-            sender.info { asLang("module-script-command-run-success", id, it.toString()) }
+            Lang.MODULE_SCRIPT_RUN_SUCCESS.info(sender, id, it.toString())
         }
         task?.onFailure { ex ->
-            sender.error(sync = true) { asLang("module-script-command-run-failure", id) }
+            Lang.MODULE_SCRIPT_RUN_FAILURE.error(sender, id, "")
             ex.notice(sender)
         }
     }
@@ -149,11 +160,12 @@ object ScriptCommand {
                 args = args
             )
         } catch (e: Exception) {
-            console().error(sync = true) { e.localizedMessage }
+            val message = (e as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: e.localizedMessage
+            Lang.MODULE_SCRIPT_RUN_FAILURE.error(sender, id, message)
             null
         }
         task?.onFailure { ex ->
-            console().error(sync = true) { asLang("module-script-command-run-failure", id) }
+            Lang.MODULE_SCRIPT_RUN_FAILURE.error(sender, id, "")
             ex.notice(sender)
         }
     }

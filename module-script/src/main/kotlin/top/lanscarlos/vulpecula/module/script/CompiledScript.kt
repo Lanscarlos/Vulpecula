@@ -2,14 +2,12 @@ package top.lanscarlos.vulpecula.module.script
 
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
-import top.lanscarlos.vulpecula.common.config.default
 import top.lanscarlos.vulpecula.common.config.map
 import top.lanscarlos.vulpecula.common.config.mapList
 import top.lanscarlos.vulpecula.common.config.mapTo
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.config.stringList
-import top.lanscarlos.vulpecula.common.config.stringOrNull
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
 import taboolib.library.kether.Quest
@@ -18,8 +16,9 @@ import taboolib.module.kether.deepVars
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.common.applicative.*
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import java.io.File
 import java.util.concurrent.CompletableFuture
@@ -85,7 +84,9 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
                 wrappedArgs[parameter.name] = value ?: continue
                 continue
             }
-            require(arg != null) { asLang("module-script-exception-argument-missing", index, parameter.name) }
+            require(arg != null) {
+                throw MissingArgumentException(id, index, parameter.name)
+            }
             wrappedArgs[parameter.name] = parameter.applicative.convert(arg)
         }
 
@@ -263,5 +264,8 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
         }
         return this
     }
+
+    class MissingArgumentException(id: String, index: Int, name: String) :
+        DefaultLocalizedException(Lang.MODULE_SCRIPT_MISSING_ARGUMENT, arrayOf(id, index + 1, name))
 
 }
