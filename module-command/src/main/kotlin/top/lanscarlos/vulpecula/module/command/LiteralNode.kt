@@ -34,14 +34,7 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
     val parameters: List<ParameterNode> by config.read("parameters").mapList().convert(::parseParameters)
 
     override fun build(): CommandComponent {
-        if (parameters.isNotEmpty()) {
-            // 参数不为空，子命令节点不允许存在 LiteralNode
-            for (child in children) {
-                require(child !is LiteralNode) {
-                    throw IllegalBindingException(id, child.id)
-                }
-            }
-        }
+        validateBinding()
 
         val component = CommandComponentLiteral(
             aliases = arrayOf(name, *aliases.toTypedArray()),
@@ -80,6 +73,17 @@ open class LiteralNode(id: String, parent: Node?, config: ConfigurationSection) 
             return
         }
         super.execute(sender, context, argument)
+    }
+
+    protected fun validateBinding() {
+        if (parameters.isNotEmpty()) {
+            // 参数不为空，子命令节点不允许存在 LiteralNode
+            for (child in children) {
+                require(child !is LiteralNode) {
+                    throw IllegalBindingException(id, child.id)
+                }
+            }
+        }
     }
 
     private fun parseParameters(value: List<Map<*, *>>): List<ParameterNode> {
