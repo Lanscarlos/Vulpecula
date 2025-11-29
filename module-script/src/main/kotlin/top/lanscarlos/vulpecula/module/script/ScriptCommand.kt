@@ -7,9 +7,11 @@ import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
 import taboolib.common.platform.command.suggestPlayers
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.onlinePlayers
 import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
+import top.lanscarlos.vulpecula.module.script.exception.ScriptExecuteException
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -139,7 +141,12 @@ object ScriptCommand {
                 args = args
             )
         } catch (e: Exception) {
-            val message = (e as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: e.localizedMessage
+            val cause = when (e) {
+                is ScriptExecuteException -> e.cause
+                else -> e
+            }
+            val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage
+            info("诶我擦 >> ${e.javaClass.name} >> $message")
             Lang.MODULE_SCRIPT_RUN_FAILURE.error(sender, id, message)
             null
         }

@@ -38,6 +38,7 @@ module-bacikal-exception-script-player-not-found: '当前脚本上下文中无�
 module-bacikal-exception-no-such-exception: '当前对象中 {1} 属性不存在. {0}'
 
 exception-quest-compile-failure: '脚本编译异常'
+exception-quest-action: '&7异常语句: {0}'
 exception-quest-reason: '&7异常原因: {0}'
 exception-quest-location-header: '&7异常位置:'
 exception-quest-location-body: '&7 {0} &8|&7 {1}'
