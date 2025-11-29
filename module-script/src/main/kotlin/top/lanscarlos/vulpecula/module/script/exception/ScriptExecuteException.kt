@@ -1,7 +1,7 @@
 package top.lanscarlos.vulpecula.module.script.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
-import top.lanscarlos.vulpecula.module.script.Script
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -10,8 +10,5 @@ import top.lanscarlos.vulpecula.module.script.Script
  * @author Lanscarlos
  * @since 2025/6/7
  */
-class ScriptExecuteException(val script: Script, override val cause: Throwable) : RuntimeException() {
-
-    override val message: String = asLang("module-script-exception-script-execute-failure", script.id, cause.localizedMessage)
-
-}
+class ScriptExecuteException(scriptId: String, override val cause: Throwable) :
+    DefaultLocalizedException(Lang.MODULE_SCRIPT_EXECUTE_FAILURE, arrayOf(scriptId, cause.localizedMessage))

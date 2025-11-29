@@ -259,7 +259,7 @@ object ScriptService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            Lang.EXCEPTION_SCRIPT_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
+            Lang.MODULE_SCRIPT_LOAD_FAILURE.error(sender, id, e.localizedMessage ?: "")
             when (e) {
                 is ConfigFieldNotFoundException -> {}
                 is ConfigFieldReadException -> {

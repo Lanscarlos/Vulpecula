@@ -56,7 +56,7 @@ class DefaultScriptTask(
 
     override fun get(): Any? {
         require(isDone) {
-            throw ScriptNotCompletedException(script)
+            throw ScriptNotCompletedException(script.id)
         }
         return future.getNow(null)
     }

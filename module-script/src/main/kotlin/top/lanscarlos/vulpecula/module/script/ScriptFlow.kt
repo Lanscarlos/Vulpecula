@@ -84,7 +84,7 @@ class ScriptFlow(
             nextPointer = 0
             future = process(future)
         } catch (e: Exception) {
-            throw ScriptExecuteException(scripts[nextPointer], e)
+            throw ScriptExecuteException(scripts[nextPointer].id, e)
         }
         return future
     }

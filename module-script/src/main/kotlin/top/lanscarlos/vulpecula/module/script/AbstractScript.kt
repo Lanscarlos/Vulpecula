@@ -25,7 +25,7 @@ abstract class AbstractScript : Script {
             // 消除重复嵌套
             throw e
         } catch (e: Exception) {
-            throw ScriptExecuteException(this, e)
+            throw ScriptExecuteException(this.id, e)
         }
     }
 

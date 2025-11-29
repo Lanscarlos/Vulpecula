@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.script.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +10,4 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/7
  */
-class TaskNotFoundException(val id: Long) : RuntimeException() {
-
-    override val message: String = asLang("module-script-exception-task-not-found", id)
-
-}
+class TaskNotFoundException(pid: Long) : DefaultLocalizedException(Lang.MODULE_SCRIPT_TASK_NOT_FOUND, arrayOf(pid))

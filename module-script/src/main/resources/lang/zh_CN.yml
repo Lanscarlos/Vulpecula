@@ -45,4 +45,8 @@ module-script-task-body: '&7脚本 {0} 存在 {1} 个正在运行的任务'
 module-script-task-branch: '&8  ├─ &7{0} | {1}'
 module-script-task-branch-end: '&8  └─ &7{0} | {1}'
 
+module-script-not-found: '&7脚本 &c{0}&7 不存在.'
+module-script-task-not-found: '脚本任务 &c{0}&7 不存在.'
 module-script-missing-argument: '脚本 &e{0}&7 执行失败. 第 &c{1}&7 参数 &c{2}&7 未传值.'
+module-script-execute-failure: '脚本 &c{0}&7 运行异常. {1}'
+module-script-not-completed: '脚本 &c{0}&7 仍在运行中.'

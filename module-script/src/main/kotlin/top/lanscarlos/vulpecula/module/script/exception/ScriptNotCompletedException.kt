@@ -1,8 +1,7 @@
 package top.lanscarlos.vulpecula.module.script.exception
 
-import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
-import top.lanscarlos.vulpecula.module.script.Script
 
 /**
  * Vulpecula
@@ -11,10 +10,4 @@ import top.lanscarlos.vulpecula.module.script.Script
  * @author Lanscarlos
  * @since 2025/11/24
  */
-class ScriptNotCompletedException(val script: Script) : AbstractLocalizedException() {
-
-    override val lang: Lang = Lang.EXCEPTION_SCRIPT_NOT_COMPLETED
-
-    override val arguments: Array<Any> = arrayOf(script.id)
-
-}
+class ScriptNotCompletedException(scriptId: String) : DefaultLocalizedException(Lang.MODULE_SCRIPT_NOT_COMPLETED, arrayOf(scriptId))
