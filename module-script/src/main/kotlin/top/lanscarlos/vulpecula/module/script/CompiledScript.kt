@@ -20,8 +20,10 @@ import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
+import top.lanscarlos.vulpecula.module.bacikal.exception.QuestTimeoutException
 import java.io.File
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeoutException
 
 /**
  * Vulpecula
@@ -52,7 +54,9 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
 
     val timeout: Long by config.read("timeout").convert(::parseTimeout)
 
-    val exceptions: Map<String, Quest> by config.read("exceptions").convert(::parseException)
+    val onTimeout: Quest? by config.read("on-timeout").convert(::parseException)
+
+    val onException: Quest? by config.read("on-exception").convert(::parseException)
 
     val returnConversion: Applicative<*>? by config.read("return-conversion").convert(::parseReturnConversion)
 
@@ -104,11 +108,7 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
             val ex = e.cause as QuestRuntimeException
             val exceptionName = ex.cause.javaClass.name
             // 匹配异常处理
-            val quest = exceptions.entries.find { exceptionName.endsWith(it.key) }?.value
-            if (quest == null) {
-                // 无异常处理
-                throw ex
-            }
+            val quest = (if (ex is QuestTimeoutException) onTimeout else onException) ?: throw ex
             // 执行异常处理
             val exContext = BacikalService.executeLater(quest, timeout, sender, args.plus(context.rootFrame().deepVars()))
             exContext.runActions()
@@ -163,7 +163,11 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
         if (debugOutput) {
             // 调试输出
             val path = id.replace('.', File.separatorChar)
-            File(getDataFolder(), "debug/script/$path.ks").writeText(builder.toString())
+            val outputFile = File(getDataFolder(), "debug/script/$path.ks")
+            if (!outputFile.parentFile.exists()) {
+                outputFile.parentFile.mkdirs()
+            }
+            outputFile.writeText(builder.toString())
         }
 
         return BacikalService.compile(builder.toString(), id, namespace)
@@ -216,33 +220,11 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
         }
     }
 
-    private fun parseException(value: Any?): Map<String, Quest> {
+    private fun parseException(value: Any?): Quest? {
         if (value == null) {
-            return emptyMap()
+            return null
         }
-        val map = mutableMapOf<String, String>()
-
-        // 加入默认超时处理
-        config.getString("on-timeout")?.let { map["java.util.concurrent.TimeoutException"] = it }
-
-        when (value) {
-            is List<*> -> {
-                for (item in value.map(MapApplicative::convert)) {
-                    val exception = item["catch"].applicativeString()
-                    val script = item["handle"].applicativeString()
-                    map[exception] = script
-                }
-            }
-            is Map<*, *> -> {
-                for (entry in value) {
-                    val exception = entry.key.applicativeString()
-                    val script = entry.value.applicativeString()
-                    map[exception] = script
-                }
-            }
-            else -> throw InvalidTypeException(value)
-        }
-        return map.mapValues { (key, value) -> BacikalService.compile(value, "$id-exception-$key", namespace) }
+        return BacikalService.compile(value.toString(), "$id-exception", namespace)
     }
 
     private fun parseReturnConversion(value: Any?): Applicative<*>? {

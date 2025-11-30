@@ -278,7 +278,10 @@ object ScriptService {
                 }
                 else -> e
             }
-            val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage ?: ""
+            val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage
+            if (message == null) {
+                cause.printStackTrace()
+            }
             Lang.MODULE_SCRIPT_LOAD_FAILURE.error(sender, id, message)
             if (cause is QuestCompileException) {
                 cause.notice(sender)
