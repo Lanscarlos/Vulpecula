@@ -23,7 +23,6 @@ import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestTimeoutException
 import java.io.File
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeoutException
 
 /**
  * Vulpecula
