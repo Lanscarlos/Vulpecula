@@ -43,7 +43,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
     /**
      * 被监听变动的文件
      * */
-    val watched: HashSet<File> = hashSetOf()
+    val watched: HashSet<String> = hashSetOf()
 
     /**
      * 重置缓存
@@ -181,25 +181,34 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             return
         }
         val config = Configuration.loadFromFile(file)
-        if (!config.getBoolean("debug.auto-reload", false)) {
-            // 未启用自动重载
-            return
+        if (config.getBoolean("debug.auto-reload", false)) {
+            // 启用自动重载
+            addFileWatcher(file)
+        } else if (watched.contains(file.absolutePath)) {
+            // 关闭自动加载
+            removeFileWatcher(file)
         }
-        addFileWatcher(file)
     }
 
     private fun addFileWatcher(file: File) {
+        if (watched.contains(file.absolutePath)) {
+            return
+        }
         FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
-        watched.add(file)
-        console().info(name) { asLang("common-config-service-load-automatic-enabled", getFileId(file)) }
+        watched.add(file.absolutePath)
+        console().info(name) {
+            asLang("common-config-service-load-automatic-enabled", directory.toURI().normalize().relativize(file.toURI().normalize()).path)
+        }
     }
 
     private fun removeFileWatcher(file: File) {
-        if (!watched.remove(file)) {
+        if (!watched.remove(file.absolutePath)) {
             return
         }
         FileWatcher.INSTANCE.removeListener(file)
-        console().info(name) { asLang("common-config-service-load-automatic-disabled", getFileId(file)) }
+        console().info(name) {
+            asLang("common-config-service-load-automatic-disabled", directory.toURI().normalize().relativize(file.toURI().normalize()).path)
+        }
     }
 
     private fun onFileModified(file: File) {
@@ -216,7 +225,9 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             callback.onFileModified(console(), id, file)
             callback.onLoadAutomatic(console(), id, file, timing(startTime))
             this.hash[file] = hash
+            detectAutoReload(file)
         } catch (e: Exception) {
+            e.printStackTrace()
             callback.onFileException(console(), id, file, e)
         }
     }
