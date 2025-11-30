@@ -146,7 +146,6 @@ object ScriptCommand {
                 else -> e
             }
             val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage
-            info("诶我擦 >> ${e.javaClass.name} >> $message")
             Lang.MODULE_SCRIPT_RUN_FAILURE.error(sender, id, message)
             null
         }

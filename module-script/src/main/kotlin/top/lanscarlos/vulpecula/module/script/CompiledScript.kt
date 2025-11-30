@@ -78,7 +78,7 @@ class CompiledScript(id: String, val config: Configuration) : AbstractScript() {
         // 参数转换
         for ((index, parameter) in parameters.withIndex()) {
             val arg = args.getOrNull(index)
-            if (parameter.optional) {
+            if (parameter.optional || parameter.default != null) {
                 val value = arg?.let(parameter.applicative::convert)
                     ?: parameter.default?.let(parameter.applicative::convert) // 采用缺省值
                 wrappedArgs[parameter.name] = value ?: continue

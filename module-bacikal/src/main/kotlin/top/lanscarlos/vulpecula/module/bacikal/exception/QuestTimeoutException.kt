@@ -1,6 +1,9 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.library.kether.Quest
+import taboolib.module.lang.sendErrorMessage
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.asLang
 
 /**
@@ -21,6 +24,12 @@ class QuestTimeoutException(
 
     override fun getLocalizedMessage(): String {
         return message
+    }
+
+    override fun notice(receiver: ProxyCommandSender) {
+        Lang.EXCEPTION_QUEST_ACTION.error(receiver, content)
+        Lang.EXCEPTION_QUEST_REASON.error(receiver, message)
+        receiver.sendErrorMessage(getDetailMessage(receiver))
     }
 
 }
