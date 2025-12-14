@@ -115,7 +115,7 @@ object PipelineRegistry : ClassVisitor() {
 
     override fun visitStart(owner: ReflexClass) {
         val clazz = owner.toClass()
-        if (clazz.`package`.name != this.javaClass.`package`.name) {
+        if (!clazz.`package`.name.startsWith(this.javaClass.`package`.name)) {
             // 包路径不对
             return
         }
