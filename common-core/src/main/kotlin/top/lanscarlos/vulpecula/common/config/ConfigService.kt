@@ -85,7 +85,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                         callback.onFileCreated(sender, getFileId(file), file)
                         cache += file
                         hash[file] = file.digest("SHA-256")
-                        detectAutoReload(file)
+                        detectAutoReload(sender, file)
                         statistics.createdFiles += file
                     } catch (e: Throwable) {
                         statistics.failedFiles += file
@@ -109,7 +109,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     callback.onFileModified(sender, getFileId(file), file)
                     cache += file
                     this.hash[file] = hash
-                    detectAutoReload(file)
+                    detectAutoReload(sender, file)
                     statistics.modifiedFiles += file
                 } catch (e: Throwable) {
                     statistics.failedFiles += file
@@ -129,7 +129,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
                     statistics.failedFiles += file
                     callback.onFileException(sender, getFileId(file), file, e)
                 } finally {
-                    removeFileWatcher(file)
+                    removeFileWatcher(sender, file)
                 }
             }
 
@@ -176,39 +176,37 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
         }
     }
 
-    private fun detectAutoReload(file: File) {
+    private fun detectAutoReload(sender: ProxyCommandSender, file: File) {
         if (file.extension != "yml" && file.extension != "yaml") {
             return
         }
         val config = Configuration.loadFromFile(file)
         if (config.getBoolean("debug.auto-reload", false)) {
             // 启用自动重载
-            addFileWatcher(file)
+            addFileWatcher(sender, file)
         } else if (watched.contains(file.absolutePath)) {
             // 关闭自动加载
-            removeFileWatcher(file)
+            removeFileWatcher(sender, file)
         }
     }
 
-    private fun addFileWatcher(file: File) {
+    private fun addFileWatcher(sender: ProxyCommandSender, file: File) {
         if (watched.contains(file.absolutePath)) {
             return
         }
         FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
         watched.add(file.absolutePath)
-        console().info(name) {
-            asLang("common-config-service-load-automatic-enabled", directory.toURI().normalize().relativize(file.toURI().normalize()).path)
-        }
+        val path = directory.toURI().normalize().relativize(file.toURI().normalize()).path
+        Lang.COMMON_CONFIG_AUTOMATIC_ENABLED.info(sender, path)
     }
 
-    private fun removeFileWatcher(file: File) {
+    private fun removeFileWatcher(sender: ProxyCommandSender, file: File) {
         if (!watched.remove(file.absolutePath)) {
             return
         }
         FileWatcher.INSTANCE.removeListener(file)
-        console().info(name) {
-            asLang("common-config-service-load-automatic-disabled", directory.toURI().normalize().relativize(file.toURI().normalize()).path)
-        }
+        val path = directory.toURI().normalize().relativize(file.toURI().normalize()).path
+        Lang.COMMON_CONFIG_AUTOMATIC_DISABLED.info(sender, path)
     }
 
     private fun onFileModified(file: File) {
@@ -225,7 +223,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             callback.onFileModified(console(), id, file)
             callback.onLoadAutomatic(console(), id, file, timing(startTime))
             this.hash[file] = hash
-            detectAutoReload(file)
+            detectAutoReload(console(), file)
         } catch (e: Exception) {
             e.printStackTrace()
             callback.onFileException(console(), id, file, e)
