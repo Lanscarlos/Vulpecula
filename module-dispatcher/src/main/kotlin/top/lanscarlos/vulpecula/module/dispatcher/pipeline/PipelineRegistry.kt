@@ -4,6 +4,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.library.reflex.ReflexClass
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
@@ -21,9 +22,31 @@ import java.util.LinkedList
 @Awake(LifeCycle.LOAD)
 object PipelineRegistry : ClassVisitor() {
 
-    data class Registration(val name: String, val extends: String, val event: Class<*>, val pipeline: Class<*>)
+    data class Registration(val name: String, val extends: String, val event: Class<*>, val pipeline: Class<*>) {
+
+        val isVirtual: Boolean = name[0] == '@'
+
+        var parent: Registration? = null
+
+    }
 
     private val registry: HashMap<String, Registration> = linkedMapOf()
+
+    @Awake(LifeCycle.INIT)
+    fun onInit() {
+        registerLifeCycleTask(LifeCycle.LOAD, 4, runnable = ::onLoad)
+    }
+
+    fun onLoad() {
+        for (registration in registry.values) {
+            if (registration.name[0] != '@') {
+                continue
+            }
+            val extends: String = registration.extends.takeIf(String::isNotBlank) ?: continue
+            val parent: Registration = registry[extends] ?: error("Parent $extends in ${registration.name} is not registered.")
+            registration.parent = parent
+        }
+    }
 
     /**
      * 获取相关联的处理流
@@ -31,12 +54,21 @@ object PipelineRegistry : ClassVisitor() {
     fun getRelatives(name: String): List<Class<*>> {
         val event = mapping(name)
         val registrations = LinkedList<Registration>()
-        for (registration in registry.values) {
+        for (registration in registry.values.filter { it.isVirtual.not() }) {
             if (!registration.event.isAssignableFrom(event)) {
                 // 没有继承关系
                 continue
             }
             registrations.add(registration)
+        }
+
+        if (name[0] == '@') {
+            // 获取继承链条上所有的虚拟事件
+            var registration: Registration? = registry.values.first { it.name == name }
+            while (registration != null) {
+                registrations.add(registration)
+                registration = registration.parent ?: break
+            }
         }
 
         // 按继承关系远近进行排序, 继承关系越远则排序越靠前, 越先处理事件
