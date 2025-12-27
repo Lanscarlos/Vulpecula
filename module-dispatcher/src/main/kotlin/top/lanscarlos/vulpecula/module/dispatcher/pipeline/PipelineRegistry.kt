@@ -43,7 +43,7 @@ object PipelineRegistry : ClassVisitor() {
                 continue
             }
             val extends: String = registration.extends.takeIf(String::isNotBlank) ?: continue
-            val parent: Registration = registry[extends] ?: error("Parent $extends in ${registration.name} is not registered.")
+            val parent: Registration = registry["@$extends"] ?: error("Parent $extends in ${registration.name} is not registered.")
             registration.parent = parent
         }
     }
@@ -72,7 +72,7 @@ object PipelineRegistry : ClassVisitor() {
         }
 
         // 按继承关系远近进行排序, 继承关系越远则排序越靠前, 越先处理事件
-        registrations.sortedWith { a, b ->
+        registrations.sortWith { a, b ->
             when {
                 a.event == b.event -> {
                     // 两者相同, 可能为虚拟事件, 比对 name 和 extends 字段
@@ -91,9 +91,20 @@ object PipelineRegistry : ClassVisitor() {
                         else -> 0
                     }
                 }
-                a.event == event -> 1 // [b, a]
-                b.event == event -> -1 // [a, b]
-                a.event.isAssignableFrom(b.event) -> -1 // [a, b]
+                a.event == event -> {
+                    1 // [b, a]
+                }
+                b.event == event -> {
+                    -1 // [a, b]
+                }
+                a.event.isAssignableFrom(b.event) -> {
+                    // a 是父类, b 为子类
+                    -1 // [a, b]
+                }
+                b.event.isAssignableFrom(a.event) -> {
+                    // b 是父类, a 为子类
+                    1 // [b, a]
+                }
                 else -> 0
             }
         }
@@ -174,11 +185,13 @@ object PipelineRegistry : ClassVisitor() {
 
         // 获取名称
         val annotation = clazz.getAnnotation(AutoRegistered::class.java)
-        val name = if (annotation.value.isNotBlank()) {
-            // 自定义名称不为空
-            "@${annotation.value}"
-        } else {
-            type.name
+        val name = when {
+            annotation.value == "~" -> clazz.name
+            annotation.value.isNotBlank() -> {
+                // 自定义名称不为空
+                "@${annotation.value}"
+            }
+            else -> type.name
         }
 
         registry[name] = Registration(name, annotation.extends, type, clazz)

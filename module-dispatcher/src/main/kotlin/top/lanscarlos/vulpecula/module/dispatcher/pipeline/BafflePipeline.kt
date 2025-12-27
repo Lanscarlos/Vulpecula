@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
  * @author Lanscarlos
  * @since 2025/6/13
  */
-@AutoRegistered
+@AutoRegistered("~")
 class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<Event>(clazz, config) {
 
     override val priority: Int = 128 // 分配较高的优先级用于优先处理冷却

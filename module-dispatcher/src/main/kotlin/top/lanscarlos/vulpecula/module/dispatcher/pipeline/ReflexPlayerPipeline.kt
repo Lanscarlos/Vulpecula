@@ -19,7 +19,7 @@ import top.lanscarlos.vulpecula.common.config.string
  * @author Lanscarlos
  * @since 2025/6/12 10:11
  */
-@AutoRegistered
+@AutoRegistered("~")
 class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPipeline<Event>(clazz, config) {
 
     override val priority: Int = 0 // 反射性能消耗大, 通常置于最后做兜底处理
