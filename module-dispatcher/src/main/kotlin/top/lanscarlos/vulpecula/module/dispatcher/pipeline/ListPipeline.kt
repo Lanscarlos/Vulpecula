@@ -1,7 +1,10 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import taboolib.library.configuration.ConfigurationSection
+import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ReflexPlayerPipeline.PlayerFieldNotFound
+import java.lang.reflect.InvocationTargetException
 
 /**
  * Vulpecula
@@ -14,13 +17,24 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
 
     override val priority: Int = 0
 
-    val pipelines: List<Pipeline> = PipelineRegistry.getRelatives(name)
-        .map {
-            it.getDeclaredConstructor(Class::class.java, ConfigurationSection::class.java)
-                .newInstance(clazz, config) as Pipeline
-        }.sortedByDescending {
-            it.priority
+    val pipelines: List<Pipeline> = initPipelines(name, clazz, config)
+
+    private fun initPipelines(name: String, clazz: Class<*>, config: ConfigurationSection): List<Pipeline> {
+        try {
+            return PipelineRegistry.getRelatives(name)
+                .map {
+                    it.getDeclaredConstructor(Class::class.java, ConfigurationSection::class.java)
+                        .newInstance(clazz, config) as Pipeline
+                }.sortedByDescending {
+                    it.priority
+                }
+        } catch (e: InvocationTargetException) {
+            when (val targetException = e.targetException) {
+                is ConfigFieldReadException -> throw targetException.cause
+                else -> throw e
+            }
         }
+    }
 
     override fun initPrincipal(context: PipelineContext) {
         for (pipeline in pipelines) {

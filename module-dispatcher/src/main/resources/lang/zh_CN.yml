@@ -1,5 +1,11 @@
 
 # 调度模块
+module-dispatcher-display-name: '调度'
+module-dispatcher-load-success: '&7调度模块加载完毕. 共 &a{0}&7 个调度器. &8({1}ms)'
+module-dispatcher-load-failure: '&7调度 &c{0}&7 加载失败. {1}'
+module-dispatcher-load-automatic: '&7调度 &a{0}&7 自动重载成功 &8({1}ms)'
+
+module-dispatcher-player-field-not-found: '&7事件类 &e{0}&7 不存在名为 &e{1}&7 的玩家字段.'
 
 module-dispatcher-service-name: '调度'
 module-dispatcher-service-load-detail-created: '本次加载有 &a{0}&7 个新增的调度'
@@ -11,5 +17,3 @@ module-dispatcher-service-load-success: '调度模块加载成功. 已载入 &a{
 module-dispatcher-service-load-failure: '调度器模块加载失败!'
 module-dispatcher-service-file-load-failure: '调度器 &c{0}&7 加载失败! {1}'
 module-dispatcher-exception-event-class-not-found: '事件类 &e{0}&7 不存在.'
-
-module-dispatcher-load-success: '&7调度模块加载完毕. 共 &a{0}&7 个调度器. &8({1}ms)'

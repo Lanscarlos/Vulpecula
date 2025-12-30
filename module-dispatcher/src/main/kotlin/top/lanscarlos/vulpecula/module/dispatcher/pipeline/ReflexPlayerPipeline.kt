@@ -2,6 +2,7 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
+import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ClassField
 import taboolib.library.reflex.ReflexClass
@@ -9,6 +10,8 @@ import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -29,7 +32,7 @@ class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : Abst
     val playerField: ClassField? by config.read("player-field").string("~").convert(::parsePlayerField)
 
     override fun initPrincipal(context: PipelineContext) {
-        if (context.isPrincipalInitialized) {
+        if (context.isPrincipalInitialized && playerField != null) {
             // 已初始化玩家对象
             return
         }
@@ -46,9 +49,14 @@ class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : Abst
     }
 
     private fun parsePlayerField(value: String): ClassField? {
+        info("this.class >> ${clazz.name}")
         val clazz = ReflexClass.of(this.clazz)
         if (value != "~") {
-            return clazz.getField(value)
+            return try {
+                clazz.getField(value)
+            } catch (_: NoSuchFieldException) {
+                throw PlayerFieldNotFound(clazz, value)
+            }
         }
 
         // 自动检索玩家字段
@@ -68,5 +76,8 @@ class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : Abst
         }
         return null
     }
+
+
+    class PlayerFieldNotFound(clazz: ReflexClass, field: String) : DefaultLocalizedException(Lang.MODULE_DISPATCHER_PLAYER_FIELD_NOT_FOUND, arrayOf(clazz.name ?: "null", field))
 
 }

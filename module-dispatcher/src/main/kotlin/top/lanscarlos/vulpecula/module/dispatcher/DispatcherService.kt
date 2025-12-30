@@ -5,6 +5,7 @@ import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
@@ -13,6 +14,7 @@ import top.lanscarlos.vulpecula.common.config.ConfigStatistics
 import top.lanscarlos.vulpecula.common.config.Configs
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
@@ -93,16 +95,25 @@ object DispatcherService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            sender.error(sync = true) { asLang("module-dispatcher-service-file-load-failure", id, e.localizedMessage) }
-            when (e) {
-                is ConfigFieldNotFoundException -> {}
+            info("e.class >> ${e.javaClass.name}")
+            val cause = when (e) {
                 is ConfigFieldReadException -> {
+                    info("e.cause.class >> ${e.cause.javaClass.name}")
                     when (val cause = e.cause) {
-                        is QuestCompileException -> cause.notice(sender)
+                        is AbstractLocalizedException -> cause
+                        else -> e
                     }
                 }
-                is QuestCompileException -> e.notice(sender)
-                else -> e.printStackTrace()
+                else -> e
+            }
+            val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage
+            if (message == null) {
+                info("输出")
+                cause.printStackTrace()
+            }
+            Lang.MODULE_DISPATCHER_LOAD_FAILURE.error(sender, id, message)
+            if (cause is QuestCompileException) {
+                cause.notice(sender)
             }
         }
 
