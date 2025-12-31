@@ -2,7 +2,6 @@ package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
-import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.reflex.ClassField
 import taboolib.library.reflex.ReflexClass
@@ -49,7 +48,6 @@ class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : Abst
     }
 
     private fun parsePlayerField(value: String): ClassField? {
-        info("this.class >> ${clazz.name}")
         val clazz = ReflexClass.of(this.clazz)
         if (value != "~") {
             return try {

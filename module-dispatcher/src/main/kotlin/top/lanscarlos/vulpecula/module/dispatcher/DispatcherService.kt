@@ -5,14 +5,12 @@ import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFolder
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.config.ConfigService
 import top.lanscarlos.vulpecula.common.config.ConfigServiceCallback
 import top.lanscarlos.vulpecula.common.config.ConfigStatistics
 import top.lanscarlos.vulpecula.common.config.Configs
-import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldNotFoundException
 import top.lanscarlos.vulpecula.common.config.exception.ConfigFieldReadException
 import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
 import top.lanscarlos.vulpecula.common.lang.Lang
@@ -95,10 +93,8 @@ object DispatcherService {
         }
 
         override fun onFileException(sender: ProxyCommandSender, id: String, file: File, e: Throwable) {
-            info("e.class >> ${e.javaClass.name}")
             val cause = when (e) {
                 is ConfigFieldReadException -> {
-                    info("e.cause.class >> ${e.cause.javaClass.name}")
                     when (val cause = e.cause) {
                         is AbstractLocalizedException -> cause
                         else -> e
@@ -108,7 +104,6 @@ object DispatcherService {
             }
             val message = (cause as? AbstractLocalizedException)?.getLocalizedMessage(sender) ?: cause.localizedMessage
             if (message == null) {
-                info("输出")
                 cause.printStackTrace()
             }
             Lang.MODULE_DISPATCHER_LOAD_FAILURE.error(sender, id, message)
