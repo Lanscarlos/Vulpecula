@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.dispatcher
 
 import taboolib.common.LifeCycle
-import taboolib.common.TabooLib
 import taboolib.common.platform.Awake
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
@@ -77,11 +76,6 @@ object DispatcherService {
             val config = Configuration.loadFromFile(file)
             val dispatcher = DefaultDispatcher(id, config)
             registry[id] = dispatcher
-
-            if (TabooLib.getCurrentLifeCycle() == LifeCycle.ACTIVE) {
-                // 重载, 直接启用
-                dispatcher.enable()
-            }
         }
 
         override fun onFileModified(sender: ProxyCommandSender, id: String, file: File) {
