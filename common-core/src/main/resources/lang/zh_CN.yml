@@ -10,8 +10,8 @@ common-applicative-exception-unsupported-type: '转换异常. 暂不支持将 &e
 
 common-config-main-load-success: '&7主配置加载成功 &8({0} ms)'
 common-config-main-load-failure: '&7主配置加载失败. {0}'
-common-config-automatic-enabled: '检测到文件 &a{0}&7 启用了自动重载功能'
-common-config-automatic-disabled: '检测到文件 &a{0}&7 关闭了自动重载功能'
+common-config-automatic-enabled: '&7检测到文件 &a{0}&7 启用了自动重载功能'
+common-config-automatic-disabled: '&7检测到文件 &a{0}&7 关闭了自动重载功能'
 common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
 common-config-exception-field-read-failure: '字段 &e{0}&7 解析异常. {1}'
 
