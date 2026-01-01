@@ -43,10 +43,8 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
             return
         }
         if (cancel) {
-            info("set cancel")
             context.cancel()
         } else {
-            info("set filter")
             context.filter()
         }
         context.baffleFilter()
@@ -54,7 +52,6 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
 
     override fun afterFilter(context: PipelineContext) {
         // 更新阻断器数据
-        info("更新阻断器...")
         val id = context.principalId
         countBaffle?.next(id)
         timeBaffle?.next(id)
@@ -72,7 +69,6 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
             return null
         }
         val time = TimeUtil.parse(StringApplicative.convert(value))
-        info("parseTimeBaffle >> $time")
         return BaffleTime.of(time, TimeUnit.MILLISECONDS)
     }
 
