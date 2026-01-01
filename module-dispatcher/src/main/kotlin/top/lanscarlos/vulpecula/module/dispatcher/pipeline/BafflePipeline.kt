@@ -1,7 +1,6 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.event.Event
-import taboolib.common.platform.function.info
 import taboolib.common5.Baffle
 import taboolib.common5.Baffle.BaffleCounter
 import taboolib.common5.Baffle.BaffleTime
