@@ -50,6 +50,9 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
     override fun filter(context: PipelineContext) {
         for (pipeline in pipelines) {
             pipeline.filter(context)
+            if (context.isFilterBaffled) {
+                break
+            }
         }
     }
 

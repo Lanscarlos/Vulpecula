@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.dispatcher.pipeline
 
 import org.bukkit.event.Event
+import taboolib.common.platform.function.info
 import taboolib.common5.Baffle
 import taboolib.common5.Baffle.BaffleCounter
 import taboolib.common5.Baffle.BaffleTime
@@ -27,7 +28,7 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
 
     override val priority: Int = 128 // 分配较高的优先级用于优先处理冷却
 
-    val counterBaffle: Baffle? by config.read("baffle-count").convert(::parseCounterBaffle)
+    val countBaffle: Baffle? by config.read("baffle-count").convert(::parseCounterBaffle)
 
     val timeBaffle: Baffle? by config.read("baffle-time").convert(::parseTimeBaffle)
 
@@ -36,30 +37,27 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
     val global: Boolean by config.read("baffle-global").boolean(false)
 
     override fun filter(context: PipelineContext) {
-        if (counterBaffle == null && timeBaffle == null) {
-            return
-        }
         val id = if (global) "*" else context.principalId
-        if (counterBaffle?.hasNext(id, false) == true) {
-            // 计数通过
-            return
-        }
-        if (timeBaffle?.hasNext(id, false) == true) {
-            // 冷却通过
+        if (countBaffle?.hasNext(id, false) != false && timeBaffle?.hasNext(id, false) != false) {
+            // 满足条件
             return
         }
         if (cancel) {
+            info("set cancel")
             context.cancel()
         } else {
+            info("set filter")
             context.filter()
         }
-        // TODO 阻断处理流的传播
+        context.baffleFilter()
     }
 
     override fun afterFilter(context: PipelineContext) {
         // 更新阻断器数据
-        counterBaffle?.next()
-        timeBaffle?.next()
+        info("更新阻断器...")
+        val id = context.principalId
+        countBaffle?.next(id)
+        timeBaffle?.next(id)
     }
 
     private fun parseCounterBaffle(value: Any?): Baffle? {
@@ -73,7 +71,9 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
         if (value == null) {
             return null
         }
-        return BaffleTime.of(TimeUtil.parse(StringApplicative.convert(value)), TimeUnit.MILLISECONDS)
+        val time = TimeUtil.parse(StringApplicative.convert(value))
+        info("parseTimeBaffle >> $time")
+        return BaffleTime.of(time, TimeUnit.MILLISECONDS)
     }
 
 }

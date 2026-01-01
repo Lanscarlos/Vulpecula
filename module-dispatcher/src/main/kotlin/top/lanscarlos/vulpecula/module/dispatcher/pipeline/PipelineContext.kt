@@ -36,6 +36,9 @@ data class PipelineContext(val event: Event) {
     var isFiltered: Boolean = false
         private set
 
+    var isFilterBaffled: Boolean = false
+        private set
+
     var player: Player? = null
         private set
 
@@ -58,6 +61,13 @@ data class PipelineContext(val event: Event) {
      * */
     fun cancel() {
         isCancelled = true
+    }
+
+    /**
+     * 阻断过滤
+     * */
+    fun baffleFilter() {
+        isFilterBaffled = true
     }
 
     /**
