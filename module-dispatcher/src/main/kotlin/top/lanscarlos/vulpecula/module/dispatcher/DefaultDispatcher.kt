@@ -14,6 +14,7 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
 import top.lanscarlos.vulpecula.common.utils.asLang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
+import top.lanscarlos.vulpecula.module.dispatcher.pipeline.BafflePipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ListPipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineContext
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.PipelineRegistry
@@ -155,7 +156,12 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         } else {
             Configuration.empty()
         }
-        return ListPipeline(name, clazz.toClass(), config)
+        return try {
+            ListPipeline(name, clazz.toClass(), config)
+        } catch (e: BafflePipeline.BaffleConflictException) {
+            e.arguments[0] = id
+            throw e
+        }
     }
 
     private fun parseScript(value: Any?): Script {

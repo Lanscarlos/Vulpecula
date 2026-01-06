@@ -10,6 +10,8 @@ import top.lanscarlos.vulpecula.common.applicative.StringApplicative
 import top.lanscarlos.vulpecula.common.config.boolean
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.read
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
 import java.util.concurrent.TimeUnit
 
@@ -35,12 +37,34 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
 
     val global: Boolean by config.read("baffle-global").boolean(false)
 
-    override fun filter(context: PipelineContext) {
-        val id = if (global) "*" else context.principalId
-        if (countBaffle?.hasNext(id, false) != false && timeBaffle?.hasNext(id, false) != false) {
-            // 满足条件
-            return
+    init {
+        if (countBaffle != null && timeBaffle != null) {
+            // 不允许同时设置两种阻断器
+            throw BaffleConflictException()
         }
+    }
+
+    override fun filter(context: PipelineContext) {
+        val baffle = countBaffle ?: timeBaffle ?: return
+        val id = if (global) "*" else context.principalId
+
+        when (baffle) {
+            is BaffleCounter -> {
+                if (baffle.hasNext(id)) {
+                    // 条件通过
+                    return
+                }
+            }
+            is BaffleTime -> {
+                if (baffle.hasNext(id, false)) {
+                    // 条件通过
+                    return
+                }
+            }
+            else -> error("Baffle type ${baffle::class.java.name} not supported.")
+        }
+
+        // 条件不通过, 阻断事件
         if (cancel) {
             context.cancel()
         } else {
@@ -51,8 +75,7 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
 
     override fun afterFilter(context: PipelineContext) {
         // 更新阻断器数据
-        val id = context.principalId
-        countBaffle?.next(id)
+        val id = if (global) "*" else context.principalId
         timeBaffle?.next(id)
     }
 
@@ -70,5 +93,7 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
         val time = TimeUtil.parse(StringApplicative.convert(value))
         return BaffleTime.of(time, TimeUnit.MILLISECONDS)
     }
+
+    class BaffleConflictException : DefaultLocalizedException(Lang.MODULE_DISPATCHER_BAFFLE_CONFLICT, arrayOf("?"))
 
 }

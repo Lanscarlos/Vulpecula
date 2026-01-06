@@ -6,6 +6,7 @@ module-dispatcher-load-failure: '&7调度 &c{0}&7 加载失败. {1}'
 module-dispatcher-load-automatic: '&7调度 &a{0}&7 自动重载成功 &8({1}ms)'
 
 module-dispatcher-player-field-not-found: '&7事件类 &e{0}&7 不存在名为 &e{1}&7 的玩家字段.'
+module-dispatcher-baffle-conflict: '&7调度器 &e{0}&7 存在名冲突的阻断规则.'
 
 module-dispatcher-service-name: '调度'
 module-dispatcher-service-load-detail-created: '本次加载有 &a{0}&7 个新增的调度'

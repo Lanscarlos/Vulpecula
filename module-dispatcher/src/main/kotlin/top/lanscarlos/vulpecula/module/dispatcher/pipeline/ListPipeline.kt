@@ -30,6 +30,7 @@ class ListPipeline(name: String, clazz: Class<*>, config: ConfigurationSection) 
         } catch (e: InvocationTargetException) {
             when (val targetException = e.targetException) {
                 is ConfigFieldReadException -> throw targetException.cause
+                is BafflePipeline.BaffleConflictException -> throw targetException
                 else -> throw e
             }
         }
