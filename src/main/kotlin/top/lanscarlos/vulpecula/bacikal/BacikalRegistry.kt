@@ -159,11 +159,9 @@ object BacikalRegistry : ClassInjector() {
         val annotation = clazz.getAnnotation(BacikalProperty::class.java)
 
         // 获取属性对象
-        val property = if (instance != null) {
-            instance.get() as BacikalGenericProperty<*>
-        } else try {
+        val property = try {
             // 尝试实例化
-            clazz.getDeclaredConstructor().newInstance() as BacikalGenericProperty<*>
+            (instance?.get() ?: clazz.getDeclaredConstructor().newInstance()) as BacikalGenericProperty<*>
         } catch (ex: Exception) {
             warning("Property \"${clazz.name}\" must have a empty constructor.")
             return
