@@ -41,25 +41,3 @@ common-exception-invalid-argument-format: '参数格式错误: &e{0}&7'
 common-exception-player-not-found: '玩家 &e{0}&7 不在线'
 common-exception-world-not-found: '世界 &e{0}&7 不存在'
 
-
-#############################################################################################
-# 以下为旧版本
-#############################################################################################
-
-
-
-common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
-common-config-exception-field-read-failure: '字段 &e{0}&7 解析异常. {1}'
-
-exception-config-service-load-failure: '{0}模块配置加载异常. {1}'
-
-
-# 通用
-prefix: '&8[&cVul&6pecula&8]'
-
-common-core-message-module: '消息'
-common-core-message-info: '&8[&3Vul&bpecula&8] &a{0} &8|&7 {1}'
-common-core-message-warning: '&8[&3Vul&bpecula&8] &e{0} &8|&7 {1}'
-common-core-message-error: '&8[&3Vul&bpecula&8] &c{0} &8|&7 {1}'
-common-core-message-debug: '&8[&3Vul&bpecula&8] &e{0} &8|&7 {1}'
-
