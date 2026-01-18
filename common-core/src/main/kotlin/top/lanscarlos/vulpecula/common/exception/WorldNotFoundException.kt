@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +9,7 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/9 13:16
  */
-class WorldNotFoundException(val name: String) : RuntimeException() {
-
-    override val message: String = asLang("common-core-exception-world-not-found", name)
-
-}
+class WorldNotFoundException(val name: String) : DefaultLocalizedException(
+    lang = Lang.COMMON_EXCEPTION_WORLD_NOT_FOUND,
+    arguments = arrayOf(name)
+)

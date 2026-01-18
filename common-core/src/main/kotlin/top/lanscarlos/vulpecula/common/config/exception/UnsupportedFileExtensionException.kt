@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.common.config.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +10,11 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/7
  */
-class UnsupportedFileExtensionException(val extension: String) : RuntimeException() {
+class UnsupportedFileExtensionException(val extension: String) : AbstractLocalizedException() {
 
-    override val message: String = asLang("common-config-exception-unsupported-file-extension", extension)
+    override val lang: Lang = Lang.COMMON_CONFIG_UNSUPPORTED_FILE_EXTENSION
+
+    override val arguments: Array<Any> = arrayOf(extension)
+
 
 }

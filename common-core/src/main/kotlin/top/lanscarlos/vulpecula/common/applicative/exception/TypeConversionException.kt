@@ -14,7 +14,7 @@ class TypeConversionException(val source: Any, val targetClass: Class<*>) : Abst
 
     val sourceClass: Class<*> = source.javaClass
 
-    override val lang: Lang = Lang.EXCEPTION_CONVERT_UNSUPPORTED_TYPE
+    override val lang: Lang = Lang.COMMON_APPLICATIVE_CONVERT_UNSUPPORTED_TYPE
 
     override val arguments: Array<Any> = arrayOf(sourceClass.name, targetClass.name)
 

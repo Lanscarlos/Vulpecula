@@ -8,8 +8,6 @@ import taboolib.common5.FileWatcher
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
-import top.lanscarlos.vulpecula.common.utils.asLang
-import top.lanscarlos.vulpecula.common.utils.info
 import java.io.File
 import java.util.*
 import kotlin.collections.HashSet
@@ -143,7 +141,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
             // 计算耗时, 单位毫秒
             callback.onLoadFailure(sender, e)
 
-            Lang.EXCEPTION_CONFIG_SERVICE_LOAD_FAILURE.error(sender, name, e.localizedMessage)
+            Lang.COMMON_CONFIG_SERVICE_LOAD_FAILURE.error(sender, name, e.localizedMessage)
             e.printStackTrace()
         }
     }
@@ -197,7 +195,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
         FileWatcher.INSTANCE.addSimpleListener(file, ::onFileModified, false)
         watched.add(file.absolutePath)
         val path = directory.toURI().normalize().relativize(file.toURI().normalize()).path
-        Lang.COMMON_CONFIG_AUTOMATIC_ENABLED.info(sender, path)
+        Lang.COMMON_CONFIG_LOAD_AUTOMATIC_ENABLED.info(sender, path)
     }
 
     private fun removeFileWatcher(sender: ProxyCommandSender, file: File) {
@@ -206,7 +204,7 @@ class ConfigService(val id: String, val name: String, val directory: File, val p
         }
         FileWatcher.INSTANCE.removeListener(file)
         val path = directory.toURI().normalize().relativize(file.toURI().normalize()).path
-        Lang.COMMON_CONFIG_AUTOMATIC_DISABLED.info(sender, path)
+        Lang.COMMON_CONFIG_LOAD_AUTOMATIC_DISABLED.info(sender, path)
     }
 
     private fun onFileModified(file: File) {

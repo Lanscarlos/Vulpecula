@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +9,7 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/9 13:13
  */
-class PlayerNotFoundException(val name: String) : RuntimeException() {
-
-    override val message: String = asLang("common-core-exception-player-not-found", name)
-
-}
+class PlayerNotFoundException(val name: String) : DefaultLocalizedException(
+    lang = Lang.COMMON_EXCEPTION_PLAYER_NOT_FOUND,
+    arguments = arrayOf(name)
+)

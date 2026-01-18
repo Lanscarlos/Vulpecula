@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.common.applicative.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.AbstractLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +10,10 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/5/29 11:54
  */
-class ValueConversionException(val value: String, val target: Class<*>) : RuntimeException() {
+class ValueConversionException(val value: String, val target: Class<*>) : AbstractLocalizedException() {
 
-    override val message: String = asLang("common-applicative-exception-invalid-value", value, target.name)
+    override val lang: Lang = Lang.COMMON_APPLICATIVE_CONVERT_INVALID_VALUE
+
+    override val arguments: Array<Any> = arrayOf(value, target.name)
 
 }

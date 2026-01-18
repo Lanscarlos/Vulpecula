@@ -8,7 +8,6 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
-import top.lanscarlos.vulpecula.common.utils.asLang
 import java.util.LinkedList
 
 /**
@@ -24,7 +23,7 @@ object Configs {
     lateinit var config: Configuration
         private set
 
-    val name: String get() = asLang("common-core-message-module")
+    val name: String get() = Lang.COMMON_CORE_DISPLAY_NAME.asText(console())
 
     val services = LinkedList<ConfigService>()
 
@@ -45,9 +44,9 @@ object Configs {
             val startTime = TimeUtil.startTiming()
             config.reload()
             // 计算耗时, 单位毫秒
-            Lang.COMMON_CONFIG_MAIN_LOAD_SUCCESS.info(sender, TimeUtil.stopTiming(startTime))
+            Lang.COMMON_CONFIG_LOAD_MAIN_SUCCESS.info(sender, TimeUtil.stopTiming(startTime))
         } catch (ex: Exception) {
-            Lang.COMMON_CONFIG_MAIN_LOAD_FAILURE.error(sender, ex.localizedMessage)
+            Lang.COMMON_CONFIG_LOAD_MAIN_FAILURE.error(sender, ex.localizedMessage)
         }
 
         // 重载所有服务

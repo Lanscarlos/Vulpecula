@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +9,7 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/4 10:52
  */
-class InvalidTypeException(value: Any) : RuntimeException() {
-
-    override val message: String = asLang("common-core-exception-invalid-type", value::class.java.name)
-
-}
+class InvalidTypeException(value: Any) : DefaultLocalizedException(
+    lang = Lang.COMMON_EXCEPTION_INVALID_TYPE,
+    arguments = arrayOf(value)
+)

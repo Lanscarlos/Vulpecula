@@ -1,6 +1,6 @@
 package top.lanscarlos.vulpecula.common.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +9,7 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/9 11:07
  */
-class InvalidArgumentFormatException(val value: String) : RuntimeException() {
-
-    override val message: String = asLang("common-core-exception-invalid-argument-format", value)
-
-}
+class InvalidArgumentFormatException(val value: String) : DefaultLocalizedException(
+    lang = Lang.COMMON_EXCEPTION_INVALID_ARGUMENT_FORMAT,
+    arguments = arrayOf(value)
+)

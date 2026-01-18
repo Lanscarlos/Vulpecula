@@ -12,7 +12,7 @@ import top.lanscarlos.vulpecula.common.lang.Lang
  */
 class NullValueException : AbstractLocalizedException() {
 
-    override val lang: Lang = Lang.EXCEPTION_CONVERT_NULL_VALUE
+    override val lang: Lang = Lang.COMMON_APPLICATIVE_CONVERT_NULL_VALUE
 
     override val arguments: Array<Any> = arrayOf()
 
