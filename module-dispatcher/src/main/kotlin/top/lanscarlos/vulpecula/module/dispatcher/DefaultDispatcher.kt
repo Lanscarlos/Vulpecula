@@ -12,7 +12,9 @@ import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.config.int
 import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.string
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
+import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.BafflePipeline
 import top.lanscarlos.vulpecula.module.dispatcher.pipeline.ListPipeline
@@ -145,7 +147,7 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
 
     private fun onScriptFailure(ex: QuestRuntimeException) {
         // 脚本运行异常时, 暂停任务
-        console().error { asLang("module-dispatcher-run-failure", id) }
+        Lang.DISPATCHER_RUN_FAILURE.error(console(), id)
         ex.notice(console())
     }
 
@@ -173,10 +175,10 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
             return null
         }
         require(value is String) {
-            asLang("module-dispatcher-exception-invalid-type", value::class.java.name)
+            throw InvalidScriptTypeException(id, value::class.java.name)
         }
         require(value.isNotBlank()) {
-            asLang("module-dispatcher-exception-invalid-blank")
+            throw ScriptBlankException(id)
         }
         return ScriptService.compile(value)
     }
@@ -191,5 +193,15 @@ class DefaultDispatcher(override val id: String, val config: Configuration) : Di
         require(value.isNotBlank()) { "Event class cannot be null or blank." }
         return ReflexClass.of(PipelineRegistry.mapping(value))
     }
+
+    class InvalidScriptTypeException(id: String, type: String) : DefaultLocalizedException(
+        lang = Lang.DISPATCHER_INVALID_SCRIPT_TYPE,
+        arguments = arrayOf(id, type)
+    )
+
+    class ScriptBlankException(id: String) : DefaultLocalizedException(
+        lang = Lang.DISPATCHER_SCRIPT_BLANK,
+        arguments = arrayOf(id)
+    )
 
 }

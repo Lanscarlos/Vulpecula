@@ -4,7 +4,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.component.CommandComponent
 import taboolib.common.platform.command.subCommand
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.common.utils.withConsole
 
 /**
@@ -28,9 +28,9 @@ object DispatcherCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     DispatcherService.get(id).enable()
-                    sender.info { asLang("module-dispatcher-command-enable-success", id) }
+                    Lang.DISPATCHER_COMMAND_ENABLE_SUCCESS.info(sender, id)
                 } catch (e: Exception) {
-                    sender.error { asLang("module-dispatcher-command-enable-failure", id, e.localizedMessage) }
+                    Lang.DISPATCHER_COMMAND_ENABLE_FAILURE.error(sender, id, e.localizedMessage)
                 }
             }
         }
@@ -41,9 +41,9 @@ object DispatcherCommand {
             execute<ProxyCommandSender> { sender, _, id ->
                 try {
                     DispatcherService.get(id).disable()
-                    sender.info { asLang("module-dispatcher-command-disable-success", id) }
+                    Lang.DISPATCHER_COMMAND_DISABLE_SUCCESS.info(sender, id)
                 } catch (e: Exception) {
-                    sender.error { asLang("module-dispatcher-command-disable-failure", id, e.localizedMessage) }
+                    Lang.DISPATCHER_COMMAND_DISABLE_FAILURE.error(sender, id, e.localizedMessage)
                 }
             }
         }
