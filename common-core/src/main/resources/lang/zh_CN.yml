@@ -1,7 +1,9 @@
 
 # 命名规则：模块_功能_子功能_描述
 
-common-core-display-name: '消息'
+# 通用
+prefix: '&8[&cVul&6pecula&8]'
+common-display-name: '消息'
 
 # 转换
 
@@ -40,4 +42,18 @@ common-exception-invalid-type: '类型错误: &e{0}&7'
 common-exception-invalid-argument-format: '参数格式错误: &e{0}&7'
 common-exception-player-not-found: '玩家 &e{0}&7 不在线'
 common-exception-world-not-found: '世界 &e{0}&7 不存在'
+
+
+#############################################################################################
+# 以下为旧版本
+#############################################################################################
+
+
+
+common-config-exception-field-not-found: '缺少必要的字段 &e{0}&7'
+common-config-exception-field-read-failure: '字段 &e{0}&7 解析异常. {1}'
+
+exception-config-service-load-failure: '{0}模块配置加载异常. {1}'
+
+
 

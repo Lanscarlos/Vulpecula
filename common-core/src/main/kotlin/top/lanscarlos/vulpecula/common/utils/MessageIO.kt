@@ -50,9 +50,9 @@ private class MessageSyncCommandSender(val player: ProxyPlayer) : ProxyCommandSe
  * @param args 消息参数
  * @return 解析后的消息
  */
-fun asLang(node: String, vararg args: Any): String {
-    return console.asLangText(node, *args)
-}
+//fun asLang(node: String, vararg args: Any): String {
+//    return console.asLangText(node, *args)
+//}
 
 /**
  * 发送信息消息
@@ -60,17 +60,17 @@ fun asLang(node: String, vararg args: Any): String {
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-fun ProxyCommandSender.info(
-    module: String,
-    sync: Boolean = false,
-    message: () -> String
-) {
-    val msg = asLang("common-core-message-info", module, message())
-    sendMessage(msg)
-    if (sync && this is ProxyPlayer) {
-        console.sendMessage(msg)
-    }
-}
+//fun ProxyCommandSender.info(
+//    module: String,
+//    sync: Boolean = false,
+//    message: () -> String
+//) {
+//    val msg = asLang("common-core-message-info", module, message())
+//    sendMessage(msg)
+//    if (sync && this is ProxyPlayer) {
+//        console.sendMessage(msg)
+//    }
+//}
 
 /**
  * 发送警告消息
@@ -78,17 +78,17 @@ fun ProxyCommandSender.info(
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-fun ProxyCommandSender.warning(
-    module: String,
-    sync: Boolean = false,
-    message: () -> String
-) {
-    val msg = asLang("common-core-message-warning", module, message())
-    sendMessage(msg)
-    if (sync && this is ProxyPlayer) {
-        console.sendMessage(msg)
-    }
-}
+//fun ProxyCommandSender.warning(
+//    module: String,
+//    sync: Boolean = false,
+//    message: () -> String
+//) {
+//    val msg = asLang("common-core-message-warning", module, message())
+//    sendMessage(msg)
+//    if (sync && this is ProxyPlayer) {
+//        console.sendMessage(msg)
+//    }
+//}
 
 /**
  * 发送错误消息
@@ -96,17 +96,17 @@ fun ProxyCommandSender.warning(
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-fun ProxyCommandSender.error(
-    module: String,
-    sync: Boolean = false,
-    message: () -> String
-) {
-    val msg = asLang("common-core-message-error", module, message())
-    sendMessage(msg)
-    if (sync && this is ProxyPlayer) {
-        console.sendMessage(msg)
-    }
-}
+//fun ProxyCommandSender.error(
+//    module: String,
+//    sync: Boolean = false,
+//    message: () -> String
+//) {
+//    val msg = asLang("common-core-message-error", module, message())
+//    sendMessage(msg)
+//    if (sync && this is ProxyPlayer) {
+//        console.sendMessage(msg)
+//    }
+//}
 
 /**
  * 发送调试消息
@@ -114,14 +114,14 @@ fun ProxyCommandSender.error(
  * @param sync 是否同步到控制台
  * @param message 消息生成器
  */
-fun ProxyCommandSender.debug(
-    module: String,
-    sync: Boolean = false,
-    message: () -> String
-) {
-    val msg = asLang("common-core-message-debug", module, message())
-    sendMessage(msg)
-    if (sync && this is ProxyPlayer) {
-        console.sendMessage(msg)
-    }
-}
+//fun ProxyCommandSender.debug(
+//    module: String,
+//    sync: Boolean = false,
+//    message: () -> String
+//) {
+//    val msg = asLang("common-core-message-debug", module, message())
+//    sendMessage(msg)
+//    if (sync && this is ProxyPlayer) {
+//        console.sendMessage(msg)
+//    }
+//}

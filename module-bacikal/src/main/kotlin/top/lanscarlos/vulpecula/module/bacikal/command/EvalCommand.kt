@@ -4,12 +4,10 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.module.kether.printKetherErrorMessage
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.BacikalService
-import top.lanscarlos.vulpecula.module.bacikal.error
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestCompileException
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
-import top.lanscarlos.vulpecula.module.bacikal.info
 import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
 
 /**
@@ -20,8 +18,6 @@ import top.lanscarlos.vulpecula.module.bacikal.quest.BacikalQuestExecutor
  * @since 2025/6/18 11:11
  */
 object EvalCommand {
-
-    val module: String get() = asLang("module-bacikal-service-name")
 
     @CommandBody
     val eval = subCommand {
@@ -41,14 +37,14 @@ object EvalCommand {
                         val ex = e.cause as QuestRuntimeException
                         ex.notice(sender)
                     } else {
-                        sender.info { asLang("module-bacikal-command-eval-success", result ?: "null") }
+                        Lang.BACIKAL_COMMAND_EVAL_SUCCESS.info(sender, result ?: "null")
                     }
                 }
         } catch (ex: QuestCompileException) {
             ex.notice(sender)
         } catch (ex: Throwable) {
             ex.printKetherErrorMessage(true)
-            sender.error { asLang("module-bacikal-command-eval-failure", ex.localizedMessage) }
+            Lang.BACIKAL_COMMAND_EVAL_FAILURE.error(sender, ex.localizedMessage)
         }
     }
 

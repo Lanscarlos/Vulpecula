@@ -23,7 +23,7 @@ object Configs {
     lateinit var config: Configuration
         private set
 
-    val name: String get() = Lang.COMMON_CORE_DISPLAY_NAME.asText(console())
+    val name: String get() = Lang.COMMON_DISPLAY_NAME.asText(console())
 
     val services = LinkedList<ConfigService>()
 

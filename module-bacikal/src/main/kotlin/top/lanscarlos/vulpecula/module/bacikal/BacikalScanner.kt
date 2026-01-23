@@ -5,6 +5,7 @@ import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.library.reflex.ReflexClass
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Property
 import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
@@ -39,7 +40,7 @@ object BacikalScanner : ClassVisitor(5) {
                 val parser = try {
                     buildClassActionParser(owner, extension)
                 } catch (ex: Exception) {
-                    console().error { ex.localizedMessage }
+                    Lang.BACIKAL_PARSER_LOAD_FAILURE.error(console(), owner.toClass().name, ex.localizedMessage)
                     ExceptionalActionParser(ex, extension)
                 }
                 BacikalRegistry.registerActionParser(parser)

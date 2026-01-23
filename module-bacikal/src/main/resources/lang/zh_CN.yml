@@ -1,21 +1,46 @@
 
 # Bacikal
 
-module-bacikal-service-name: '语句'
+bacikal-command-reload-success: '重载语句 &a{0}&7 配置成功'
+bacikal-command-reload-failure: '重载语句 &a{0}&7 配置失败！{1}'
+
 module-bacikal-command-eval-success: '运行结果: &r{0}'
 module-bacikal-command-eval-failure: '运行异常: &e{0}'
-module-bacikal-command-registry-display-bacikal-action: '当前注册了 &a{0}&7 个拓展语句, 分别来自:'
-module-bacikal-command-registry-display-bacikal-property: '当前注册了 &a{0}&7 个拓展属性, 分别来自:'
-module-bacikal-command-registry-display-remote: '当前注册了 &a{0}&7 个第三方语句, 分别来自:'
-module-bacikal-command-registry-display-remote-empty: '当前并未发现已注册的第三方语句'
-module-bacikal-command-registry-display-local: '当前注册了 &a{0}&7 个原生语句:'
-module-bacikal-command-registry-display-item: ' - {0} &8v{1}&7: {2}'
-module-bacikal-command-reload-success: '重载语句 &a{0}&7 配置成功'
-module-bacikal-command-reload-failure: '重载语句 &a{0}&7 配置失败！{1}'
-module-bacikal-command-timing-repeat: '运行次数: &a{0}'
-module-bacikal-command-timing-group: '分组数量: &a{0}'
-module-bacikal-command-timing-compile: '编译用时: &a{0}ms'
-module-bacikal-command-timing-execute: '运行用时: &a{0}ms'
+
+bacikal-command-timing-repeat: '运行次数: &a{0}'
+bacikal-command-timing-group: '分组数量: &a{0}'
+bacikal-command-timing-compile: '编译用时: &a{0}ms'
+bacikal-command-timing-execute: '运行用时: &a{0}ms'
+
+bacikal-command-registry-bacikal-action: '当前注册了 &a{0}&7 个拓展语句, 分别来自:'
+bacikal-command-registry-bacikal-property: '当前注册了 &a{0}&7 个拓展属性, 分别来自:'
+bacikal-command-registry-remote: '当前注册了 &a{0}&7 个第三方语句, 分别来自:'
+bacikal-command-registry-remote-empty: '当前并未发现已注册的第三方语句'
+bacikal-command-registry-local: '当前注册了 &a{0}&7 个原生语句:'
+bacikal-command-registry-item: ' - {0} &8v{1}&7: {2}'
+bacikal-command-registry-exceptional: '{0}'
+
+bacikal-parser-load-failure: 'Kether 解析器 &e{0}&7 载入异常. &e{1}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module-bacikal-service-name: '语句'
 module-bacikal-exception-action: '异常语句: {0}'
 module-bacikal-exception-reason: '异常原因: {0}'
 module-bacikal-exception-detail-header: '异常位置:'
