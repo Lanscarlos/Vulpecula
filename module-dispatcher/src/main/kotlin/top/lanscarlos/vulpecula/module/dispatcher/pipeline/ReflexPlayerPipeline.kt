@@ -76,6 +76,6 @@ class ReflexPlayerPipeline(clazz: Class<*>, config: ConfigurationSection) : Abst
     }
 
 
-    class PlayerFieldNotFound(clazz: ReflexClass, field: String) : DefaultLocalizedException(Lang.MODULE_DISPATCHER_PLAYER_FIELD_NOT_FOUND, arrayOf(clazz.name ?: "null", field))
+    class PlayerFieldNotFound(clazz: ReflexClass, field: String) : DefaultLocalizedException(Lang.DISPATCHER_PLAYER_FIELD_NOT_FOUND, arrayOf(clazz.name ?: "null", field))
 
 }

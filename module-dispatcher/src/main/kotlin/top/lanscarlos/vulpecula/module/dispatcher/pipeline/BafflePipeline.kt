@@ -94,6 +94,6 @@ class BafflePipeline(clazz: Class<*>, config: ConfigurationSection) : AbstractPi
         return BaffleTime.of(time, TimeUnit.MILLISECONDS)
     }
 
-    class BaffleConflictException : DefaultLocalizedException(Lang.MODULE_DISPATCHER_BAFFLE_CONFLICT, arrayOf("?"))
+    class BaffleConflictException : DefaultLocalizedException(Lang.DISPATCHER_BAFFLE_CONFLICT, arrayOf("?"))
 
 }
