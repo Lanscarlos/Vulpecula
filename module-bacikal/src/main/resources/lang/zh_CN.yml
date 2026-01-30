@@ -21,50 +21,23 @@ bacikal-command-registry-item: ' - {0} &8v{1}&7: {2}'
 bacikal-command-registry-exceptional: '{0}'
 
 bacikal-parser-load-failure: 'Kether 解析器 &e{0}&7 载入异常. &e{1}'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module-bacikal-service-name: '语句'
-module-bacikal-exception-action: '异常语句: {0}'
-module-bacikal-exception-reason: '异常原因: {0}'
-module-bacikal-exception-detail-header: '异常位置:'
-module-bacikal-exception-detail-item: '&7 {0} &8|&7 {1}'
-module-bacikal-exception-detail-footer: ' '
-module-bacikal-exception-compile-failure: '脚本编译异常'
-module-bacikal-exception-execute-failure: '脚本运行异常'
-module-bacikal-exception-execute-timeout: '脚本运行超时 &e{0}ms'
-module-bacikal-exception-class-action-register: '语句 &c{0}&7 注册失败. {1}'
-module-bacikal-exception-invalid-class-implement: '类 {0} 未实现 &e{1}&7 接口'
-module-bacikal-exception-invalid-constructors-size: '非单例类的构造函数个数必须控制在 1 个以内'
-module-bacikal-exception-invalid-constructor-parameter: '非单例类的构造函数要么无参要么仅接受 {0} 类型参数'
-module-bacikal-exception-invalid-resolve-function: '类 {0} 含有多个名为 &e{1}&7 方法'
-module-bacikal-exception-invalid-parameter-defined: '使用 {0} 修饰符的参数 &e{2}&7 必须设置为可空或带缺省值'
-module-bacikal-exception-empty-modifier-prefix: '参数 &e{1}&7 修饰符内容为空'
-module-bacikal-exception-invalid-modifier-prefix: '参数 &e{1}&7 修饰符不能为数字'
-module-bacikal-exception-unknown-additional-parameter: '未知的附加参数 &e{0}'
-module-bacikal-exception-invalid-null-argument: '传入的参数 &e{1}&7 值为空'
-module-bacikal-exception-script-player-not-found: '当前脚本上下文中无玩家对象'
-module-bacikal-exception-no-such-exception: '当前对象中 {1} 属性不存在. {0}'
-
-exception-quest-compile-failure: '脚本编译异常'
-exception-quest-action: '&7异常语句: {0}'
-exception-quest-reason: '&7异常原因: {0}'
-exception-quest-location-header: '&7异常位置:'
-exception-quest-location-body: '&7 {0} &8|&7 {1}'
-exception-quest-location-footer: ' '
+bacikal-action: '异常语句: {0}'
+bacikal-reason: '异常原因: {0}'
+bacikal-detail-header: '异常位置:'
+bacikal-detail-item: '&7 {0} &8|&7 {1}'
+bacikal-detail-footer: ' '
+bacikal-compile-failure: '脚本编译异常'
+bacikal-execute-failure: '脚本运行异常'
+bacikal-execute-timeout: '脚本运行超时 &e{0}ms'
+bacikal-class-action-register: '语句 &c{0}&7 注册失败. {1}'
+bacikal-invalid-class-implement: '类 {0} 未实现 &e{1}&7 接口'
+bacikal-invalid-constructors-size: '非单例类的构造函数个数必须控制在 1 个以内'
+bacikal-invalid-constructor-parameter: '非单例类的构造函数要么无参要么仅接受 {0} 类型参数'
+bacikal-invalid-resolve-function: '类 {0} 含有多个名为 &e{1}&7 方法'
+bacikal-invalid-parameter-defined: '使用 {0} 修饰符的参数 &e{2}&7 必须设置为可空或带缺省值'
+bacikal-empty-modifier-prefix: '参数 &e{1}&7 修饰符内容为空'
+bacikal-invalid-modifier-prefix: '参数 &e{1}&7 修饰符不能为数字'
+bacikal-unknown-additional-parameter: '未知的附加参数 &e{0}'
+bacikal-invalid-null-argument: '传入的参数 &e{1}&7 值为空'
+bacikal-script-player-not-found: '当前脚本上下文中无玩家对象'
+bacikal-no-such-exception: '当前对象中 {1} 属性不存在. {0}'

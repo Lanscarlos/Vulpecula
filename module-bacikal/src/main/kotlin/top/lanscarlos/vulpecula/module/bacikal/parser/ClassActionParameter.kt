@@ -2,12 +2,13 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyPlayer
+import taboolib.common.platform.function.console
 import taboolib.common.reflect.hasAnnotation
 import taboolib.library.kether.ParsedAction
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.common.applicative.ApplicativeRegistry
 import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
@@ -53,14 +54,14 @@ class ClassActionParameter(
             }
             source.hasAnnotation(Optional::class.java) -> {
                 require(isNullable || hasDefaultValue) {
-                    asLang("module-bacikal-exception-invalid-parameter-defined", Optional::class.java.simpleName, index, name)
+                    Lang.BACIKAL_INVALID_PARAMETER_DEFINED.asText(console(), Optional::class.java.simpleName, index, name)
                 }
                 modifier = Modifier.OPTIONAL
                 prefix = source.getAnnotation(Optional::class.java).values.toList()
             }
             source.hasAnnotation(Additional::class.java) -> {
                 require(isNullable || hasDefaultValue) {
-                    asLang("module-bacikal-exception-invalid-parameter-defined", Additional::class.java.simpleName, index, name)
+                    Lang.BACIKAL_INVALID_PARAMETER_DEFINED.asText(console(), Additional::class.java.simpleName, index, name)
                 }
                 modifier = Modifier.ADDITIONAL
                 prefix = source.getAnnotation(Additional::class.java).values.toList()
@@ -74,10 +75,10 @@ class ClassActionParameter(
         // 检查前缀
         if (modifier != Modifier.NONE) {
             require(prefix.isNotEmpty()) {
-                asLang("module-bacikal-exception-empty-modifier-prefix", index, name)
+                Lang.BACIKAL_EMPTY_MODIFIER_PREFIX.asText(console(), index, name)
             }
             require(prefix.all { it.toIntOrNull() == null }) {
-                asLang("module-bacikal-exception-invalid-modifier-prefix", index, name)
+                Lang.BACIKAL_INVALID_MODIFIER_PREFIX.asText(console(), index, name)
             }
         }
     }
@@ -130,7 +131,7 @@ class ClassActionParameter(
         override fun execute(frame: BacikalFrame): CompletableFuture<Player> {
             val player = frame.senderAsPlayer
             require(isNullable || player != null) {
-                asLang("module-bacikal-exception-script-player-not-found")
+                Lang.BACIKAL_SCRIPT_PLAYER_NOT_FOUND.asText(console())
             }
             return CompletableFuture.completedFuture(player)
         }
@@ -140,7 +141,7 @@ class ClassActionParameter(
         override fun execute(frame: BacikalFrame): CompletableFuture<ProxyPlayer> {
             val player = frame.sender as? ProxyPlayer
             require(isNullable || player != null) {
-                asLang("module-bacikal-exception-script-player-not-found")
+                Lang.BACIKAL_SCRIPT_PLAYER_NOT_FOUND.asText(console())
             }
             return CompletableFuture.completedFuture(player)
         }
@@ -158,7 +159,7 @@ class ClassActionParameter(
             return frame.runAction(source).thenApply {
                 if (it == null) {
                     require(isNullable) {
-                        asLang("module-bacikal-exception-invalid-null-argument", index, name)
+                        Lang.BACIKAL_INVALID_NULL_ARGUMENT.asText(console(), index, name)
                     }
                     return@thenApply null
                 }
@@ -173,7 +174,7 @@ class ClassActionParameter(
             return frame.runAction(source).thenApply {
                 if (it == null) {
                     require(isNullable) {
-                        asLang("module-bacikal-exception-invalid-null-argument", index, name)
+                        Lang.BACIKAL_INVALID_NULL_ARGUMENT.asText(console(), index, name)
                     }
                     return@thenApply null
                 }
@@ -190,7 +191,7 @@ class ClassActionParameter(
             return frame.runAction(source).thenApply {
                 if (it == null) {
                     require(isNullable) {
-                        asLang("module-bacikal-exception-invalid-null-argument", index, name)
+                        Lang.BACIKAL_INVALID_NULL_ARGUMENT.asText(console(), index, name)
                     }
                     return@thenApply null
                 }

@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import java.lang.RuntimeException
 
 /**
@@ -12,6 +13,6 @@ import java.lang.RuntimeException
  */
 class NoSuchPropertyException(val clazz: Class<*>, val property: String) : RuntimeException() {
 
-    override val message: String = asLang("module-bacikal-exception-no-such-exception", clazz.name, property)
+    override val message: String = Lang.BACIKAL_NO_SUCH_EXCEPTION.asText(console(), clazz.name, property)
 
 }

@@ -1,10 +1,10 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.console
 import taboolib.library.kether.Quest
 import taboolib.module.lang.sendErrorMessage
 import top.lanscarlos.vulpecula.common.lang.Lang
-import top.lanscarlos.vulpecula.common.utils.asLang
 
 /**
  * Vulpecula
@@ -20,7 +20,7 @@ class QuestTimeoutException(
     timeout: Long
 ) : QuestRuntimeException(cause, quest, properties) {
 
-    override val message: String = asLang("module-bacikal-exception-execute-timeout", timeout)
+    override val message: String = Lang.BACIKAL_EXECUTE_TIMEOUT.asText(console(), timeout)
 
     override fun getLocalizedMessage(): String {
         return message

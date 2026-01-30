@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.bacikal.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -11,6 +12,6 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  */
 class ClassActionRegisterException(id: String, cause: Throwable) : BacikalException(cause) {
 
-    override val message: String = asLang("module-bacikal-exception-class-action-register", id, cause.localizedMessage)
+    override val message: String = Lang.BACIKAL_CLASS_ACTION_REGISTER.asText(console(), id, cause.localizedMessage)
 
 }

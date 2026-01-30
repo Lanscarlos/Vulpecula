@@ -1,8 +1,9 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
+import taboolib.common.platform.function.console
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import java.lang.reflect.Constructor
 
 /**
@@ -22,7 +23,7 @@ class ClassActionConstructor(javaClass: Class<*>) {
         // 类结构验证
         require(ClassActionResolver::class.java.isAssignableFrom(javaClass)) {
             // 未实现 ClassActionResolver 接口
-            asLang("module-bacikal-exception-invalid-class-implement", javaClass.name, ClassActionResolver::class.java.simpleName)
+            Lang.BACIKAL_INVALID_CLASS_IMPLEMENT.asText(console(), javaClass.name, ClassActionResolver::class.java.simpleName)
         }
 
         val reflexClass = ReflexClass.of(javaClass, AnalyseMode.ASM_ONLY)
@@ -30,16 +31,17 @@ class ClassActionConstructor(javaClass: Class<*>) {
         if (instance == null) {
             // 约束构造函数
             require(javaClass.declaredConstructors.size == 1) {
-                asLang("module-bacikal-exception-invalid-constructors-size")
+                Lang.BACIKAL_INVALID_CONSTRUCTORS_SIZE.asText(console())
+
             }
             constructor = javaClass.declaredConstructors.single()
             constructor.isAccessible = true
             val parameters = constructor.parameters
             require(parameters.size <= 1) {
-                asLang("module-bacikal-exception-invalid-constructor-parameter", BacikalReader::class.java.simpleName)
+                Lang.BACIKAL_INVALID_CONSTRUCTOR_PARAMETER.asText(console(), BacikalReader::class.java.simpleName)
             }
             require(parameters.size == 0 || parameters[0].type == BacikalReader::class.java) {
-                asLang("module-bacikal-exception-invalid-constructor-parameter", BacikalReader::class.java.simpleName)
+                Lang.BACIKAL_INVALID_CONSTRUCTOR_PARAMETER.asText(console(), BacikalReader::class.java.simpleName)
             }
         } else {
             constructor = null

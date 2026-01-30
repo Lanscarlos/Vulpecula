@@ -3,9 +3,10 @@ package top.lanscarlos.vulpecula.module.bacikal.parser
 import kotlinx.metadata.Flag
 import kotlinx.metadata.internal.metadata.jvm.deserialization.JvmProtoBufUtil
 import taboolib.common.env.RuntimeDependency
+import taboolib.common.platform.function.console
 import taboolib.library.reflex.AnalyseMode
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.*
@@ -50,7 +51,7 @@ class ClassActionFunction(javaClass: Class<*>) {
         // 类结构验证
         require(javaClass.declaredMethods.count { it.name == "resolve" } == 1) {
             // 仅允许定义一个 resolve 方法
-            asLang("module-bacikal-exception-invalid-resolve-function", javaClass.name, "resolve")
+            Lang.BACIKAL_INVALID_RESOLVE_FUNCTION.asText(console(), javaClass.name, "resolve")
         }
 
         // 获取函数
@@ -99,7 +100,7 @@ class ClassActionFunction(javaClass: Class<*>) {
         for (parameter in parameters) {
             require(parameter.isNullable || parameter.hasDefaultValue || arguments[parameter.index] != null) {
                 // 参数非空性检查失败
-                asLang("module-bacikal-exception-invalid-null-argument", parameter.index, parameter.name)
+                Lang.BACIKAL_INVALID_NULL_ARGUMENT.asText(console(), parameter.index, parameter.name)
             }
         }
 

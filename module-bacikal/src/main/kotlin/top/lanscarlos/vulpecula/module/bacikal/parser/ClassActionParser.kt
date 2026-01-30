@@ -1,10 +1,11 @@
 package top.lanscarlos.vulpecula.module.bacikal.parser
 
+import taboolib.common.platform.function.console
 import taboolib.library.kether.*
 import taboolib.module.chat.ComponentText
 import taboolib.module.chat.Components
 import taboolib.module.chat.StandardColors
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.exception.ClassActionRegisterException
 import top.lanscarlos.vulpecula.module.bacikal.extension.Extension
 import java.util.LinkedList
@@ -154,7 +155,7 @@ class ClassActionParser(
             while (reader.peekToken().matches(regex)) {
                 val prefix = reader.readToken().substring(2)
                 val parameter = additional[prefix]
-                    ?: error(asLang("module-bacikal-exception-unknown-additional-parameter", prefix))
+                    ?: error(Lang.BACIKAL_UNKNOWN_ADDITIONAL_PARAMETER.asText(console(), prefix))
                 actions[parameter.index] = parameter.read(reader)
             }
 
