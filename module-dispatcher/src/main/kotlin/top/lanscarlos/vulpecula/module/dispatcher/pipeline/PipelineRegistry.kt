@@ -6,9 +6,8 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.registerLifeCycleTask
 import taboolib.library.reflex.ReflexClass
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.dispatcher.Pipeline
-import top.lanscarlos.vulpecula.module.dispatcher.warning
 import java.lang.reflect.ParameterizedType
 import java.util.LinkedList
 
@@ -176,10 +175,10 @@ object PipelineRegistry : ClassVisitor() {
             getParameterizedType(clazz)
         } catch (ex: TypeNotPresentException) {
             // 事件类不存在
-            console().warning { asLang("module-dispatcher-exception-event-class-not-found", ex.typeName()) }
+            Lang.DISPATCHER_EXCEPTION_EVENT_CLASS_NOT_FOUND.warn(console(), ex.typeName())
             return
         } catch (_: NullPointerException) {
-            console().warning { "Property \"${clazz.name}\" must have a generic type." }
+            Lang.DISPATCHER_EXCEPTION_PIPELINE_MISSING_GENERIC_TYPE.warn(console(), clazz.name)
             return
         }
 
