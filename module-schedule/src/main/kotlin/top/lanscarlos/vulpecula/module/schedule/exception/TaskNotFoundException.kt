@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.schedule.exception
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.exception.DefaultLocalizedException
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -9,8 +10,4 @@ import top.lanscarlos.vulpecula.common.utils.asLang
  * @author Lanscarlos
  * @since 2025/6/7
  */
-class TaskNotFoundException(val pid: String) : RuntimeException() {
-
-    override val message: String = asLang("module-schedule-exception-task-not-found", pid)
-
-}
+class TaskNotFoundException(val pid: String) : DefaultLocalizedException(Lang.MODULE_SCHEDULE_EXCEPTION_TASK_NOT_FOUND, arrayOf(pid))

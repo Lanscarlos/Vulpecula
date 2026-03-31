@@ -10,12 +10,12 @@ import taboolib.common.platform.function.console
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
 import top.lanscarlos.vulpecula.common.applicative.exception.TypeConversionException
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.exception.QuestRuntimeException
 import top.lanscarlos.vulpecula.module.schedule.exception.TaskNotFoundException
 import top.lanscarlos.vulpecula.module.script.Script
 import top.lanscarlos.vulpecula.module.script.ScriptService
 import top.lanscarlos.vulpecula.common.utils.TimeUtil
-import top.lanscarlos.vulpecula.common.utils.asLang
 
 /**
  * Vulpecula
@@ -74,7 +74,7 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
     private var currentPid: Long = 0
 
     init {
-        require(!isAutoStart || !prototype) { asLang("module-schedule-exception-conflict-autostart") }
+        require(!isAutoStart || !prototype) { Lang.MODULE_SCHEDULE_EXCEPTION_CONFLICT_AUTOSTART.asText(console(), id) }
     }
 
     override fun pause(pid: String) {
@@ -125,10 +125,10 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
             return null
         }
         require(value is String) {
-            asLang("module-schedule-exception-invalid-type", value::class.java.name)
+            Lang.MODULE_SCHEDULE_EXCEPTION_INVALID_TYPE.asText(console(), value::class.java.name)
         }
         require(value.isNotBlank()) {
-            asLang("module-schedule-exception-invalid-blank")
+            Lang.MODULE_SCHEDULE_EXCEPTION_INVALID_BLANK.asText(console())
         }
         return ScriptService.compile(value)
     }
@@ -208,13 +208,13 @@ abstract class AbstractSchedule(override val id: String, val config: Configurati
         fun onFailure(ex: QuestRuntimeException) {
             // 脚本运行异常时, 暂停任务
             pause()
-            console().error { asLang("module-schedule-run-failure", id, pid) }
+            Lang.MODULE_SCHEDULE_RUN_FAILURE.error(console(), id, pid)
             ex.notice(console())
         }
 
         override fun start() {
             require(activationTime < 0L) {
-                asLang("module-schedule-exception-repetition-start", id, pid)
+                Lang.MODULE_SCHEDULE_EXCEPTION_REPETITION_START.asText(console(), id, pid)
             }
             onStart()
             activationTime = System.currentTimeMillis() + delay.coerceAtLeast(0)

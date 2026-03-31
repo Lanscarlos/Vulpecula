@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.schedule
 
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.module.configuration.Configuration
@@ -8,7 +9,7 @@ import top.lanscarlos.vulpecula.common.config.read
 import top.lanscarlos.vulpecula.common.config.convert
 import top.lanscarlos.vulpecula.common.exception.InvalidTimeFormatException
 import top.lanscarlos.vulpecula.common.exception.InvalidTypeException
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -34,10 +35,10 @@ class PeriodicSchedule(id: String, config: Configuration) : AbstractSchedule(id,
     override fun create(pid: String, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) {
             val runningPid = tasks.values.firstOrNull { it.state.isRunning }
-            asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
+            Lang.MODULE_SCHEDULE_EXCEPTION_CONFLICT_PROTOTYPE.asText(console(), id, runningPid ?: "null")
         }
         require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
-            asLang("module-schedule-exception-conflict-task", id, pid)
+            Lang.MODULE_SCHEDULE_EXCEPTION_CONFLICT_TASK.asText(console(), id, pid)
         }
         val task = Task(pid, null, args)
         tasks[task.pid] = task

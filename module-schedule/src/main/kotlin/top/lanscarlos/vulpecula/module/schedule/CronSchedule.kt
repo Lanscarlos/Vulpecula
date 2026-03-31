@@ -17,7 +17,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.service.PlatformExecutor
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.schedule.exception.InvalidCronException
 import java.util.*
 
@@ -72,7 +72,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
 
     init {
         require(days == null || weeks == null) {
-            asLang("module-schedule-exception-conflict-days-weeks", id)
+            Lang.MODULE_SCHEDULE_EXCEPTION_CONFLICT_DAYS_WEEKS.asText(console(), id)
         }
         cron = Cron.builder()
             .seconds(TimeGroups.entries.first { it.index == seconds.first.index }, seconds.second)
@@ -93,10 +93,10 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
     override fun create(pid: String, args: List<String>): ScheduleTask {
         require(prototype || tasks.values.all { !it.state.isRunning }) {
             val runningPid = tasks.values.firstOrNull { it.state.isRunning }
-            asLang("module-schedule-exception-conflict-prototype", id, runningPid ?: "null")
+            Lang.MODULE_SCHEDULE_EXCEPTION_CONFLICT_PROTOTYPE.asText(console(), id, runningPid ?: "null")
         }
         require(!tasks.containsKey(pid) || tasks[pid]!!.state.isRunning) {
-            asLang("module-schedule-exception-conflict-task", id, pid)
+            Lang.MODULE_SCHEDULE_EXCEPTION_CONFLICT_TASK.asText(console(), id, pid)
         }
         val task = Task(pid, null, args)
         tasks[task.pid] = task
@@ -123,7 +123,7 @@ class CronSchedule(id: String, config: Configuration) : AbstractSchedule(id, con
                 onExecute()
                 schedule() // 继续触发
             } catch (e: Exception) {
-                console().error { e.localizedMessage }
+                e.printStackTrace()
                 pause()
             }
         }

@@ -5,9 +5,10 @@ import org.bukkit.World
 import org.bukkit.util.BoundingBox
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
+import taboolib.common.platform.function.console
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.schedule.SenderSelector
 
 /**
@@ -27,13 +28,13 @@ class AreaSelector(location1: String, location2: String) : SenderSelector {
         val a: Location = LocationApplicative.convertOrThrow(location1).toBukkitLocation()
         val b: Location = LocationApplicative.convertOrThrow(location2).toBukkitLocation()
         require(a.world != null) {
-            asLang("module-schedule-exception-invalid-location", location1)
+            Lang.MODULE_SCHEDULE_EXCEPTION_INVALID_LOCATION.asText(console(), location1)
         }
         require(b.world != null) {
-            asLang("module-schedule-exception-invalid-location", location2)
+            Lang.MODULE_SCHEDULE_EXCEPTION_INVALID_LOCATION.asText(console(), location2)
         }
         require(a.world == b.world) {
-            asLang("module-schedule-exception-invalid-location")
+            Lang.MODULE_SCHEDULE_EXCEPTION_INVALID_LOCATION.asText(console())
         }
         world = a.world!!
         boundingBox = BoundingBox.of(a, b)

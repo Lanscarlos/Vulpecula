@@ -4,9 +4,10 @@ import org.bukkit.Location
 import org.bukkit.World
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
+import taboolib.common.platform.function.console
 import taboolib.platform.util.toBukkitLocation
 import top.lanscarlos.vulpecula.common.applicative.LocationApplicative
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.schedule.SenderSelector
 import kotlin.math.pow
 
@@ -23,7 +24,7 @@ class RangeSelector(location: String, range: String) : SenderSelector {
 
     val range = range.toDouble().pow(2)
 
-    val world: World = center.world ?: error(asLang("module-schedule-exception-invalid-location", location))
+    val world: World = center.world ?: error(Lang.MODULE_SCHEDULE_EXCEPTION_INVALID_LOCATION.asText(console(), location))
 
     override fun select(sender: ProxyCommandSender?): List<ProxyCommandSender> {
         return world.players.filter { it.location.distanceSquared(center) <= range }.map(::adaptPlayer)
