@@ -1,7 +1,8 @@
 package top.lanscarlos.vulpecula.module.action.entity
 
 import org.bukkit.entity.Entity
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 
 /**
@@ -23,7 +24,7 @@ object ActionEntity {
 
         val player = frame.senderAsPlayer
         require(player != null) {
-            asLang("module-action-entity-exception-entity-not-found")
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_NOT_FOUND.asText(console())
         }
         setContext(frame, player)
         return player

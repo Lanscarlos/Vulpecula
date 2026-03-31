@@ -5,7 +5,8 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import taboolib.library.xseries.XPotion
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -24,7 +25,7 @@ object ActionEntityPotionSize : ClassActionResolver {
     fun resolve(frame: BacikalFrame): Int {
         val entity = ActionEntity.getContext(frame)
         require(entity is LivingEntity) {
-            asLang("module-action-entity-exception-entity-unsupported-potion", entity.type.name)
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_UNSUPPORTED_POTION.asText(console(), entity.type.name)
         }
         return entity.activePotionEffects.size
     }
@@ -37,7 +38,7 @@ object ActionEntityPotionHas : ClassActionResolver {
     fun resolve(frame: BacikalFrame, type: String): Boolean {
         val entity = ActionEntity.getContext(frame)
         require(entity is LivingEntity) {
-            asLang("module-action-entity-exception-entity-unsupported-potion", entity.type.name)
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_UNSUPPORTED_POTION.asText(console(), entity.type.name)
         }
         val potionEffectType = getPotionEffectType(type)
         return entity.hasPotionEffect(potionEffectType)
@@ -60,7 +61,7 @@ object ActionEntityPotionSet : ClassActionResolver {
     ): Boolean {
         val entity = ActionEntity.getContext(frame)
         require(entity is LivingEntity) {
-            asLang("module-action-entity-exception-entity-unsupported-potion", entity.type.name)
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_UNSUPPORTED_POTION.asText(console(), entity.type.name)
         }
         val potionEffectType = getPotionEffectType(type)
         val amplifier = level - 1
@@ -83,7 +84,7 @@ object ActionEntityPotionRemove : ClassActionResolver {
     fun resolve(frame: BacikalFrame, type: String): Boolean {
         val entity = ActionEntity.getContext(frame)
         require(entity is LivingEntity) {
-            asLang("module-action-entity-exception-entity-unsupported-potion", entity.type.name)
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_UNSUPPORTED_POTION.asText(console(), entity.type.name)
         }
         val potionEffectType = getPotionEffectType(type)
         if (!entity.hasPotionEffect(potionEffectType)) {
@@ -101,7 +102,7 @@ object ActionEntityPotionClear : ClassActionResolver {
     fun resolve(frame: BacikalFrame): Boolean {
         val entity = ActionEntity.getContext(frame)
         require(entity is LivingEntity) {
-            asLang("module-action-entity-exception-entity-unsupported-potion", entity.type.name)
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_UNSUPPORTED_POTION.asText(console(), entity.type.name)
         }
         if (entity.activePotionEffects.isEmpty()) {
             return false
@@ -120,9 +121,9 @@ private fun getPotionEffectType(type: String): PotionEffectType {
 
 private fun getXPotion(type: String): XPotion {
     val xPotion = XPotion.entries.find { it.name.equals(type, true) }
-        ?: error(asLang("module-action-item-exception-invalid-potion-type", type))
+        ?: error(Lang.ACTION_ITEM_EXCEPTION_INVALID_POTION_TYPE.asText(console(), type))
     require(xPotion.isSupported) {
-        asLang("module-action-item-exception-unsupported-potion-type", MinecraftVersion.runningVersion, type)
+        Lang.ACTION_ITEM_EXCEPTION_UNSUPPORTED_POTION_TYPE.asText(console(), MinecraftVersion.runningVersion, type)
     }
     return xPotion
 }

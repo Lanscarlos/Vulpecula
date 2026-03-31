@@ -5,7 +5,8 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EntityEquipment
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -43,7 +44,7 @@ object ActionEntityEquipmentSet : ClassActionResolver {
 
 private fun getEquipment(entity: Entity): EntityEquipment {
     return (entity as? LivingEntity)?.equipment
-        ?: error(asLang("module-action-entity-exception-equipment-not-found", entity.name))
+        ?: error(Lang.ACTION_ENTITY_EXCEPTION_EQUIPMENT_NOT_FOUND.asText(console(), entity.name))
 }
 
 private fun getEquipmentSlot(slot: String): EquipmentSlot {
@@ -54,6 +55,6 @@ private fun getEquipmentSlot(slot: String): EquipmentSlot {
         "CHESTPLATE", "CHEST" -> EquipmentSlot.CHEST
         "LEGGINGS", "LEGS" -> EquipmentSlot.LEGS
         "BOOTS", "FEET" -> EquipmentSlot.FEET
-        else -> error(asLang("module-action-entity-exception-invalid-slot", slot))
+        else -> error(Lang.ACTION_ENTITY_EXCEPTION_INVALID_SLOT.asText(console(), slot))
     }
 }

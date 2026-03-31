@@ -2,7 +2,8 @@ package top.lanscarlos.vulpecula.module.action.entity
 
 import org.bukkit.entity.Damageable
 import org.bukkit.entity.Entity
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -25,7 +26,7 @@ object ActionEntityDamage : ClassActionResolver {
     ) {
         val entity = ActionEntity.getContext(frame)
         require(entity is Damageable) {
-            asLang("module-action-entity-exception-entity-unsupported-damage", entity.type.name)
+            Lang.ACTION_ENTITY_EXCEPTION_ENTITY_UNSUPPORTED_DAMAGE.asText(console(), entity.type.name)
         }
         entity.damage(damage, damager)
     }
