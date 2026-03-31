@@ -1,9 +1,10 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.enchantments.Enchantment
+import taboolib.common.platform.function.console
 import taboolib.library.xseries.XEnchantment
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -56,7 +57,7 @@ object ActionItemEnchantmentSet : ClassActionResolver {
         val bukkitEnchantment = getEnchantment(enchantment)
         val itemMeta = item.itemMeta!!
         require(level >= 0) {
-            asLang("module-action-item-exception-invalid-enchantment-level", level)
+            Lang.ACTION_ITEM_EXCEPTION_INVALID_ENCHANTMENT_LEVEL.asText(console(), level)
         }
         val result = itemMeta.addEnchant(bukkitEnchantment, level, true)
         item.itemMeta = itemMeta
@@ -95,7 +96,7 @@ object ActionItemEnchantmentClear : ClassActionResolver {
 
 private fun getEnchantment(enchantment: String): Enchantment {
     val xEnchantment = XEnchantment.of(enchantment.uppercase()).getOrNull()
-        ?: error(asLang("module-action-item-exception-invalid-enchantment-type", enchantment))
+        ?: error(Lang.ACTION_ITEM_EXCEPTION_INVALID_ENCHANTMENT_TYPE.asText(console(), enchantment))
     return xEnchantment.get()
-        ?: error(asLang("module-action-item-exception-unsupported-enchantment-type", MinecraftVersion.runningVersion, enchantment))
+        ?: error(Lang.ACTION_ITEM_EXCEPTION_UNSUPPORTED_ENCHANTMENT_TYPE.asText(console(), MinecraftVersion.runningVersion, enchantment))
 }

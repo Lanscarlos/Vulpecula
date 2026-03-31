@@ -2,7 +2,8 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -26,7 +27,7 @@ object ActionItemColorGet : ClassActionResolver {
         val color =  when (val itemMeta = item.itemMeta) {
             is LeatherArmorMeta -> toStandardColor(itemMeta.color)
             is PotionMeta -> itemMeta.color?.let(::toStandardColor)
-            else -> error(asLang("module-action-item-exception-item-unsupported-color", item.type.name))
+            else -> error(Lang.ACTION_ITEM_EXCEPTION_ITEM_UNSUPPORTED_COLOR.asText(console(), item.type.name))
         }
         return when {
             color == null -> null
@@ -47,7 +48,7 @@ object ActionItemColorSet : ClassActionResolver {
         when (itemMeta) {
             is LeatherArmorMeta -> itemMeta.setColor(bukkitColor)
             is PotionMeta -> itemMeta.color = bukkitColor
-            else -> error(asLang("module-action-item-exception-item-unsupported-color", item.type.name))
+            else -> error(Lang.ACTION_ITEM_EXCEPTION_ITEM_UNSUPPORTED_COLOR.asText(console(), item.type.name))
         }
         item.itemMeta = itemMeta
     }
@@ -64,7 +65,7 @@ object ActionItemColorMix : ClassActionResolver {
         when (itemMeta) {
             is LeatherArmorMeta -> itemMeta.setColor(itemMeta.color.mixColors(bukkitColor))
             is PotionMeta -> itemMeta.color = itemMeta.color?.mixColors(bukkitColor) ?: bukkitColor
-            else -> error(asLang("module-action-item-exception-item-unsupported-color", item.type.name))
+            else -> error(Lang.ACTION_ITEM_EXCEPTION_ITEM_UNSUPPORTED_COLOR.asText(console(), item.type.name))
         }
         item.itemMeta = itemMeta
     }

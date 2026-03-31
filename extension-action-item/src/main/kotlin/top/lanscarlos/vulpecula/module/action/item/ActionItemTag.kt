@@ -1,8 +1,9 @@
 package top.lanscarlos.vulpecula.module.action.item
 
+import taboolib.common.platform.function.console
 import taboolib.module.nms.getItemTag
 import taboolib.module.nms.setItemTag
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Expected
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Optional
@@ -46,7 +47,7 @@ object ActionItemTagGet : ClassActionResolver {
             "float" -> data.asFloat()
             "double" -> data.asDouble()
             "string", "str" -> data.asString()
-            else -> error(asLang("module-action-item-exception-invalid-tag-type", type))
+            else -> error(Lang.ACTION_ITEM_EXCEPTION_INVALID_TAG_TYPE.asText(console(), type))
         }
     }
 

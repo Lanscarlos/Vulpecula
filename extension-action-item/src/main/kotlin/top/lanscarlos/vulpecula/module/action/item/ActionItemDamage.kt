@@ -2,8 +2,9 @@ package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
+import taboolib.common.platform.function.console
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -84,11 +85,11 @@ internal fun getDamage(item: ItemStack): Int {
 @Suppress("DEPRECATION")
 internal fun setDamage(item: ItemStack, damage: Int) {
     require(damage in 0..getMaxDurability(item)) {
-        asLang("module-action-item-exception-invalid-damage", damage)
+        Lang.ACTION_ITEM_EXCEPTION_INVALID_DAMAGE.asText(console(), damage)
     }
     if (MinecraftVersion.major >= MinecraftVersion.V1_13) {
         val itemMeta = item.itemMeta as? Damageable
-            ?: error(asLang("module-action-item-exception-durability-unsupported", item.type.name))
+            ?: error(Lang.ACTION_ITEM_EXCEPTION_DURABILITY_UNSUPPORTED.asText(console(), item.type.name))
         itemMeta.damage = damage
     } else {
         item.durability = damage.toShort()

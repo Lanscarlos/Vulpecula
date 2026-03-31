@@ -1,7 +1,8 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemFlag
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -62,5 +63,5 @@ object ActionItemFlagRemove : ClassActionResolver {
 
 private fun getItemFlag(flag: String): ItemFlag {
     return ItemFlag.entries.find { it.name.equals(flag, true) }
-        ?: error(asLang("module-action-item-exception-invalid-flag"))
+        ?: error(Lang.ACTION_ITEM_EXCEPTION_INVALID_FLAG.asText(console(), flag))
 }

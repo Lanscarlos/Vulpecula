@@ -1,9 +1,10 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
+import taboolib.common.platform.function.console
 import taboolib.library.xseries.XMaterial
 import taboolib.platform.util.buildItem
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -33,7 +34,7 @@ object ActionItemBuild : ClassActionResolver {
         @Additional(["model"]) model: Int = -1
     ) : ItemStack {
         val material = XMaterial.matchXMaterial(type.uppercase()).getOrNull()
-            ?: error(asLang("module-action-item-exception-invalid-material-type", type))
+            ?: error(Lang.ACTION_ITEM_EXCEPTION_INVALID_MATERIAL_TYPE.asText(console(), type))
         val item = buildItem(material) {
             this.amount = amount
             this.damage = durability

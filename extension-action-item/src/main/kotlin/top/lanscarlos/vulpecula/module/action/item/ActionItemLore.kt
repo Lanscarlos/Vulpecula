@@ -1,7 +1,8 @@
 package top.lanscarlos.vulpecula.module.action.item
 
+import taboolib.common.platform.function.console
 import top.lanscarlos.vulpecula.common.applicative.IntApplicative
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -49,7 +50,7 @@ class ActionItemLoreInsert : ClassActionResolver {
         val index = line - 1
         require(index in 0..lore.size) {
             val indices = "[1, ${lore.size + 1}]"
-            asLang("module-action-item-exception-lore-out-of-bounds", line, indices)
+            Lang.ACTION_ITEM_EXCEPTION_LORE_OUT_OF_BOUNDS.asText(console(), line, indices)
         }
         lore.add(index, content)
         itemMeta.lore = lore
@@ -87,7 +88,7 @@ class ActionItemLoreSet : ClassActionResolver {
             val index = IntApplicative.convert(line) - 1
             require(index in lore.indices) {
                 val indices = "[1, ${lore.size}]"
-                asLang("module-action-item-exception-lore-out-of-bounds", line, indices)
+                Lang.ACTION_ITEM_EXCEPTION_LORE_OUT_OF_BOUNDS.asText(console(), line, indices)
             }
             lore[index] = content
         }
@@ -110,7 +111,7 @@ class ActionItemLoreRemove : ClassActionResolver {
             val index = IntApplicative.convert(line) - 1
             require(index in lore.indices) {
                 val indices = "[1, ${lore.size}]"
-                asLang("module-action-item-exception-lore-out-of-bounds", line, indices)
+                Lang.ACTION_ITEM_EXCEPTION_LORE_OUT_OF_BOUNDS.asText(console(), line, indices)
             }
             lore.removeAt(index)
         }

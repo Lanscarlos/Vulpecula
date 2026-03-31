@@ -1,7 +1,8 @@
 package top.lanscarlos.vulpecula.module.action.item
 
 import org.bukkit.inventory.ItemStack
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -85,7 +86,7 @@ private fun getDurability(item: ItemStack): Int {
  * */
 private fun setDurability(item: ItemStack, durability: Int) {
     require(durability in 0..getMaxDurability(item)) {
-        asLang("module-action-item-exception-invalid-durability", durability)
+        Lang.ACTION_ITEM_EXCEPTION_INVALID_DURABILITY.asText(console(), durability)
     }
     setDamage(item, getMaxDurability(item) - durability)
 }

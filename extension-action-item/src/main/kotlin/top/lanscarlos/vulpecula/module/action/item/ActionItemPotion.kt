@@ -4,9 +4,10 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import taboolib.common.platform.function.console
 import taboolib.library.xseries.XPotion
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -113,7 +114,7 @@ object ActionItemPotionClear : ClassActionResolver {
 }
 
 private fun getPotionMeta(item: ItemStack): PotionMeta {
-    return item.itemMeta as? PotionMeta ?: error(asLang("module-action-item-exception-item-unsupported-potion", item.type.name))
+    return item.itemMeta as? PotionMeta ?: error(Lang.ACTION_ITEM_EXCEPTION_ITEM_UNSUPPORTED_POTION.asText(console(), item.type.name))
 }
 
 private fun getPotionEffectType(type: String): PotionEffectType {
@@ -122,9 +123,9 @@ private fun getPotionEffectType(type: String): PotionEffectType {
 
 private fun getXPotion(type: String): XPotion {
     val xPotion = XPotion.entries.find { it.name.equals(type, true) }
-        ?: error(asLang("module-action-item-exception-invalid-potion-type", type))
+        ?: error(Lang.ACTION_ITEM_EXCEPTION_INVALID_POTION_TYPE.asText(console(), type))
     require(xPotion.isSupported) {
-        asLang("module-action-item-exception-unsupported-potion-type", MinecraftVersion.runningVersion, type)
+        Lang.ACTION_ITEM_EXCEPTION_UNSUPPORTED_POTION_TYPE.asText(console(), MinecraftVersion.runningVersion, type)
     }
     return xPotion
 }

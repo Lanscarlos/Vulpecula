@@ -1,6 +1,7 @@
 package top.lanscarlos.vulpecula.module.action.item
 
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -38,7 +39,7 @@ object ActionItemAmountSet : ClassActionResolver {
     fun resolve(frame: BacikalFrame, amount: Int) {
         val item = ActionItem.getContext(frame)
         require(amount in 1..item.type.maxStackSize) {
-            asLang("module-action-item-exception-invalid-amount", amount)
+            Lang.ACTION_ITEM_EXCEPTION_INVALID_AMOUNT.asText(console(), amount)
         }
         item.amount = amount
     }

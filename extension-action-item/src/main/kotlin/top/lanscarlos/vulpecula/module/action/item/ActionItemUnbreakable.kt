@@ -1,8 +1,9 @@
 package top.lanscarlos.vulpecula.module.action.item
 
+import taboolib.common.platform.function.console
 import taboolib.library.reflex.Reflex.Companion.invokeMethod
 import taboolib.module.nms.MinecraftVersion
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import top.lanscarlos.vulpecula.module.bacikal.parser.ClassActionResolver
@@ -27,7 +28,7 @@ object ActionItemUnbreakableState : ClassActionResolver {
                 itemMeta.invokeMethod<Any>("spigot")!!
                     .invokeMethod<Boolean>("isUnbreakable") == true
             } catch (_: NoSuchMethodException) {
-                error(asLang("module-action-item-exception-unsupported-unbreakable", MinecraftVersion.runningVersion))
+                error(Lang.ACTION_ITEM_EXCEPTION_UNSUPPORTED_UNBREAKABLE.asText(console(), MinecraftVersion.runningVersion))
             }
         }
     }
@@ -47,7 +48,7 @@ object ActionItemUnbreakableEnable : ClassActionResolver {
                 itemMeta.invokeMethod<Any>("spigot")!!
                     .invokeMethod<Boolean>("setUnbreakable", true)
             } catch (_: NoSuchMethodException) {
-                error(asLang("module-action-item-exception-unsupported-unbreakable", MinecraftVersion.runningVersion))
+                error(Lang.ACTION_ITEM_EXCEPTION_UNSUPPORTED_UNBREAKABLE.asText(console(), MinecraftVersion.runningVersion))
             }
         }
         item.itemMeta = itemMeta
@@ -68,7 +69,7 @@ object ActionItemUnbreakableDisable : ClassActionResolver {
                 itemMeta.invokeMethod<Any>("spigot")!!
                     .invokeMethod<Boolean>("setUnbreakable", false)
             } catch (_: NoSuchMethodException) {
-                error(asLang("module-action-item-exception-unsupported-unbreakable", MinecraftVersion.runningVersion))
+                error(Lang.ACTION_ITEM_EXCEPTION_UNSUPPORTED_UNBREAKABLE.asText(console(), MinecraftVersion.runningVersion))
             }
         }
         item.itemMeta = itemMeta
