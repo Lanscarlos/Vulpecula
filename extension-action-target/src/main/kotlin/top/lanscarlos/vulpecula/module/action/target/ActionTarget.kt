@@ -3,7 +3,8 @@ package top.lanscarlos.vulpecula.module.action.target
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
 import java.util.LinkedList
 
@@ -20,7 +21,7 @@ object ActionTarget {
 
     fun getContext(frame: BacikalFrame): LinkedList<Any> {
         val target = frame.getVariable<LinkedList<Any>>(CONTEXT)
-            ?: error(asLang("module-action-target-exception-context-not-found"))
+            ?: error(Lang.ACTION_TARGET_EXCEPTION_CONTEXT_NOT_FOUND.asText(console()))
         return target
     }
 

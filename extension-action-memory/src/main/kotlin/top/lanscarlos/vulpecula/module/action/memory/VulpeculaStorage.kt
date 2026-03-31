@@ -1,7 +1,8 @@
 package top.lanscarlos.vulpecula.module.action.memory
 
 import org.bukkit.entity.Entity
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -47,7 +48,7 @@ object VulpeculaStorage : MemoryStorage {
         return when (owner) {
             is String -> owner
             is Entity -> owner.uniqueId.toString()
-            else -> error(asLang("module-action-memory-exception-unsupported-owner-type", "Vulpecula", owner::class.java.name))
+            else -> error(Lang.ACTION_MEMORY_EXCEPTION_UNSUPPORTED_OWNER_TYPE.asText(console(), "Vulpecula", owner::class.java.name))
         }
     }
 

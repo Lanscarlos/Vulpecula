@@ -2,8 +2,9 @@ package top.lanscarlos.vulpecula.module.action.memory
 
 import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.metadata.Metadatable
+import taboolib.common.platform.function.console
 import taboolib.platform.BukkitPlugin
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 
 /**
  * Vulpecula
@@ -34,7 +35,7 @@ object MetadataStorage : MemoryStorage {
     }
 
     private fun getMetadatable(owner: Any): Metadatable {
-        return owner as? Metadatable ?: error(asLang("module-action-memory-exception-unsupported-owner-type", "Metadata", owner::class.java.name))
+        return owner as? Metadatable ?: error(Lang.ACTION_MEMORY_EXCEPTION_UNSUPPORTED_OWNER_TYPE.asText(console(), "Metadata", owner::class.java.name))
     }
 
 }

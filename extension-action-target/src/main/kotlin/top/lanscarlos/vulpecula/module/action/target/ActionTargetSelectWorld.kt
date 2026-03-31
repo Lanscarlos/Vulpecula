@@ -2,7 +2,8 @@ package top.lanscarlos.vulpecula.module.action.target
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import top.lanscarlos.vulpecula.common.utils.asLang
+import taboolib.common.platform.function.console
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.parser.BacikalFrame
@@ -23,7 +24,7 @@ object ActionTargetSelectWorld : ClassActionResolver {
         worldName: String,
         @Additional(["playerOnly"]) playerOnly: Boolean = true
     ) {
-        val world = Bukkit.getWorld(worldName) ?: error(asLang("module-action-target-exception-world-not-found", worldName))
+        val world = Bukkit.getWorld(worldName) ?: error(Lang.ACTION_TARGET_EXCEPTION_WORLD_NOT_FOUND.asText(console(), worldName))
         val entities = if (playerOnly) {
             world.entities.filterIsInstance<Player>()
         } else {

@@ -1,7 +1,8 @@
 package top.lanscarlos.vulpecula.module.action.memory
 
+import taboolib.common.platform.function.console
 import top.lanscarlos.vulpecula.common.config.string
-import top.lanscarlos.vulpecula.common.utils.asLang
+import top.lanscarlos.vulpecula.common.lang.Lang
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Additional
 import top.lanscarlos.vulpecula.module.bacikal.annotation.Parser
 import top.lanscarlos.vulpecula.module.bacikal.extension.bindActionConfig
@@ -89,6 +90,6 @@ private fun getStorage(frame: BacikalFrame, storage: String): MemoryStorage {
 private fun getStorageByName(name: String): MemoryStorage {
     return when (name.lowercase()) {
         "vulpecula" -> VulpeculaStorage
-        else -> error(asLang("module-action-memory-exception-invalid-storage", name))
+        else -> error(Lang.ACTION_MEMORY_EXCEPTION_INVALID_STORAGE.asText(console(), name))
     }
 }

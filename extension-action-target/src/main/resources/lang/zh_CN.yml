@@ -1,4 +1,4 @@
 
 # Action Target
-module-action-target-exception-context-not-found: "当前脚本上下文中无目标对象"
-module-action-target-exception-world-not-found: "世界 {0} 不存在"
+action-target-exception-context-not-found: "当前脚本上下文中无目标对象"
+action-target-exception-world-not-found: "世界 {0} 不存在"
