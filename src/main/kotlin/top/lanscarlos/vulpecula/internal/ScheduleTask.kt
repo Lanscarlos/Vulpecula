@@ -89,6 +89,7 @@ class ScheduleTask(
     lateinit var script: BacikalScript
 
     private var task: PlatformExecutor.PlatformTask? = null
+    private var nextRunAt = 0L
 
     val isRunning get() = task != null
     val isStopped get() = task == null
@@ -134,43 +135,32 @@ class ScheduleTask(
             return
         }
 
-        val period = if (!duration.isZero) duration.toMillis() else 0L
-        val delay = if (now < startOf) {
-            // 未达到开始时间
-            startOf - now
-        } else {
-            // 已达到开始时间
-            if (!duration.isZero) {
-                /* 循环任务 */
-                // 获取过去的循环次数 + 1
-                val times = (now - startOf) / period + 1
-                // 计算与下一次任务的间隔时间
-                (startOf + times * period) - now
-            } else {
-                /*
-                * 非循环任务
-                * 直接开始
-                * */
-                0L
-            }
-        }
+        nextRunAt = calculateNextRunAt(now) + this.delay.coerceAtLeast(0) * 50L
 
-        debug("ScheduleTask $id ready to run. {async=$async, delay=${delay/50L}, period=${period/50L}, start-of=${dateFormat.format(startOf)}}")
+        debug("ScheduleTask $id ready to run. {async=$async, next-run=${dateFormat.format(nextRunAt)}, period=$period, start-of=${dateFormat.format(startOf)}}")
 
-        // 开始新的任务
         task = submit(
             async = async,
-            period = period / 50L,
-            /* 额外延迟 10 tick 是为了矫正时间的显示 */
-            delay = (delay / 50L + this.delay + 10).coerceAtLeast(0)
+            period = 1L
         ) {
-            if (endOf > 0 && System.currentTimeMillis() >= endOf) {
+            val current = System.currentTimeMillis()
+            if (endOf > 0 && current >= endOf) {
                 debug("ScheduleTask $id has completed. {end-of=${dateFormat.format(endOf)}}")
                 terminate()
                 return@submit
             }
+            if (current < nextRunAt) {
+                return@submit
+            }
 
-            debug("ScheduleTask $id running...")
+            val scheduledAt = nextRunAt
+            if (duration.isZero) {
+                terminate()
+            } else {
+                nextRunAt = calculateNextRunAt(current)
+            }
+
+            debug("ScheduleTask $id running... {scheduled=${dateFormat.format(scheduledAt)}, actual=${dateFormat.format(current)}}")
 
             script.runActions {
                 if (args.isEmpty()) return@runActions
@@ -180,6 +170,18 @@ class ScheduleTask(
                 rootFrame().variables().set("args", args)
             }
         }
+    }
+
+    private fun calculateNextRunAt(now: Long): Long {
+        if (now < startOf) {
+            return startOf
+        }
+        if (duration.isZero) {
+            return now
+        }
+        val durationMillis = duration.toMillis()
+        val times = (now - startOf) / durationMillis + 1
+        return startOf + times * durationMillis
     }
 
     /**
@@ -202,7 +204,7 @@ class ScheduleTask(
                 "namespace", "execute" -> {
                     refresh = true
                 }
-                "async", "period", "start", "end", "duration" -> {
+                "async", "delay", "period", "start", "end", "duration" -> {
                     restart = true
                 }
             }
