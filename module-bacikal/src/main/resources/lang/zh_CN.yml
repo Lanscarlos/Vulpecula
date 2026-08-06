@@ -4,8 +4,8 @@
 bacikal-command-reload-success: '重载语句 &a{0}&7 配置成功'
 bacikal-command-reload-failure: '重载语句 &a{0}&7 配置失败！{1}'
 
-module-bacikal-command-eval-success: '运行结果: &r{0}'
-module-bacikal-command-eval-failure: '运行异常: &e{0}'
+bacikal-command-eval-success: '运行结果: &r{0}'
+bacikal-command-eval-failure: '运行异常: &e{0}'
 
 bacikal-command-timing-repeat: '运行次数: &a{0}'
 bacikal-command-timing-group: '分组数量: &a{0}'
@@ -21,13 +21,6 @@ bacikal-command-registry-item: ' - {0} &8v{1}&7: {2}'
 bacikal-command-registry-exceptional: '{0}'
 
 bacikal-parser-load-failure: 'Kether 解析器 &e{0}&7 载入异常. &e{1}'
-bacikal-action: '异常语句: {0}'
-bacikal-reason: '异常原因: {0}'
-bacikal-detail-header: '异常位置:'
-bacikal-detail-item: '&7 {0} &8|&7 {1}'
-bacikal-detail-footer: ' '
-bacikal-compile-failure: '脚本编译异常'
-bacikal-execute-failure: '脚本运行异常'
 bacikal-execute-timeout: '脚本运行超时 &e{0}ms'
 bacikal-class-action-register: '语句 &c{0}&7 注册失败. {1}'
 bacikal-invalid-class-implement: '类 {0} 未实现 &e{1}&7 接口'
@@ -41,3 +34,13 @@ bacikal-unknown-additional-parameter: '未知的附加参数 &e{0}'
 bacikal-invalid-null-argument: '传入的参数 &e{1}&7 值为空'
 bacikal-script-player-not-found: '当前脚本上下文中无玩家对象'
 bacikal-no-such-exception: '当前对象中 {1} 属性不存在. {0}'
+
+# 任务异常
+
+exception-quest-compile-failure: '脚本编译异常'
+exception-quest-execute-failure: '脚本运行异常'
+exception-quest-action: '异常语句: {0}'
+exception-quest-reason: '异常原因: {0}'
+exception-quest-location-header: '异常位置:'
+exception-quest-location-body: '&7 {0} &8|&7 {1}'
+exception-quest-location-footer: ' '

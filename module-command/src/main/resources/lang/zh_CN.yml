@@ -17,7 +17,6 @@ module-command-suggest-failure-timeout: '脚本超时, 请检查&e suggest &7字
 module-command-suggest-failure-conversion: '无法将脚本运行结果 &e{0}&7 转换为提示列表, 请检查&e suggest &7字段的脚本并确保脚本返回值为&e List&7.'
 
 module-command-missing-argument: '缺少必要的参数 &e{0}&7.'
-module-command-invalid-field: '节点 &e{0}&7 字段 &e{1}&7 内容不符合规则. 异常值 &e{2}&7.'
 module-command-executor-not-found: '节点 &e{0}&7 未定义 execute 执行内容.'
 
 module-command-duplicate-node: '节点 &e{0}&7 标识重复, 请检查配置.'
