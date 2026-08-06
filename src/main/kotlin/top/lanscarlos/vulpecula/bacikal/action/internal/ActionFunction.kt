@@ -21,7 +21,7 @@ object ActionFunction {
             text(),
             optional("with", "using", then = list())
         ) { name, args ->
-            val function = this.context().quest.blocks["function_$name"] ?: error("function \"$name\" not found")
+            val function = this.context().quest.blocks[name] ?: error("function \"$name\" not found")
             val newFrame = this.newFrame(name)
             newFrame.setNext(function)
             this.addClosable(newFrame)
