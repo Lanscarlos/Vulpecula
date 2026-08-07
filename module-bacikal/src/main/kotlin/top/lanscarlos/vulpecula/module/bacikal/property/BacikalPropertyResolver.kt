@@ -48,9 +48,9 @@ class BacikalPropertyResolver<T: Any>(
     override fun write(instance: T, key: String, value: Any?): OpenResult {
         return try {
             if (key.contains('.')) {
-                writeProperty(instance, key, value)
-            } else {
                 writePropertyDeep(instance, key, value)
+            } else {
+                writeProperty(instance, key, value)
             }
             OpenResult.successful()
         } catch (e: Exception) {
@@ -107,6 +107,8 @@ class BacikalPropertyResolver<T: Any>(
         for (property in relatedProperties) {
             try {
                 property.writeProperty(instance, key, value)
+                relatedBacikalCache[key] = property
+                return
             } catch (_: NoSuchPropertyException) {
             } catch (ex: Exception) {
                 throw ex
@@ -145,6 +147,7 @@ class BacikalPropertyResolver<T: Any>(
         for (property in getRelatedProperties(clazz)) {
             try {
                 property.writeProperty(instance, key, value)
+                return
             } catch (_: NoSuchPropertyException) {
             } catch (ex: Exception) {
                 throw ex
@@ -176,7 +179,12 @@ class BacikalPropertyResolver<T: Any>(
 
     private fun writePropertyDeep(instance: T, key: String, value: Any?) {
         val parentPath = key.substringBeforeLast('.')
-        val cache: Any? = readPropertyDeep(instance, parentPath)
+        // 父路径可能只有一级, 此时不能走 readPropertyDeep, 后者要求路径至少两级
+        val cache: Any? = if (parentPath.contains('.')) {
+            readPropertyDeep(instance, parentPath)
+        } else {
+            readProperty(instance, parentPath.removeSuffix("?"))
+        }
         if (cache == null) {
             // 中间属性为空
             if (parentPath.last() == '?') {

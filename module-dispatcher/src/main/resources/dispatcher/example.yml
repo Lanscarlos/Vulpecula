@@ -3,23 +3,30 @@
 listen-event: 'org.bukkit.event.entity.EntityShootBowEvent'
 # 监听优先级
 listen-priority: 'NORMAL'
-# 是否监听已取消的事件
-listen-cancelled: false
 
 # 权重, 权重越高, 同类触发器中越先触发
 weight: 1
 
 # 规则
 rule:
+  # 是否要求事件存在关联玩家
   player-required: true
-  baffle: 100ms
+  # 时间阻断器, 同一主体在该时间内只触发一次
+  baffle-time: 100ms
+  # 次数阻断器, 与 baffle-time 互斥, 两者只能设置其一
+#  baffle-count: 3
+  # 阻断时是否取消事件, 为 false 时仅跳过后续处理
   baffle-cancel: true
+  # 阻断器是否全局共享, 为 false 时按事件主体各自计算
+#  baffle-global: false
 
-pre-processing: |-
-    tell pre-processing
+# 前置处理
+before-execute: |-
+    tell before-execute
 
-post-processing: |-
-    tell post-processing
+# 后置处理
+after-execute: |-
+    tell after-execute
 
 # 脚本
 execute: 'script@example'
@@ -27,4 +34,4 @@ execute: 'script@example'
 # 调试
 debug:
   # 启用文件自动重载
-  config-auto-reload: true
+  auto-reload: true

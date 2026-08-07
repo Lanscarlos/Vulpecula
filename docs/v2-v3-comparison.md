@@ -520,8 +520,35 @@ v3 另有 `ScriptFlow` / `ScriptTask` / `CompiledScript` / `NativeScript` / `Pro
 
 5. **canvas 家族的归属。** v2 用了私有命名空间 `vulpecula-canvas` 和自己的 `CanvasScriptContext`，与 v3「一个 id 一棵树」的模型冲突最大，建议单独立项而不是混在常规移植里。
 
-### 顺带发现的疑似缺陷（移植前建议先修）
+### 顺带发现的疑似缺陷
 
-- `module-dispatcher` 的 `example.yml` 写的是 `pre-processing` / `post-processing`，但 `DefaultDispatcher` 读的是 `before-execute` / `after-execute`（`DefaultDispatcher.kt:43-45`）—— 示例配置不生效。
-- `BacikalPropertyResolver.write` 的分支写反了：`if (key.contains('.')) writeProperty(...) else writePropertyDeep(...)`，与 `read` 的判断相反（`BacikalPropertyResolver.kt`）。
-- `BacikalPropertyResolver` 私有的 `writeProperty(instance: T, key, value)` 在遍历 `relatedProperties` 成功写入后**没有 return**，会继续写给所有匹配的 property，最后仍抛 `NoSuchPropertyException`；`readProperty` 是有 `return` 的。
+以下均已修复：
+
+- `module-dispatcher` 的 `example.yml` 沿用了 v2 的键名，与 `DefaultDispatcher` 实际读取的键不一致，共 5 处 —— 已按代码为准更新示例配置：
+
+  | 示例原写法 | 代码实际读取 | 读取位置 |
+  | --- | --- | --- |
+  | `pre-processing` | `before-execute` | `DefaultDispatcher.kt:43` |
+  | `post-processing` | `after-execute` | `DefaultDispatcher.kt:45` |
+  | `rule.baffle` | `rule.baffle-time`（或 `rule.baffle-count`，二者互斥） | `BafflePipeline.kt:32,34` |
+  | `debug.config-auto-reload` | `debug.auto-reload` | `ConfigService.kt:182` |
+  | `listen-cancelled` | 无任何代码读取 | — |
+
+  其中 `listen-cancelled` 不是键名不一致，而是**功能缺失**：v2 的 `ignore-cancelled` 在 v3 没有对应实现，`Listener.register` 未传递该语义。已从示例中移除，待补齐监听器注册逻辑后再加回。
+
+- `BacikalPropertyResolver.write` 的分支写反了：`if (key.contains('.')) writeProperty(...) else writePropertyDeep(...)`，与 `read` 的判断相反，导致**所有深路径写入 `a.b = x` 全部失效**。已修正为与 `read` 对称。
+
+- `BacikalPropertyResolver` 私有的 `writeProperty(instance: T, key, value)` 在遍历 `relatedProperties` 成功写入后**没有 return**，会继续写给所有匹配的 property，最后仍抛 `NoSuchPropertyException`；`readProperty` 是有 `return` 的。已补 `return`，并与 `readProperty` 一致地写入 `relatedBacikalCache`（此前该缓存只由 `readProperty` 填充，而写入路径开头却会查它）。
+  泛型重载 `writeProperty`（`@JvmName("writePropertyGeneric")`）有完全相同的缺陷，一并修复 —— `writePropertyDeep` 正是调用这个重载，只修前者不解决问题。
+
+- 连带修复：`writePropertyDeep` 取父路径后无条件调用 `readPropertyDeep`，但后者有 `require(paths.size >= 2)`。两级路径（最常见的 `a.b = v`）父路径只剩一级，必然抛 `Invalid path`。已改为按父路径级数分派到 `readPropertyDeep` / `readProperty`。
+
+### 仍待决策：深路径的 `?` 空安全语义不一致
+
+`readPropertyDeep` 与 `writePropertyDeep` 对 `?` 的归属理解相反，且首段无法标记：
+
+- `readPropertyDeep`：判空发生在 `while` 循环开头，检查的是**当前段** `paths[index]` 的 `?`，而此时 `cache` 持有的是**前一段**的值。即 `a.b?.c` 实际表达「若 `a` 为空则返回 null」，与 Kotlin 惯例（若 `b` 为空则返回 null）相差一位。
+- `writePropertyDeep`：检查 `parentPath.last() == '?'`，即 `a.b?.c = v` 表达「若 `b` 为空则跳过」—— 符合 Kotlin 惯例，但与上一条相反。
+- 首段读取 `readProperty(instance, paths[0])` **未** `removeSuffix("?")`，因此 `a?.b` 会去查找名为 `a?` 的属性并报 `NoSuchPropertyException`。
+
+三者需统一到同一套语义后再改，属于行为变更，未随本次修复一并处理。
