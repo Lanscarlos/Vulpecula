@@ -24,7 +24,7 @@ taboolib {
         install(MinecraftEffect)
     }
     version {
-        taboolib = "6.3.0-a3ad7d9"
+        taboolib = "6.3.0-75b18a2"
     }
     description {
         contributors {
