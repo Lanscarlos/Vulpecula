@@ -5,6 +5,11 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: '构建后发布 release（tag 取自 gradle.properties 中的版本号）'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -61,12 +66,19 @@ jobs:
           path: build/libs/Vulpecula-*.jar
           if-no-files-found: error
 
+      # tag 推送时用该 tag；手动触发且勾选 publish 时，用版本号建 tag 并指向当前 commit
       - name: Create release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.publish
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || steps.version.outputs.version }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "Release $GITHUB_REF_NAME" \
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::release $TAG 已存在，请先升版本号或删除该 release"
+            exit 1
+          fi
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --target "$GITHUB_SHA" \
             --generate-notes \
             "build/libs/Vulpecula-${{ steps.version.outputs.version }}.jar"
