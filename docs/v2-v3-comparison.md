@@ -543,12 +543,18 @@ v3 另有 `ScriptFlow` / `ScriptTask` / `CompiledScript` / `NativeScript` / `Pro
 
 - 连带修复：`writePropertyDeep` 取父路径后无条件调用 `readPropertyDeep`，但后者有 `require(paths.size >= 2)`。两级路径（最常见的 `a.b = v`）父路径只剩一级，必然抛 `Invalid path`。已改为按父路径级数分派到 `readPropertyDeep` / `readProperty`。
 
-### 仍待决策：深路径的 `?` 空安全语义不一致
+- 深路径的 `?` 空安全语义在读 / 写两侧不一致，已统一（属行为变更）。修复前存在三处分歧：
 
-`readPropertyDeep` 与 `writePropertyDeep` 对 `?` 的归属理解相反，且首段无法标记：
+  - `readPropertyDeep`：判空在 `while` 循环开头，检查的是**当前段** `paths[index]` 的 `?`，而此时 `cache` 持有的是**前一段**的值。即 `a.b?.c` 实际表达「若 `a` 为空则返回 null」，与 Kotlin 惯例相差一位。
+  - `writePropertyDeep`：检查 `parentPath.last() == '?'`，即 `a.b?.c = v` 表达「若 `b` 为空则跳过」—— 符合 Kotlin 惯例，但与上一条相反。
+  - 首段读取 `readProperty(instance, paths[0])` **未** `removeSuffix("?")`，因此 `a?.b` 会去查找名为 `a?` 的属性并报 `NoSuchPropertyException`。
 
-- `readPropertyDeep`：判空发生在 `while` 循环开头，检查的是**当前段** `paths[index]` 的 `?`，而此时 `cache` 持有的是**前一段**的值。即 `a.b?.c` 实际表达「若 `a` 为空则返回 null」，与 Kotlin 惯例（若 `b` 为空则返回 null）相差一位。
-- `writePropertyDeep`：检查 `parentPath.last() == '?'`，即 `a.b?.c = v` 表达「若 `b` 为空则跳过」—— 符合 Kotlin 惯例，但与上一条相反。
-- 首段读取 `readProperty(instance, paths[0])` **未** `removeSuffix("?")`，因此 `a?.b` 会去查找名为 `a?` 的属性并报 `NoSuchPropertyException`。
+  统一后的语义：**`?` 标记的是该段自身的值可能为空**，与 Kotlin 的 `?.` 一致。
 
-三者需统一到同一套语义后再改，属于行为变更，未随本次修复一并处理。
+  | 写法 | 含义 |
+  | --- | --- |
+  | `a?.b` | `a` 为空时整体返回 null（写入时跳过） |
+  | `a.b?.c` | `b` 为空时整体返回 null（写入时跳过）；`a` 为空仍报错 |
+  | `a.b.c` | 任意中间段为空都报错 |
+
+  实现上：判空改为检查**上一段** `paths[index - 1]` 的 `?`，首段读取补 `removeSuffix("?")`，`writePropertyDeep` 的 `parentPath.last() == '?'` 判断维持不变 —— 三者由此落到同一套规则。同时修正了报错信息里多出的 `}` 与多算一段的路径名。

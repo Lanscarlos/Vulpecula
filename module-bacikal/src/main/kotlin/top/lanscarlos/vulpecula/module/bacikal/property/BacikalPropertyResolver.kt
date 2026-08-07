@@ -160,17 +160,16 @@ class BacikalPropertyResolver<T: Any>(
         val paths = key.split('.')
         require(paths.size >= 2) { "Invalid path: $key at ${instance.javaClass.name}" }
 
-        var index = 0
-        var cache: Any? = readProperty(instance, paths[index])
-        while (++index < paths.size) {
+        var cache: Any? = readProperty(instance, paths[0].removeSuffix("?"))
+        for (index in 1 until paths.size) {
             if (cache == null) {
-                // 中间属性为空
-                if (paths[index].last() == '?') {
-                    // 安全返回可空类型
+                // 上一段属性为空
+                if (paths[index - 1].last() == '?') {
+                    // 上一段已标记空安全, 返回 null
                     return null
                 }
-                val name = paths.subList(0, index + 1).joinToString(".")
-                error("${instance.javaClass.name}[$key] read failed. ${instance.javaClass.name }}[$name] is null.")
+                val name = paths.subList(0, index).joinToString(".") { it.removeSuffix("?") }
+                error("${instance.javaClass.name}[$key] read failed. ${instance.javaClass.name}[$name] is null.")
             }
             cache = readProperty(cache, paths[index].removeSuffix("?"))
         }
@@ -186,12 +185,12 @@ class BacikalPropertyResolver<T: Any>(
             readProperty(instance, parentPath.removeSuffix("?"))
         }
         if (cache == null) {
-            // 中间属性为空
+            // 父属性为空
             if (parentPath.last() == '?') {
-                // 安全返回可空类型
+                // 父属性已标记空安全, 跳过写入
                 return
             }
-            error("${instance.javaClass.name}[$key] write failed. ${instance.javaClass.name }}[$parentPath] is null.")
+            error("${instance.javaClass.name}[$key] write failed. ${instance.javaClass.name}[$parentPath] is null.")
         }
         writeProperty(cache, key.substringAfterLast('.').removeSuffix("?"), value)
     }
