@@ -1,0 +1,214 @@
+name: Release
+
+# 发正式版：推一个 3.0.0 这样的 tag，或者在 Actions 页面点「Run workflow」。
+# 剩下的构建、打包、生成发布说明、上架 release 都由这个工作流完成。
+#
+# 这里刻意不做「合并进 v3 时发现版本号没有 tag 就自动发」：gradle.properties 里的
+# 版本号在这个仓库里表示「正在往哪个版本走」，快照工作流正是拿它发 3.0.0-snapshot.N
+# 的。如果抬版本号就等于发正式版，那这个版本永远不会有快照，两个工作流会互相打架。
+# 所以版本号归版本号，什么时候发正式版由 tag 说了算。
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '版本号，例如 3.0.0；留空则用 gradle.properties 里的版本号。tag 不存在时会打在 v3 当前的提交上'
+        required: false
+
+# 需要创建 tag 和 release。
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # 廉价的门槛：先算清楚这次要发的是哪个版本、从哪个提交发。单独成一个 job，
+  # 版本号写错就只浪费几秒，而不是拉起一整套 Gradle 构建之后才失败。
+  resolve:
+    name: 确定版本
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      ref: ${{ steps.v.outputs.ref }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # 版本号一律通过环境变量进入脚本，不做字符串插值拼进脚本体。
+      - id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT" = workflow_dispatch ]; then
+            tag="${INPUT_TAG:-}"
+            if [ -z "$tag" ]; then
+              # 没填就用分支自称的版本号，省得手动触发时还要抄一遍。
+              tag=$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*//p' gradle.properties | tr -d '\r' | head -1)
+            fi
+          else
+            tag="$REF_NAME"
+          fi
+
+          if [ -z "$tag" ]; then
+            echo "::error::没能确定要发布的版本号"
+            exit 1
+          fi
+
+          # 快照 tag 由 Snapshot 工作流管理，正式发布这条路不碰它。
+          case "$tag" in
+            *-snapshot.*)
+              echo "::error::$tag 是快照版本，正式发布不处理快照 tag"
+              exit 1
+              ;;
+          esac
+
+          if ! printf '%s' "$tag" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::版本号「$tag」不符合 X.Y.Z 或 X.Y.Z-rc.1 的格式"
+            exit 1
+          fi
+
+          # tag 已经存在就发它指向的那个提交，这样重跑一次失败的发布不会换掉内容；
+          # 还不存在（手动触发发新版本）就发当前这个提交，tag 交给 gh 顺手打上。
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            ref="$tag"
+          else
+            ref="$GITHUB_SHA"
+          fi
+
+          # 带预发布后缀的版本号（3.1.0-rc.1）以预发布形式上架。
+          if printf '%s' "$tag" | grep -q -- '-'; then
+            prerelease=true
+          else
+            prerelease=false
+          fi
+
+          echo "准备发布 $tag (ref=$ref, prerelease=$prerelease)"
+          {
+            echo "tag=$tag"
+            echo "ref=$ref"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+  release:
+    name: 构建并发布
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      # 发布说明要和上一个 tag 做对比，需要完整历史。
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # 仓库里的 gradlew 没有可执行位，直接 ./gradlew 会 Permission denied。
+      - name: 准备 Gradle Wrapper
+        run: chmod +x ./gradlew
+
+      # -Pversion 覆盖 gradle.properties，保证 jar 文件名和 plugin.yml 里的版本号
+      # 与 tag 一致；两者对不上通常意味着忘了抬版本号，值得提醒一句。
+      - name: 构建插件
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          declared=$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*//p' gradle.properties | tr -d '\r' | head -1)
+          if [ "$declared" != "$TAG" ]; then
+            echo "::warning::gradle.properties 里是 $declared，与发布的 $TAG 不一致，以 $TAG 为准"
+          fi
+          ./gradlew build --no-daemon --stacktrace -Pversion="$TAG"
+          ls -lh build/libs/*.jar build/libs/extension/*.jar
+
+      # 挑出要上架的东西：plugin-snapshot 模块产出的才是插件本体，根项目那个同名 jar
+      # 是个不到 1 KB 的空壳，不能传上去。顺手把带着模块名的 Vulpecula-snapshot-*.jar
+      # 改成 Vulpecula-<版本>.jar，免得正式版的下载文件名里挂着「snapshot」。
+      - name: 整理发布产物
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          cp "build/libs/Vulpecula-snapshot-${TAG}.jar" "release/Vulpecula-${TAG}.jar"
+          cp build/libs/extension/*.jar release/
+          (cd release && sha256sum *.jar > SHA256SUMS.txt)
+          ls -lh release
+
+      # 发布说明交给 GitHub 按提交与 PR 自动生成。上一个版本显式指定为最近的一个
+      # 正式版 tag，否则 GitHub 会拿最近的快照预发布来比，得到一份几乎是空的日志。
+      - name: 生成发布说明
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          prev=$(git tag --list --sort=-v:refname \
+                 | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+                 | grep -vxF "$TAG" | head -1 || true)
+
+          args=(-f "tag_name=$TAG" -f "target_commitish=$(git rev-parse HEAD)")
+          if [ -n "$prev" ]; then
+            echo "上一个正式版：$prev"
+            args+=(-f "previous_tag_name=$prev")
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+            "${args[@]}" --jq .body > notes.md
+
+          cat >> notes.md <<'EOF'
+
+          ## 安装
+
+          - `Vulpecula-<版本>.jar`：插件本体，放进服务端的 `plugins` 目录。
+          - 其余的 jar：可选拓展，按需放进 `plugins/Vulpecula/extension/` 目录。
+
+          插件依赖会在首次启动时自动下载，需要保证服务端能访问外网。
+          从旧版本升级时直接覆盖原 jar 即可。
+
+          ## 校验
+
+          ```bash
+          sha256sum -c SHA256SUMS.txt --ignore-missing
+          ```
+          EOF
+
+      # --target 让 GitHub 在 tag 还不存在时把它打在这个提交上，也就是手动触发发新
+      # 版本的那条路；tag 已经存在时 --target 会被忽略。
+      - name: 创建 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          PRERELEASE: ${{ needs.resolve.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          # 每次都显式声明，这样重跑一次就能纠正误标成预发布的 release，
+          # 而不是维持原样。
+          if [ "$PRERELEASE" = true ]; then
+            flag=--prerelease
+          else
+            flag=--prerelease=false
+          fi
+
+          # 对已经存在的 release 重跑，是替换掉产物和说明，而不是直接失败。
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "Release $TAG" --notes-file notes.md "$flag"
+            gh release upload "$TAG" release/* --clobber
+          else
+            gh release create "$TAG" release/* \
+              --title "Release $TAG" --notes-file notes.md "$flag" \
+              --target "$(git rev-parse HEAD)"
+          fi

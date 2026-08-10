@@ -1,0 +1,58 @@
+name: CI
+
+# 每次推送和 PR 都完整构建一次插件，保证 v3 分支上的提交始终是可构建的。
+# 快照工作流挂在这个工作流的成功结果上，所以它同时也是快照发布的前置门槛。
+on:
+  push:
+    branches: [v3]
+  pull_request:
+  workflow_dispatch:
+
+# 构建只读取仓库。
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 构建
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # 负责 Gradle 发行版与依赖缓存，后面仍然用仓库自带的 wrapper 调用。
+      - uses: gradle/actions/setup-gradle@v4
+
+      # 仓库里的 gradlew 没有可执行位，直接 ./gradlew 会 Permission denied。
+      - name: 准备 Gradle Wrapper
+        run: chmod +x ./gradlew
+
+      # build 会跑通 TabooLib 的重定向与打包，编译不过或者打包失败都会在这里挂掉。
+      - name: 构建插件
+        run: ./gradlew build --no-daemon --stacktrace
+
+      # 构建“成功”但没产出插件本体是最容易被忽略的失败，所以显式检查一次。
+      # 根项目自己也会产出一个 build/libs/Vulpecula-<版本>.jar，那是个不到 1 KB 的
+      # 空壳，插件本体来自 plugin-snapshot 模块，两者别搞混。
+      - name: 检查产物
+        run: |
+          set -euo pipefail
+          ls -lh build/libs/*.jar build/libs/extension/*.jar
+          test -n "$(find build/libs -maxdepth 1 -name 'Vulpecula-snapshot-*.jar' -print -quit)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vulpecula-${{ github.sha }}
+          path: |
+            build/libs/Vulpecula-snapshot-*.jar
+            build/libs/extension/*.jar
+          if-no-files-found: error
+          retention-days: 14

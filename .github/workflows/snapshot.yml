@@ -1,0 +1,184 @@
+name: Snapshot
+
+# 把 v3 分支的构建当作预发布放上来，想提前尝鲜的人不用自己拉源码编译。
+#
+# 它挂在 CI 上而不是直接挂在 push 上，所以只有已经构建通过的提交才会被发布。
+# 快照不是发行版：它的 tag 形如 3.0.0-snapshot.N，在 GitHub 上标记为预发布，
+# 因此不会出现在 releases/latest，README 上的版本徽章也不会被它带跑。
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  workflow_dispatch:
+
+# 需要创建快照 tag、预发布，以及清理旧的快照。
+permissions:
+  contents: write
+
+# 快照排队而不是互相取消：一个跑到一半被杀掉的任务会留下一个产物不全的预发布。
+concurrency:
+  group: snapshot
+  cancel-in-progress: false
+
+jobs:
+  # 廉价的门槛：决定这个提交要不要发快照、发出来叫什么。不合条件的 CI 运行
+  # 只花一个几秒的短 job。
+  resolve:
+    name: 确定快照版本
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'v3')
+    outputs:
+      publish: ${{ steps.v.outputs.publish }}
+      sha: ${{ steps.v.outputs.sha }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      # workflow_run 是从默认分支起跑的，不是 CI 跑过的那个提交，所以显式检出它。
+      # 下面数构建号要用到完整历史。
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - id: v
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+
+          declared=$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*//p' gradle.properties | tr -d '\r' | head -1)
+          if [ -z "$declared" ]; then
+            echo "::warning::gradle.properties 里没找到 version=，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 快照是「正在往这个版本走」的构建，所以直接用分支自称的版本号加后缀：
+          # 3.0.0-snapshot.N 在语义化版本里排在 3.0.0 之前，正好表达它是 3.0.0 的
+          # 前夜构建，3.0.0 一发布就自然被盖过去。
+          #
+          # 反过来说，如果这个版本号已经有 tag 了，说明它已经发过正式版而分支还没把
+          # 版本号往上抬，此时再发一个 3.0.0-snapshot.N 就成了倒退。这种情况直接跳过，
+          # 等下一次抬版本号。
+          if git rev-parse -q --verify "refs/tags/$declared" >/dev/null; then
+            echo "$declared 已经发布过正式版，gradle.properties 里的版本号还没往上抬，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 构建号用提交数而不是 run number：换名字、重跑都不影响它的含义，而且
+          # 同一个提交重跑会得到同一个版本号，不会凭空多出一个「更新」的版本。
+          build=$(git rev-list --count HEAD)
+
+          tag="${declared}-snapshot.${build}"
+          echo "准备发布快照 $tag ($(git rev-parse --short "$SHA"))"
+          {
+            echo "publish=true"
+            echo "sha=$SHA"
+            echo "tag=$tag"
+          } >> "$GITHUB_OUTPUT"
+
+  snapshot:
+    name: 构建并发布快照
+    needs: resolve
+    if: needs.resolve.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: 准备 Gradle Wrapper
+        run: chmod +x ./gradlew
+
+      # 这里不重复跑检查：能走到这一步的提交，它的 CI 已经在同样的代码上过了。
+      # -Pversion 让 jar 文件名和 plugin.yml 里的版本号带上快照号，装到服务端里
+      # 一眼能看出跑的是哪一版。
+      - name: 构建插件
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          ./gradlew build --no-daemon --stacktrace -Pversion="$TAG"
+          ls -lh build/libs/*.jar build/libs/extension/*.jar
+
+      # 和正式版走同一套整理逻辑，下载下来的文件名结构完全一致。
+      - name: 整理发布产物
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          cp "build/libs/Vulpecula-snapshot-${TAG}.jar" "release/Vulpecula-${TAG}.jar"
+          cp build/libs/extension/*.jar release/
+          (cd release && sha256sum *.jar > SHA256SUMS.txt)
+          ls -lh release
+
+      - name: 生成说明
+        env:
+          SHA: ${{ needs.resolve.outputs.sha }}
+        run: |
+          set -euo pipefail
+          {
+            printf '这是 v3 分支的自动构建，**不是正式发布版本**。\n\n'
+            printf '它通过了 CI，但没有经过发布前的人工验证，可能包含未完成的功能。\n'
+            printf '正式服请使用[最新正式版](https://github.com/%s/releases/latest)。\n\n' "$GITHUB_REPOSITORY"
+            printf '## 本次构建\n\n'
+            printf -- '- 提交：[`%s`](https://github.com/%s/commit/%s)\n' \
+              "$(git rev-parse --short "$SHA")" "$GITHUB_REPOSITORY" "$SHA"
+            printf -- '- 说明：%s\n\n' "$(git log -1 --pretty=%s "$SHA")"
+            printf '## 安装\n\n'
+            printf -- '- `Vulpecula-<版本>.jar`：插件本体，放进服务端的 `plugins` 目录。\n'
+            printf -- '- 其余的 jar：可选拓展，按需放进 `plugins/Vulpecula/extension/` 目录。\n\n'
+            printf '快照与正式版的配置文件不保证兼容，建议先备份 `plugins/Vulpecula` 再覆盖。\n\n'
+            printf '## 校验\n\n'
+            printf '```bash\nsha256sum -c SHA256SUMS.txt --ignore-missing\n```\n'
+          } > notes.md
+
+      # 标题跟正式版一模一样，靠 tag 里的 -snapshot.N 和 GitHub 的预发布标记区分，
+      # 不在标题里再写一遍。
+      - name: 创建快照 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+        run: |
+          set -euo pipefail
+          # 对已经有快照的提交重跑，是替换掉产物，而不是直接失败。
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "Release $TAG" --notes-file notes.md --prerelease
+            gh release upload "$TAG" release/* --clobber
+          else
+            gh release create "$TAG" release/* \
+              --title "Release $TAG" --notes-file notes.md --prerelease \
+              --target "$SHA"
+          fi
+
+      # 每次推送都会留下一个预发布，不清理的话一周之内 releases 页面就全是快照了。
+      # 只动这个工作流自己建的 tag，正式版的 tag 不会匹配到这个模式。
+      - name: 清理旧快照
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP: '5'
+        run: |
+          set -euo pipefail
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq 'map(select(.tagName | test("-snapshot\\.[0-9]+$")))
+                  | sort_by(.createdAt) | reverse | .['"$KEEP"':] | .[].tagName' \
+            > stale.txt
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            echo "删除旧快照 $tag"
+            gh release delete "$tag" --cleanup-tag --yes
+          done < stale.txt
