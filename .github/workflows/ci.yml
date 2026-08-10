@@ -2,12 +2,12 @@ name: CI
 
 # 保证进入 v2 / v3 的代码是能编译的。
 #
-# v2、v3 上的推送不在这里构建：那条路径由 Snapshot 工作流接管，它同样跑一次
-# 完整构建，只是构建完还会把产物发成快照，放在这里只会重复编译一遍。
+# v2 上的推送不在这里构建：那条路径由 Release 或 Snapshot 工作流接管，两者
+# 都会跑一次完整构建，放在这里只会重复编译一遍。其余分支（v3 等）照常构建。
 on:
   pull_request:
   push:
-    branches-ignore: [v2, v3]
+    branches-ignore: [v2]
   workflow_dispatch:
 
 # 只读仓库即可。

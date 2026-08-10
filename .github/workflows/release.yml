@@ -1,17 +1,20 @@
 name: Release
 
-# 发布正式版。两种触发方式，走的是同一条路：
-#   1. 推一个 2.3.16 这样的 tag；
-#   2. 手动运行本工作流，tag 留空就取 gradle.properties 里的版本号，
-#      并把 tag 打在当前分支的最新提交上。
-# 第二种同时也是重试手段：对已经存在的 tag 再跑一次，会覆盖掉上一次的
+# 发布正式版。版本号只有一个出处：gradle.properties 里的 version。
+# 改动它并合进 v2，这里就会把 tag 打在那个提交上并发布；没改版本号的合并
+# 会在几秒内跳过，不会进构建。
+#
+# 另外两种触发走的是同一条路：
+#   1. 手动推一个 2.3.16 这样的 tag；
+#   2. 手动运行本工作流，tag 留空就取 gradle.properties，填了就用填的。
+# 手动运行同时也是重试手段：对已经存在的 tag 再跑一次，会覆盖掉上一次的
 # 附件和发布说明，而不是报错。
 #
-# 发正式版的那次推送不应该同时出快照：连 tag 一起推，或者在提交信息里写
-# [release]，Snapshot 工作流就会让路。真漏了的话，这里发完会把同版本号的
-# 快照删掉。
+# 发布说明的正文取自 CHANGELOG.md 里同版本号的小节，没有对应小节就退回
+# GitHub 按提交自动生成的那份。
 on:
   push:
+    branches: [v2]
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
       - '[0-9]+.[0-9]+.[0-9]+-*'
@@ -33,11 +36,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # 先用一个轻量的 job 把版本号定下来，免得在真正的构建里才发现 tag 写错了。
+  # 先用一个轻量的 job 把版本号定下来，顺便判断这次到底要不要发。普通的
+  # 合并到这里就停了，不用白跑一次构建。
   resolve:
     name: 确定版本
     runs-on: ubuntu-latest
     outputs:
+      release: ${{ steps.v.outputs.release }}
       tag: ${{ steps.v.outputs.tag }}
       ref: ${{ steps.v.outputs.ref }}
       prerelease: ${{ steps.v.outputs.prerelease }}
@@ -48,21 +53,26 @@ jobs:
       - id: v
         env:
           GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
           REF_TYPE: ${{ github.ref_type }}
           REF_NAME: ${{ github.ref_name }}
           INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
           set -euo pipefail
 
+          declared="$(sed -n 's/^version=//p' gradle.properties | head -1 | tr -d '[:space:]')"
+
           if [ "$REF_TYPE" = tag ]; then
             tag="$REF_NAME"
           elif [ -n "$INPUT_TAG" ]; then
             tag="$INPUT_TAG"
           else
-            tag="$(sed -n 's/^version=//p' gradle.properties | head -1 | tr -d '[:space:]')"
+            # 合并进 v2：这条分支此刻自称的版本号就是要发的版本号。
+            tag="$declared"
             if [ -z "$tag" ]; then
-              echo "::error::gradle.properties 里没读到 version"
-              exit 1
+              echo "::warning::gradle.properties 里没读到 version，跳过发布"
+              echo "release=false" >> "$GITHUB_OUTPUT"
+              exit 0
             fi
           fi
 
@@ -71,18 +81,32 @@ jobs:
             exit 1
           fi
 
-          # jar 的文件名直接取自版本号，所以构建时会用 -Pversion 覆盖成 tag，
+          # tag 是否已经存在，决定了两件事：这次还要不要发，以及该检出哪个 ref。
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
+             || gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            exists=true
+          else
+            exists=false
+          fi
+
+          # 没动版本号的合并落在一个已经存在的 tag 上，这是常态，不是错误。
+          # 手动推 tag 或手动运行则一律照办，好让传挂了的发布能重来一次。
+          if [ "$EVENT" = push ] && [ "$REF_TYPE" != tag ] && [ "$exists" = true ]; then
+            echo "$tag 已经发布过了，跳过"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # jar 的文件名直接取自版本号，构建时会用 -Pversion 覆盖成 tag，
           # 保证 release 里的文件名和 tag 永远一致；两边对不上多半是漏改了
           # gradle.properties，值得提醒一句，但不必拦住发布。
-          declared="$(sed -n 's/^version=//p' gradle.properties | head -1 | tr -d '[:space:]')"
           if [ "$declared" != "$tag" ]; then
             echo "::warning::gradle.properties 里的版本号是 $declared，与本次发布的 $tag 不一致"
           fi
 
           # tag 已经存在就检出它，让发布的内容严格等于那个 tag 指向的提交；
-          # 还不存在（手动触发首发）则用当前提交，稍后由 GitHub 建 tag。
-          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
-             || gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+          # 还不存在则用当前提交，稍后由 GitHub 建 tag。
+          if [ "$exists" = true ]; then
             ref="$tag"
           else
             ref="$GITHUB_SHA"
@@ -97,6 +121,7 @@ jobs:
 
           echo "准备发布 $tag (prerelease=$prerelease)"
           {
+            echo "release=true"
             echo "tag=$tag"
             echo "ref=$ref"
             echo "prerelease=$prerelease"
@@ -105,6 +130,7 @@ jobs:
   release:
     name: 构建并发布
     needs: resolve
+    if: needs.resolve.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -128,21 +154,49 @@ jobs:
         id: sha
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      # 仓库里没有 CHANGELOG，发布说明用 GitHub 按提交自动生成的那份。
-      # 走 API 而不是 gh release create --generate-notes，是因为覆盖发布走的
-      # 是 gh release edit，那条命令只认 --notes-file。
+      # 正文取自 CHANGELOG.md 里同版本号的小节。没有对应小节不算失败，退回
+      # GitHub 按提交自动生成的那份，发布照常进行。
       - name: 生成发布说明
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.resolve.outputs.tag }}
           SHA: ${{ steps.sha.outputs.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
-          if ! gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
-                 -f tag_name="$TAG" -f target_commitish="$SHA" \
-                 --jq .body > notes.md; then
-            echo "::warning::自动生成发布说明失败，本次只附安装说明"
-            : > notes.md
+
+          # 版本号里的点在正则里是通配符，先转义再交给 awk。
+          pattern="^## \\[$(printf '%s' "$TAG" | sed 's/\./\\./g')\\]"
+          extract() {
+            [ -f "$1" ] || return 0
+            awk -v pat="$pattern" '
+              $0 ~ pat        { found = 1; next }
+              found && /^## / { exit }
+              found           { print }
+            ' "$1"
+          }
+
+          extract CHANGELOG.md > notes.md
+
+          # tag 打完才补写更新日志的情况：tag 上那份没有这一节，去默认分支上
+          # 的最新版本里再找一次，这样重跑一次就能把说明补齐，不必动 tag。
+          if [ ! -s notes.md ] && [ -n "$DEFAULT_BRANCH" ]; then
+            if gh api "repos/$GITHUB_REPOSITORY/contents/CHANGELOG.md?ref=$DEFAULT_BRANCH" \
+                 --jq .content 2>/dev/null | base64 -d > head-changelog.md 2>/dev/null; then
+              extract head-changelog.md > notes.md
+            fi
+          fi
+
+          if [ -s notes.md ]; then
+            echo "发布说明取自 CHANGELOG.md 的 [$TAG] 小节"
+          else
+            echo "::warning::CHANGELOG.md 里没有 [$TAG] 这一节，改用自动生成的发布说明"
+            if ! gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+                   -f tag_name="$TAG" -f target_commitish="$SHA" \
+                   --jq .body > notes.md; then
+              echo "::warning::自动生成发布说明也失败了，本次只附安装说明"
+              : > notes.md
+            fi
           fi
 
           cat >> notes.md <<EOF
@@ -187,10 +241,9 @@ jobs:
               --target "$SHA"
           fi
 
-      # 通向这个版本的快照，等的就是它。正式版发出来之后再让 2.3.16 和
-      # 2.3.16-SNAPSHOT.N 并排挂在发布页上没有意义，何况快照本来就应该在
-      # 发正式版的那次推送里被跳过——先发出去了的，这里补掉。
-      # 只删版本号严格以 "<本次版本>-SNAPSHOT." 开头的，别的版本线不动。
+      # 通向这个版本的快照，等的就是它。正常情况下发版那次推送本就不该出快照
+      # （Snapshot 工作流会让路），这里是兜底：真出了的话补掉，免得正式版和
+      # 快照并排挂在发布页上。只删版本号严格以 "<本次版本>-SNAPSHOT." 开头的。
       - name: 清理该版本的快照
         env:
           GH_TOKEN: ${{ github.token }}
