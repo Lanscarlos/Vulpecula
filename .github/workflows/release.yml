@@ -1,0 +1,184 @@
+name: Release
+
+# 发布正式版。两种触发方式，走的是同一条路：
+#   1. 推一个 2.3.16 这样的 tag；
+#   2. 手动运行本工作流，tag 留空就取 gradle.properties 里的版本号，
+#      并把 tag 打在当前分支的最新提交上。
+# 第二种同时也是重试手段：对已经存在的 tag 再跑一次，会覆盖掉上一次的
+# 附件和发布说明，而不是报错。
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+      # 快照的 tag 由 Snapshot 工作流自己发布，不走这里。
+      - '!*-SNAPSHOT.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发布的版本号，例如 2.3.16；留空则读取 gradle.properties'
+        required: false
+
+# 建 tag、发 release 都需要写权限。
+permissions:
+  contents: write
+
+# 发布不能被后一次运行掐断，否则会留下一个附件传了一半的 release。
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # 先用一个轻量的 job 把版本号定下来，免得在真正的构建里才发现 tag 写错了。
+  resolve:
+    name: 确定版本
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      ref: ${{ steps.v.outputs.ref }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # tag 一律通过环境变量进入脚本，不做字符串拼接。
+      - id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [ "$REF_TYPE" = tag ]; then
+            tag="$REF_NAME"
+          elif [ -n "$INPUT_TAG" ]; then
+            tag="$INPUT_TAG"
+          else
+            tag="$(sed -n 's/^version=//p' gradle.properties | head -1 | tr -d '[:space:]')"
+            if [ -z "$tag" ]; then
+              echo "::error::gradle.properties 里没读到 version"
+              exit 1
+            fi
+          fi
+
+          if ! printf '%s' "$tag" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::版本号「$tag」不符合 x.y.z 或 x.y.z-rc.1 的格式"
+            exit 1
+          fi
+
+          # jar 的文件名直接取自版本号，所以构建时会用 -Pversion 覆盖成 tag，
+          # 保证 release 里的文件名和 tag 永远一致；两边对不上多半是漏改了
+          # gradle.properties，值得提醒一句，但不必拦住发布。
+          declared="$(sed -n 's/^version=//p' gradle.properties | head -1 | tr -d '[:space:]')"
+          if [ "$declared" != "$tag" ]; then
+            echo "::warning::gradle.properties 里的版本号是 $declared，与本次发布的 $tag 不一致"
+          fi
+
+          # tag 已经存在就检出它，让发布的内容严格等于那个 tag 指向的提交；
+          # 还不存在（手动触发首发）则用当前提交，稍后由 GitHub 建 tag。
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null \
+             || gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            ref="$tag"
+          else
+            ref="$GITHUB_SHA"
+          fi
+
+          # 带后缀的版本号（2.4.0-rc.1）按预发布处理。
+          if printf '%s' "$tag" | grep -q -- '-'; then
+            prerelease=true
+          else
+            prerelease=false
+          fi
+
+          echo "准备发布 $tag (prerelease=$prerelease)"
+          {
+            echo "tag=$tag"
+            echo "ref=$ref"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+  release:
+    name: 构建并发布
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # -Pversion 覆盖 gradle.properties，jar 名和 plugin.yml 里的 version
+      # 都会跟着变成本次发布的版本号。
+      - name: 构建
+        run: ./gradlew build -Pversion=${{ needs.resolve.outputs.tag }}
+
+      - name: 记录提交
+        id: sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # 仓库里没有 CHANGELOG，发布说明用 GitHub 按提交自动生成的那份。
+      # 走 API 而不是 gh release create --generate-notes，是因为覆盖发布走的
+      # 是 gh release edit，那条命令只认 --notes-file。
+      - name: 生成发布说明
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          if ! gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+                 -f tag_name="$TAG" -f target_commitish="$SHA" \
+                 --jq .body > notes.md; then
+            echo "::warning::自动生成发布说明失败，本次只附安装说明"
+            : > notes.md
+          fi
+
+          cat >> notes.md <<EOF
+
+          ## 安装
+
+          下载 \`Vulpecula-${TAG}.jar\`，放进服务端的 \`plugins\` 目录后重启即可。
+          依赖由 TabooLib 在首次启动时自动下载，需要能联网。
+          EOF
+
+      # tag 还不存在时，--target 会让 GitHub 顺手把 tag 建在这个提交上；
+      # tag 推送的场景里 tag 已经在了，--target 会被忽略。
+      - name: 创建 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          SHA: ${{ steps.sha.outputs.sha }}
+          PRERELEASE: ${{ needs.resolve.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          # 每次都显式声明，这样重跑可以纠正上一次标错的预发布状态。
+          if [ "$PRERELEASE" = true ]; then
+            flag=--prerelease
+          else
+            flag=--prerelease=false
+          fi
+
+          asset="build/libs/Vulpecula-${TAG}.jar"
+          if [ ! -f "$asset" ]; then
+            echo "::error::没找到 $asset"
+            ls -l build/libs || true
+            exit 1
+          fi
+
+          # 对已存在的 release 重跑时替换附件和说明，而不是失败。
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "Release $TAG" --notes-file notes.md "$flag"
+            gh release upload "$TAG" "$asset" --clobber
+          else
+            gh release create "$TAG" "$asset" \
+              --title "Release $TAG" --notes-file notes.md "$flag" \
+              --target "$SHA"
+          fi
