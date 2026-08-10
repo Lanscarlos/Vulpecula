@@ -6,6 +6,13 @@ name: Snapshot
 # 快照不是正式版：它的 tag 形如 2.3.17-SNAPSHOT.472，在 GitHub 上标记为
 # 预发布，不会顶掉 releases/latest。标题和正式版用同一种写法，只有版本号
 # 本身能看出它是快照。
+#
+# 要发正式版的那次推送不出快照，两种写法都行：
+#   1. 连 tag 一起推（git push origin v2 --follow-tags），这里会看到提交上
+#      已经有正式版 tag，直接跳过；
+#   2. 打算晚点再打 tag 或手动触发 Release 的，在提交信息里写上 [release]。
+# 万一还是先出了快照，Release 工作流发完正式版会把同版本号的快照删掉，
+# 不会两个一直并排挂在发布页上。
 on:
   push:
     branches: [v2, v3]
@@ -48,14 +55,27 @@ jobs:
             exit 0
           fi
 
+          # 这个提交上已经有正式版 tag：要么它本来就是某个正式版，要么正式版
+          # 和分支是一起推上来的（--follow-tags），Release 工作流正在发它。
+          # 两种情况都不该再出一个内容一模一样的快照。
+          released="$(git tag --points-at HEAD \
+                      | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$' \
+                      | grep -v -- '-SNAPSHOT\.' || true)"
+          if [ -n "$released" ]; then
+            echo "这个提交已经带上正式版 tag $(printf '%s' "$released" | tr '\n' ' ')，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # tag 打算晚点再补、或者准备手动触发 Release 的，就靠提交信息声明；
+          # 否则快照会赶在打 tag 之前先发出去。
+          if git log -1 --pretty=%B | grep -qiE '\[(release|skip[ -]snapshot)\]'; then
+            echo "提交信息声明了本次要发正式版，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           if git rev-parse -q --verify "refs/tags/$base" >/dev/null; then
-            # 版本号对应的正式版已经发过了。如果这个提交就是那个正式版，
-            # 没必要再发一份一模一样的快照。
-            if [ "$(git rev-list -n1 "refs/tags/$base")" = "$GITHUB_SHA" ]; then
-              echo "这个提交就是 $base 本身，跳过快照"
-              echo "publish=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
             # 已发布的版本号后面的提交，是在往下一个修订号走，快照就按那个
             # 版本号算。这样 2.3.17-SNAPSHOT.N 排在 2.3.16 之后、2.3.17 之前，
             # 不会出现"比正式版新的代码，版本号却比正式版小"。

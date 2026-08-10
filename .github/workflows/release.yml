@@ -6,6 +6,10 @@ name: Release
 #      并把 tag 打在当前分支的最新提交上。
 # 第二种同时也是重试手段：对已经存在的 tag 再跑一次，会覆盖掉上一次的
 # 附件和发布说明，而不是报错。
+#
+# 发正式版的那次推送不应该同时出快照：连 tag 一起推，或者在提交信息里写
+# [release]，Snapshot 工作流就会让路。真漏了的话，这里发完会把同版本号的
+# 快照删掉。
 on:
   push:
     tags:
@@ -182,3 +186,22 @@ jobs:
               --title "Release $TAG" --notes-file notes.md "$flag" \
               --target "$SHA"
           fi
+
+      # 通向这个版本的快照，等的就是它。正式版发出来之后再让 2.3.16 和
+      # 2.3.16-SNAPSHOT.N 并排挂在发布页上没有意义，何况快照本来就应该在
+      # 发正式版的那次推送里被跳过——先发出去了的，这里补掉。
+      # 只删版本号严格以 "<本次版本>-SNAPSHOT." 开头的，别的版本线不动。
+      - name: 清理该版本的快照
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh release list --limit 200 --json tagName \
+            --jq '.[] | select(.tagName | startswith("'"$TAG"'-SNAPSHOT.")) | .tagName' \
+            > stale.txt
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            echo "删除已被 $TAG 取代的快照 $tag"
+            gh release delete "$tag" --cleanup-tag --yes
+          done < stale.txt
