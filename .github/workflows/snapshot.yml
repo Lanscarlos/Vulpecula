@@ -1,0 +1,180 @@
+name: Snapshot
+
+# 把 v2 / v3 的最新代码发成快照，方便想提前试新功能的人直接下 jar，
+# 不用自己拉仓库编译。
+#
+# 快照不是正式版：它的 tag 形如 2.3.17-SNAPSHOT.472，在 GitHub 上标记为
+# 预发布，不会顶掉 releases/latest。标题和正式版用同一种写法，只有版本号
+# 本身能看出它是快照。
+#
+# 要发正式版的那次推送不出快照，两种写法都行：
+#   1. 连 tag 一起推（git push origin v2 --follow-tags），这里会看到提交上
+#      已经有正式版 tag，直接跳过；
+#   2. 打算晚点再打 tag 或手动触发 Release 的，在提交信息里写上 [release]。
+# 万一还是先出了快照，Release 工作流发完正式版会把同版本号的快照删掉，
+# 不会两个一直并排挂在发布页上。
+on:
+  push:
+    branches: [v2, v3]
+  workflow_dispatch:
+
+# 建快照 tag、发预发布、删旧快照都需要写权限。
+permissions:
+  contents: write
+
+# 快照排队而不是互相取消：跑到一半被掐掉会留下附件不全的预发布。
+# v2 和 v3 各排各的队。
+concurrency:
+  group: snapshot-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  # 轻量的 job，只负责算出这次快照该叫什么、要不要发。不该发的推送到这里
+  # 就停了，不用白跑一次构建。
+  resolve:
+    name: 确定快照版本
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.v.outputs.publish }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      # 需要完整历史和 tag：构建号取自提交数，还要判断当前提交是不是某个
+      # 正式版本身。
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: v
+        run: |
+          set -euo pipefail
+
+          base="$(sed -n 's/^version=//p' gradle.properties | head -1 | tr -d '[:space:]')"
+          if [ -z "$base" ]; then
+            echo "::warning::gradle.properties 里没读到 version，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 这个提交上已经有正式版 tag：要么它本来就是某个正式版，要么正式版
+          # 和分支是一起推上来的（--follow-tags），Release 工作流正在发它。
+          # 两种情况都不该再出一个内容一模一样的快照。
+          released="$(git tag --points-at HEAD \
+                      | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$' \
+                      | grep -v -- '-SNAPSHOT\.' || true)"
+          if [ -n "$released" ]; then
+            echo "这个提交已经带上正式版 tag $(printf '%s' "$released" | tr '\n' ' ')，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # tag 打算晚点再补、或者准备手动触发 Release 的，就靠提交信息声明；
+          # 否则快照会赶在打 tag 之前先发出去。
+          if git log -1 --pretty=%B | grep -qiE '\[(release|skip[ -]snapshot)\]'; then
+            echo "提交信息声明了本次要发正式版，跳过快照"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$base" >/dev/null; then
+            # 已发布的版本号后面的提交，是在往下一个修订号走，快照就按那个
+            # 版本号算。这样 2.3.17-SNAPSHOT.N 排在 2.3.16 之后、2.3.17 之前，
+            # 不会出现"比正式版新的代码，版本号却比正式版小"。
+            IFS=. read -r major minor patch <<EOF
+          ${base%%-*}
+          EOF
+            base="${major}.${minor}.$((patch + 1))"
+          fi
+
+          # 构建号用提交数而不是 run number：重命名或重跑工作流都不影响它，
+          # 同一个提交重跑也会得到同一个版本号，而不是凭空变新。
+          build="$(git rev-list --count HEAD)"
+          tag="${base}-SNAPSHOT.${build}"
+
+          echo "准备发布快照 $tag ($(git rev-parse --short HEAD))"
+          {
+            echo "publish=true"
+            echo "tag=$tag"
+          } >> "$GITHUB_OUTPUT"
+
+  snapshot:
+    name: 构建并发布快照
+    needs: resolve
+    if: needs.resolve.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # 构建失败这次就没有快照，等于把这一步当成了这条分支的 CI。
+      - name: 构建
+        run: ./gradlew build -Pversion=${{ needs.resolve.outputs.tag }}
+
+      - name: 生成说明
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          {
+            printf '这是 `%s` 分支的自动构建，**不是正式发布版本**。\n\n' "$BRANCH"
+            printf '它只保证能编译通过，没有经过发布前的验证，可能包含没写完的功能。\n'
+            printf '正式服请用[最新正式版](https://github.com/%s/releases/latest)。\n\n' "$GITHUB_REPOSITORY"
+            printf '## 本次构建\n\n'
+            printf -- '- 提交：[`%s`](https://github.com/%s/commit/%s)\n' \
+              "$(git rev-parse --short HEAD)" "$GITHUB_REPOSITORY" "$GITHUB_SHA"
+            printf -- '- 说明：%s\n\n' "$(git log -1 --pretty=%s)"
+            printf '## 安装\n\n'
+            printf '下载下面的 jar 放进服务端的 `plugins` 目录后重启即可。\n'
+          } > notes.md
+
+      # 标题和正式版用同一种写法，是不是快照看版本号就够了。
+      - name: 创建快照 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          asset="build/libs/Vulpecula-${TAG}.jar"
+          if [ ! -f "$asset" ]; then
+            echo "::error::没找到 $asset"
+            ls -l build/libs || true
+            exit 1
+          fi
+
+          # 同一个提交重跑时替换附件，而不是失败。
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "Release $TAG" --notes-file notes.md --prerelease
+            gh release upload "$TAG" "$asset" --clobber
+          else
+            gh release create "$TAG" "$asset" \
+              --title "Release $TAG" --notes-file notes.md --prerelease \
+              --target "$GITHUB_SHA"
+          fi
+
+      # 每次推送都会留下一个预发布，不清理的话发布页很快就全是快照了。
+      # 只动本工作流自己建的 tag，并且只在同一个大版本里数，v2 和 v3 的快照
+      # 各留各的，互不挤占。
+      - name: 清理旧快照
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          KEEP: '5'
+        run: |
+          set -euo pipefail
+          major="${TAG%%.*}"
+          gh release list --limit 200 --json tagName,createdAt \
+            --jq 'map(select(.tagName | test("^'"$major"'\\.[0-9]+\\.[0-9]+.*-SNAPSHOT\\.[0-9]+$")))
+                  | sort_by(.createdAt) | reverse | .['"$KEEP"':] | .[].tagName' \
+            > stale.txt
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            echo "删除旧快照 $tag"
+            gh release delete "$tag" --cleanup-tag --yes
+          done < stale.txt

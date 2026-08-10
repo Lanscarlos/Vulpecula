@@ -1,0 +1,44 @@
+name: CI
+
+# 保证进入 v2 / v3 的代码是能编译的。
+#
+# v2、v3 上的推送不在这里构建：那条路径由 Snapshot 工作流接管，它同样跑一次
+# 完整构建，只是构建完还会把产物发成快照，放在这里只会重复编译一遍。
+on:
+  pull_request:
+  push:
+    branches-ignore: [v2, v3]
+  workflow_dispatch:
+
+# 只读仓库即可。
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 构建
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: 构建
+        run: ./gradlew build
+
+      # 让 PR 上也能直接下到 jar 试跑，不用自己拉下来编译一遍。
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vulpecula-${{ github.sha }}
+          path: build/libs/*.jar
+          if-no-files-found: error
